@@ -1,2 +1,2 @@
-module.exports.authController = require('./auth.controller');
-module.exports.userController = require('./user.controller');
+module.exports.authDoctorController = require('./authdoctor.controller');
+module.exports.authUserController = require('./authuser.controller');

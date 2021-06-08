@@ -8,6 +8,17 @@ const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 
 /**
+ * Save a token
+ * @param {string} token
+ */
+const saveToken = async (token) => {
+  const tokenDoc = await Token.create({
+    token,
+  });
+  return tokenDoc;
+};
+
+/**
  * Generate token
  * @param {ObjectId} userId
  * @param {Moment} expires
@@ -15,34 +26,36 @@ const { tokenTypes } = require('../config/tokens');
  * @param {string} [secret]
  * @returns {string}
  */
-const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
+const generateDoctorToken = (userId, expires, secret = config.jwt.secret) => {
   const payload = {
     sub: userId,
     iat: moment().unix(),
-    exp: expires.unix(),
-    type,
+    role: 'doctor',
+    exp: moment().add(30, 'days').unix(),
   };
-  return jwt.sign(payload, secret);
+  const jwttoken = jwt.sign(payload, secret);
+  saveToken(jwttoken);
+  return jwttoken;
 };
 
 /**
- * Save a token
- * @param {string} token
+ * Generate token
  * @param {ObjectId} userId
  * @param {Moment} expires
  * @param {string} type
- * @param {boolean} [blacklisted]
- * @returns {Promise<Token>}
+ * @param {string} [secret]
+ * @returns {string}
  */
-const saveToken = async (token, userId, expires, type, blacklisted = false) => {
-  const tokenDoc = await Token.create({
-    token,
-    user: userId,
-    expires: expires.toDate(),
-    type,
-    blacklisted,
-  });
-  return tokenDoc;
+const generateUserToken = (userId, expires, secret = config.jwt.secret) => {
+  const payload = {
+    sub: userId,
+    iat: moment().unix(),
+    role: 'user',
+    exp: moment().add(5, 'days').unix(),
+  };
+  const jwttoken = jwt.sign(payload, secret);
+  saveToken(jwttoken);
+  return jwttoken;
 };
 
 /**
@@ -67,10 +80,10 @@ const verifyToken = async (token, type) => {
  */
 const generateAuthTokens = async (user) => {
   const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-  const accessToken = generateToken(user.id, accessTokenExpires, tokenTypes.ACCESS);
+  const accessToken = generateDoctorToken(user.id, accessTokenExpires, tokenTypes.ACCESS);
 
   const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  const refreshToken = generateToken(user.id, refreshTokenExpires, tokenTypes.REFRESH);
+  const refreshToken = generateDoctorToken(user.id, refreshTokenExpires, tokenTypes.REFRESH);
   await saveToken(refreshToken, user.id, refreshTokenExpires, tokenTypes.REFRESH);
 
   return {
@@ -96,7 +109,7 @@ const generateResetPasswordToken = async (email) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
   }
   const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-  const resetPasswordToken = generateToken(user.id, expires, tokenTypes.RESET_PASSWORD);
+  const resetPasswordToken = generateDoctorToken(user.id, expires, tokenTypes.RESET_PASSWORD);
   await saveToken(resetPasswordToken, user.id, expires, tokenTypes.RESET_PASSWORD);
   return resetPasswordToken;
 };
@@ -108,13 +121,14 @@ const generateResetPasswordToken = async (email) => {
  */
 const generateVerifyEmailToken = async (user) => {
   const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-  const verifyEmailToken = generateToken(user.id, expires, tokenTypes.VERIFY_EMAIL);
+  const verifyEmailToken = generateDoctorToken(user.id, expires, tokenTypes.VERIFY_EMAIL);
   await saveToken(verifyEmailToken, user.id, expires, tokenTypes.VERIFY_EMAIL);
   return verifyEmailToken;
 };
 
 module.exports = {
-  generateToken,
+  generateDoctorToken,
+  generateUserToken,
   saveToken,
   verifyToken,
   generateAuthTokens,

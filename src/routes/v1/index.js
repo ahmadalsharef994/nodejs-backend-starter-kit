@@ -1,5 +1,6 @@
 const express = require('express');
-const authRoute = require('./auth.route');
+const authRouteDoctor = require('./authdoctor.route');
+const authRouteUser = require('./authuser.route');
 const userRoute = require('./user.route');
 const docsRoute = require('./docs.route');
 const config = require('../../config/config');
@@ -8,8 +9,12 @@ const router = express.Router();
 
 const defaultRoutes = [
   {
-    path: '/auth',
-    route: authRoute,
+    path: '/auth/doctor', // doctor Auth Endpoints
+    route: authRouteDoctor,
+  },
+  {
+    path: '/auth/user', // User Auth Endpoints
+    route: authRouteUser,
   },
   {
     path: '/users',

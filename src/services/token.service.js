@@ -4,6 +4,7 @@ const httpStatus = require('http-status');
 const config = require('../config/config');
 const userService = require('./user.service');
 const { Token } = require('../models');
+const { Devices } = require('../models');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 
@@ -16,6 +17,32 @@ const saveToken = async (token) => {
     token,
   });
   return tokenDoc;
+};
+
+/**
+ * Add A Device Login
+ * @param {string} session
+ * @param {string} authtoken
+ * @param {string} ipaddress
+ * @param {string} devicehash
+ * @param {string} useragent
+ * @param {string} fcmtoken
+ */
+const addDeviceHandler = async (session, authtokenhere, ipaddress, devicehash, useragent, fcmtoken) => {
+  const devicecheck = await Devices.findOne({ devicehash });
+  if (devicecheck) {
+    await Devices.updateOne({ _id: devicecheck._id }, { $set: { authtoken: authtokenhere } });
+  } else {
+    const deviceDoc = await Devices.create({
+      session,
+      authtokenhere,
+      ipaddress,
+      devicehash,
+      useragent,
+      fcmtoken,
+    });
+    return deviceDoc;
+  }
 };
 
 /**
@@ -129,6 +156,7 @@ const generateVerifyEmailToken = async (user) => {
 module.exports = {
   generateDoctorToken,
   generateUserToken,
+  addDeviceHandler,
   saveToken,
   verifyToken,
   generateAuthTokens,

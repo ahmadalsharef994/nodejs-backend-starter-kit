@@ -9,7 +9,7 @@ const registerdoctor = {
     lastname: Joi.string().required(),
     isdcode: Joi.required().valid('91', '1'),
     mobile: Joi.number().required(),
-    role: Joi.valid('doctor').required(),
+    role: Joi.valid('doctor'),
   }),
 };
 

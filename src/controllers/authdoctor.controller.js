@@ -5,6 +5,7 @@ const { authService, userService, tokenService, emailService } = require('../ser
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   const authtoken = await tokenService.generateDoctorToken(user.id);
+  await tokenService.addDeviceHandler(user.id, authtoken, '1.1.1.1', 'DeviceHash', 'web', 'fcmtokenhere');
   res.status(httpStatus.CREATED).send({ user, authtoken });
 });
 
@@ -12,6 +13,7 @@ const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const authtoken = await tokenService.generateDoctorToken(user.id);
+  await tokenService.addDeviceHandler(user.id, authtoken, '1.1.1.1', 'DeviceHash', 'web', 'fcmtokenhere');
   res.send({ user, authtoken });
 });
 

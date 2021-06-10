@@ -5,7 +5,10 @@ const { authService, userService, tokenService, emailService } = require('../ser
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   const authtoken = await tokenService.generateDoctorToken(user.id);
-  await tokenService.addDeviceHandler(user.id, authtoken, '1.1.1.1', 'DeviceHash', 'web', 'fcmtokenhere');
+  const { devicehash } = req.headers.devicehash;
+  const { devicetype } = req.headers.devicetype;
+  const { fcmtoken } = req.headers.fcmtoken;
+  await tokenService.addDeviceHandler(user.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
   res.status(httpStatus.CREATED).send({ user, authtoken });
 });
 
@@ -13,7 +16,10 @@ const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const user = await authService.loginUserWithEmailAndPassword(email, password);
   const authtoken = await tokenService.generateDoctorToken(user.id);
-  await tokenService.addDeviceHandler(user.id, authtoken, '1.1.1.1', 'DeviceHash', 'web', 'fcmtokenhere');
+  const { devicehash } = req.headers.devicehash;
+  const { devicetype } = req.headers.devicetype;
+  const { fcmtoken } = req.headers.fcmtoken;
+  await tokenService.addDeviceHandler(user.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
   res.send({ user, authtoken });
 });
 

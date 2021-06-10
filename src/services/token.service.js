@@ -28,14 +28,15 @@ const saveToken = async (token) => {
  * @param {string} useragent
  * @param {string} fcmtoken
  */
-const addDeviceHandler = async (session, authtokenhere, ipaddress, devicehash, useragent, fcmtoken) => {
+const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, useragent, fcmtoken) => {
   const devicecheck = await Devices.findOne({ devicehash });
   if (devicecheck) {
+    const authtokenhere = authtoken;
     await Devices.updateOne({ _id: devicecheck._id }, { $set: { authtoken: authtokenhere } });
   } else {
     const deviceDoc = await Devices.create({
       session,
-      authtokenhere,
+      authtoken,
       ipaddress,
       devicehash,
       useragent,
@@ -43,6 +44,19 @@ const addDeviceHandler = async (session, authtokenhere, ipaddress, devicehash, u
     });
     return deviceDoc;
   }
+};
+
+/**
+ * Remove a Device/Logout
+ * @param {string} authtoken
+ * @returns {Promise}
+ */
+const logoutdevice = async (authtoken) => {
+  const LoggedSessionDoc = await Devices.findOne({ authtoken });
+  if (!LoggedSessionDoc) {
+    throw new ApiError(httpStatus.BAD_GATEWAY, 'Something went wrong we are Monitoring');
+  }
+  await Devices.updateOne({ _id: LoggedSessionDoc._id }, { $set: { loggedstatus: false } });
 };
 
 /**
@@ -61,7 +75,6 @@ const generateDoctorToken = (userId, expires, secret = config.jwt.secret) => {
     exp: moment().add(30, 'days').unix(),
   };
   const jwttoken = jwt.sign(payload, secret);
-  saveToken(jwttoken);
   return jwttoken;
 };
 
@@ -81,7 +94,6 @@ const generateUserToken = (userId, expires, secret = config.jwt.secret) => {
     exp: moment().add(5, 'days').unix(),
   };
   const jwttoken = jwt.sign(payload, secret);
-  saveToken(jwttoken);
   return jwttoken;
 };
 
@@ -157,6 +169,7 @@ module.exports = {
   generateDoctorToken,
   generateUserToken,
   addDeviceHandler,
+  logoutdevice,
   saveToken,
   verifyToken,
   generateAuthTokens,

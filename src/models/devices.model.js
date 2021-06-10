@@ -12,6 +12,10 @@ const deviceSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    loggedstatus: {
+      type: String,
+      default: true,
+    },
     ipaddress: {
       type: String,
       required: true,

@@ -28,18 +28,20 @@ const saveToken = async (token) => {
  * @param {string} useragent
  * @param {string} fcmtoken
  */
-const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, useragent, fcmtoken) => {
+const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devicetype, fcmtoken) => {
   const devicecheck = await Devices.findOne({ devicehash });
   if (devicecheck) {
     const authtokenhere = authtoken;
+    const oldtoken = devicecheck.authtoken;
     await Devices.updateOne({ _id: devicecheck._id }, { $set: { authtoken: authtokenhere } });
+    await saveToken(oldtoken);
   } else {
     const deviceDoc = await Devices.create({
       session,
       authtoken,
       ipaddress,
       devicehash,
-      useragent,
+      devicetype,
       fcmtoken,
     });
     return deviceDoc;
@@ -72,7 +74,7 @@ const generateDoctorToken = (userId, expires, secret = config.jwt.secret) => {
     sub: userId,
     iat: moment().unix(),
     role: 'doctor',
-    exp: moment().add(30, 'days').unix(),
+    exp: moment().add(45, 'days').unix(),
   };
   const jwttoken = jwt.sign(payload, secret);
   return jwttoken;

@@ -24,7 +24,7 @@ const deviceSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    useragent: {
+    devicetype: {
       type: String,
       required: true,
     },

@@ -65,7 +65,6 @@ const updateUserById = async (userId, updateBody) => {
   await user.save();
   return user;
 };
-
 /**
  * Delete user by id
  * @param {ObjectId} userId

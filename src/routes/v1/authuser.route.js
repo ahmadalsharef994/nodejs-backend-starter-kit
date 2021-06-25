@@ -13,6 +13,7 @@ router.post('/forgot-password', validate(authUserValidation.forgotPassword), aut
 router.post('/reset-password', validate(authUserValidation.resetPassword), authController.resetPassword);
 router.post('/send-verification-email', auth(), authController.sendVerificationEmail);
 router.post('/verify-email', validate(authUserValidation.verifyEmail), authController.verifyEmail);
+router.post('/change-password', validate(authUserValidation.changepassword), authController.changePassword);
 
 module.exports = router;
 

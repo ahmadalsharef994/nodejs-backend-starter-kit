@@ -4,6 +4,7 @@ const userService = require('./user.service');
 const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
+const getTokenSubID = require('../utils/GetToken');
 
 /**
  * Login with username and password
@@ -32,6 +33,16 @@ const logout = async (refreshToken) => {
   await refreshTokenDoc.remove();
 };
 
+const changeUserPassword = async (oldPassword, newPassword, token) => {
+  const userSubID = await getTokenSubID(token);
+  const userdocs = await userService.getUserById(userSubID);
+  if (!userdocs || !(await userdocs.isPasswordMatch(oldPassword))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password InCorrect');
+  }
+  await userService.updateUserPassByID(userdocs._id, newPassword);
+  await tokenService.logoutdevice(token);
+  return userdocs;
+};
 /**
  * Refresh auth tokens
  * @param {string} refreshToken
@@ -96,4 +107,5 @@ module.exports = {
   refreshAuth,
   resetPassword,
   verifyEmail,
+  changeUserPassword,
 };

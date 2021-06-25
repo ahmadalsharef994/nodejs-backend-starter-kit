@@ -13,6 +13,7 @@ router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), a
 router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassword);
 router.post('/send-verification-email', auth(), authDoctorController.sendVerificationEmail);
 router.post('/verify-email', validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
+router.post('/change-password', validate(authDoctorValidation.changepassword), authDoctorController.changePassword);
 
 module.exports = router;
 

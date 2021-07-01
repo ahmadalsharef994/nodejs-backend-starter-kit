@@ -11,7 +11,7 @@ router.post('/login', validate(authDoctorValidation.login), authDoctorController
 router.post('/logout', validate(authDoctorValidation.logout), authDoctorController.logout);
 router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), authDoctorController.forgotPassword);
 router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassword);
-router.post('/send-verification-email', auth(), authDoctorController.sendVerificationEmail);
+router.post('/send-verification-email',auth(), authDoctorController.sendVerificationEmail);
 router.post('/verify-email', validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
 router.post('/change-password', validate(authDoctorValidation.changepassword), authDoctorController.changePassword);
 

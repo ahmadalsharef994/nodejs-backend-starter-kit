@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { Model } = require('mongoose');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -35,7 +36,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findById(id);
+  return User.findOne({ _id : id});
 };
 
 /**
@@ -46,6 +47,18 @@ const getUserById = async (id) => {
 const getUserByEmail = async (email) => {
   return User.findOne({ email });
 };
+/**
+ * Update user by id
+ * @param {Model} user
+ * @param {Object} updateBody
+ * @returns {Promise<User>}
+ */
+ const updateUserPassByID = async (user, updateBody) => {
+  user.password = updateBody,
+  await user.save();
+  return User;
+};
+
 
 /**
  * Update user by id
@@ -86,4 +99,5 @@ module.exports = {
   getUserByEmail,
   updateUserById,
   deleteUserById,
+  updateUserPassByID,
 };

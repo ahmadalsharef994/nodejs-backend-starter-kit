@@ -39,7 +39,7 @@ const changeUserPassword = async (oldPassword, newPassword, token) => {
   if (!userdocs || !(await userdocs.isPasswordMatch(oldPassword))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Password InCorrect');
   }
-  await userService.updateUserPassByID(userdocs._id, newPassword);
+  await userService.updateUserPassByID(userdocs, newPassword);
   await tokenService.logoutdevice(token);
   return userdocs;
 };

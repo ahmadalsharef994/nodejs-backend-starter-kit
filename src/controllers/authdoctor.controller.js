@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const checkHeader = require('../utils/chechHeader');
 const sendOtp = require("../utils/sendOtp");
-const { authService, userService, tokenService, emailService , emailServices} = require('../services');
+const { authService, userService, tokenService , emailServices} = require('../services');
 
 const register = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
@@ -56,9 +56,9 @@ const resetPassword = catchAsync(async (req, res) => {
 });
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
-  const email = req.body.email;// email will come from payload
+  const AuthData = await userService.getUserById(req.SubjectId);
   const OTP = sendOtp();
-  await emailServices.sendVerificationEmail(email,OTP);
+  await emailServices.sendVerificationEmail(AuthData.email,OTP);
   res.status(httpStatus.NO_CONTENT).send();
 });
 

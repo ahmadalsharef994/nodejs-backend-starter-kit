@@ -15,10 +15,10 @@ const auth = (req) => async (req, res, next) => {
       const payload = jwt.verify(token, secret);
       const subid = payload.sub;
       resolve()
-      //return subid;
+      return req.SubjectId = subid;
      } 
   catch (error) {
-  throw new ApiError(httpStatus.UNAUTHORIZED,'InCorrect AuthHeader');
+  throw new ApiError(httpStatus.UNAUTHORIZED,'Invalid AuthHeader');
 }})
   .then(() => next())
   .catch((err) => next(err));

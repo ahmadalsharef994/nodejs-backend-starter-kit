@@ -1,7 +1,8 @@
 {
   "env": {
     "node": true,
-    "jest": true
+    "jest": true,
+    "amd":true
   },
   "extends": ["airbnb-base", "plugin:jest/recommended", "plugin:security/recommended", "plugin:prettier/recommended"],
   "plugins": ["jest", "security", "prettier"],
@@ -15,6 +16,10 @@
     "consistent-return": "off",
     "jest/expect-expect": "off",
     "security/detect-object-injection": "off",
+    "import/extensions": "off",
     "prefer-destructuring": ["error", {"object": false, "array": false}]
+  },
+  "settings":{
+  "import/resolver": "node"
   }
 }

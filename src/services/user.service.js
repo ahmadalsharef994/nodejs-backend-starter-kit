@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const { Model } = require('mongoose');
 const { User } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -36,7 +35,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findOne({ _id : id});
+  return User.findOne({ _id: id });
 };
 
 /**
@@ -53,13 +52,12 @@ const getUserByEmail = async (email) => {
  * @param {Object} updateBody
  * @returns {Promise<User>}
  */
- const updateUserPassByID = async (user, updateBody) => {
-  user.password = updateBody,
+const updateUserPassByID = async (user, updateBody) => {
+  // eslint-disable-next-line no-param-reassign
+  user.password = updateBody;
   await user.save();
   return User;
 };
-
-
 /**
  * Update user by id
  * @param {ObjectId} userId

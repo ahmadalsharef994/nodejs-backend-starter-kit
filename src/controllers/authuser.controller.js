@@ -1,4 +1,4 @@
-const httpStatus = require('http-status');
+const httpStatus = require('../../node_modules/http-status');
 const catchAsync = require('../utils/catchAsync');
 const checkHeader = require('../utils/chechHeader');
 const sendOtp = require("../utils/sendOtp");
@@ -44,8 +44,10 @@ const changePassword = catchAsync(async (req, res) => {
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
-  const resetPasswordToken = await tokenService.generateResetPasswordToken(req.body.email);
-  await emailService.sendResetPasswordEmail(req.body.email, resetPasswordToken);
+  const AuthData = await userService.getUserById(req.SubjectId);
+  const OTP = sendOtp();
+  await emailServices.sendResetPasswordEmail(req.body.email,OTP);
+  await otpServices.saveOtp(null,null,OTP,AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -58,13 +60,42 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
   const OTP = sendOtp();
   await emailServices.sendVerificationEmail(AuthData.email,OTP);
+  await otpServices.saveOtp(null,OTP,null,AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
-  await authService.verifyEmail(req.query.token);
+  const AuthData = await userService.getUserById(req.SubjectId);
+  await otpServices.verifyEmailOtp(req.body.otp,AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
+
+const requestOtp = catchAsync(async (req, res) => {
+  const AuthData = await userService.getUserById(req.SubjectId);
+  const OTP = sendOtp();
+  await otpServices.saveOtp(OTP,null,null,AuthData);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const verifyPhone = catchAsync(async (req, res) => {
+  const AuthData = await userService.getUserById(req.SubjectId);
+  await otpServices.verifyPhoneOtp(req.body.otp,AuthData);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const resendOtp = catchAsync(async (req, res) => {
+  const AuthData = await userService.getUserById(req.SubjectId);
+  const OTP = sendOtp();
+  await otpServices.resentOtp(OTP,AuthData);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
+const verifyforgetOtp = catchAsync(async (req, res) => {
+  const AuthData = await userService.getUserById(req.SubjectId);
+  await otpServices.verifyForgetPasswordOtp(req.body.otp,AuthData);
+  res.status(httpStatus.NO_CONTENT).send();
+});
+
 
 module.exports = {
   register,
@@ -76,4 +107,9 @@ module.exports = {
   sendVerificationEmail,
   verifyEmail,
   changePassword,
+  requestOtp,
+  verifyPhone,
+  resendOtp,
+  verifyforgetOtp,
+
 };

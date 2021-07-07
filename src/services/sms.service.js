@@ -16,7 +16,6 @@ const smsClient =  {
         if (user && user.phone) {
           const params = new URLSearchParams();
           const verifycode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-          console.log(verifycode);
           params.append("numbers", [parseInt("91" + user.phone)]);
           params.append(
             "message",

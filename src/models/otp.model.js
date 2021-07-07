@@ -1,39 +1,42 @@
-const mongoose = require('mongoose');
+const mongoose = require('../../node_modules/mongoose');
 const { toJSON } = require('./plugins');
+const User = require('./user.model');
 
 const otpSchema = mongoose.Schema(
   {
-    otp: {
+    phoneVerify: {
       type: Number,
-      required: true,
-      index: true,
+      default:null
+      
     },
-    emailverify:{
-        type: Number,
-        required: true,
-        index: true,
+    emailVerify: {
+      type: Number,
+      default:null
+      
     },
-    ResetPassverify:{
-        type: Number,
-        required: true,
-        index: true,
+    resetPasswordVerify: {
+      type: Number,
+      default:null
+      
     },
-    User:{
+    user:{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Auth'
+        ref: User,
+        
     },
   },
   {
     timestamps: true,
   }
+  
 );
 
 // add plugin that converts mongoose to json
-tokenSchema.plugin(toJSON);
+otpSchema.plugin(toJSON);
 
 /**
  * @typedef otp
  */
-const otp = mongoose.model('otp', otpSchema);
+const Otp = mongoose.model('Otp', otpSchema);
 
-module.exports = otp;
+module.exports = Otp;

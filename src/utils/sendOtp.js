@@ -1,7 +1,7 @@
-const otpGenerator = require('otp-generator');
-
 const sendOtp = () => {
-  const OTP = otpGenerator.generate(6, { upperCase: false, specialChars: false, alphabets: false });
+  const OTP = Math.floor(
+    Math.random() * (999999 - 100000 + 1) + 100000
+  )
   return OTP;
 };
 module.exports = sendOtp;

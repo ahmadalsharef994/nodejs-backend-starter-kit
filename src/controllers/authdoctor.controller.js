@@ -38,21 +38,16 @@ const changePassword = catchAsync(async (req, res) => {
   res.status(204).send({});
 });
 
-const refreshTokens = catchAsync(async (req, res) => {
-  const tokens = await authService.refreshAuth(req.body.refreshToken);
-  res.send({ ...tokens });
-});
-
 const forgotPassword = catchAsync(async (req, res) => {
-  const AuthData = await userService.getUserById(req.SubjectId);
+  const AuthData = await userService.getUserByEmail(req.body.email);
   const OTP = sendOtp();
   await emailServices.sendResetPasswordEmail(req.body.email, OTP);
-  await otpServices.saveOtp(null, null, OTP, AuthData);
+  await otpServices.sendresetpassotp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  await authService.resetPassword(req.query.token, req.body.password);
+  await authService.resetPassword(req.body.email,req.body.resetcode, req.body.newpassword);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -60,20 +55,20 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
   const OTP = sendOtp();
   await emailServices.sendVerificationEmail(AuthData.email, OTP);
-  await otpServices.saveOtp(null, OTP, null, AuthData);
+  await otpServices.sendemailverifyotp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
-  await otpServices.verifyEmailOtp(req.body.otp, AuthData);
+  await otpServices.verifyEmailOtp(req.body.emailcode, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
 const requestOtp = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
   const OTP = sendOtp();
-  await otpServices.saveOtp(OTP, null, null, AuthData);
+  await otpServices.sendphoneverifyotp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -86,13 +81,7 @@ const verifyPhone = catchAsync(async (req, res) => {
 const resendOtp = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
   const OTP = sendOtp();
-  await otpServices.resentOtp(OTP, AuthData);
-  res.status(httpStatus.NO_CONTENT).send();
-});
-
-const verifyforgetOtp = catchAsync(async (req, res) => {
-  const AuthData = await userService.getUserById(req.SubjectId);
-  await otpServices.verifyForgetPasswordOtp(req.body.otp, AuthData);
+  await otpServices.resendOtp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
 
@@ -100,7 +89,6 @@ module.exports = {
   register,
   login,
   logout,
-  refreshTokens,
   forgotPassword,
   resetPassword,
   sendVerificationEmail,
@@ -109,5 +97,4 @@ module.exports = {
   requestOtp,
   verifyPhone,
   resendOtp,
-  verifyforgetOtp,
 };

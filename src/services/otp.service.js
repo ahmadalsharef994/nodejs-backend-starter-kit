@@ -1,52 +1,89 @@
+const httpStatus = require('http-status');
 const { Otp } = require('../models');
+const ApiError = require('../utils/ApiError');
 
-const saveOtp = async (phoneVerify, emailVerify, resetPasswordVerify, user) => {
-  const OtpDoc = await Otp.create({
-    phoneVerify,
-    emailVerify,
-    resetPasswordVerify,
-    user,
-  });
-  return OtpDoc;
+const sendresetpassotp = async (OTP, user) => {
+  const authDataExist = await Otp.findOne({ user: user });
+  if (authDataExist) {
+    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { resetPasswordVerify: OTP } });
+    return OtpDoc;
+  }
+  else {
+    const OtpDoc = await Otp.create({ resetPasswordVerify: OTP, user: user });
+    return OtpDoc;
+  }
+}
+
+const sendemailverifyotp = async (OTP, user) => {
+  const authDataExist = await Otp.findOne({ user: user });
+  if (authDataExist) {
+    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { emailVerify: OTP } });
+    return OtpDoc;
+  }
+  else {
+    const OtpDoc = await Otp.create({ emailVerify: OTP, user: user });
+    return OtpDoc;
+  }
+}
+
+const sendphoneverifyotp = async (OTP, user) => {
+  const authDataExist = await Otp.findOne({ user: user });
+  if (authDataExist) {
+    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { phoneVerify: OTP } });
+    return OtpDoc;
+  }
+  else {
+    const OtpDoc = await Otp.create({ phoneVerify: OTP, user: user });
+    return OtpDoc;
+  }
 };
 
-const verifyEmailOtp = async (emailVerify, AuthData) => {
-  const OtpDoc = await Otp.findOne({ emailVerify, user: AuthData });
-  if (!OtpDoc) {
-    throw new Error('Otp not found');
+const verifyEmailOtp = async (emailcode, AuthData) => {
+  const OtpDoc = await Otp.findOne({ user: AuthData });
+  if (emailcode == OtpDoc.emailVerify) {
+    return OtpDoc;
   }
-  return OtpDoc;
+  else{
+    throw new ApiError(httpStatus.BAD_REQUEST,"Incorrect OTP")
+  }
 };
-const verifyForgetPasswordOtp = async (resetPasswordVerify, AuthData) => {
-  const OtpDoc = await Otp.findOne({ resetPasswordVerify, user: AuthData });
-  if (!OtpDoc) {
-    throw new Error('Otp not found');
+const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
+  const OtpDoc = await Otp.findOne({ user: AuthData });
+  if (resetcode == OtpDoc.resetPasswordVerify) {
+    return OtpDoc;
   }
-  return OtpDoc;
+  else{
+    throw new ApiError(httpStatus.BAD_REQUEST,"Incorrect OTP")
+  }
 };
 
-const verifyPhoneOtp = async (phoneVerify, AuthData) => {
-  const OtpDoc = await Otp.findOne({ phoneVerify, user: AuthData });
-  if (!OtpDoc) {
-    throw new Error('Otp not found');
+const verifyPhoneOtp = async (otp, AuthData) => {
+  const OtpDoc = await Otp.findOne({ user: AuthData });
+  if (otp == OtpDoc.phoneVerify) {
+    return OtpDoc;
   }
-  return OtpDoc;
+  else{
+    throw new ApiError(httpStatus.BAD_REQUEST,"Incorrect OTP")
+  }
 };
-const resentOtp = async (phoneVerify, AuthData) => {
-  Otp.findOne({ user: AuthData })
-    .then(() => Otp.updateOne({ user: AuthData }, { $set: { phoneVerify } }))
-    .then(() => Otp.findOne({ phoneVerify }))
-    .then((doc) => {
-      return doc;
-    })
-    .catch((err) => {
-      return err;
-    });
+
+const resendOtp = async (OTP, user) => {
+  const authDataExist = await Otp.findOne({ user: user });
+  if (authDataExist) {
+    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { phoneVerify: OTP } });
+    return OtpDoc;
+  }
+  else {
+    throw new ApiError(httpStatus.BAD_REQUEST,"You are being Monitored")
+  }
 };
+
 module.exports = {
-  saveOtp,
   verifyEmailOtp,
   verifyForgetPasswordOtp,
   verifyPhoneOtp,
-  resentOtp,
+  resendOtp,
+  sendphoneverifyotp,
+  sendemailverifyotp,
+  sendresetpassotp,
 };

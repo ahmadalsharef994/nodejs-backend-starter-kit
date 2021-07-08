@@ -33,12 +33,6 @@ const changepassword = {
   }),
 };
 
-const refreshTokens = {
-  body: Joi.object().keys({
-    refreshToken: Joi.string().required(),
-  }),
-};
-
 const forgotPassword = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
@@ -46,35 +40,23 @@ const forgotPassword = {
 };
 
 const resetPassword = {
-  query: Joi.object().keys({
-    token: Joi.string().required(),
-  }),
   body: Joi.object().keys({
-    password: Joi.string().required().custom(password),
+    email: Joi.string().email().required(),
+    resetcode: Joi.number().required(),
+    newpassword: Joi.string().required().custom(password),
+    newconfirmpassword: Joi.string().required().valid(Joi.ref('newpassword')),
   }),
 };
 
 const verifyEmail = {
   body: Joi.object().keys({
-    otp: Joi.number().required(),
-  }),
-};
-
-const requestOtp = {
-  body: Joi.object().keys({
-    phonenumber: Joi.number().required(),
+    emailcode: Joi.number().required(),
   }),
 };
 
 const verifyPhone = {
   body: Joi.object().keys({
     otp: Joi.number().required(),
-  }),
-};
-
-const resendOtp = {
-  body: Joi.object().keys({
-    phonenumber: Joi.number().required(),
   }),
 };
 
@@ -89,12 +71,9 @@ module.exports = {
   login,
   logout,
   changepassword,
-  refreshTokens,
   forgotPassword,
   resetPassword,
   verifyEmail,
-  resendOtp,
   verifyPhone,
-  requestOtp,
   verifyforget,
 };

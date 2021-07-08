@@ -5,6 +5,7 @@ const Token = require('../models/token.model');
 const ApiError = require('../utils/ApiError');
 const { tokenTypes } = require('../config/tokens');
 const getTokenSubID = require('../utils/GetToken');
+const otpServices = require('./otp.service');
 
 /**
  * Login with username and password
@@ -43,42 +44,19 @@ const changeUserPassword = async (oldPassword, newPassword, token) => {
   await tokenService.logoutdevice(token);
   return userdocs;
 };
-/**
- * Refresh auth tokens
- * @param {string} refreshToken
- * @returns {Promise<Object>}
- */
-const refreshAuth = async (refreshToken) => {
-  try {
-    const refreshTokenDoc = await tokenService.verifyToken(refreshToken, tokenTypes.REFRESH);
-    const user = await userService.getUserById(refreshTokenDoc.user);
-    if (!user) {
-      throw new Error();
-    }
-    await refreshTokenDoc.remove();
-    return tokenService.generateAuthTokens(user);
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
-  }
-};
 
 /**
  * Reset password
- * @param {string} resetPasswordToken
+ * @param {string} email
+ * @param {string} resetcode
  * @param {string} newPassword
  * @returns {Promise}
  */
-const resetPassword = async (resetPasswordToken, newPassword) => {
-  try {
-    const resetPasswordTokenDoc = await tokenService.verifyToken(resetPasswordToken, tokenTypes.RESET_PASSWORD);
-    const user = await userService.getUserById(resetPasswordTokenDoc.user);
-    if (!user) {
-      throw new Error();
-    }
-    await userService.updateUserById(user.id, { password: newPassword });
-    await Token.deleteMany({ user: user.id, type: tokenTypes.RESET_PASSWORD });
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password reset failed');
+const resetPassword = async (email, resetcode, newPassword) => {
+  const AuthData = await userService.getUserByEmail(email);
+  const verification = await otpServices.verifyForgetPasswordOtp(resetcode, AuthData);
+  if(verification){
+    await userService.updateUserById(AuthData._id, { password: newPassword });
   }
 };
 
@@ -104,7 +82,6 @@ const verifyEmail = async (verifyEmailToken) => {
 module.exports = {
   loginUserWithEmailAndPassword,
   logout,
-  refreshAuth,
   resetPassword,
   verifyEmail,
   changeUserPassword,

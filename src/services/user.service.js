@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const { User } = require('../models');
+const { Auth } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 /**
@@ -8,11 +8,11 @@ const ApiError = require('../utils/ApiError');
  * @returns {Promise<User>}
  */
 const createUser = async (userBody) => {
-  if (await User.isEmailTaken(userBody.email)) {
+  if (await Auth.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  const user = await User.create(userBody);
-  return user;
+  const auth = await Auth.create(userBody);
+  return auth;
 };
 
 /**
@@ -25,7 +25,7 @@ const createUser = async (userBody) => {
  * @returns {Promise<QueryResult>}
  */
 const queryUsers = async (filter, options) => {
-  const users = await User.paginate(filter, options);
+  const users = await Auth.paginate(filter, options);
   return users;
 };
 
@@ -35,7 +35,7 @@ const queryUsers = async (filter, options) => {
  * @returns {Promise<User>}
  */
 const getUserById = async (id) => {
-  return User.findOne({ _id: id });
+  return Auth.findOne({ _id: id });
 };
 
 /**
@@ -44,7 +44,7 @@ const getUserById = async (id) => {
  * @returns {Promise<User>}
  */
 const getUserByEmail = async (email) => {
-  return User.findOne({ email });
+  return Auth.findOne({ email });
 };
 /**
  * Update user by id
@@ -52,11 +52,11 @@ const getUserByEmail = async (email) => {
  * @param {Object} updateBody
  * @returns {Promise<User>}
  */
-const updateUserPassByID = async (user, updateBody) => {
+const updateUserPassByID = async (auth, updateBody) => {
   // eslint-disable-next-line no-param-reassign
-  user.password = updateBody;
-  await user.save();
-  return User;
+  auth.password = updateBody;
+  await auth.save();
+  return Auth;
 };
 /**
  * Update user by id
@@ -64,30 +64,30 @@ const updateUserPassByID = async (user, updateBody) => {
  * @param {Object} updateBody
  * @returns {Promise<User>}
  */
-const updateUserById = async (userId, updateBody) => {
-  const user = await getUserById(userId);
-  if (!user) {
+const updateUserById = async (authId, updateBody) => {
+  const auth = await getUserById(authId);
+  if (!auth) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
+  if (updateBody.email && (await Auth.isEmailTaken(updateBody.email, authId))) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  Object.assign(user, updateBody);
-  await user.save();
-  return user;
+  Object.assign(auth, updateBody);
+  await Auth.save();
+  return auth;
 };
 /**
  * Delete user by id
  * @param {ObjectId} userId
  * @returns {Promise<User>}
  */
-const deleteUserById = async (userId) => {
-  const user = await getUserById(userId);
-  if (!user) {
+const deleteUserById = async (authId) => {
+  const auth = await getUserById(authId);
+  if (!auth) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  await user.remove();
-  return user;
+  await auth.remove();
+  return auth;
 };
 
 module.exports = {

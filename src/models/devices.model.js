@@ -5,7 +5,7 @@ const deviceSchema = mongoose.Schema(
   {
     session: {
       type: mongoose.SchemaTypes.ObjectId,
-      ref: 'User',
+      ref: 'Auth',
       index: true,
     },
     authtoken: {

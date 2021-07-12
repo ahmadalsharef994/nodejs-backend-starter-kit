@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
-const { roles } = require('../config/roles');
 
 const userSchema = mongoose.Schema(
   {
@@ -16,6 +15,7 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
+      index:true,
       lowercase: true,
       validate(value) {
         if (!validator.isEmail(value)) {
@@ -41,14 +41,17 @@ const userSchema = mongoose.Schema(
       private: true, // used by the toJSON plugin
     },
     role: {
-      type: String,
-      enum: roles,
-      default: 'user',
+      type: Array,
+      default: ['user'],
     },
     isEmailVerified: {
       type: Boolean,
       default: false,
     },
+    isbanned: {
+      type: Boolean,
+      default: false,
+    }
   },
   {
     timestamps: true,
@@ -89,8 +92,8 @@ userSchema.pre('save', async function (next) {
 });
 
 /**
- * @typedef User
+ * @typedef Auth
  */
-const User = mongoose.model('User', userSchema);
+const Auth = mongoose.model('Auth', userSchema);
 
-module.exports = User;
+module.exports = Auth;

@@ -1,6 +1,6 @@
 const mongoose = require('../../node_modules/mongoose');
 const { toJSON } = require('./plugins');
-const User = require('./user.model');
+const Auth = require('./auth.model');
 
 const otpSchema = mongoose.Schema(
   {
@@ -16,9 +16,9 @@ const otpSchema = mongoose.Schema(
       type: Number,
       default: null,
     },
-    user: {
+    auth: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: User,
+      ref: Auth,
     },
   },
   {

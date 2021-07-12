@@ -1,7 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const checkHeader = require('../utils/chechHeader');
-const sendOtp = require('../utils/sendOtp');
+const generateOTP = require('../utils/generateOTP');
 const { authService, userService, tokenService, emailServices, otpServices } = require('../services');
 
 const register = catchAsync(async (req, res) => {
@@ -40,7 +39,7 @@ const changePassword = catchAsync(async (req, res) => {
 
 const forgotPassword = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserByEmail(req.body.email);
-  const OTP = sendOtp();
+  const OTP = generateOTP();
   await emailServices.sendResetPasswordEmail(req.body.email, OTP);
   await otpServices.sendresetpassotp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
@@ -53,7 +52,7 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
-  const OTP = sendOtp();
+  const OTP = generateOTP();
   await emailServices.sendVerificationEmail(AuthData.email, OTP);
   await otpServices.sendemailverifyotp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
@@ -67,7 +66,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 
 const requestOtp = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
-  const OTP = sendOtp();
+  const OTP = generateOTP();
   await otpServices.sendphoneverifyotp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });
@@ -80,7 +79,7 @@ const verifyPhone = catchAsync(async (req, res) => {
 
 const resendOtp = catchAsync(async (req, res) => {
   const AuthData = await userService.getUserById(req.SubjectId);
-  const OTP = sendOtp();
+  const OTP = generateOTP();
   await otpServices.resendOtp(OTP, AuthData);
   res.status(httpStatus.NO_CONTENT).send();
 });

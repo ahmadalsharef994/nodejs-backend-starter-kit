@@ -48,6 +48,10 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    isMobileVerified: {
+      type: Boolean,
+      default: false,
+    },
     isbanned: {
       type: Boolean,
       default: false,

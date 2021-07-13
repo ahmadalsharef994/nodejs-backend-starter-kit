@@ -8,7 +8,7 @@ const registerdoctor = {
     fullname: Joi.string().required(),
     isdcode: Joi.required().valid('91', '1'),
     mobile: Joi.number().required(),
-    role: Joi.valid('doctor'),
+    role: Joi.valid('doctor').required(),
   }),
 };
 

@@ -14,7 +14,7 @@ const defaultRoutes = [
     route: authRouteUser,
   },
   {
-    path: '/doctor', //Doctor Routes
+    path: '/doctor', //Doctor Routes In Progress
     route: doctorRoute, 
   },
   {

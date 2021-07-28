@@ -39,7 +39,7 @@ const DoctorBasicSchema = mongoose.Schema(
 DoctorBasicSchema.plugin(toJSON);
 
 /**
- * @typedef otp
+ * @typedef DoctorBasic
  */
 const DoctorBasic = mongoose.model('DoctorBasic', DoctorBasicSchema);
 

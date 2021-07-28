@@ -60,7 +60,26 @@ const logoutdevice = async (authtoken) => {
 };
 
 /**
- * Generate token
+ * Generate Admin token
+ * @param {ObjectId} userId
+ * @param {Moment} expires
+ * @param {string} type
+ * @param {string} [secret]
+ * @returns {string}
+ */
+ const generateAdminToken = (userId, expires, secret = config.jwt.secret) => {
+  const payload = {
+    sub: userId,
+    iat: moment().unix(),
+    role: 'admin',
+    exp: moment().add(1, 'days').unix(),
+  };
+  const jwttoken = jwt.sign(payload, secret);
+  return jwttoken;
+};
+
+/**
+ * Generate Doctor token
  * @param {ObjectId} userId
  * @param {Moment} expires
  * @param {string} type
@@ -79,7 +98,28 @@ const generateDoctorToken = (userId, expires, secret = config.jwt.secret) => {
 };
 
 /**
- * Generate token
+ * Generate Verified Doctor token
+ * @param {ObjectId} userId
+ * @param {string} docId
+ * @param {Moment} expires
+ * @param {string} type
+ * @param {string} [secret]
+ * @returns {string}
+ */
+ const generateVerifiedDoctorToken = (userId, docId, expires, secret = config.jwt.secret) => {
+  const payload = {
+    sub: userId,
+    iat: moment().unix(),
+    role: 'doctor',
+    docid: docId,
+    exp: moment().add(45, 'days').unix(),
+  };
+  const jwttoken = jwt.sign(payload, secret);
+  return jwttoken;
+};
+
+/**
+ * Generate User token
  * @param {ObjectId} userId
  * @param {Moment} expires
  * @param {string} type
@@ -98,7 +138,9 @@ const generateUserToken = (userId, expires, secret = config.jwt.secret) => {
 };
 
 module.exports = {
+  generateAdminToken,
   generateDoctorToken,
+  generateVerifiedDoctorToken,
   generateUserToken,
   addDeviceHandler,
   logoutdevice,

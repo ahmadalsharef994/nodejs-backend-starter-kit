@@ -2,6 +2,7 @@ const express = require('express');
 const authRouteDoctor = require('./authdoctor.route');
 const authRouteUser = require('./authuser.route');
 const doctorProfileRoute = require('./doctorprofile.route');
+const internalTeamRoute = require('./internalTeam.route');
 const router = express.Router();
 
 const defaultRoutes = [
@@ -20,6 +21,10 @@ const defaultRoutes = [
   {
     path: '/user',
     route: doctorProfileRoute, //Change it to User route when made
+  },
+  {
+    path: '/internalteam',
+    route: internalTeamRoute, //Internal Team API
   }
 ];
 

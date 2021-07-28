@@ -41,7 +41,7 @@ const DoctorEducationSchema = mongoose.Schema(
 DoctorEducationSchema.plugin(toJSON);
 
 /**
- * @typedef otp
+ * @typedef DoctorEducation
  */
 const DoctorEducation = mongoose.model('DoctorEducation', DoctorEducationSchema);
 

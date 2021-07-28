@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const generateOTP = require('../utils/generateOTP');
 const checkHeader = require('../utils/chechHeader');
-const { authService, tokenService, otpServices } = require('../services');
+const { authService, tokenService, otpServices, verifiedDoctorService } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 
 const register = catchAsync(async (req, res) => {
@@ -18,7 +18,12 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
-  const authtoken = await tokenService.generateDoctorToken(AuthData.id);
+  const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData);
+  if(verifiedcheckData){
+    var authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.docid);
+  }else{
+    var authtoken = await tokenService.generateDoctorToken(AuthData.id);
+  }
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;

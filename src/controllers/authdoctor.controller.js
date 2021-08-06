@@ -18,7 +18,7 @@ const register = catchAsync(async (req, res) => {
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
   const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
-  const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData);
+  const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   if(verifiedcheckData){
     var authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.docid);
   }else{

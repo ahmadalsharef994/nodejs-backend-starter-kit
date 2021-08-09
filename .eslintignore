@@ -1,1 +1,3 @@
 bin
+src/services/document.service.js
+src/routes/v1/document.route.js

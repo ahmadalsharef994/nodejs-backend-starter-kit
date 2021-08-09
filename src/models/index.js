@@ -5,3 +5,4 @@ module.exports.Otp = require('./otp.model');
 module.exports.DoctorBasic = require('./doctorBasic');
 module.exports.DoctorEducation = require('./doctorEducation');
 module.exports.VerifiedDoctors = require('./verifieddoctor');
+module.exports.Document = require('./document.model');

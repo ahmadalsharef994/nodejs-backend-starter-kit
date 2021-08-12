@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/upload', authdoctornonverified(), fileUpload.upload.fields([
     { name: 'resume', maxCount: 1 },
     { name: 'esign', maxCount: 1 },
-    { name: 'medicalDegree', maxCount: 8 },
+    { name: 'medicalDegree', maxCount: 1 },
     { name: 'medicalRegistration', maxCount: 1 },
     { name: 'aadharCardDoc', maxCount: 1 },
     { name: 'pancardDoc', maxCount: 1 },

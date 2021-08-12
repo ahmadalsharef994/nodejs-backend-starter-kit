@@ -19,20 +19,16 @@ const s3 = new AWS.S3({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png') {
-    cb(null, true);
-  } else if (file.mimetype === 'application/pdf') {
+  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf') {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file type, only JPEG ,PNG and pdf is allowed!'), false);
+    cb(new Error('Invalid file or data, only JPEG ,PNG and pdf is allowed!'), false);
   }
 };
 
 const upload = multer({
   storage: multerS3({
     s3,
-    fileFilter,
-    limits: { fileSize: 100000000 },
     bucket: BUCKET_NAME,
     metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldname });
@@ -42,6 +38,8 @@ const upload = multer({
       cb(null, `${file.fieldname}/${uuid()}${ext}`);
     },
   }),
+  fileFilter,
+  limits: { fileSize: 100000000 },
 });
 
 module.exports = {

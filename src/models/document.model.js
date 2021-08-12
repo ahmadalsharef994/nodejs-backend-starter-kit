@@ -31,6 +31,10 @@ const docSchema = mongoose.Schema({
     type: String,
     default: null,
   },
+  isRestricted:{
+    type: Boolean,
+    default: false
+  },
   auth: {
     type: mongoose.Schema.Types.ObjectId,
     ref: Auth,

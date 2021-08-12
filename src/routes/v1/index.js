@@ -13,24 +13,24 @@ const defaultRoutes = [
     route: authRouteDoctor,
   },
   {
-    path: '/auth/user', // User Auth Endpoints
-    route: authRouteUser,
-  },
-  {
     path: '/doctor/profile', // Doctor Profile Route
     route: doctorProfileRoute,
+  },
+  {
+    path: '/doctor/document',
+    route: document, // Document upload
   },
   {
     path: '/user',
     route: doctorProfileRoute, // Change it to User route when made
   },
   {
-    path: '/internalteam',
-    route: internalTeamRoute, // Internal Team API
+    path: '/auth/user', // User Auth Endpoints
+    route: authRouteUser,
   },
   {
-    path: '/document',
-    route: document, // Document upload
+    path: '/internalteam',
+    route: internalTeamRoute, // Internal Team API
   },
 ];
 

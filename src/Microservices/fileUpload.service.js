@@ -42,6 +42,30 @@ const upload = multer({
   limits: { fileSize: 100000000 },
 });
 
+const getSingedUrl = async (file) => {    
+  const params = {
+    Bucket: BUCKET_NAME ,
+    Key: file ,
+    Expires: 60 * 60 * 5
+  };
+
+  try {
+    const url = await new Promise((resolve, reject) => {
+      s3.getSignedUrl('getObject', params, (err, url) => {
+        err ? reject(err) : resolve(url);
+    });
+  });
+    console.log(url)
+  } catch (err) {
+    if (err) {
+      console.log(err)
+    }
+  }
+}
+
+
+
 module.exports = {
   upload,
+  getSingedUrl
 };

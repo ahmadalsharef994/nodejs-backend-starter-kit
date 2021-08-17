@@ -2,6 +2,8 @@ const express = require('express');
 const { documentController } = require('../../controllers');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const { fileUpload } = require('../../Microservices');
+const validate = require('../../middlewares/validate');
+const documentValidation = require('../../validations/document.validation');
 
 const router = express.Router();
 router.post(
@@ -21,7 +23,7 @@ router.post(
   }
 );
 
-router.get('/view/:doctype', authdoctornonverified(), function (req, res) {
+router.get('/view/:doctype', validate(documentValidation.documentUrl),authdoctornonverified(),  function (req, res) {
   documentController.getUrl(req, res);
 });
 

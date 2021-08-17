@@ -7,8 +7,20 @@ const authdoctornonverified = require('../../middlewares/authDoctorNonVerified')
 const router = express.Router();
 
 router.route('/basic-details').get(authdoctornonverified(), DoctorProfileController.fetchbasicdetails);
-router.route('/basic-details').post(authdoctornonverified(), validate(DoctorProfileValidator.BasicDoctorDetails), DoctorProfileController.submitbasicdetails);
+router
+  .route('/basic-details')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.BasicDoctorDetails),
+    DoctorProfileController.submitbasicdetails
+  );
 
 router.route('/education-details').get(authdoctornonverified(), DoctorProfileController.fetcheducationdetails);
-router.route('/education-details').post(authdoctornonverified(), validate(DoctorProfileValidator.EducationDoctorDetails), DoctorProfileController.submiteducationdetails);
+router
+  .route('/education-details')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.EducationDoctorDetails),
+    DoctorProfileController.submiteducationdetails
+  );
 module.exports = router;

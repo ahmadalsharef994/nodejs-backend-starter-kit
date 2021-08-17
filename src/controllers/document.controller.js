@@ -48,6 +48,19 @@ const upload = async (req, res) => {
   }
 };
 
+const getUrl = async (req,res) => {
+  const Documenttype = req.params.doctype ;
+  const Authdata = await authService.getAuthById(req.SubjectId);
+  const Url = await documentService.signedUrl(Authdata, Documenttype);
+  if(Url !=false){
+    res.status(200).json({ documentUrl: Url});
+  }else{
+    res.status(400).json("Sorry, No Document Found");
+  }
+}
+
+
 module.exports = {
   upload,
+  getUrl
 };

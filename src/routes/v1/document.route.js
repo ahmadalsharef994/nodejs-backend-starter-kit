@@ -4,7 +4,10 @@ const authdoctornonverified = require('../../middlewares/authDoctorNonVerified')
 const { fileUpload } = require('../../Microservices');
 
 const router = express.Router();
-router.post('/upload', authdoctornonverified(), fileUpload.upload.fields([
+router.post(
+  '/upload',
+  authdoctornonverified(),
+  fileUpload.upload.fields([
     { name: 'resume', maxCount: 1 },
     { name: 'esign', maxCount: 1 },
     { name: 'medicalDegree', maxCount: 1 },
@@ -12,9 +15,14 @@ router.post('/upload', authdoctornonverified(), fileUpload.upload.fields([
     { name: 'aadharCardDoc', maxCount: 1 },
     { name: 'pancardDoc', maxCount: 1 },
     { name: 'ifsc', maxCount: 1 },
-  ]),function (req, res) {
+  ]),
+  function (req, res) {
     documentController.upload(req, res);
-  });
+  }
+);
 
+router.get('/view/:doctype', authdoctornonverified(), function (req, res) {
+  documentController.getUrl(req, res);
+});
 
 module.exports = router;

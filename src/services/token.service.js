@@ -67,7 +67,7 @@ const logoutdevice = async (authtoken) => {
  * @param {string} [secret]
  * @returns {string}
  */
- const generateAdminToken = (userId, expires, secret = config.jwt.secret) => {
+const generateAdminToken = (userId, expires, secret = config.jwt.secret) => {
   const payload = {
     sub: userId,
     iat: moment().unix(),
@@ -106,7 +106,7 @@ const generateDoctorToken = (userId, expires, secret = config.jwt.secret) => {
  * @param {string} [secret]
  * @returns {string}
  */
- const generateVerifiedDoctorToken = (userId, docId, expires, secret = config.jwt.secret) => {
+const generateVerifiedDoctorToken = (userId, docId, expires, secret = config.jwt.secret) => {
   const payload = {
     sub: userId,
     iat: moment().unix(),

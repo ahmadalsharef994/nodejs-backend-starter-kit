@@ -98,14 +98,13 @@ const deleteAuthById = async (authId) => {
  * @param {string} password
  * @returns {Promise<Auth>}
  */
- const loginAuthWithEmailAndPassword = async (email, password) => {
+const loginAuthWithEmailAndPassword = async (email, password) => {
   const user = await getAuthByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
   return user;
 };
-
 
 const changeAuthPassword = async (oldPassword, newPassword, token, SubjectId) => {
   const userdocs = await getAuthById(SubjectId);
@@ -127,7 +126,7 @@ const changeAuthPassword = async (oldPassword, newPassword, token, SubjectId) =>
 const resetPassword = async (email, resetcode, newPassword) => {
   const AuthData = await getAuthByEmail(email);
   const verification = await otpServices.verifyForgetPasswordOtp(resetcode, AuthData);
-  if(verification){
+  if (verification) {
     await updateAuthById(AuthData._id, { password: newPassword });
   }
 };

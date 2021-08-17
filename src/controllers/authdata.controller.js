@@ -19,7 +19,6 @@ const getAuthdata = catchAsync(async (req, res) => {
   res.send(user);
 });
 
-
 module.exports = {
   getAuthdatas,
   getAuthdata,

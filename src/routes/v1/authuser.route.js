@@ -13,7 +13,7 @@ router.post('/forgot-password', validate(authUserValidation.forgotPassword), aut
 router.post('/reset-password', validate(authUserValidation.resetPassword), authUserController.resetPassword);
 router.post('/send-verification-email', authuser(), authUserController.sendVerificationEmail);
 router.post('/verify-email', authuser(), validate(authUserValidation.verifyEmail), authUserController.verifyEmail);
-router.post('/change-password',authuser(), validate(authUserValidation.changepassword), authUserController.changePassword);
+router.post('/change-password', authuser(), validate(authUserValidation.changepassword), authUserController.changePassword);
 router.post('/request-otp', authuser(), authUserController.requestOtp);
 router.post('/verify-phone', authuser(), validate(authUserValidation.verifyPhone), authUserController.verifyPhone);
 router.post('/resend-otp', authuser(), authUserController.resendOtp);

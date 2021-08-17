@@ -48,17 +48,16 @@ const getSingedUrl = async (file) => {
     Key: file ,
     Expires: 60 * 60 * 5
   };
-
-  try {
+try {
     const url = await new Promise((resolve, reject) => {
       s3.getSignedUrl('getObject', params, (err, url) => {
         err ? reject(err) : resolve(url);
     });
   });
-    console.log(url)
+     return url 
   } catch (err) {
     if (err) {
-      console.log(err)
+      return url 
     }
   }
 }

@@ -15,7 +15,7 @@ const DoctorBasicSchema = mongoose.Schema(
     },
     languages: {
       type: Array,
-      default: "EN",
+      default: 'EN',
     },
     city: {
       type: String,

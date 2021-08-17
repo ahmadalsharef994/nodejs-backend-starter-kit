@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
+const { Strategy: ExtractJwt } = require('passport-jwt');
 const config = require('../config/config');
 const checkBanned = require('../utils/CheckBanned');
-const { Strategy: ExtractJwt } = require('passport-jwt');
 const SessionCheck = require('../utils/SessionCheck');
 
 const authdoctornonverified = () => async (req, res, next) => {
@@ -16,18 +16,18 @@ const authdoctornonverified = () => async (req, res, next) => {
     req.SubjectId = subid;
     const bancheck = await checkBanned(subid);
     const sessionbancheck = await SessionCheck(token);
-    if(bancheck.isbanned == true){
+    if (bancheck.isbanned == true) {
       res.status(401).json('You are Banned please reach support');
-    }else if(!bancheck.role.includes("doctor") || subidrole != "doctor"){
+    } else if (!bancheck.role.includes('doctor') || subidrole != 'doctor') {
       res.status(401).json('You dont have Access to these resources');
-    }else if(sessionbancheck == true){
+    } else if (sessionbancheck == true) {
       res.status(401).json('Session Expired Login Again');
-    }else{
+    } else {
       next();
     }
-  } catch (error) { 
+  } catch (error) {
     res.status(400).json('Invalid Request!');
-  };
-  };
+  }
+};
 
 module.exports = authdoctornonverified;

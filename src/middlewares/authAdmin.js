@@ -17,18 +17,18 @@ const authAdmin = () => async (req, res, next) => {
     req.SubjectId = subid;
     const bancheck = await checkBanned(subid);
     const sessionbancheck = await SessionCheck(token);
-    if(bancheck.isbanned == true){
+    if (bancheck.isbanned == true) {
       res.status(401).json('You are Banned please reach support');
-    }else if(!bancheck.role.includes("admin") || subidrole != "admin"){
+    } else if (!bancheck.role.includes('admin') || subidrole != 'admin') {
       res.status(401).json('You dont have Access to these resources');
-    }else if(sessionbancheck == true){
+    } else if (sessionbancheck == true) {
       res.status(401).json('Session Expired Login Again');
-    }else{
+    } else {
       next();
     }
-  } catch (error) { 
+  } catch (error) {
     res.status(400).json('Invalid Request!');
-  };
-  };
+  }
+};
 
 module.exports = authAdmin;

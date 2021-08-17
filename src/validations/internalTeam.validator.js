@@ -25,7 +25,6 @@ const loginadmin = {
   }),
 };
 
-
 module.exports = {
   verifydoctor,
   registeradmin,

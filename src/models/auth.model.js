@@ -15,7 +15,7 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      index:true,
+      index: true,
       lowercase: true,
       validate(value) {
         if (!validator.isEmail(value)) {
@@ -55,7 +55,7 @@ const userSchema = mongoose.Schema(
     isbanned: {
       type: Boolean,
       default: false,
-    }
+    },
   },
   {
     timestamps: true,

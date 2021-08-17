@@ -4,7 +4,7 @@ const { toJSON } = require('./plugins');
 const VerifiedDoctorsSchema = mongoose.Schema(
   {
     verifieddocid: {
-      type:String,
+      type: String,
       required: true,
       index: true,
     },

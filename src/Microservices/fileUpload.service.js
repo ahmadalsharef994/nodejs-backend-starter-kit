@@ -46,7 +46,7 @@ const getSingedUrl = async (file) => {
   const params = {
     Bucket: BUCKET_NAME ,
     Key: file ,
-    Expires: 60 * 60 * 5
+    Expires:60 * 5
   };
 try {
     const url = await new Promise((resolve, reject) => {

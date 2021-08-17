@@ -55,7 +55,7 @@ const getUrl = async (req,res) => {
   if(Url !=false){
     res.status(200).json({ documentUrl: Url});
   }else{
-    res.status(400).json("Sorry, No Document Found");
+    res.status(400).json("Sorry, Document Error");
   }
 }
 

@@ -6,6 +6,7 @@ const validate = require('../../middlewares/validate');
 const documentValidation = require('../../validations/document.validation');
 
 const router = express.Router();
+
 router.post(
   '/upload',
   authdoctornonverified(),
@@ -23,7 +24,7 @@ router.post(
   }
 );
 
-router.get('/view/:doctype', validate(documentValidation.documentUrl),authdoctornonverified(),  function (req, res) {
+router.get('/view/:doctype', validate(documentValidation.documentUrl), authdoctornonverified(),  function (req, res) {
   documentController.getUrl(req, res);
 });
 

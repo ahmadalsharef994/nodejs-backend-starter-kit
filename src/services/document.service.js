@@ -3,7 +3,7 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const fileUpload = require('../Microservices/fileUpload.service');
 
-const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {
+const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc,AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
   if (!DocDataExist) {
     // If doctor uploaded docx already exists
@@ -79,7 +79,7 @@ const signedUrl = async (Authdata, document) => {
       break;
     case 'ifsc':
       docUrl = await fileUpload.getSingedUrl(DocDataExist.ifsc);
-      break;
+      break; 
     default:
       // eslint-disable-next-line no-undef
       text = 'Document not Found';

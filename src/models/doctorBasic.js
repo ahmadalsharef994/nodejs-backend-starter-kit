@@ -7,7 +7,6 @@ const DoctorBasicSchema = mongoose.Schema(
     gender: {
       type: String,
       required: true,
-      default: null,
     },
     dob: {
       type: Date,
@@ -17,13 +16,21 @@ const DoctorBasicSchema = mongoose.Schema(
       type: Array,
       default: 'EN',
     },
-    city: {
+    state: {
       type: String,
+      required: true,
+    },
+    pin: {
+      type: Number,
       required: true,
     },
     isBasicDetailsVerified: {
       type: Boolean,
       default: false,
+    },
+    avatar:{
+      type: String,
+      default: null,
     },
     auth: {
       type: mongoose.Schema.Types.ObjectId,

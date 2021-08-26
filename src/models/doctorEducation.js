@@ -27,6 +27,18 @@ const DoctorEducationSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    registrationNo: {
+      type: Number,
+      required:true,
+    },
+    yearofRegistration: {
+      type: Number,
+      required: true,
+    },
+    stateMedicalCouncil: {
+      type: String,
+      required: true,
+    },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

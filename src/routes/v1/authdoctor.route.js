@@ -6,31 +6,17 @@ const authdoctornonverified = require('../../middlewares/authDoctorNonVerified')
 
 const router = express.Router();
 
-router.post('/register', validate(authDoctorValidation.registerdoctor), authDoctorController.register);
+router.post('/register', authDoctorController.register);
 router.post('/login', validate(authDoctorValidation.login), authDoctorController.login);
 router.post('/logout', validate(authDoctorValidation.logout), authDoctorController.logout); // Thinking to make it GET and Validated
 router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), authDoctorController.forgotPassword);
 router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassword);
 router.post('/send-verification-email', authdoctornonverified(), authDoctorController.sendVerificationEmail);
-router.post(
-  '/verify-email',
-  authdoctornonverified(),
-  validate(authDoctorValidation.verifyEmail),
-  authDoctorController.verifyEmail
-);
-router.post(
-  '/change-password',
-  authdoctornonverified(),
-  validate(authDoctorValidation.changepassword),
-  authDoctorController.changePassword
-);
+router.post('/change-email', authdoctornonverified(), authDoctorController.changeEmail);
+router.post('/verify-email', authdoctornonverified(), validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
+router.post('/change-password', authdoctornonverified(), validate(authDoctorValidation.changepassword), authDoctorController.changePassword );
 router.post('/request-otp', authdoctornonverified(), authDoctorController.requestOtp);
-router.post(
-  '/verify-phone',
-  authdoctornonverified(),
-  validate(authDoctorValidation.verifyPhone),
-  authDoctorController.verifyPhone
-);
+router.post('/verify-phone', authdoctornonverified(), validate(authDoctorValidation.verifyPhone), authDoctorController.verifyPhone );
 router.post('/resend-otp', authdoctornonverified(), authDoctorController.resendOtp);
 
 module.exports = router;

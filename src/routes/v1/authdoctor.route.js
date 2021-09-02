@@ -13,6 +13,7 @@ router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), a
 router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassword);
 router.post('/send-verification-email', authdoctornonverified(), authDoctorController.sendVerificationEmail);
 router.post('/change-email', authdoctornonverified(), authDoctorController.changeEmail);
+router.post('/change-phone', authdoctornonverified(), authDoctorController.changePhone);
 router.post('/verify-email', authdoctornonverified(), validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
 router.post('/change-password', authdoctornonverified(), validate(authDoctorValidation.changepassword), authDoctorController.changePassword );
 router.post('/request-otp', authdoctornonverified(), authDoctorController.requestOtp);

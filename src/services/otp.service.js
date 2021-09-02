@@ -85,6 +85,18 @@ const changeEmail = async (email, user) =>{
   throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already taken');
 }
 
+const changePhone = async (mobile, user) =>{
+  const authDataExist = await Auth.findOne({ mobile: mobile });
+  if (!authDataExist){
+    const checkemailveried = await Auth.findOne({ isMobileVerified: true })
+    if(checkemailveried == null){
+      const AuthDoc = await Auth.updateOne({ _id: user._id }, { $set: { mobile: mobile } });
+    }
+    return false;
+  }
+  throw new ApiError(httpStatus.BAD_REQUEST, 'Phone number is already taken');
+}
+
 
 
 module.exports = {
@@ -95,5 +107,6 @@ module.exports = {
   verifyForgetPasswordOtp,
   verifyPhoneOtp,
   resendOtp,
-  changeEmail
+  changeEmail,
+  changePhone
 };

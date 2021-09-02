@@ -74,7 +74,15 @@ const changeEmail = catchAsync(async (req, res) => {
   const result = await otpServices.changeEmail(req.body.email, AuthData);
   if(result != false){
   res.status(200).json('email is updated sucessfully');
-  }res.status(200).json('email is verified already');
+  }res.status(400).json('email is verified already');
+});
+
+const changePhone = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const result = await otpServices.changePhone(req.body.phone, AuthData);
+  if(result != false){
+  res.status(201).json('Phone is updated sucessfully');
+  }res.status(400).json('Phone is verified already');
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
@@ -112,6 +120,7 @@ module.exports = {
   sendVerificationEmail,
   verifyEmail,
   changeEmail,
+  changePhone,
   changePassword,
   requestOtp,
   verifyPhone,

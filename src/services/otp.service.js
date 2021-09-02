@@ -79,6 +79,7 @@ const changeEmail = async (email, user) =>{
     const checkemailveried = await Auth.findOne({ isEmailVerified: true })
     if(checkemailveried == null){
       const AuthDoc = await Auth.updateOne({ _id: user._id }, { $set: { email: email } });
+      return "Sucessfully Updated" ;
     }
     return false;
   }
@@ -91,6 +92,7 @@ const changePhone = async (mobile, user) =>{
     const checkemailveried = await Auth.findOne({ isMobileVerified: true })
     if(checkemailveried == null){
       const AuthDoc = await Auth.updateOne({ _id: user._id }, { $set: { mobile: mobile } });
+      return "Sucessfully Updated" ;
     }
     return false;
   }

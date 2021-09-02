@@ -1,6 +1,6 @@
 const { BAD_REQUEST } = require('http-status');
 const httpStatus = require('http-status');
-const { DoctorBasic, DoctorEducation, DoctorClinic } = require('../models');
+const { DoctorBasic, DoctorEducation, DoctorClinic, DoctorExperience } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const submitbasicdetails = async (BasicDetailBody, AuthData) => {
@@ -19,7 +19,7 @@ const submitprofilepicture = async (ProfilePhoto, AuthData) => {
     const avatarDoc = await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
     return "profile Picture updated";
   }
-s};
+};
 
 const fetchbasicdetails = async (AuthData) => {
   const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
@@ -28,7 +28,7 @@ const fetchbasicdetails = async (AuthData) => {
 
 const submiteducationdetails = async (EducationDetailBody, AuthData) => {
   const alreayExist = await fetcheducationdetails(AuthData);
-  if (!alreayExist) {
+  if (alreayExist == null) {
     EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
     const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
     return educationDetailDoc;
@@ -56,6 +56,24 @@ const fetchClinicdetails = async (AuthData) => {
   return DoctorClinicExist;
 };
 
+
+const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
+  const alreayExist = await fetchexperiencedetails(AuthData);
+  if (!alreayExist) {
+    ExperienceDetailBody.auth = AuthData; // Assign Reference to Req Body
+    const ExperienceDetailDoc = await DoctorExperience.create(ExperienceDetailBody);
+    return ExperienceDetailDoc;
+  }
+  throw new ApiError(BAD_REQUEST, 'Data Already Submitted');
+};
+
+const fetchexperiencedetails = async (AuthData) => {
+  const DoctorExperienceExist = await DoctorExperience.findOne({ auth: AuthData });
+  return DoctorExperienceExist;
+};
+
+
+
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -63,6 +81,8 @@ module.exports = {
   fetcheducationdetails,
   submitedClinicdetails,
   fetchClinicdetails,
-  submitprofilepicture
+  submitprofilepicture,
+  submitexperiencedetails,
+  fetchexperiencedetails
 
 };

@@ -41,11 +41,15 @@ const changePassword = catchAsync(async (req, res) => {
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
+  const service = req.body.choice ;
   const AuthData = await authService.getAuthByEmail(req.body.email);
   const OTP = generateOTP();
-  await emailService.sendResetPasswordEmail(req.body.email, OTP);
+  if(service == 'email'){
+    const result = await emailService.sendResetPasswordEmail(req.body.value, OTP);
+    res.status(200).json('Reset Code Sent to Registered EmailID');
+  }
   await otpServices.sendresetpassotp(OTP, AuthData);
-  res.status(200).json('Reset Code Sent to Registered EmailID');
+  
 });
 
 const resetPassword = catchAsync(async (req, res) => {

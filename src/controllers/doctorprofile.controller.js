@@ -43,6 +43,21 @@ const fetcheducationdetails = catchAsync(async (req, res) => {
   res.status(200).send(educationdata);
 });
 
+const submitexperiencedetails = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  await doctorprofileService.submitexperiencedetails(req.body, AuthData);
+  res.status(201).json('Experience Details Submitted!');
+});
+
+const fetchexperiencedetails = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const educationdata = await doctorprofileService.fetchexperiencedetails(AuthData);
+  if (!educationdata) {
+    throw new ApiError(BAD_REQUEST, 'Your OnBoarding is pending data submit');
+  }
+  res.status(200).send(educationdata);
+});
+
 const submitclinicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const resultData = await doctorprofileService.submitedClinicdetails(req.body, AuthData);
@@ -69,7 +84,9 @@ module.exports = {
   fetcheducationdetails,
   submitclinicdetails,
   fetchclinicdetails,
-  submitprofilepicture
+  submitprofilepicture,
+  submitexperiencedetails,
+  fetchexperiencedetails
   
   
 };

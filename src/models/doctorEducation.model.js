@@ -4,36 +4,13 @@ const Auth = require('./auth.model');
 
 const DoctorEducationSchema = mongoose.Schema(
   {
-    mainstream: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    speciality: {
-      type: Array,
-      required: true,
-      trim: true,
-    },
-    skills: {
-      type: Array,
-      required: true,
-      default: null,
-    },
-    experience: {
-      type: Number,
-      default: 0,
-    },
-    isEducationVerified: {
-      type: Boolean,
-      default: false,
-    },
     registrationNo: {
-      type: Number,
-      required:true,
+        type: Number,
+        required:true,
     },
     yearofRegistration: {
-      type: Number,
-      required: true,
+        type: Number,
+        required: true,
     },
     stateMedicalCouncil: {
       type: String,

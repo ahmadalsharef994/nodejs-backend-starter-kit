@@ -9,7 +9,11 @@ const doctorClinic = mongoose.Schema(
       required: true,
       default: null,
     },
-    ClinicAddress: {
+    AddressFirstline: {
+      type: String,
+      required: true,
+    },
+    AddressSecondline: {
       type: String,
       required: true,
     },
@@ -21,10 +25,6 @@ const doctorClinic = mongoose.Schema(
       type: Number,
       required: true,
     },
-    clinicTiming: {
-        type: Number,
-        required: true,
-      },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

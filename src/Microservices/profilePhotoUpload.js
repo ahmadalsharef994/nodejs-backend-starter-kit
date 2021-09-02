@@ -40,7 +40,9 @@ const publicupload = multer({
         cb(null, `${file.fieldname}/${uuid()}${ext}`);
       },
     }),
+    ContentType:"image/jpg",
     fileFilter,
+    acl:'public-read',
     limits: { fileSize: 100000000 },
 });
 

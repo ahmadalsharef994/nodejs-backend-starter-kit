@@ -26,7 +26,7 @@ router
   .route('/education-details')
   .post(
     authdoctornonverified(),
-    //validate(DoctorProfileValidator.EducationDoctorDetails),
+    validate(DoctorProfileValidator.EducationDoctorDetails),
     DoctorProfileController.submiteducationdetails
   );
 
@@ -35,7 +35,7 @@ router
     .route('/experience-details')
     .post(
       authdoctornonverified(),
-      //validate(DoctorProfileValidator.EducationDoctorDetails),
+      validate(DoctorProfileValidator.ExperienceDoctorDetails),
       DoctorProfileController.submitexperiencedetails
     );  
 
@@ -44,6 +44,7 @@ router
   .route('/clinic-details')
   .post(
     authdoctornonverified(),
+    validate(DoctorProfileValidator.ClinicDoctorDetails),
     DoctorProfileController.submitclinicdetails
   );
 

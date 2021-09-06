@@ -3,6 +3,7 @@ const authRouteDoctor = require('./authdoctor.route');
 const authRouteUser = require('./authuser.route');
 const doctorProfileRoute = require('./doctorprofile.route');
 const internalTeamRoute = require('./internalTeam.route');
+const appointmentPrefRoute = require('./appointmentpref.route');
 const document = require('./document.route');
 
 const router = express.Router();
@@ -31,6 +32,10 @@ const defaultRoutes = [
   {
     path: '/internalteam',
     route: internalTeamRoute, // Internal Team API
+  },
+  {
+    path: '/appointmentpref',
+    route: appointmentPrefRoute, // Appointment Pref API
   },
 ];
 

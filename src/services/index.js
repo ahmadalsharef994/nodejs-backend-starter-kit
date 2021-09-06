@@ -5,3 +5,4 @@ module.exports.doctorprofileService = require('./doctorprofile.service');
 module.exports.verifiedDoctorService = require('./verifiedDoctorService');
 module.exports.internalTeamService = require('./internalteam.service');
 module.exports.documentService = require('./document.service');
+module.exports.appointmentPrefService = require('./appointmentpref.service');

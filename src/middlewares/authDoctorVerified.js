@@ -15,6 +15,7 @@ const authdoctorverified = () => async (req, res, next) => {
     const docid = payload.docid;
     const subidrole = payload.role;
     req.SubjectId = subid;
+    console.log(docid);
     req.verifieddocid = docid;
     const bancheck = await checkBanned(subid);
     const sessionbancheck = await SessionCheck(token);
@@ -22,7 +23,7 @@ const authdoctorverified = () => async (req, res, next) => {
       res.status(401).json('You are Banned please reach support');
     } else if (!bancheck.role.includes('doctor') || subidrole != 'doctor') {
       res.status(401).json('You dont have Access to these resources');
-    } else if (docid == 'null' || docid == '') {
+    } else if (docid == 'null' || docid == undefined) {
       res.status(401).json('Your Verification is Awaited');
     } else if (sessionbancheck == true) {
       res.status(401).json('Session Expired Login Again');

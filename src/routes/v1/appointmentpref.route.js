@@ -5,8 +5,8 @@ const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const { appointmentPrefController } = require('../../controllers');
 
 router.post('/setpref', authdoctorverified(), appointmentPrefController.newpref);
-router.get('/getf', appointmentPrefController.showfollowups);
+router.get('/getf', authdoctorverified(), appointmentPrefController.showfollowups);
 router.get('/geta', appointmentPrefController.showpappointments);
-router.put('/updatepref', appointmentPrefController.changepref);
+router.put('/updatepref', authdoctorverified(), appointmentPrefController.changepref);
 
 module.exports = router;

@@ -3,74 +3,75 @@ const { toJSON } = require('./plugins');
 
 const AppointmentPrefSchema = mongoose.Schema(
   {
-    _id: { //verifieddocid
+    _id: {
       type: String,
       required: true,
       default: null,
     },
     MON_A: {
       type: Array,
-      default: null
+      default: null,
     },
     TUE_A: {
       type: Array,
-      default: null
+      default: null,
     },
     WED_A: {
       type: Array,
-      default: null
+      default: null,
     },
     THU_A: {
       type: Array,
-      default: null
+      default: null,
     },
     FRI_A: {
       type: Array,
-      default: null
+      default: null,
     },
     SAT_A: {
       type: Array,
-      default: null
+      default: null,
     },
     SUN_A: {
       type: Array,
-      default: null
+      default: null,
     },
     MON_F: {
       type: Array,
-      default: null
+      default: null,
     },
     TUE_F: {
       type: Array,
-      default: null
+      default: null,
     },
     WED_F: {
       type: Array,
-      default: null
+      default: null,
     },
     THU_F: {
       type: Array,
-      default: null
+      default: null,
     },
     FRI_F: {
       type: Array,
-      default: null
+      default: null,
     },
     SAT_F: {
       type: Array,
-      default: null
+      default: null,
     },
     SUN_F: {
       type: Array,
-      default: null
-    }
+      default: null,
+    },
   },
   {
-    versionKey: false, timestamps: true, _id: false
+    versionKey: false,
+    timestamps: true,
+    _id: false,
   }
 );
 
-// add plugin that converts mongoose to json
 AppointmentPrefSchema.plugin(toJSON);
 
 const AppointmentPref = mongoose.model('AppointmentPref', AppointmentPrefSchema);

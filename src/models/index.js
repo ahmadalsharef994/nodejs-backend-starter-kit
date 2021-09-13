@@ -6,4 +6,4 @@ module.exports.DoctorBasic = require('./doctorBasic');
 module.exports.DoctorEducation = require('./doctorEducation');
 module.exports.VerifiedDoctors = require('./verifieddoctor');
 module.exports.Document = require('./document.model');
-module.exports.AppointmentPref = require('./appointmentpref.model');
+module.exports.AppointmentPreference = require('./appointmentPreference.model');

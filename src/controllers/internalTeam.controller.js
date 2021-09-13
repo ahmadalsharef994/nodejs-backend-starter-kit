@@ -1,5 +1,4 @@
 const httpStatus = require('http-status');
-const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const { authService, verifiedDoctorService, tokenService } = require('../services');
@@ -11,7 +10,7 @@ const verifydoctor = catchAsync(async (req, res) => {
 });
 
 const registeradmin = catchAsync(async (req, res) => {
-  if (req.headers.secretadminkey != process.env.secretadminkey || req.headers.secretadminkey == '') {
+  if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
       400,
       'Alarm Triggered! Suspected Activity Detected 🧐reach at security@medzgo.com 😒kyu bhai kya haal he Admin banega woh bhi bina permission? 😂'
@@ -28,7 +27,7 @@ const registeradmin = catchAsync(async (req, res) => {
 });
 
 const loginadmin = catchAsync(async (req, res) => {
-  if (req.headers.secretadminkey != process.env.secretadminkey || req.headers.secretadminkey == '') {
+  if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
       400,
       'Alarm Triggered! Suspected Activity Detected 🧐reach at security@medzgo.com 😒kyu bhai kya haal he Admin banega woh bhi bina permission? 😂'

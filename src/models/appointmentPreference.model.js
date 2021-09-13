@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 
-const AppointmentPrefSchema = mongoose.Schema(
+const AppointmentPreferenceSchema = mongoose.Schema(
   {
     MON_A: {
       type: Array,
@@ -70,7 +70,12 @@ const AppointmentPrefSchema = mongoose.Schema(
   }
 );
 
-AppointmentPrefSchema.plugin(toJSON);
+// add plugin that converts mongoose to json
+AppointmentPreferenceSchema.plugin(toJSON);
 
-const AppointmentPref = mongoose.model('AppointmentPref', AppointmentPrefSchema);
-module.exports = AppointmentPref;
+/**
+ * @typedef AppointmentPreference
+ */
+const AppointmentPreference = mongoose.model('AppointmentPreference', AppointmentPreferenceSchema);
+
+module.exports = AppointmentPreference;

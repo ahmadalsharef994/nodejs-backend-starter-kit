@@ -3,11 +3,6 @@ const { toJSON } = require('./plugins');
 
 const AppointmentPrefSchema = mongoose.Schema(
   {
-    _id: {
-      type: String,
-      required: true,
-      default: null,
-    },
     MON_A: {
       type: Array,
       default: null,
@@ -64,11 +59,14 @@ const AppointmentPrefSchema = mongoose.Schema(
       type: Array,
       default: null,
     },
+    verifieddocid: {
+      type: String,
+      required: true,
+      index: true,
+    },
   },
   {
-    versionKey: false,
     timestamps: true,
-    _id: false,
   }
 );
 

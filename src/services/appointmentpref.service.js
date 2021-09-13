@@ -1,5 +1,7 @@
 const randomstring = require('randomstring');
+const { AppointmentPref } = require('../models');
 const Appointment = require('../models/appointmentpref.model');
+const ApiError = require('../utils/ApiError');
 
 /**
  * Create a Slot
@@ -20,11 +22,12 @@ const createSlots = (startTime, day, docId, numberOfSlots) => {
   let FromMins = startTime.FromMinute;
   let ToHr = startTime.FromHour;
   let ToMins = startTime.FromMinute;
-  const incrementer = 15;
+  let incrementer = 15;
 
   for (let i = 0; i < numberOfSlots; i += 1) {
     if (!noOfA) {
       typeAF = 'F';
+      incrementer = 10;
     }
     ToMins = (FromMins + incrementer) % 60 ? FromMins + incrementer : 0;
     ToHr = ToMins === 0 ? ToHr + 1 : ToHr;
@@ -69,7 +72,39 @@ const calculateDuration = (timeObj) => {
   return totalTime;
 };
 
-const setpref = (body, doctorID, update = false) => {
+const createPrefSlots = async (body, doctorID, update = false) => {
+  const alreayExist = await checkPreferenceSlot(doctorID);
+  if (!alreayExist) {
+    const days = Object.keys(body);
+    const noOfSlots = [];
+    for (let i = 0; i < days.length; i += 1) {
+      noOfSlots.push(calculateDuration(body[days[i]]));
+    }
+    const daysAndSlots = {};
+    days.forEach((day, i) => {
+      daysAndSlots[day] = noOfSlots[i];
+    });
+
+    console.log(daysAndSlots.MON);
+    let minutesOfA = Math.floor((daysAndSlots.MON / 4) * 3);
+    let minutesOfF = daysAndSlots.MON - minutesOfA;
+    console.log(Math.floor(minutesOfA / 15));
+    console.log(Math.floor(minutesOfF / 10));
+    
+// 115 = 86.25 , 28.75
+
+    const appointmentslotdata = await VerifiedDoctors.create({ verifiedby: AuthData._id, docid: docId });
+    return appointmentslotdata;
+  }
+  throw new ApiError(400, 'Appointment Slots already added please Update');
+};
+
+const checkPreferenceSlot = async (doctorID) => {
+  const SlotsExist = await AppointmentPref.findOne({ verifieddocid: doctorID });
+  return SlotsExist;
+};
+
+const setpref = async (body, doctorID, update = false) => {
   const result = {};
   const days = Object.keys(body);
 
@@ -106,10 +141,13 @@ const setpref = (body, doctorID, update = false) => {
 
   if (!update) {
     result._id = doctorID;
-    Appointment.create(result);
+    console.log(result);
+    await Appointment.create(result);
   }
   return result;
 };
+
+
 
 const updatepref = async (body, docId) => {
   const promise = await Appointment.findOneAndUpdate(
@@ -143,6 +181,7 @@ const getappointments = async () => {
 };
 
 module.exports = {
+  createPrefSlots,
   setpref,
   getfollowups,
   getappointments,

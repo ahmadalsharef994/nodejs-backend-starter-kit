@@ -1,4 +1,13 @@
 const { appointmentPrefService } = require('../services');
+const catchAsync = require('../utils/catchAsync');
+
+
+const submitDoctorAppointmentPref = catchAsync(async (req, res) => {
+  const preferenceData = await appointmentPrefService.setpref(req.body, req.verifieddocid);
+  res.status(201).json(preferenceData);
+});
+
+
 
 const newpref = (req, res) => {
   const result = appointmentPrefService.setpref(req.body, req.verifieddocid);
@@ -35,4 +44,5 @@ module.exports = {
   showfollowups,
   showpappointments,
   changepref,
+  submitDoctorAppointmentPref,
 };

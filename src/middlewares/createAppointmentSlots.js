@@ -5,7 +5,7 @@ const randomstring = require('randomstring');
  * @param {Object} startTime : {FromHour: 5, FromMinute: 45} //24hr format
  * @param {String} day : "MON"
  * @param {String} docId : "verifieddocid"
- * @param {Number} numberOfSlots : 4
+ * @param {Number} numberOfSlots
  * @returns {Promise<Auth>}
  */
 

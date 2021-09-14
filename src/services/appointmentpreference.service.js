@@ -3,13 +3,20 @@ const createSlots = require('../middlewares/createAppointmentSlots');
 
 /**
  * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"FromMeridian": 1,"ToHour": 2,"ToMinutes": 0,"ToMeridian": 0} //12hr format
+ * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"ToHour": 2,"ToMinutes": 0 } //24hr format
  * @returns {Object} totalTime
  */
 
 const calculateDuration = async (timeObj) => {
+  /* converts incoming obj to 24hr format if it is in 12hr format
   const startTimeHour = timeObj.FromMeridian === 1 ? (timeObj.FromHour + 12) % 24 : timeObj.FromHour;
   const startTimeMinute = timeObj.FromMinutes;
   const endTimeHour = timeObj.ToMeridian === 1 ? (timeObj.ToHour + 12) % 24 : timeObj.ToHour;
+  const endTimeMinute = timeObj.ToMinutes; 
+  */
+  const startTimeHour = timeObj.FromHour;
+  const startTimeMinute = timeObj.FromMinutes;
+  const endTimeHour = timeObj.ToHour;
   const endTimeMinute = timeObj.ToMinutes;
   let totalTime =
     startTimeMinute <= endTimeMinute
@@ -27,7 +34,7 @@ const checkPreference = async (doctorID) => {
 const createPreference = async (body, doctorID, update = false) => {
   const alreadyExist = await checkPreference(doctorID);
   if (alreadyExist && !update) {
-    return 'Appointment Slots already added please Update';
+    return 'Appointment Slots already exist please Update them!';
   }
 
   const result = {};
@@ -47,8 +54,11 @@ const createPreference = async (body, doctorID, update = false) => {
   const slots = [];
   // creating slots for each day
   for (let i = 0; i < days.length; i += 1) {
-    // converting 12hr to 24hr
+    /* converting 12hr to 24hr if input is in 12hr format
     const startHr = body[days[i]].FromMeridian === 1 ? (body[days[i]].FromHour + 12) % 24 : body[days[i]].FromHour;
+    const startMin = body[days[i]].FromMinutes;
+    */
+    const startHr = body[days[i]].FromHour;
     const startMin = body[days[i]].FromMinutes;
     // eslint-disable-next-line no-await-in-loop
     const element = await createSlots({ FromHour: startHr, FromMinute: startMin }, days[i], doctorID, daysAndSlots[days[i]]);

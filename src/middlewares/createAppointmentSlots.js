@@ -9,7 +9,7 @@ const randomstring = require('randomstring');
  * @returns {Promise<Auth>}
  */
 
-const createAppointmentSlots = async (startTime, day, docId, numberOfSlots) => {
+const createSlots = async (startTime, day, docId, numberOfSlots) => {
   let typeAF = 'A';
   // calculate no. of A 3:1 ratio
   let noOfA = Math.floor((numberOfSlots / 4) * 3);
@@ -49,4 +49,32 @@ const createAppointmentSlots = async (startTime, day, docId, numberOfSlots) => {
   return [slotA, slotF];
 };
 
-module.exports = createAppointmentSlots;
+/**
+ * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"FromMeridian": 1,"ToHour": 2,"ToMinutes": 0,"ToMeridian": 0} //12hr format
+ * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"ToHour": 2,"ToMinutes": 0 } //24hr format
+ * @returns {Object} totalTime
+ */
+
+const calculateDuration = async (timeObj) => {
+  /* converts incoming obj to 24hr format if it is in 12hr format
+  const startTimeHour = timeObj.FromMeridian === 1 ? (timeObj.FromHour + 12) % 24 : timeObj.FromHour;
+  const startTimeMinute = timeObj.FromMinutes;
+  const endTimeHour = timeObj.ToMeridian === 1 ? (timeObj.ToHour + 12) % 24 : timeObj.ToHour;
+  const endTimeMinute = timeObj.ToMinutes; 
+  */
+  const startTimeHour = timeObj.FromHour;
+  const startTimeMinute = timeObj.FromMinutes;
+  const endTimeHour = timeObj.ToHour;
+  const endTimeMinute = timeObj.ToMinutes;
+  let totalTime =
+    startTimeMinute <= endTimeMinute
+      ? (endTimeHour - startTimeHour) * 60 + (endTimeMinute - startTimeMinute)
+      : (endTimeHour - 1 - startTimeHour) * 60 + (endTimeMinute + 60 - startTimeMinute);
+  totalTime = totalTime > 0 ? totalTime : 1440 + totalTime;
+  return totalTime;
+};
+
+module.exports = {
+  createSlots,
+  calculateDuration,
+};

@@ -5,14 +5,15 @@ const randomstring = require('randomstring');
  * @param {Object} startTime : {FromHour: 5, FromMinute: 45} //24hr format
  * @param {String} day : "MON"
  * @param {String} docId : "verifieddocid"
- * @param {Number} numberOfSlots
+ * @param {Number} duration
  * @returns {Promise<Auth>}
  */
 
-const createSlots = async (startTime, day, docId, numberOfSlots) => {
+const createSlots = async (startTime, day, docId, duration) => {
   let typeAF = 'A';
-  // calculate no. of A 3:1 ratio
-  let noOfA = Math.floor((numberOfSlots / 4) * 3);
+  // 3:1 ratio
+  let noOfA = Math.round(duration / 20);
+  const totalSlots = noOfA + Math.round(duration / 40);
   const slotA = [];
   const slotF = [];
   let FromHr = startTime.FromHour;
@@ -21,7 +22,7 @@ const createSlots = async (startTime, day, docId, numberOfSlots) => {
   let ToMins = startTime.FromMinute;
   let incrementer = 15;
 
-  for (let i = 0; i < numberOfSlots; i += 1) {
+  for (let i = 0; i < totalSlots; i += 1) {
     if (!noOfA) {
       typeAF = 'F';
       incrementer = 10;
@@ -35,7 +36,7 @@ const createSlots = async (startTime, day, docId, numberOfSlots) => {
     ToHr %= 24;
     // console.log(ToMins, "  mins  ", ToHr, " hr")
     const slot = {};
-    slot.slotId = [typeAF, day, docId, randomstring.generate(6).toUpperCase()].join('-');
+    slot.slotId = [typeAF, day, docId, i + 1 + randomstring.generate(6).toUpperCase()].join('-');
     slot.FromHour = FromHr;
     slot.FromMinutes = FromMins + 1;
     slot.ToHour = ToHr;

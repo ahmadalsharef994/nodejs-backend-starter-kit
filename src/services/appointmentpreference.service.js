@@ -1,13 +1,8 @@
 const AppointmentPreference = require('../models/appointmentPreference.model');
-const { createSlots, calculateDuration } = require('../middlewares/createAppointmentSlots');
-
-const checkPreference = async (doctorID) => {
-  const PreferenceExist = await AppointmentPreference.findOne({ verifieddocid: doctorID });
-  return PreferenceExist;
-};
+const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 
 const createPreference = async (body, doctorID, update = false) => {
-  const alreadyExist = await checkPreference(doctorID);
+  const alreadyExist = await AppointmentPreference.findOne({ verifieddocid: doctorID });
   if (alreadyExist && !update) {
     return 'Appointment Slots already exist please Update them!';
   }
@@ -15,15 +10,15 @@ const createPreference = async (body, doctorID, update = false) => {
   const result = {};
   const days = Object.keys(body);
 
-  const noOfSlots = [];
+  const durations = [];
   for (let i = 0; i < days.length; i += 1) {
     // eslint-disable-next-line no-await-in-loop
-    noOfSlots.push((await calculateDuration(body[days[i]])) / 15);
+    durations.push(await calculateDuration(body[days[i]]));
   }
 
-  const daysAndSlots = {};
+  const daysAndDurations = {};
   days.forEach((day, i) => {
-    daysAndSlots[day] = noOfSlots[i];
+    daysAndDurations[day] = durations[i];
   });
 
   const slots = [];
@@ -36,7 +31,12 @@ const createPreference = async (body, doctorID, update = false) => {
     const startHr = body[days[i]].FromHour;
     const startMin = body[days[i]].FromMinutes;
     // eslint-disable-next-line no-await-in-loop
-    const element = await createSlots({ FromHour: startHr, FromMinute: startMin }, days[i], doctorID, daysAndSlots[days[i]]);
+    const element = await createSlots(
+      { FromHour: startHr, FromMinute: startMin },
+      days[i],
+      doctorID,
+      daysAndDurations[days[i]]
+    );
     slots.push(element);
   }
 

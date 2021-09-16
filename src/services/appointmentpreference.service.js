@@ -1,10 +1,11 @@
 const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
+const ApiError = require('../utils/ApiError');
 
 const createPreference = async (body, doctorID, update = false) => {
   const alreadyExist = await AppointmentPreference.findOne({ verifieddocid: doctorID });
   if (alreadyExist && !update) {
-    return 'Appointment Slots already exist please Update them!';
+    return Promise.reject(new ApiError(500, 'Appointment Slots already exist please Update them!'));
   }
 
   const result = {};
@@ -14,6 +15,14 @@ const createPreference = async (body, doctorID, update = false) => {
   for (let i = 0; i < days.length; i += 1) {
     // eslint-disable-next-line no-await-in-loop
     durations.push(await calculateDuration(body[days[i]]));
+  }
+
+  const isvalid = durations.every((duration) => {
+    return !(duration % 40) && duration >= 120;
+  });
+
+  if (!isvalid) {
+    return false;
   }
 
   const daysAndDurations = {};
@@ -60,6 +69,9 @@ const createPreference = async (body, doctorID, update = false) => {
 
 const updatePreference = async (body, doctorId) => {
   const result = await createPreference(body, doctorId, true);
+  if (result === false) {
+    return Promise.reject(new ApiError(500, 'All Durations should be multiple of 40 and atleast 120'));
+  }
   const promise = await AppointmentPreference.findOneAndUpdate(
     { verifieddocid: doctorId },
     result,

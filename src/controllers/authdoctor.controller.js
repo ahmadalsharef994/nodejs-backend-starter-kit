@@ -20,7 +20,7 @@ const login = catchAsync(async (req, res) => {
   const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   if (verifiedcheckData) {
-    var authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.verifieddocid);
+    var authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.Docid);
   } else {
     var authtoken = await tokenService.generateDoctorToken(AuthData.id);
   }

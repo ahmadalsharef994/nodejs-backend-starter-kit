@@ -4,7 +4,7 @@ const randomstring = require('randomstring');
  * Create a Slot
  * @param {Object} startTime : {FromHour: 5, FromMinute: 45} //24hr format
  * @param {String} day : "MON"
- * @param {String} docId : "verifieddocid"
+ * @param {String} docId : "docid"
  * @param {Number} duration
  * @returns {Promise<Auth>}
  */

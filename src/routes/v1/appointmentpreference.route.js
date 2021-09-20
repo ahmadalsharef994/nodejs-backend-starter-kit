@@ -11,13 +11,13 @@ router.put(
   '/updateappointmentpreference',
   authdoctorverified(),
   validate(preferenceValidator.PreferenceDetails),
-  appointmentPreferenceController.updateAppointmentPreference // ValidationRequired
+  appointmentPreferenceController.updateAppointmentPref // ValidationRequired
 );
 router.post(
   '/submitappointmentpreference',
   authdoctorverified(),
   validate(preferenceValidator.PreferenceDetails),
-  appointmentPreferenceController.submitAppointmentPreference // ValidationRequired
+  appointmentPreferenceController.submitAppointmentPref // ValidationRequired
 );
 router.post('/getdoctorappointments', appointmentPreferenceController.showappointments);
 

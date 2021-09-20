@@ -1,3 +1,4 @@
+const httpStatus = require('http-status');
 const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
@@ -5,7 +6,12 @@ const ApiError = require('../utils/ApiError');
 const createPreference = async (body, doctorID, update = false) => {
   const alreadyExist = await AppointmentPreference.findOne({ verifieddocid: doctorID });
   if (alreadyExist && !update) {
-    return Promise.reject(new ApiError(500, 'Appointment Slots already exist please Update them!'));
+    return Promise.reject(
+      new ApiError(
+        httpStatus.FORBIDDEN,
+        'Appointment preference already exist!. If you wish to make any changes in your preference please update them instead!'
+      )
+    );
   }
 
   const result = {};
@@ -17,12 +23,17 @@ const createPreference = async (body, doctorID, update = false) => {
     durations.push(await calculateDuration(body[days[i]]));
   }
 
-  const isvalid = durations.every((duration) => {
+  const validDurations = durations.every((duration) => {
     return !(duration % 40) && duration >= 120;
   });
 
-  if (!isvalid) {
-    return false;
+  if (!validDurations) {
+    return Promise.reject(
+      new ApiError(
+        httpStatus.FORBIDDEN,
+        'Difference between "Start Time" and "End Time" should be multiple of 40 and atleast 120'
+      )
+    );
   }
 
   const daysAndDurations = {};
@@ -69,9 +80,6 @@ const createPreference = async (body, doctorID, update = false) => {
 
 const updatePreference = async (body, doctorId) => {
   const result = await createPreference(body, doctorId, true);
-  if (result === false) {
-    return Promise.reject(new ApiError(500, 'All Durations should be multiple of 40 and atleast 120'));
-  }
   const promise = await AppointmentPreference.findOneAndUpdate(
     { verifieddocid: doctorId },
     result,
@@ -94,9 +102,9 @@ const getfollowups = async (doctorId) => {
   return promise;
 };
 
-const getappointments = async () => {
-  const promise = await AppointmentPreference.find(
-    {},
+const getappointments = async (doctorId) => {
+  const promise = await AppointmentPreference.findOne(
+    { verifieddocid: doctorId },
     { MON_A: 1, TUE_A: 1, WED_A: 1, THU_A: 1, FRI_A: 1, SAT_A: 1, SUN_A: 1, verifieddocid: 1 }
   );
   return promise;

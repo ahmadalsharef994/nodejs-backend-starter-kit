@@ -14,8 +14,10 @@ const BUCKET_NAME = process.env.BUCKET;
 
 const s3 = new AWS.S3({
   accessKeyId: ID,
+  region:'us-east-2',
   secretAccessKey: SECRET,
   bucket: BUCKET_NAME,
+  signatureVersion: 'v4',
 });
 
 const fileFilter = (req, file, cb) => {
@@ -46,10 +48,12 @@ const getSingedUrl = async (file) => {
   const params = {
     Bucket: BUCKET_NAME ,
     Key: file ,
-    Expires: 60 * 60 * 5
+    Expires:60 * 5,
+    ResponseContentDisposition:'inline',
+    
   };
 try {
-    const url = await new Promise((resolve, reject) => {
+    var url = await new Promise((resolve, reject) => {
       s3.getSignedUrl('getObject', params, (err, url) => {
         err ? reject(err) : resolve(url);
     });
@@ -57,14 +61,14 @@ try {
      return url 
   } catch (err) {
     if (err) {
-      return url 
+      return err
     }
   }
 }
 
 
-
 module.exports = {
   upload,
-  getSingedUrl
+  getSingedUrl,
+  
 };

@@ -2,35 +2,28 @@ const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 const Auth = require('./auth.model');
 
-const DoctorBasicSchema = mongoose.Schema(
+const doctorClinic = mongoose.Schema(
   {
-    gender: {
+    clinicName: {
+      type: String,
+      required: true,
+      default: null,
+    },
+    AddressFirstline: {
       type: String,
       required: true,
     },
-    dob: {
-      type: Date,
+    AddressSecondline: {
+      type: String,
       required: true,
     },
-    languages: {
-      type: Array,
-      default: 'EN',
-    },
-    state: {
-      type: String,
+    clinicTelephone: {
+      type: Number,
       required: true,
     },
     pin: {
       type: Number,
       required: true,
-    },
-    isBasicDetailsVerified: {
-      type: Boolean,
-      default: false,
-    },
-    avatar:{
-      type: String,
-      default: null,
     },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
@@ -43,11 +36,11 @@ const DoctorBasicSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-DoctorBasicSchema.plugin(toJSON);
+doctorClinic.plugin(toJSON);
 
 /**
- * @typedef DoctorBasic
+ * @typedef DoctorClinic
  */
-const DoctorBasic = mongoose.model('DoctorBasic', DoctorBasicSchema);
+const DoctorClinic = mongoose.model('DoctorClinic', doctorClinic);
 
-module.exports = DoctorBasic;
+module.exports = DoctorClinic;

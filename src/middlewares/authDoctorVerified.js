@@ -15,7 +15,7 @@ const authdoctorverified = () => async (req, res, next) => {
     const docid = payload.docid;
     const subidrole = payload.role;
     req.SubjectId = subid;
-    req.verifieddocid = docid;
+    req.Docid = docid;
     const bancheck = await checkBanned(subid);
     const sessionbancheck = await SessionCheck(token);
     if (bancheck.isbanned == true) {

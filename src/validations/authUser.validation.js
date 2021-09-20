@@ -35,7 +35,9 @@ const changepassword = {
 
 const forgotPassword = {
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
+    choice: Joi.string().required().valid('email', 'phone'),
+    email: Joi.string().email().when('choice', {is: 'email', then: Joi.required()}),
+    phone: Joi.number().when('choice', {is: 'phone', then: Joi.required()}),
   }),
 };
 

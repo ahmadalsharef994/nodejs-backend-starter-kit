@@ -70,9 +70,36 @@ const resendOtp = async (OTP, user) => {
     const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { phoneVerify: OTP } });
     return OtpDoc;
   }
-
   throw new ApiError(httpStatus.BAD_REQUEST, 'You are being Monitored');
 };
+
+const changeEmail = async (email, user) =>{
+  const authDataExist = await Auth.findOne({ email: email });
+  if (!authDataExist){
+    const checkemailveried = await Auth.findOne({ isEmailVerified: true })
+    if(checkemailveried == null){
+      const AuthDoc = await Auth.updateOne({ _id: user._id }, { $set: { email: email } });
+      return "Sucessfully Updated" ;
+    }
+    return false;
+  }
+  throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already taken');
+}
+
+const changePhone = async (mobile, user) =>{
+  const authDataExist = await Auth.findOne({ mobile: mobile });
+  if (!authDataExist){
+    const checkemailveried = await Auth.findOne({ isMobileVerified: true })
+    if(checkemailveried == null){
+      const AuthDoc = await Auth.updateOne({ _id: user._id }, { $set: { mobile: mobile } });
+      return "Sucessfully Updated" ;
+    }
+    return false;
+  }
+  throw new ApiError(httpStatus.BAD_REQUEST, 'Phone number is already taken');
+}
+
+
 
 module.exports = {
   sendphoneverifyotp,
@@ -82,4 +109,6 @@ module.exports = {
   verifyForgetPasswordOtp,
   verifyPhoneOtp,
   resendOtp,
+  changeEmail,
+  changePhone
 };

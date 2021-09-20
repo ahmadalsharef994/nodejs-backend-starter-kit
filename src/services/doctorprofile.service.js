@@ -1,16 +1,24 @@
 const { BAD_REQUEST } = require('http-status');
 const httpStatus = require('http-status');
-const { DoctorBasic, DoctorEducation } = require('../models');
+const { DoctorBasic, DoctorEducation, DoctorClinic, DoctorExperience } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const submitbasicdetails = async (BasicDetailBody, AuthData) => {
-  const alreayExist = await fetchbasicdetails(AuthData);
-  if (!alreayExist) {
+  const alreadyExist = await fetchbasicdetails(AuthData);
+  if (!alreadyExist) {
     BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
     const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
     return basicDetailDoc;
   }
-  throw new ApiError(BAD_REQUEST, 'Data Already Submitted');
+  return false;
+};
+
+const submitprofilepicture = async (ProfilePhoto, AuthData) => {
+  const alreadyExist = await fetchbasicdetails(AuthData);
+  if (alreadyExist) {
+    const avatarDoc = await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
+    return "profile Picture updated";
+  }
 };
 
 const fetchbasicdetails = async (AuthData) => {
@@ -20,7 +28,7 @@ const fetchbasicdetails = async (AuthData) => {
 
 const submiteducationdetails = async (EducationDetailBody, AuthData) => {
   const alreayExist = await fetcheducationdetails(AuthData);
-  if (!alreayExist) {
+  if (alreayExist == null) {
     EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
     const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
     return educationDetailDoc;
@@ -33,9 +41,48 @@ const fetcheducationdetails = async (AuthData) => {
   return DoctorEducationExist;
 };
 
+const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
+  const alreayExist = await fetchClinicdetails(AuthData);
+  if (!alreayExist) {
+    ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
+    const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
+    return clinicDetailDoc;
+  }
+  throw new ApiError(BAD_REQUEST, 'Data Already Submitted');
+};
+
+const fetchClinicdetails = async (AuthData) => {
+  const DoctorClinicExist = await DoctorClinic.findOne({ auth: AuthData });
+  return DoctorClinicExist;
+};
+
+
+const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
+  const alreayExist = await fetchexperiencedetails(AuthData);
+  if (!alreayExist) {
+    ExperienceDetailBody.auth = AuthData; // Assign Reference to Req Body
+    const ExperienceDetailDoc = await DoctorExperience.create(ExperienceDetailBody);
+    return ExperienceDetailDoc;
+  }
+  throw new ApiError(BAD_REQUEST, 'Data Already Submitted');
+};
+
+const fetchexperiencedetails = async (AuthData) => {
+  const DoctorExperienceExist = await DoctorExperience.findOne({ auth: AuthData });
+  return DoctorExperienceExist;
+};
+
+
+
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
   submiteducationdetails,
   fetcheducationdetails,
+  submitedClinicdetails,
+  fetchClinicdetails,
+  submitprofilepicture,
+  submitexperiencedetails,
+  fetchexperiencedetails
+
 };

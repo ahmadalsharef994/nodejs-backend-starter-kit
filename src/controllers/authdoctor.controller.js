@@ -45,11 +45,15 @@ const changePassword = catchAsync(async (req, res) => {
 });
 
 const forgotPassword = catchAsync(async (req, res) => {
+  const service = req.body.choice ;
   const AuthData = await authService.getAuthByEmail(req.body.email);
   const OTP = generateOTP();
-  await emailService.sendResetPasswordEmail(req.body.email, OTP);
+  if(service == 'email'){
+    const result = await emailService.sendResetPasswordEmail(req.body.value, OTP);
+    res.status(200).json('Reset Code Sent to Registered EmailID');
+  }
   await otpServices.sendresetpassotp(OTP, AuthData);
-  res.status(200).json('Reset Code Sent to Registered EmailID');
+  
 });
 
 const resetPassword = catchAsync(async (req, res) => {
@@ -63,6 +67,22 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   await emailService.sendVerificationEmail(AuthData.email, OTP);
   await otpServices.sendemailverifyotp(OTP, AuthData);
   res.status(200).json('Enter OTP sent over Email');
+});
+
+const changeEmail = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const result = await otpServices.changeEmail(req.body.email, AuthData);
+  if(result != false){
+  res.status(200).json('email is updated sucessfully');
+  }res.status(400).json('email is verified already');
+});
+
+const changePhone = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const result = await otpServices.changePhone(req.body.phone, AuthData);
+  if(result != false){
+  res.status(201).json('Phone is updated sucessfully');
+  }res.status(400).json('Phone is verified already');
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
@@ -99,6 +119,8 @@ module.exports = {
   resetPassword,
   sendVerificationEmail,
   verifyEmail,
+  changeEmail,
+  changePhone,
   changePassword,
   requestOtp,
   verifyPhone,

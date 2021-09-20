@@ -81,6 +81,6 @@ AppointmentPrefSchema.plugin(toJSON);
 /**
  * @typedef AppointmentPref
  */
-const AppointmentPref = mongoose.model('AppointmentPref', AppointmentPrefSchema);
+const AppointmentPreference = mongoose.model('AppointmentPreference', AppointmentPrefSchema);
 
-module.exports = AppointmentPref;
+module.exports = AppointmentPreference;

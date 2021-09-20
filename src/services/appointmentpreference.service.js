@@ -1,10 +1,10 @@
 const httpStatus = require('http-status');
-const AppointmentPref = require('../models/appointmentPreference.model');
+const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
 
 const createPreference = async (body, doctorID, AuthData, update = false) => {
-  const alreadyExist = await AppointmentPref.findOne({ docid: doctorID, auth: AuthData });
+  const alreadyExist = await AppointmentPreference.findOne({ docid: doctorID, auth: AuthData });
   if (alreadyExist && !update) {
     return Promise.reject(
       new ApiError(
@@ -74,14 +74,14 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
   if (!update) {
     result.docid = doctorID;
     result.auth = AuthData;
-    await AppointmentPref.create(result);
+    await AppointmentPreference.create(result);
   }
   return result;
 };
 
 const updatePreference = async (body, doctorId, AuthData) => {
-  const result = await createPreference(body, doctorId, true);
-  const promise = await AppointmentPref.findOneAndUpdate(
+  const result = await createPreference(body, doctorId, AuthData, true);
+  const promise = await AppointmentPreference.findOneAndUpdate(
     { docid: doctorId, auth: AuthData },
     result,
     { useFindAndModify: false, new: true },
@@ -96,17 +96,17 @@ const updatePreference = async (body, doctorId, AuthData) => {
 };
 
 const getfollowups = async (doctorId, AuthData) => {
-  const promise = await AppointmentPref.findOne(
+  const promise = await AppointmentPreference.findOne(
     { docid: doctorId, auth: AuthData },
-    { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1 }
+    { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1, auth: 1 }
   );
   return promise;
 };
 
 const getappointments = async (doctorId, AuthData) => {
-  const promise = await AppointmentPref.findOne(
+  const promise = await AppointmentPreference.findOne(
     { docid: doctorId, auth: AuthData },
-    { MON_A: 1, TUE_A: 1, WED_A: 1, THU_A: 1, FRI_A: 1, SAT_A: 1, SUN_A: 1, docid: 1 }
+    { MON_A: 1, TUE_A: 1, WED_A: 1, THU_A: 1, FRI_A: 1, SAT_A: 1, SUN_A: 1, docid: 1, auth: 1 }
   );
   return promise;
 };

@@ -6,19 +6,19 @@ const preferenceValidator = require('../../validations/appointmentpreference.val
 
 const router = express.Router();
 
-router.get('/getdoctorfollowups', authdoctorverified(), appointmentPreferenceController.showfollowups);
+router.get('/getfollowups', authdoctorverified(), appointmentPreferenceController.showfollowups);
 router.put(
   '/updateappointmentpreference',
   authdoctorverified(),
   validate(preferenceValidator.PreferenceDetails),
-  appointmentPreferenceController.updateAppointmentPref // ValidationRequired
+  appointmentPreferenceController.updateAppointmentPreference
 );
 router.post(
-  '/submitappointmentpreference',
+  '/createappointmentpreference',
   authdoctorverified(),
   validate(preferenceValidator.PreferenceDetails),
-  appointmentPreferenceController.submitAppointmentPref // ValidationRequired
+  appointmentPreferenceController.submitAppointmentPreference
 );
-router.post('/getdoctorappointments', appointmentPreferenceController.showappointments);
+router.post('/getappointments', appointmentPreferenceController.showappointments);
 
 module.exports = router;

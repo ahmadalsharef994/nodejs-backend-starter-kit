@@ -1,12 +1,11 @@
 const randomstring = require('randomstring');
 
 /**
- * Create a Slot
- * @param {Object} startTime : {FromHour: 5, FromMinute: 45} //24hr format
+ * @param {Object} startTime : {FromHour: 5, FromMinute: 45}    //24hr format
  * @param {String} day : "MON"
  * @param {String} docId : "docid"
- * @param {Number} duration
- * @returns {Promise<Auth>}
+ * @param {Number} duration : "120"   // total duration in mins
+ * @returns {Object} : // appointment and followup slots
  */
 
 const createSlots = async (startTime, day, docId, duration) => {
@@ -34,9 +33,13 @@ const createSlots = async (startTime, day, docId, duration) => {
       ToHr += 1;
     }
     ToHr %= 24;
-    // console.log(ToMins, "  mins  ", ToHr, " hr")
     const slot = {};
-    slot.slotId = [typeAF, day, docId, i + 1 + randomstring.generate(6).toUpperCase()].join('-');
+    slot.slotId = [
+      typeAF,
+      day,
+      docId,
+      i + 1 + randomstring.generate({ length: 6, charset: 'alphabetic' }).toUpperCase(),
+    ].join('-');
     slot.FromHour = FromHr;
     slot.FromMinutes = FromMins + 1;
     slot.ToHour = ToHr;
@@ -51,18 +54,11 @@ const createSlots = async (startTime, day, docId, duration) => {
 };
 
 /**
- * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"FromMeridian": 1,"ToHour": 2,"ToMinutes": 0,"ToMeridian": 0} //12hr format
- * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"ToHour": 2,"ToMinutes": 0 } //24hr format
- * @returns {Object} totalTime
+ * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"ToHour": 2,"ToMinutes": 0 }   //24hr format
+ * @returns {Object} : "120"   // total duration
  */
 
 const calculateDuration = async (timeObj) => {
-  /* converts incoming obj to 24hr format if it is in 12hr format
-  const startTimeHour = timeObj.FromMeridian === 1 ? (timeObj.FromHour + 12) % 24 : timeObj.FromHour;
-  const startTimeMinute = timeObj.FromMinutes;
-  const endTimeHour = timeObj.ToMeridian === 1 ? (timeObj.ToHour + 12) % 24 : timeObj.ToHour;
-  const endTimeMinute = timeObj.ToMinutes; 
-  */
   const startTimeHour = timeObj.FromHour;
   const startTimeMinute = timeObj.FromMinutes;
   const endTimeHour = timeObj.ToHour;

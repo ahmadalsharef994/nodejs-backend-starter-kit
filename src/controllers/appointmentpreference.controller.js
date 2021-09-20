@@ -2,13 +2,13 @@ const httpStatus = require('http-status');
 const { appointmentPreferenceService, authService } = require('../services');
 const catchAsync = require('../utils/catchAsync');
 
-const submitAppointmentPref = catchAsync(async (req, res) => {
+const submitAppointmentPreference = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const result = await appointmentPreferenceService.createPreference(req.body, req.Docid, AuthData);
   return res.status(httpStatus.CREATED).json(result);
 });
 
-const updateAppointmentPref = catchAsync(async (req, res) => {
+const updateAppointmentPreference = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const result = await appointmentPreferenceService.updatePreference(req.body, req.Docid, AuthData);
   if (result === null) {
@@ -28,8 +28,7 @@ const showfollowups = catchAsync(async (req, res) => {
 });
 
 const showappointments = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  appointmentPreferenceService.getappointments(req.body.Docid, AuthData).then((result) => {
+  appointmentPreferenceService.getappointments(req.body.Docid, req.body.AuthData).then((result) => {
     if (result === null) {
       return res.status(httpStatus.NOT_FOUND).json("Appointment slots doesn't exist.");
     }
@@ -38,8 +37,8 @@ const showappointments = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  submitAppointmentPref,
-  updateAppointmentPref,
+  submitAppointmentPreference,
+  updateAppointmentPreference,
   showfollowups,
   showappointments,
 };

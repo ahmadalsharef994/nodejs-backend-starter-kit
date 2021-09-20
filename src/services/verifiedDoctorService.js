@@ -4,25 +4,25 @@ const { VerifiedDoctors } = require('../models');
 const ApiError = require('../utils/ApiError');
 const docuniqueidgenerator = require('../utils/generateDoctorID');
 
-const createVerifiedDoctor = async (docId, AuthData) => {
+const createVerifiedDoctor = async (doctorauthid, AuthData) => {
   var uniqueID = docuniqueidgenerator();
-  while (await VerifiedDoctors.findOne({ verifieddocid: uniqueID })) {
+  while (await VerifiedDoctors.findOne({ docid: uniqueID })) {
     var uniqueID = docuniqueidgenerator();
   }
-  const alreayExist = await checkVerification(docId);
+  const alreayExist = await checkVerification(doctorauthid);
   if (!alreayExist) {
     const doctorverifieddata = await VerifiedDoctors.create({
-      verifieddocid: uniqueID,
+      docid: uniqueID,
       verifiedby: AuthData._id,
-      docid: docId,
+      doctorauthid: doctorauthid,
     });
     return doctorverifieddata;
   }
   throw new ApiError(BAD_REQUEST, 'Data Already Submitted');
 };
 
-const checkVerification = async (docid) => {
-  const VerificationExist = await VerifiedDoctors.findOne({ docid });
+const checkVerification = async (doctorauthid) => {
+  const VerificationExist = await VerifiedDoctors.findOne({ doctorauthid });
   return VerificationExist;
 };
 

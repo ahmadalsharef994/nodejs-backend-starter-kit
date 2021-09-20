@@ -41,6 +41,6 @@ doctorClinic.plugin(toJSON);
 /**
  * @typedef DoctorClinic
  */
-const DoctorClinic = mongoose.model('doctorClinic', doctorClinic);
+const DoctorClinic = mongoose.model('DoctorClinic', doctorClinic);
 
 module.exports = DoctorClinic;

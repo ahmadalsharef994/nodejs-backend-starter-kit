@@ -87,7 +87,14 @@ const signedUrl = async (Authdata, document) => {
   return docUrl;
 };
 
+const fetchDocumentdata = async (AuthData) => {
+  const DocDataExist = await Document.findOne({ auth: AuthData });
+  return DocDataExist;
+};
+
+
 module.exports = {
   Upload,
   signedUrl,
+  fetchDocumentdata,
 };

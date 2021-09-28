@@ -2,7 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const generateOTP = require('../utils/generateOTP');
 const checkHeader = require('../utils/chechHeader');
-const { authService, tokenService, otpServices, verifiedDoctorService } = require('../services');
+const { authService, tokenService, otpServices, verifiedDoctorService, doctorprofileService, documentService } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 
 const register = catchAsync(async (req, res) => {
@@ -111,8 +111,33 @@ const resendOtp = catchAsync(async (req, res) => {
   res.status(200).json('OTP sent over Phone');
 });
 
+const onboardingstatus = catchAsync(async (req, res) => {
+  var AuthStatus = {}
+  var OnboardingStatusData = {};
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  var DoctorAlreadyOnboarded = await verifiedDoctorService.checkVerification(req.SubjectId);
+  DoctorAlreadyOnboarded == null ? DoctorAlreadyOnboarded = false : DoctorAlreadyOnboarded = true;
+  //Auth Status for Onboarding
+  AuthStatus['Emailverified'] = AuthData.isEmailVerified;
+  AuthStatus['phoneverified'] = AuthData.isMobileVerified;
+  AuthStatus['banned'] = AuthData.isbanned;
+  //Onboarding steps status
+  OnboardingStatusData['basicdetailsSubmitted'] = await doctorprofileService.fetchbasicdetails(AuthData);
+  OnboardingStatusData['basicdetailsSubmitted'] == null ? OnboardingStatusData['basicdetailsSubmitted'] = false : OnboardingStatusData['basicdetailsSubmitted'] = true;
+  OnboardingStatusData['educationdetailsSubmitted'] = await doctorprofileService.fetcheducationdetails(AuthData);
+  OnboardingStatusData['educationdetailsSubmitted'] == null ? OnboardingStatusData['educationdetailsSubmitted'] = false : OnboardingStatusData['educationdetailsSubmitted'] = true;
+  OnboardingStatusData['experiencedetailsSubmitted'] = await doctorprofileService.fetchexperiencedetails(AuthData);
+  OnboardingStatusData['experiencedetailsSubmitted'] == null ? OnboardingStatusData['experiencedetailsSubmitted'] = false : OnboardingStatusData['experiencedetailsSubmitted'] = true;
+  OnboardingStatusData['clinicdetailsSubmitted'] = await doctorprofileService.fetchClinicdetails(AuthData);
+  OnboardingStatusData['clinicdetailsSubmitted'] == null ? OnboardingStatusData['clinicdetailsSubmitted'] = false : OnboardingStatusData['clinicdetailsSubmitted'] = true;
+  //Document Status
+  const DocumentStatusData = await documentService.fetchDocumentdata(AuthData);
+  res.status(httpStatus.OK).send( {DoctorAlreadyOnboarded, AuthStatus, OnboardingStatusData, DocumentStatusData} );
+});
+
 module.exports = {
   register,
+  onboardingstatus,
   login,
   logout,
   forgotPassword,

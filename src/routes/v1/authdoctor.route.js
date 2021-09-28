@@ -6,6 +6,8 @@ const authdoctornonverified = require('../../middlewares/authDoctorNonVerified')
 
 const router = express.Router();
 
+router.get('/onboarding-status', authdoctornonverified(), authDoctorController.onboardingstatus);
+
 router.post('/register', authDoctorController.register);
 router.post('/login', validate(authDoctorValidation.login), authDoctorController.login);
 router.post('/logout', validate(authDoctorValidation.logout), authDoctorController.logout); // Thinking to make it GET and Validated

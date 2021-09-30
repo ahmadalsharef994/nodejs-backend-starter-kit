@@ -4,7 +4,7 @@ const config = require('../config/config');
 const checkBanned = require('../utils/CheckBanned');
 const SessionCheck = require('../utils/SessionCheck');
 
-const authdoctornonverified = () => async (req, res, next) => {
+const OnboardingAuth = () => async (req, res, next) => {
   try {
     const header = req.headers.authorization;
     const bearer = header.split(' ');
@@ -20,8 +20,6 @@ const authdoctornonverified = () => async (req, res, next) => {
       res.status(401).json('You are Banned please reach support');
     } else if (!bancheck.role.includes('doctor') || subidrole != 'doctor') {
       res.status(401).json('You dont have Access to these resources');
-    }else if (bancheck.isEmailVerified == false || bancheck.isMobileVerified == false) {
-      res.status(401).json('Please Verify your Authenticated Email & Phone');
     }else if (sessionbancheck == true) {
       res.status(401).json('Session Expired Login Again');
     } else {
@@ -32,4 +30,4 @@ const authdoctornonverified = () => async (req, res, next) => {
   }
 };
 
-module.exports = authdoctornonverified;
+module.exports = OnboardingAuth;

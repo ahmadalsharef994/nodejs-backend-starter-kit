@@ -24,7 +24,7 @@ const login = catchAsync(async (req, res) => {
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
-  res.send({ AuthData, authtoken });
+  res.json({ AuthData, authtoken });
 });
 
 const logout = catchAsync(async (req, res) => {

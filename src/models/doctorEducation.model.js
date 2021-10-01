@@ -5,12 +5,12 @@ const Auth = require('./auth.model');
 const DoctorEducationSchema = mongoose.Schema(
   {
     registrationNo: {
-        type: Number,
-        required:true,
+      type: Number,
+      required: true,
     },
     yearofRegistration: {
-        type: Number,
-        required: true,
+      type: Number,
+      required: true,
     },
     stateMedicalCouncil: {
       type: String,

@@ -1,4 +1,4 @@
-const { authService } = require('../services');
+// const { authService } = require('../services');
 const { Devices, Token } = require('../models');
 
 const SessionCheck = async (token) => {
@@ -9,4 +9,5 @@ const SessionCheck = async (token) => {
   }
   return false;
 };
+
 module.exports = SessionCheck;

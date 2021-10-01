@@ -6,31 +6,30 @@ const path = require('path');
 const uuid = require('uuid');
 
 dotenv.config();
-
 const ID = process.env.AWSID;
 const SECRET = process.env.AWSKEY;
 const PUBLICBUCKET_NAME = process.env.PUBLICBUCKET;
 
 const s3 = new AWS.S3({
   accessKeyId: ID,
-  region:'ap-south-1',
+  region: 'ap-south-1',
   secretAccessKey: SECRET,
-  bucket:PUBLICBUCKET_NAME ,
+  bucket: PUBLICBUCKET_NAME,
   signatureVersion: 'v4',
 });
 
 const fileFilter = (req, file, cb) => {
-    if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file or data, only JPEG ,PNG and pdf is allowed!'), false);
-    }
+  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file or data, only JPEG ,PNG and pdf is allowed!'), false);
+  }
 };
 
 const publicupload = multer({
   storage: multerS3({
     s3,
-    acl:'public-read',
+    acl: 'public-read',
     bucket: PUBLICBUCKET_NAME,
     contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: (req, file, cb) => {
@@ -45,8 +44,6 @@ const publicupload = multer({
   limits: { fileSize: 100000000 },
 });
 
-
 module.exports = {
-   publicupload
+  publicupload,
 };
-  

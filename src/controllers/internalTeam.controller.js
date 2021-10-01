@@ -6,13 +6,13 @@ const { authService, verifiedDoctorService, tokenService } = require('../service
 const verifydoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   await verifiedDoctorService.createVerifiedDoctor(req.body.docid, AuthData);
-  res.status(201).json('Doctor Verified');
+  res.status(httpStatus.CREATED).json({ message: 'Doctor Verified' });
 });
 
 const registeradmin = catchAsync(async (req, res) => {
   if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
-      400,
+      httpStatus.BAD_REQUEST,
       'Alarm Triggered! Suspected Activity Detected 🧐reach at security@medzgo.com 😒kyu bhai kya haal he Admin banega woh bhi bina permission? 😂'
     );
   } else {
@@ -22,14 +22,14 @@ const registeradmin = catchAsync(async (req, res) => {
     const devicetype = req.headers.devicetype;
     const fcmtoken = req.headers.fcmtoken;
     await tokenService.addDeviceHandler(AuthData.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
-    res.status(httpStatus.CREATED).send({ AuthData, authtoken });
+    res.status(httpStatus.CREATED).json({ AuthData, authtoken });
   }
 });
 
 const loginadmin = catchAsync(async (req, res) => {
   if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
-      400,
+      httpStatus.BAD_REQUEST,
       'Alarm Triggered! Suspected Activity Detected 🧐reach at security@medzgo.com 😒kyu bhai kya haal he Admin banega woh bhi bina permission? 😂'
     );
   } else {
@@ -40,7 +40,7 @@ const loginadmin = catchAsync(async (req, res) => {
     const devicetype = req.headers.devicetype;
     const fcmtoken = req.headers.fcmtoken;
     await tokenService.addDeviceHandler(AuthData.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
-    res.json({ AuthData, authtoken });
+    res.status(httpStatus.OK).json({ AuthData, authtoken });
   }
 });
 

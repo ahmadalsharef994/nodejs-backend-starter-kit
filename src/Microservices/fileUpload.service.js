@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 const dotenv = require('dotenv');
 const AWS = require('aws-sdk');
 const multer = require('multer');
@@ -7,14 +6,13 @@ const path = require('path');
 const uuid = require('uuid');
 
 dotenv.config();
-
 const ID = process.env.AWSID;
 const SECRET = process.env.AWSKEY;
 const BUCKET_NAME = process.env.BUCKET;
 
 const s3 = new AWS.S3({
   accessKeyId: ID,
-  region:'us-east-2',
+  region: 'us-east-2',
   secretAccessKey: SECRET,
   bucket: BUCKET_NAME,
   signatureVersion: 'v4',
@@ -44,31 +42,28 @@ const upload = multer({
   limits: { fileSize: 100000000 },
 });
 
-const getSingedUrl = async (file) => {    
+const getSingedUrl = async (file) => {
   const params = {
-    Bucket: BUCKET_NAME ,
-    Key: file ,
-    Expires:60 * 5,
-    ResponseContentDisposition:'inline',
-    
+    Bucket: BUCKET_NAME,
+    Key: file,
+    Expires: 60 * 5,
+    ResponseContentDisposition: 'inline',
   };
-try {
-    var url = await new Promise((resolve, reject) => {
-      s3.getSignedUrl('getObject', params, (err, url) => {
-        err ? reject(err) : resolve(url);
+  try {
+    const url = await new Promise((resolve, reject) => {
+      s3.getSignedUrl('getObject', params, (err, docs) => {
+        return err ? reject(err) : resolve(docs);
+      });
     });
-  });
-     return url 
+    return url;
   } catch (err) {
     if (err) {
-      return err
+      return err;
     }
   }
-}
-
+};
 
 module.exports = {
   upload,
   getSingedUrl,
-  
 };

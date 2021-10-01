@@ -17,9 +17,14 @@ router.post('/send-verification-email', OnboardingAuth(), authDoctorController.s
 router.post('/change-email', OnboardingAuth(), authDoctorController.changeEmail);
 router.post('/change-phone', OnboardingAuth(), authDoctorController.changePhone);
 router.post('/verify-email', OnboardingAuth(), validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
-router.post('/change-password', OnboardingAuth(), validate(authDoctorValidation.changepassword), authDoctorController.changePassword );
+router.post(
+  '/change-password',
+  OnboardingAuth(),
+  validate(authDoctorValidation.changepassword),
+  authDoctorController.changePassword
+);
 router.post('/request-otp', OnboardingAuth(), authDoctorController.requestOtp);
-router.post('/verify-phone', OnboardingAuth(), validate(authDoctorValidation.verifyPhone), authDoctorController.verifyPhone );
+router.post('/verify-phone', OnboardingAuth(), validate(authDoctorValidation.verifyPhone), authDoctorController.verifyPhone);
 router.post('/resend-otp', OnboardingAuth(), authDoctorController.resendOtp);
 
 module.exports = router;

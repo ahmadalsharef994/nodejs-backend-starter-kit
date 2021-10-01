@@ -20,4 +20,5 @@ const smsClient = {
     }
   },
 };
+
 module.exports = smsClient;

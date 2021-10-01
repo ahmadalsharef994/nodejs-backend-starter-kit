@@ -8,7 +8,7 @@ const getAuthdatas = catchAsync(async (req, res) => {
   const filter = pick(req.query, ['name', 'role']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await authService.queryUsers(filter, options);
-  res.json(result);
+  res.status(httpStatus.OK).json(result);
 });
 
 const getAuthdata = catchAsync(async (req, res) => {
@@ -16,7 +16,7 @@ const getAuthdata = catchAsync(async (req, res) => {
   if (!user) {
     throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
   }
-  res.json(user);
+  res.status(httpStatus.OK).json(user);
 });
 
 module.exports = {

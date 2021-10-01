@@ -24,7 +24,7 @@ router.post(
   }
 );
 
-router.get('/view/:doctype', validate(documentValidation.documentUrl), authdoctornonverified(),  function (req, res) {
+router.get('/view/:doctype', validate(documentValidation.documentUrl), authdoctornonverified(), function (req, res) {
   documentController.getUrl(req, res);
 });
 

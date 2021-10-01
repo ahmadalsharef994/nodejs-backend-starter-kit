@@ -11,7 +11,7 @@ const otpServices = require('./otp.service');
  */
 const createAuthData = async (authBody) => {
   if (await Auth.isEmailTaken(authBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
   const auth = await Auth.create(authBody);
   return auth;
@@ -54,6 +54,7 @@ const getAuthByEmail = async (email) => {
  * @param {Object} updateBody
  * @returns {Promise<Auth>}
  */
+// eslint-disable-next-line no-shadow
 const updateAuthPassByID = async (Auth, updateBody) => {
   // eslint-disable-next-line no-param-reassign
   Auth.password = updateBody;

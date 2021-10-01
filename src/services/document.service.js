@@ -1,9 +1,11 @@
-const { Document, Auth } = require('../models');
-const ApiError = require('../utils/ApiError');
-const catchAsync = require('../utils/catchAsync');
+/* eslint-disable no-nested-ternary */
+/* eslint-disable no-unused-expressions */
+const { Document } = require('../models/document.model');
+// const ApiError = require('../utils/ApiError');
+// const catchAsync = require('../utils/catchAsync');
 const fileUpload = require('../Microservices/fileUpload.service');
 
-const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc,AuthData) => {
+const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
   if (!DocDataExist) {
     // If doctor uploaded docx already exists
@@ -19,7 +21,7 @@ const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, a
     });
     return uploadDoc;
   }
-  if (DocDataExist.isRestricted != true) {
+  if (DocDataExist.isRestricted !== true) {
     // Check is Restricted
     const DataToUpdate = {};
     let throwError = false;
@@ -46,7 +48,7 @@ const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, a
         ? (throwError = true)
         : (DataToUpdate.pancardDoc = pancardDoc)
       : false;
-    if (throwError == false && DataToUpdate != {}) {
+    if (throwError === false && DataToUpdate !== {}) {
       const uploadDoc = await Document.updateOne({ _id: DocDataExist._id }, { $set: DataToUpdate });
       return uploadDoc;
     }
@@ -79,10 +81,9 @@ const signedUrl = async (Authdata, document) => {
       break;
     case 'ifsc':
       docUrl = await fileUpload.getSingedUrl(DocDataExist.ifsc);
-      break; 
+      break;
     default:
-      // eslint-disable-next-line no-undef
-      text = 'Document not Found';
+      docUrl = 'Document not Found';
   }
   return docUrl;
 };
@@ -91,7 +92,6 @@ const fetchDocumentdata = async (AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
   return DocDataExist;
 };
-
 
 module.exports = {
   Upload,

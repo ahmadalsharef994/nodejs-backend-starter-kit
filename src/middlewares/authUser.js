@@ -27,7 +27,7 @@ const authuser = () => async (req, res, next) => {
       next();
     }
   } catch (error) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Request!' });
+    res.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid Request!' });
   }
 };
 

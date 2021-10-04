@@ -8,12 +8,24 @@ const otpSchema = mongoose.Schema(
       type: Number,
       default: null,
     },
+    phoneTimestamp: {
+      type: Date,
+      default: null,
+    },
     emailVerify: {
       type: Number,
       default: null,
     },
+    emailTimestamp: {
+      type: Date,
+      default: null,
+    },
     resetPasswordVerify: {
       type: Number,
+      default: null,
+    },
+    resetPasswordTimestamp: {
+      type: Date,
       default: null,
     },
     auth: {

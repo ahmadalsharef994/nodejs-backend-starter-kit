@@ -31,7 +31,7 @@ const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devic
   if (devicecheck) {
     const authtokenhere = authtoken;
     const oldtoken = devicecheck.authtoken;
-    await Devices.updateOne({ _id: devicecheck._id }, { $set: { authtoken: authtokenhere } });
+    await Devices.updateOne({ _id: devicecheck._id }, { $set: { authtoken: authtokenhere, loggedstatus: true } });
     await saveToken(oldtoken);
   } else {
     const deviceDoc = await Devices.create({

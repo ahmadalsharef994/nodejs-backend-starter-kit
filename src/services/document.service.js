@@ -89,6 +89,7 @@ const signedUrl = async (Authdata, document) => {
 };
 
 const fetchDocumentdata = async (AuthData) => {
+  console.log(AuthData);
   const DocDataExist = await Document.findOne({ auth: AuthData });
   return DocDataExist;
 };

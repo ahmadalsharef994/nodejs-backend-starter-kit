@@ -84,7 +84,7 @@ const logout = catchAsync(async (req, res) => {
 
 const changePassword = catchAsync(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const token = checkHeader(req);
+  const token = checkHeader(req); //Used for Blacklisting Current Token
   await authService.changeAuthPassword(oldPassword, newPassword, token, req.SubjectId);
   // const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({ message: 'Password Changed Successfully' });
@@ -92,25 +92,25 @@ const changePassword = catchAsync(async (req, res) => {
 
 const forgotPassword = catchAsync(async (req, res) => {
   const service = req.body.choice;
-  const AuthData = await authService.getAuthByEmail(req.body.email);
   const OTP = generateOTP();
   if (service === 'email') {
-    await emailService.sendResetPasswordEmail(req.body.value, OTP);
-    const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
-    const challenge = await getOnboardingChallenge(AuthDataUpdated);
+    const AuthData = await authService.getAuthByEmail(req.body.email);
+    await emailService.sendResetPasswordEmail(req.body.email, OTP);
+    const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered EmailID', challenge });
   } else {
+    const AuthData = await authService.getAuthByPhone(req.body.phone);
     await otpServices.sendresetpassotp(OTP, AuthData);
-    const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
-    const challenge = await getOnboardingChallenge(AuthDataUpdated);
+    const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered PhoneNumber', challenge });
   }
 });
 
 const resetPassword = catchAsync(async (req, res) => {
   await authService.resetPassword(req.body.email, req.body.resetcode, req.body.newpassword);
-  // const challenge = await getOnboardingChallenge(AuthData);
-  res.status(httpStatus.OK).json({ message: 'Password Reset Successful' });
+  const AuthData = await authService.getAuthByEmail(req.body.email);
+  const challenge = await getOnboardingChallenge(AuthData);
+  res.status(httpStatus.OK).json({ message: 'Password Reset Successful', challenge });
 });
 
 const sendVerificationEmail = catchAsync(async (req, res) => {

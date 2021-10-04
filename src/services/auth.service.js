@@ -48,6 +48,15 @@ const getAuthById = async (id) => {
 const getAuthByEmail = async (email) => {
   return Auth.findOne({ email });
 };
+
+/**
+ * Get Auth by Phone
+ * @param {string} phone
+ * @returns {Promise<Auth>}
+ */
+ const getAuthByPhone = async (phone) => {
+  return Auth.findOne({ phone });
+};
 /**
  * Update Auth by id
  * @param {Model} Auth
@@ -137,6 +146,7 @@ module.exports = {
   queryAuthData,
   getAuthById,
   getAuthByEmail,
+  getAuthByPhone,
   updateAuthById,
   deleteAuthById,
   updateAuthPassByID,

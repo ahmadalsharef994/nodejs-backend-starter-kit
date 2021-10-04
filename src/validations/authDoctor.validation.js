@@ -27,9 +27,9 @@ const logout = {
 
 const changepassword = {
   body: Joi.object().keys({
-    oldpassword: Joi.string().required(),
-    newpassword: Joi.string().required(),
-    newconfirmpassword: Joi.string().required().valid(Joi.ref('newpassword')),
+    oldPassword: Joi.string().required(),
+    newPassword: Joi.string().required(),
+    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
 };
 

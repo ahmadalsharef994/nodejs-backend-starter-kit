@@ -83,9 +83,9 @@ const logout = catchAsync(async (req, res) => {
 });
 
 const changePassword = catchAsync(async (req, res) => {
-  const { oldpassword, newpassword } = req.body;
+  const { oldPassword, newPassword } = req.body;
   const token = checkHeader(req);
-  await authService.changeAuthPassword(oldpassword, newpassword, token, req.SubjectId);
+  await authService.changeAuthPassword(oldPassword, newPassword, token, req.SubjectId);
   // const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({ message: 'Password Changed Successfully' });
 });

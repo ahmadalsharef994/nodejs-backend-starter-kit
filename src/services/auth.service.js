@@ -54,7 +54,7 @@ const getAuthByEmail = async (email) => {
  * @param {string} phone
  * @returns {Promise<Auth>}
  */
- const getAuthByPhone = async (phone) => {
+const getAuthByPhone = async (phone) => {
   return Auth.findOne({ phone });
 };
 /**

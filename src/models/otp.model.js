@@ -4,27 +4,27 @@ const Auth = require('./auth.model');
 
 const otpSchema = mongoose.Schema(
   {
-    phoneVerify: {
+    phoneOtpVerify: {
       type: Number,
       default: null,
     },
-    phoneTimestamp: {
+    phoneOtpTimestamp: {
       type: Date,
       default: null,
     },
-    emailVerify: {
+    emailOtpVerify: {
       type: Number,
       default: null,
     },
-    emailTimestamp: {
+    emailOtpTimestamp: {
       type: Date,
       default: null,
     },
-    resetPasswordVerify: {
+    resetPasswordOtpVerify: {
       type: Number,
       default: null,
     },
-    resetPasswordTimestamp: {
+    resetPasswordOtpTimestamp: {
       type: Date,
       default: null,
     },

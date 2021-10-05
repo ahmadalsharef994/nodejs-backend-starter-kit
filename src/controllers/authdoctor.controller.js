@@ -84,7 +84,7 @@ const logout = catchAsync(async (req, res) => {
 
 const changePassword = catchAsync(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
-  const token = checkHeader(req); //Used for Blacklisting Current Token
+  const token = checkHeader(req); // Used for Blacklisting Current Token
   await authService.changeAuthPassword(oldPassword, newPassword, token, req.SubjectId);
   // const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({ message: 'Password Changed Successfully' });
@@ -96,10 +96,12 @@ const forgotPassword = catchAsync(async (req, res) => {
   if (service === 'email') {
     const AuthData = await authService.getAuthByEmail(req.body.email);
     await emailService.sendResetPasswordEmail(req.body.email, OTP);
+    await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered EmailID', challenge });
   } else {
     const AuthData = await authService.getAuthByPhone(req.body.phone);
+    // await smsService.sendResetPasswordPhone(req.body.phone, OTP); ***to be implemented***
     await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered PhoneNumber', challenge });
@@ -107,7 +109,7 @@ const forgotPassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  await authService.resetPassword(req.body.email, req.body.resetcode, req.body.newpassword);
+  await authService.resetPassword(req.body.email, req.body.resetcode, req.body.newPassword);
   const AuthData = await authService.getAuthByEmail(req.body.email);
   const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({ message: 'Password Reset Successful', challenge });
@@ -127,7 +129,7 @@ const changeEmail = catchAsync(async (req, res) => {
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   if (result !== false) {
-    res.status(httpStatus.OK).json({ message: 'Email is updated sucessfully', challenge });
+    return res.status(httpStatus.OK).json({ message: 'Email is updated sucessfully', challenge });
   }
   res.status(httpStatus.BAD_REQUEST).json({ message: 'Email Already Verified', challenge });
 });
@@ -138,7 +140,7 @@ const changePhone = catchAsync(async (req, res) => {
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   if (result !== false) {
-    res.status(httpStatus.CREATED).json({ message: 'Phone is updated sucessfully', challenge });
+    return res.status(httpStatus.CREATED).json({ message: 'Phone is updated sucessfully', challenge });
   }
   res.status(httpStatus.BAD_REQUEST).json({ message: 'Phone Number already verified', challenge });
 });

@@ -8,7 +8,7 @@ const router = express.Router();
 
 router.get('/onboarding-status', OnboardingAuth(), authDoctorController.onboardingstatus);
 
-router.post('/register', authDoctorController.register);
+router.post('/register', validate(authDoctorValidation.registerdoctor), authDoctorController.register);
 router.post('/login', validate(authDoctorValidation.login), authDoctorController.login);
 router.post('/logout', validate(authDoctorValidation.logout), authDoctorController.logout); // Thinking to make it GET and Validated
 router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), authDoctorController.forgotPassword);

@@ -44,30 +44,47 @@ const sendphoneverifyotp = async (OTP, user) => {
 const verifyEmailOtp = async (emailcode, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
   const time = new Date().getTime() - OtpDoc.emailOtpTimestamp.getTime();
-  // console.log(time/1000);    time in seconds
-  if (time <= 180000 && emailcode === OtpDoc.emailOtpVerify) {
+
+  if (time > 180000) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
+  }
+
+  if (emailcode === OtpDoc.emailOtpVerify) {
     await Auth.updateOne({ _id: AuthData._id }, { $set: { isEmailVerified: true } });
     return OtpDoc;
   }
+
   throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
 };
 
 const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
   const time = new Date().getTime() - OtpDoc.resetPasswordOtpTimestamp.getTime();
-  if (time <= 180000 && resetcode === OtpDoc.resetPasswordOtpVerify) {
+
+  if (time > 180000) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
+  }
+
+  if (resetcode === OtpDoc.resetPasswordOtpVerify) {
     return OtpDoc;
   }
+
   throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
 };
 
 const verifyPhoneOtp = async (otp, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
   const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
-  if (time <= 180000 && otp === OtpDoc.phoneOtpVerify) {
+
+  if (time > 180000) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
+  }
+
+  if (otp === OtpDoc.phoneOtpVerify) {
     await Auth.updateOne({ _id: AuthData._id }, { $set: { isMobileVerified: true } });
     return OtpDoc;
   }
+
   throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
 };
 
@@ -106,6 +123,7 @@ const changePhone = async (mobile, user) => {
     }
     return false;
   }
+
   throw new ApiError(httpStatus.BAD_REQUEST, 'Phone number is already taken');
 };
 

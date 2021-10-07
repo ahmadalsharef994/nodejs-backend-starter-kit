@@ -47,7 +47,10 @@ app.use('/v1/auth/user/forgot-password', otpratelimiter);
 // v1 api routes
 app.use('/v1', routes);
 app.use((req, res, next) => {
-  req.ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || getClientIp(req);
+  req.ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  if(req.ip == null || req.ip==undefined){
+    req.ip = getClientIp(req);
+  }
   next();
 });
 // send back a 404 error for any unknown api request

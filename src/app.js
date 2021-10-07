@@ -8,7 +8,7 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
-const { getClientIp } = require('request-ip')
+const { getClientIp } = require('@supercharge/request-ip');
 const { jwtStrategy } = require('./config/passport');
 const { authLimiter, otpratelimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
@@ -47,7 +47,7 @@ app.use('/v1/auth/user/forgot-password', otpratelimiter);
 // v1 api routes
 app.use('/v1', routes);
 app.use((req, res, next) => {
-  req.ip = getClientIp(req)
+  req.ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress || getClientIp(req);
   next();
 });
 // send back a 404 error for any unknown api request

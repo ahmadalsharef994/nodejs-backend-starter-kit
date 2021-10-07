@@ -52,10 +52,9 @@ const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
-  let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const AuthData = await authService.createAuthData(req.body);
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, ip, devicehash, devicetype, fcmtoken);
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip, devicehash, devicetype, fcmtoken);
   const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.CREATED).json({ AuthData, authtoken, challenge });
 });

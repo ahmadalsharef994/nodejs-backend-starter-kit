@@ -12,7 +12,7 @@ const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip, devicehash, devicetype, fcmtoken);
   res.status(httpStatus.CREATED).json({ AuthData, authtoken });
 });
 
@@ -23,7 +23,7 @@ const login = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, '1.1.1.1', devicehash, devicetype, fcmtoken);
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip, devicehash, devicetype, fcmtoken);
   res.status(httpStatus.OK).json({ AuthData, authtoken });
 });
 

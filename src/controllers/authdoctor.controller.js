@@ -13,7 +13,6 @@ const {
 const { emailService } = require('../Microservices');
 
 /* Challenge Heirarchy for Onboarding API
-AUTH_REGISTER
 AUTH_LOGIN
 AUTH_EMAILVERIFY
 AUTH_OTPVERIFY

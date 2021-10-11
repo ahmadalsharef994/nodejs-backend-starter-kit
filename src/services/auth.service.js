@@ -12,6 +12,8 @@ const otpServices = require('./otp.service');
 const createAuthData = async (authBody) => {
   if (await Auth.isEmailTaken(authBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  }if (await Auth.isPhoneTaken(authBody.mobile)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone Number already taken');
   }
   const auth = await Auth.create(authBody);
   return auth;

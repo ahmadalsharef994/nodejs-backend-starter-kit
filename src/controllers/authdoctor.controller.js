@@ -51,6 +51,7 @@ const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
+  console.log(req.ip4);
   const AuthData = await authService.createAuthData(req.body);
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);

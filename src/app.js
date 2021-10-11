@@ -6,9 +6,9 @@ const compression = require('compression');
 const cors = require('cors');
 const passport = require('passport');
 const httpStatus = require('http-status');
+const { getClientIp } = require('@supercharge/request-ip');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
-const { getClientIp } = require('@supercharge/request-ip');
 const { jwtStrategy } = require('./config/passport');
 const { authLimiter, otpratelimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
@@ -38,6 +38,10 @@ app.options('*', cors());
 // jwt authentication
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
+app.use((req, res, next) => {
+  req.ip4 = req.headers['x-forwarded-for'] || getClientIp(req);
+  next();
+});
 // limit repeated failed requests to auth endpoints
 if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
@@ -46,10 +50,6 @@ app.use('/v1/auth/doctor/forgot-password', otpratelimiter);
 app.use('/v1/auth/user/forgot-password', otpratelimiter);
 // v1 api routes
 app.use('/v1', routes);
-app.use((req, res, next) => {
-  req.ip4 = req.headers['x-forwarded-for'] || getClientIp(req) || '1.1.1.1';
-  next();
-});
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found We are Monitoring It ☠️'));

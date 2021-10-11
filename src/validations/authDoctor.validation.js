@@ -45,8 +45,8 @@ const resetPassword = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
     resetcode: Joi.number().required(),
-    newpassword: Joi.string().required().custom(password),
-    newconfirmpassword: Joi.string().required().valid(Joi.ref('newpassword')),
+    newPassword: Joi.string().required().custom(password),
+    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
 };
 

@@ -5,39 +5,51 @@ const ApiError = require('../utils/ApiError');
 const sendresetpassotp = async (OTP, user) => {
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
-    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { resetPasswordVerify: OTP } });
+    const OtpDoc = await Otp.updateOne(
+      { _id: authDataExist._id },
+      { $set: { resetPasswordOtpVerify: OTP, resetPasswordOtpTimestamp: new Date() } }
+    );
     return OtpDoc;
   }
-
-  const OtpDoc = await Otp.create({ resetPasswordVerify: OTP, auth: user });
+  const OtpDoc = await Otp.create({ resetPasswordOtpVerify: OTP, auth: user, resetPasswordOtpTimestamp: new Date() });
   return OtpDoc;
 };
 
 const sendemailverifyotp = async (OTP, user) => {
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
-    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { emailVerify: OTP } });
+    const OtpDoc = await Otp.updateOne(
+      { _id: authDataExist._id },
+      { $set: { emailOtpVerify: OTP, emailOtpTimestamp: new Date() } }
+    );
     return OtpDoc;
   }
-
-  const OtpDoc = await Otp.create({ emailVerify: OTP, auth: user });
+  const OtpDoc = await Otp.create({ emailOtpVerify: OTP, auth: user, emailOtpTimestamp: new Date() });
   return OtpDoc;
 };
 
 const sendphoneverifyotp = async (OTP, user) => {
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
-    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { phoneVerify: OTP } });
+    const OtpDoc = await Otp.updateOne(
+      { _id: authDataExist._id },
+      { $set: { phoneOtpVerify: OTP, phoneOtpTimestamp: new Date() } }
+    );
     return OtpDoc;
   }
-
-  const OtpDoc = await Otp.create({ phoneVerify: OTP, auth: user });
+  const OtpDoc = await Otp.create({ phoneOtpVerify: OTP, auth: user, phoneOtpTimestamp: new Date() });
   return OtpDoc;
 };
 
 const verifyEmailOtp = async (emailcode, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
-  if (emailcode === OtpDoc.emailVerify) {
+  const time = new Date().getTime() - OtpDoc.emailOtpTimestamp.getTime();
+
+  if (time > 180000) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
+  }
+
+  if (emailcode === OtpDoc.emailOtpVerify) {
     await Auth.updateOne({ _id: AuthData._id }, { $set: { isEmailVerified: true } });
     return OtpDoc;
   }
@@ -47,7 +59,13 @@ const verifyEmailOtp = async (emailcode, AuthData) => {
 
 const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
-  if (resetcode === OtpDoc.resetPasswordVerify) {
+  const time = new Date().getTime() - OtpDoc.resetPasswordOtpTimestamp.getTime();
+
+  if (time > 180000) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
+  }
+
+  if (resetcode === OtpDoc.resetPasswordOtpVerify) {
     return OtpDoc;
   }
 
@@ -56,7 +74,13 @@ const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
 
 const verifyPhoneOtp = async (otp, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
-  if (otp === OtpDoc.phoneVerify) {
+  const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
+
+  if (time > 180000) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
+  }
+
+  if (otp === OtpDoc.phoneOtpVerify) {
     await Auth.updateOne({ _id: AuthData._id }, { $set: { isMobileVerified: true } });
     return OtpDoc;
   }
@@ -65,9 +89,12 @@ const verifyPhoneOtp = async (otp, AuthData) => {
 };
 
 const resendOtp = async (OTP, user) => {
-  const authDataExist = await Otp.findOne({ auth: user });
-  if (authDataExist) {
-    const OtpDoc = await Otp.updateOne({ _id: authDataExist._id }, { $set: { phoneVerify: OTP } });
+  const authData = await Otp.findOne({ auth: user });
+  if (authData) {
+    const OtpDoc = await Otp.updateOne(
+      { _id: authData._id },
+      { $set: { phoneOtpVerify: OTP, phoneOtpTimestamp: new Date() } }
+    );
     return OtpDoc;
   }
   throw new ApiError(httpStatus.BAD_REQUEST, 'You are being Monitored');
@@ -76,8 +103,8 @@ const resendOtp = async (OTP, user) => {
 const changeEmail = async (email, user) => {
   const authDataExist = await Auth.findOne({ email });
   if (!authDataExist) {
-    const checkemailveried = await Auth.findOne({ isEmailVerified: true });
-    if (checkemailveried == null) {
+    const checkEmailVerified = await Auth.findOne({ isEmailVerified: true });
+    if (checkEmailVerified === null) {
       await Auth.updateOne({ _id: user._id }, { $set: { email } });
       return 'Sucessfully Updated';
     }
@@ -89,13 +116,14 @@ const changeEmail = async (email, user) => {
 const changePhone = async (mobile, user) => {
   const authDataExist = await Auth.findOne({ mobile });
   if (!authDataExist) {
-    const checkemailveried = await Auth.findOne({ isMobileVerified: true });
-    if (checkemailveried == null) {
+    const checkemailverified = await Auth.findOne({ isMobileVerified: true });
+    if (checkemailverified === null) {
       await Auth.updateOne({ _id: user._id }, { $set: { mobile } });
       return 'Sucessfully Updated';
     }
     return false;
   }
+
   throw new ApiError(httpStatus.BAD_REQUEST, 'Phone number is already taken');
 };
 

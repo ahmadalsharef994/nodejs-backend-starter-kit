@@ -51,7 +51,6 @@ const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
-  console.log(req.ip4);
   const AuthData = await authService.createAuthData(req.body);
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
@@ -120,7 +119,7 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   const OTP = generateOTP();
   await emailService.sendVerificationEmail(AuthData.email, OTP);
   await otpServices.sendemailverifyotp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'OTP Sent over Email', challenge: 'AUTH_EMAILVERIFY' });
+  res.status(httpStatus.OK).json({ message: 'OTP Sent over Email', challenge: 'AUTH_EMAILVERIFY', otp: OTP });
 });
 
 const changeEmail = catchAsync(async (req, res) => {
@@ -159,7 +158,7 @@ const requestOtp = catchAsync(async (req, res) => {
   await otpServices.sendphoneverifyotp(OTP, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res.status(httpStatus.OK).json({ message: 'OTP Sent over Phone', challenge });
+  res.status(httpStatus.OK).json({ message: 'OTP Sent over Phone',  otp: OTP, challenge });
 });
 
 const verifyPhone = catchAsync(async (req, res) => {
@@ -176,7 +175,7 @@ const resendOtp = catchAsync(async (req, res) => {
   await otpServices.resendOtp(OTP, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res.status(httpStatus.OK).json({ message: 'OTP Sent Over Phone', challenge });
+  res.status(httpStatus.OK).json({ message: 'OTP Sent Over Phone', otp: OTP, challenge });
 });
 
 const onboardingstatus = catchAsync(async (req, res) => {

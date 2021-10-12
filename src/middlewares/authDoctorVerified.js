@@ -31,7 +31,7 @@ const authdoctorverified = () => async (req, res, next) => {
       next();
     }
   } catch (error) {
-    res.status(httpStatus.UNAUTHORIZED).json({ message: 'Invalid Request!' });
+    res.status(httpStatus.UNAUTHORIZED).json({ message: 'Forbidden Error' });
   }
 };
 

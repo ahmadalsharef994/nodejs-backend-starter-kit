@@ -12,8 +12,9 @@ const submitbasicdetails = async (req, res) => {
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (resultData !== false) {
     res.status(httpStatus.CREATED).json({ message: 'Basic details Submitted', challenge });
+  }else{
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge });
   }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge });
 };
 
 const submitprofilepicture = async (req, res) => {
@@ -27,8 +28,9 @@ const fetchbasicdetails = catchAsync(async (req, res) => {
   const basicdata = await doctorprofileService.fetchbasicdetails(AuthData);
   if (!basicdata) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
+  }else{
+    res.status(httpStatus.OK).json(basicdata);
   }
-  res.status(httpStatus.OK).json(basicdata);
 });
 
 const submiteducationdetails = catchAsync(async (req, res) => {
@@ -43,8 +45,9 @@ const fetcheducationdetails = catchAsync(async (req, res) => {
   const educationdata = await doctorprofileService.fetcheducationdetails(AuthData);
   if (!educationdata) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
+  }else{
+    res.status(httpStatus.OK).json(educationdata);
   }
-  res.status(httpStatus.OK).json(educationdata);
 });
 
 const submitexperiencedetails = catchAsync(async (req, res) => {
@@ -59,8 +62,9 @@ const fetchexperiencedetails = catchAsync(async (req, res) => {
   const educationdata = await doctorprofileService.fetchexperiencedetails(AuthData);
   if (!educationdata) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
+  }else{
+    res.status(httpStatus.OK).json(educationdata);
   }
-  res.status(httpStatus.OK).json(educationdata);
 });
 
 const submitclinicdetails = catchAsync(async (req, res) => {
@@ -79,8 +83,9 @@ const fetchclinicdetails = catchAsync(async (req, res) => {
   const clinicdata = await doctorprofileService.fetchClinicdetails(AuthData);
   if (!clinicdata) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
+  }else{
+    res.status(httpStatus.OK).json(clinicdata);
   }
-  res.status(httpStatus.OK).json(clinicdata);
 });
 
 module.exports = {

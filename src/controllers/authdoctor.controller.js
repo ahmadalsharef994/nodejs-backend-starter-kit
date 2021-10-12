@@ -33,10 +33,10 @@ const getOnboardingChallenge = async (AuthData) => {
     challenge = 'AUTH_OTPVERIFY';
   } else if (!(await doctorprofileService.fetchbasicdetails(AuthData))) {
     challenge = 'BASIC_DETAILS';
-  } else if (!(await doctorprofileService.fetcheducationdetails(AuthData))) {
-    challenge = 'EDUCATION_DETAILS';
   } else if (!(await documentService.fetchDocumentdata(AuthData))) {
     challenge = 'EDUCATION_DOCUMENTUPLOAD';
+  } else if (!(await doctorprofileService.fetcheducationdetails(AuthData))) {
+    challenge = 'EDUCATION_DETAILS';
   } else if (!(await doctorprofileService.fetchexperiencedetails(AuthData))) {
     challenge = 'EXPERIENCE_DETAILS';
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {

@@ -11,9 +11,9 @@ const submitbasicdetails = async (req, res) => {
   const resultData = await doctorprofileService.submitbasicdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (resultData !== false) {
-    res.status(httpStatus.UNAUTHORIZED).json({ message: 'Basic details Submitted', challenge });
+    res.status(httpStatus.CREATED).json({ message: 'Basic details Submitted', challenge });
   }
-  res.status(httpStatus.OK).json({ message: 'Data already Submitted', challenge });
+  res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge });
 };
 
 const submitprofilepicture = async (req, res) => {
@@ -68,9 +68,9 @@ const submitclinicdetails = catchAsync(async (req, res) => {
   const resultData = await doctorprofileService.submitedClinicdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (!resultData) {
-    res.status(httpStatus.UNAUTHORIZED).json({ message: 'Data already Submitted', challenge });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge });
   } else {
-    res.status(httpStatus.OK).json({ message: 'Clinic details Submitted', challenge });
+    res.status(httpStatus.CREATED).json({ message: 'Clinic details Submitted', challenge });
   }
 });
 

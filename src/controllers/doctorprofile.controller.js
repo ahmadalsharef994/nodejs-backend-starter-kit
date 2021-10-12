@@ -33,7 +33,7 @@ const fetchbasicdetails = catchAsync(async (req, res) => {
 
 const submiteducationdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  await doctorprofileService.submiteducationdetails(req.body, AuthData);
+  const educationsubmitdata = await doctorprofileService.submiteducationdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   res.status(httpStatus.CREATED).json({ message: 'Education Details Submitted!', challenge });
 });

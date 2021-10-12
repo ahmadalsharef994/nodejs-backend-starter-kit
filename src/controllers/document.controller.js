@@ -1,8 +1,8 @@
-// const { Error } = require('mongoose');
+const { Error } = require('mongoose');
 const httpStatus = require('http-status');
 const { authService, documentService } = require('../services');
 const authDoctorController = require('./authdoctor.controller');
-// const ApiError = require('../utils/ApiError');
+const ApiError = require('../utils/ApiError');
 
 const upload = async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);

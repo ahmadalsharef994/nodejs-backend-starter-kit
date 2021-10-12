@@ -1,12 +1,10 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-unused-expressions */
-const { Document } = require('../models/document.model');
-// const ApiError = require('../utils/ApiError');
-// const catchAsync = require('../utils/catchAsync');
+const { Document, Auth } = require('../models');
+const ApiError = require('../utils/ApiError');
+const catchAsync = require('../utils/catchAsync');
 const fileUpload = require('../Microservices/fileUpload.service');
 
 const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {
-  const DocDataExist = await Document.findOne({ auth: AuthData });
+  const DocDataExist = await Document.findOne({ auth: AuthData._id });
   if (!DocDataExist) {
     // If doctor uploaded docx already exists
     const uploadDoc = await Document.create({

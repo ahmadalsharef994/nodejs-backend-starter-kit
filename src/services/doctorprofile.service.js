@@ -33,8 +33,7 @@ const fetcheducationdetails = async (AuthData) => {
 
 const submiteducationdetails = async (EducationDetailBody, AuthData) => {
   const alreayExist = await fetcheducationdetails(AuthData);
-  if (alreayExist == null) {
-    // eslint-disable-next-line no-param-reassign
+  if (!alreayExist) {
     EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
     const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
     return educationDetailDoc;

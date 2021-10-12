@@ -19,7 +19,7 @@ const s3 = new AWS.S3({
 });
 
 const fileFilter = (req, file, cb) => {
-  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf') {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf') {
     cb(null, true);
   } else {
     cb(new Error('Invalid file or data, only JPEG ,PNG and pdf is allowed!'), false);

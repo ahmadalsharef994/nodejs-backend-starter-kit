@@ -79,7 +79,7 @@ userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
  * @param {ObjectId} [excludeUserId] - The id of the user to be excluded
  * @returns {Promise<boolean>}
  */
- userSchema.statics.isPhoneTaken = async function (mobile, excludeUserId) {
+userSchema.statics.isPhoneTaken = async function (mobile, excludeUserId) {
   const user = await this.findOne({ mobile, _id: { $ne: excludeUserId } });
   return !!user;
 };

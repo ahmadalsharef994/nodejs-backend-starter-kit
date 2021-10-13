@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 const request = require('supertest');
 const faker = require('faker');
 const httpStatus = require('http-status');

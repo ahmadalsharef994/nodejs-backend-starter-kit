@@ -28,6 +28,6 @@ router.post('/verify-phone', OnboardingAuth(), validate(authDoctorValidation.ver
 router.post('/resend-otp', OnboardingAuth(), authDoctorController.resendOtp);
 
 // router.get('/checkverification', OnboardingAuth(), authDoctorController.tryverification); //Checking Verification States
-//It is breaking NMC Portal be Cautious
+// It is breaking NMC Portal be Cautious
 
 module.exports = router;

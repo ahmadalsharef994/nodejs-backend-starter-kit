@@ -1,8 +1,6 @@
-const { Error } = require('mongoose');
 const httpStatus = require('http-status');
 const { authService, documentService } = require('../services');
 const authDoctorController = require('./authdoctor.controller');
-const ApiError = require('../utils/ApiError');
 
 const upload = async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -60,11 +58,17 @@ const upload = async (req, res) => {
   );
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (DataQuery !== false) {
-    res.status(httpStatus.OK).json({ message: 'Documents Uploaded', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+    res.status(httpStatus.OK).json({
+      message: 'Documents Uploaded',
+      challenge: challenge.challenge,
+      optionalchallenge: challenge.optionalChallenge,
+    });
   } else {
-    res
-      .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'You are Restricted Contact Support to Update Documents', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+    res.status(httpStatus.BAD_REQUEST).json({
+      message: 'You are Restricted Contact Support to Update Documents',
+      challenge: challenge.challenge,
+      optionalchallenge: challenge.optionalChallenge,
+    });
   }
 };
 

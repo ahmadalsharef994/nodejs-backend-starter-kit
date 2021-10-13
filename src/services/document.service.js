@@ -1,6 +1,6 @@
-const { Document, Auth } = require('../models');
-const ApiError = require('../utils/ApiError');
-const catchAsync = require('../utils/catchAsync');
+/* eslint-disable no-nested-ternary */
+/* eslint-disable no-unused-expressions */
+const { Document } = require('../models');
 const fileUpload = require('../Microservices/fileUpload.service');
 
 const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {

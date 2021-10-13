@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
+/* const axios = require('axios'); */
 const { VerifiedDoctors } = require('../models');
 const ApiError = require('../utils/ApiError');
-const axios = require('axios');
 
 const checkVerification = async (AuthData) => {
   const VerificationExist = await VerifiedDoctors.findOne({ docid: AuthData._id });
@@ -17,7 +17,7 @@ const createVerifiedDoctor = async (docId, AuthData) => {
   throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
 };
 
-/*async function getData(registrationNo) {
+/* async function getData(registrationNo) {
   try {
     let data = JSON.stringify({
       registrationNo: registrationNo,
@@ -41,16 +41,15 @@ const createVerifiedDoctor = async (docId, AuthData) => {
   catch (err) {
       console.error(err);
   }
-}*/
+} */
 
-
-const AutoverifyDoctorByBNMC = async (registrationNo, registrationState, yearofRegistration) => {
+/* const AutoverifyDoctorByBNMC = async (registrationNo, registrationState, yearofRegistration) => {
   const responsestatus = await getData(registrationNo);
   console.log(responsestatus);
-};
+}; */
 
 module.exports = {
   createVerifiedDoctor,
   checkVerification,
-  AutoverifyDoctorByBNMC,
+  // AutoverifyDoctorByBNMC,
 };

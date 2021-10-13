@@ -1,5 +1,4 @@
 const express = require('express');
-// const multer = require('multer');
 const validate = require('../../middlewares/validate');
 const { profilePhotoUpload } = require('../../Microservices');
 const DoctorProfileValidator = require('../../validations/DoctorProfile.validation');

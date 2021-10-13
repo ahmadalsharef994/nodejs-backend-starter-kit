@@ -245,7 +245,7 @@ const tryverification = catchAsync(async (req, res) => {
       res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending', challenge: 'ONBOARDING_ONHOLD' });
     }
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified', challenge: 'ALL_OK' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ALL_OK' });
   }
 });
 

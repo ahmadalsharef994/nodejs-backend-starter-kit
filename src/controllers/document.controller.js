@@ -60,11 +60,11 @@ const upload = async (req, res) => {
   );
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (DataQuery !== false) {
-    res.status(httpStatus.OK).json({ message: 'Documents Uploaded', challenge });
+    res.status(httpStatus.OK).json({ message: 'Documents Uploaded', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   } else {
     res
       .status(httpStatus.BAD_REQUEST)
-      .json({ message: 'You are Restricted Contact Support to Update Documents', challenge });
+      .json({ message: 'You are Restricted Contact Support to Update Documents', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   }
 };
 

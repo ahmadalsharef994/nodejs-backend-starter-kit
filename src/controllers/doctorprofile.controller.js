@@ -11,9 +11,9 @@ const submitbasicdetails = async (req, res) => {
   const resultData = await doctorprofileService.submitbasicdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (resultData !== false) {
-    res.status(httpStatus.CREATED).json({ message: 'Basic details Submitted', challenge });
+    res.status(httpStatus.CREATED).json({ message: 'Basic details Submitted', challenge : challenge.challenge , optionalchallenge: challenge.optionalChallenge });
   }else{
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge : challenge.challenge , optionalchallenge: challenge.optionalChallenge });
   }
 };
 
@@ -37,7 +37,7 @@ const submiteducationdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const educationsubmitdata = await doctorprofileService.submiteducationdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
-  res.status(httpStatus.CREATED).json({ message: 'Education Details Submitted!', challenge });
+  res.status(httpStatus.CREATED).json({ message: 'Education Details Submitted!', challenge : challenge.challenge , optionalchallenge: challenge.optionalChallenge});
 });
 
 const fetcheducationdetails = catchAsync(async (req, res) => {
@@ -54,7 +54,7 @@ const submitexperiencedetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   await doctorprofileService.submitexperiencedetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
-  res.status(httpStatus.CREATED).json({ message: 'Experience Details Submitted!', challenge });
+  res.status(httpStatus.CREATED).json({ message: 'Experience Details Submitted!', challenge : challenge.challenge , optionalchallenge: challenge.optionalChallenge });
 });
 
 const fetchexperiencedetails = catchAsync(async (req, res) => {
@@ -72,9 +72,9 @@ const submitclinicdetails = catchAsync(async (req, res) => {
   const resultData = await doctorprofileService.submitedClinicdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   if (!resultData) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Data already Submitted', challenge : challenge.challenge , optionalchallenge: challenge.optionalChallenge });
   } else {
-    res.status(httpStatus.CREATED).json({ message: 'Clinic details Submitted', challenge });
+    res.status(httpStatus.CREATED).json({ message: 'Clinic details Submitted', challenge : challenge.challenge , optionalchallenge: challenge.optionalChallenge });
   }
 });
 

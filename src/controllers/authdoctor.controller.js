@@ -9,6 +9,7 @@ const {
   verifiedDoctorService,
   doctorprofileService,
   documentService,
+  internalTeamService,
 } = require('../services');
 const { emailService } = require('../Microservices');
 
@@ -27,6 +28,7 @@ ONBOARDING_ONHOLD
 
 const getOnboardingChallenge = async (AuthData) => {
   let challenge = 'ONBOARDING_ONHOLD';
+  let optionalChallenge = "NONE";
   if (AuthData.isEmailVerified === false) {
     challenge = 'AUTH_EMAILVERIFY';
   } else if (AuthData.isMobileVerified === false) {
@@ -38,13 +40,14 @@ const getOnboardingChallenge = async (AuthData) => {
   } else if (!(await doctorprofileService.fetcheducationdetails(AuthData))) {
     challenge = 'EDUCATION_DETAILS';
   } else if (!(await doctorprofileService.fetchexperiencedetails(AuthData))) {
-    challenge = 'EXPERIENCE_DETAILS';
+    optionalChallenge = "EXPERIENCE_DETAILS"
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
-    challenge = 'CLINIC_DETAILS';
+    optionalChallenge = "CLINIC_DETAILS"
   } else if (await verifiedDoctorService.checkVerification(AuthData.auth)) {
-    challenge = 'ONBOARDING_SUCCESS';
+    challenge = "ALL_OK";
+    optionalChallenge = "ONBOARDING_SUCCESS"
   }
-  return challenge;
+  return {challenge,optionalChallenge};
 };
 
 const register = catchAsync(async (req, res) => {
@@ -55,7 +58,7 @@ const register = catchAsync(async (req, res) => {
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
   const challenge = await getOnboardingChallenge(AuthData);
-  res.status(httpStatus.CREATED).json({ AuthData, authtoken, challenge });
+  res.status(httpStatus.CREATED).json({ AuthData, authtoken, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const login = catchAsync(async (req, res) => {
@@ -73,7 +76,7 @@ const login = catchAsync(async (req, res) => {
   const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
   const challenge = await getOnboardingChallenge(AuthData);
-  res.status(httpStatus.OK).json({ AuthData, authtoken, challenge });
+  res.status(httpStatus.OK).json({ AuthData, authtoken, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const logout = catchAsync(async (req, res) => {
@@ -97,13 +100,13 @@ const forgotPassword = catchAsync(async (req, res) => {
     await emailService.sendResetPasswordEmail(req.body.email, OTP);
     await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
-    res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered EmailID', challenge });
+    res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered EmailID', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   } else {
     const AuthData = await authService.getAuthByPhone(req.body.phone);
     // await smsService.sendResetPasswordPhone(req.body.phone, OTP); ***to be implemented***
     await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
-    res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered PhoneNumber', challenge });
+    res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered PhoneNumber', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   }
 });
 
@@ -111,7 +114,7 @@ const resetPassword = catchAsync(async (req, res) => {
   await authService.resetPassword(req.body.email, req.body.resetcode, req.body.newPassword);
   const AuthData = await authService.getAuthByEmail(req.body.email);
   const challenge = await getOnboardingChallenge(AuthData);
-  res.status(httpStatus.OK).json({ message: 'Password Reset Successful', challenge });
+  res.status(httpStatus.OK).json({ message: 'Password Reset Successful', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
@@ -128,9 +131,9 @@ const changeEmail = catchAsync(async (req, res) => {
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   if (result !== false) {
-    return res.status(httpStatus.OK).json({ message: 'Email is updated sucessfully', challenge });
+    return res.status(httpStatus.OK).json({ message: 'Email is updated sucessfully', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'Email Already Verified', challenge });
+  res.status(httpStatus.BAD_REQUEST).json({ message: 'Email Already Verified', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const changePhone = catchAsync(async (req, res) => {
@@ -139,9 +142,9 @@ const changePhone = catchAsync(async (req, res) => {
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   if (result !== false) {
-    return res.status(httpStatus.CREATED).json({ message: 'Phone is updated sucessfully', challenge });
+    return res.status(httpStatus.CREATED).json({ message: 'Phone is updated sucessfully', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'Phone Number already verified', challenge });
+  res.status(httpStatus.BAD_REQUEST).json({ message: 'Phone Number already verified', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
@@ -149,7 +152,7 @@ const verifyEmail = catchAsync(async (req, res) => {
   await otpServices.verifyEmailOtp(req.body.emailcode, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res.status(httpStatus.OK).json({ message: 'Email Verified', challenge });
+  res.status(httpStatus.OK).json({ message: 'Email Verified', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const requestOtp = catchAsync(async (req, res) => {
@@ -158,7 +161,7 @@ const requestOtp = catchAsync(async (req, res) => {
   await otpServices.sendphoneverifyotp(OTP, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res.status(httpStatus.OK).json({ message: 'OTP Sent over Phone',  otp: OTP, challenge });
+  res.status(httpStatus.OK).json({ message: 'OTP Sent over Phone',  otp: OTP, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge});
 });
 
 const verifyPhone = catchAsync(async (req, res) => {
@@ -166,7 +169,7 @@ const verifyPhone = catchAsync(async (req, res) => {
   await otpServices.verifyPhoneOtp(req.body.otp, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res.status(httpStatus.OK).json({ message: 'Phone Number Verified', challenge });
+  res.status(httpStatus.OK).json({ message: 'Phone Number Verified', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });
 
 const resendOtp = catchAsync(async (req, res) => {
@@ -175,8 +178,25 @@ const resendOtp = catchAsync(async (req, res) => {
   await otpServices.resendOtp(OTP, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res.status(httpStatus.OK).json({ message: 'OTP Sent Over Phone', otp: OTP, challenge });
+  res.status(httpStatus.OK).json({ message: 'OTP Sent Over Phone', otp: OTP, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge});
 });
+
+const tryverification = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const educationdata = await doctorprofileService.fetcheducationdetails(AuthData);
+  const verifytry = await internalTeamService.checkVerification(AuthData);
+  if(!verifytry){
+    const try1 = await internalTeamService.AutoverifyDoctorByBNMC(educationdata.registrationNo, educationdata.stateMedicalCouncil, educationdata.yearofRegistration); 
+    if(try1){
+      res.status(httpStatus.OK).json({ message: 'Your Verification Successful',  challenge:"ALL_OK" });
+    }else{
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending',  challenge:"ONBOARDING_ONHOLD" });
+    }           
+  }else{
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified',  challenge:"ALL_OK" });
+  }
+});
+
 
 const onboardingstatus = catchAsync(async (req, res) => {
   const AuthStatus = {};
@@ -231,4 +251,5 @@ module.exports = {
   verifyPhone,
   resendOtp,
   getOnboardingChallenge,
+  tryverification,
 };

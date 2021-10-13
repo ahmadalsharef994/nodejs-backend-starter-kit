@@ -142,7 +142,7 @@ const changePhone = catchAsync(async (req, res) => {
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   if (result !== false) {
-    return res.status(httpStatus.CREATED).json({ message: 'Phone is updated sucessfully', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+    return res.status(httpStatus.CREATED).json({ message: 'Phone is updated Sucessfully', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
   }
   res.status(httpStatus.BAD_REQUEST).json({ message: 'Phone Number already verified', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
 });

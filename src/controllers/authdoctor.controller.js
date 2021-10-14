@@ -192,9 +192,9 @@ const changePhone = catchAsync(async (req, res) => {
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  await otpServices.verifyEmailOtp(req.body.emailcode, AuthData);
-  const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
+  // const AuthData = await authService.getAuthByEmail(req.body.emailcode);
+  const verifystatus = await otpServices.verifyEmailOtp(req.body.emailcode);
+  const AuthDataUpdated = await authService.getAuthById(verifystatus.auth);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res
     .status(httpStatus.OK)

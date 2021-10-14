@@ -16,7 +16,7 @@ router.post('/reset-password', validate(authDoctorValidation.resetPassword), aut
 router.post('/send-verification-email', OnboardingAuth(), authDoctorController.sendVerificationEmail);
 router.post('/change-email', OnboardingAuth(), authDoctorController.changeEmail);
 router.post('/change-phone', OnboardingAuth(), authDoctorController.changePhone);
-router.post('/verify-email', OnboardingAuth(), validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
+router.post('/verify-email', validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
 router.post(
   '/change-password',
   OnboardingAuth(),

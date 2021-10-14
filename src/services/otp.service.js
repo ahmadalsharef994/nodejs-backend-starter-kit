@@ -50,8 +50,8 @@ const sendphoneverifyotp = async (OTP, user) => {
   return OtpDoc;
 };
 
-const verifyEmailOtp = async (emailcode, AuthData) => {
-  const OtpDoc = await Otp.findOne({ auth: AuthData });
+const verifyEmailOtp = async (emailcode) => {
+  const OtpDoc = await Otp.findOne({ emailOtpVerify: emailcode });
   const time = new Date().getTime() - OtpDoc.emailOtpTimestamp.getTime();
 
   if (time > 180000) {
@@ -59,7 +59,7 @@ const verifyEmailOtp = async (emailcode, AuthData) => {
   }
 
   if (emailcode === OtpDoc.emailOtpVerify) {
-    await Auth.updateOne({ _id: AuthData._id }, { $set: { isEmailVerified: true } });
+    await Auth.updateOne({ _id: OtpDoc.auth }, { $set: { isEmailVerified: true } });
     return OtpDoc;
   }
 

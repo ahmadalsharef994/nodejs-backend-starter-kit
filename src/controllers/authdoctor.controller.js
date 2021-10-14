@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const generateOTP = require('../utils/generateOTP');
+const generateString = require('../utils/generateString');
 const checkHeader = require('../utils/chechHeader');
 const {
   authService,
@@ -12,6 +13,7 @@ const {
   internalTeamService,
 } = require('../services');
 const { emailService } = require('../Microservices');
+const ApiError = require('../utils/ApiError');
 
 /* Challenge Heirarchy for Onboarding API
 AUTH_LOGIN
@@ -57,6 +59,7 @@ const register = catchAsync(async (req, res) => {
   const AuthData = await authService.createAuthData(req.body);
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  await otpServices.initiateOTPData(AuthData);
   const challenge = await getOnboardingChallenge(AuthData);
   res
     .status(httpStatus.CREATED)
@@ -98,11 +101,14 @@ const changePassword = catchAsync(async (req, res) => {
 
 const forgotPassword = catchAsync(async (req, res) => {
   const service = req.body.choice;
-  const OTP = generateOTP();
   if (service === 'email') {
+    const resetstring = generateString();
     const AuthData = await authService.getAuthByEmail(req.body.email);
-    await emailService.sendResetPasswordEmail(req.body.email, OTP);
-    await otpServices.sendresetpassotp(OTP, AuthData);
+    if (!AuthData) {
+      throw new ApiError(400, 'No account is registered using this email please provide correct email');
+    }
+    await emailService.sendResetPasswordEmail(req.body.email, resetstring);
+    await otpServices.sendresetpassotp(resetstring, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({
       message: 'Reset Code Sent to Registered EmailID',
@@ -110,7 +116,11 @@ const forgotPassword = catchAsync(async (req, res) => {
       optionalchallenge: challenge.optionalChallenge,
     });
   } else {
+    const OTP = generateOTP();
     const AuthData = await authService.getAuthByPhone(req.body.phone);
+    if (!AuthData) {
+      throw new ApiError(400, 'No account is registered using this email please provide correct email');
+    }
     // await smsService.sendResetPasswordPhone(req.body.phone, OTP); ***to be implemented***
     await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
@@ -135,10 +145,12 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const OTP = generateOTP();
-  await emailService.sendVerificationEmail(AuthData.email, OTP);
-  await otpServices.sendemailverifyotp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'OTP Sent over Email', challenge: 'AUTH_EMAILVERIFY', otp: OTP });
+  const resetstring = generateString();
+  await emailService.sendVerificationEmail(AuthData.email, resetstring);
+  await otpServices.sendemailverifyotp(resetstring, AuthData);
+  res
+    .status(httpStatus.OK)
+    .json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY', otp: resetstring });
 });
 
 const changeEmail = catchAsync(async (req, res) => {

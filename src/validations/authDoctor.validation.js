@@ -44,7 +44,7 @@ const forgotPassword = {
 const resetPassword = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    resetcode: Joi.number().required(),
+    resetcode: Joi.string().required(),
     newPassword: Joi.string().required().custom(password),
     confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
@@ -52,7 +52,7 @@ const resetPassword = {
 
 const verifyEmail = {
   body: Joi.object().keys({
-    emailcode: Joi.number().required(),
+    emailcode: Joi.string().required(),
   }),
 };
 
@@ -64,7 +64,7 @@ const verifyPhone = {
 
 const verifyforget = {
   body: Joi.object().keys({
-    otp: Joi.number().required(),
+    otp: Joi.string().required(),
   }),
 };
 

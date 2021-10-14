@@ -64,7 +64,7 @@ const verifyPhone = {
 
 const verifyforget = {
   body: Joi.object().keys({
-    otp: Joi.number().required(),
+    otp: Joi.string().required(),
   }),
 };
 

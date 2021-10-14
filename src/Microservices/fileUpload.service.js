@@ -33,7 +33,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: multerS3({
-    s3:s3,
+    s3,
     bucket: BUCKET_NAME,
     metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldname });

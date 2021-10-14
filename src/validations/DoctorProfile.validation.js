@@ -44,8 +44,34 @@ const BasicDoctorDetails = {
         'Delhi',
         'Lakshadweep',
         'Puducherry'
-      ), // Add citites list here using valid or contains
-    languages: Joi.array().items(Joi.string().valid('EN', 'HI')), // Add Languages supported here
+      ),
+    languages: Joi.array().items(
+      Joi.string().valid(
+        'Assamese',
+        'Bengali',
+        'Bodo',
+        'Dogri',
+        'Gujarati',
+        'Hindi',
+        'Kannada',
+        'Kashmiri',
+        'Konkani',
+        'Maithili',
+        'Malayalam',
+        'Manipuri',
+        'Marathi',
+        'Nepali',
+        'Odia',
+        'Punjabi',
+        'Sanskrit',
+        'Santali',
+        'Sindhi',
+        'Tamil',
+        'Telugu',
+        'Urdu',
+        'English'
+      )
+    ), // Add Languages supported here
   }),
 };
 

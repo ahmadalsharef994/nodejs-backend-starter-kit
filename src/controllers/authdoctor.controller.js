@@ -105,7 +105,7 @@ const forgotPassword = catchAsync(async (req, res) => {
     const resetstring = generateString();
     const AuthData = await authService.getAuthByEmail(req.body.email);
     if (!AuthData) {
-      throw new ApiError(400, 'No account is registered using this email please provide correct email');
+      throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this email please provide correct email');
     }
     await emailService.sendResetPasswordEmail(req.body.email, resetstring);
     await otpServices.sendresetpassotp(resetstring, AuthData);
@@ -119,7 +119,7 @@ const forgotPassword = catchAsync(async (req, res) => {
     const OTP = generateOTP();
     const AuthData = await authService.getAuthByPhone(req.body.phone);
     if (!AuthData) {
-      throw new ApiError(400, 'No account is registered using this email please provide correct email');
+      throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
     }
     // await smsService.sendResetPasswordPhone(req.body.phone, OTP); ***to be implemented***
     await otpServices.sendresetpassotp(OTP, AuthData);

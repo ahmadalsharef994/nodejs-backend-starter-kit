@@ -10,12 +10,22 @@ const registeruser = {
     mobile: Joi.number().required(),
     role: Joi.valid('user'),
   }),
+  headers: Joi.object().keys({
+    devicehash: Joi.string().required(),
+    devicetype: Joi.string().valid('ios', 'android', 'web', 'others').required(),
+    fcmtoken: Joi.string().required(),
+  }),
 };
 
 const login = {
   body: Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
+  }),
+  headers: Joi.object().keys({
+    devicehash: Joi.string().required(),
+    devicetype: Joi.string().valid('ios', 'android', 'web', 'others').required(),
+    fcmtoken: Joi.string().required(),
   }),
 };
 

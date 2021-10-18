@@ -16,12 +16,22 @@ const registeradmin = {
     mobile: Joi.number().required(),
     role: Joi.valid('admin').required(),
   }),
+  headers: Joi.object().keys({
+    devicehash: Joi.string().required(),
+    devicetype: Joi.string().valid('ios', 'android', 'web', 'others').required(),
+    fcmtoken: Joi.string().required(),
+  }),
 };
 
 const loginadmin = {
   body: Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
+  }),
+  headers: Joi.object().keys({
+    devicehash: Joi.string().required(),
+    devicetype: Joi.string().valid('ios', 'android', 'web', 'others').required(),
+    fcmtoken: Joi.string().required(),
   }),
 };
 

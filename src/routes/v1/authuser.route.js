@@ -3,11 +3,12 @@ const validate = require('../../middlewares/validate');
 const authUserValidation = require('../../validations/authUser.validation');
 const authUserController = require('../../controllers/authuser.controller');
 const authuser = require('../../middlewares/authUser');
+const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 
-router.post('/register', validate(authUserValidation.registeruser), authUserController.register);
-router.post('/login', validate(authUserValidation.login), authUserController.login);
+router.post('/register', deviceauth(), validate(authUserValidation.registeruser), authUserController.register);
+router.post('/login', deviceauth(), validate(authUserValidation.login), authUserController.login);
 router.post('/logout', validate(authUserValidation.logout), authUserController.logout);
 router.post('/forgot-password', validate(authUserValidation.forgotPassword), authUserController.forgotPassword);
 router.post('/reset-password', validate(authUserValidation.resetPassword), authUserController.resetPassword);

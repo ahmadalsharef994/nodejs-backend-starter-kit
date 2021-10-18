@@ -10,22 +10,12 @@ const registerdoctor = {
     mobile: Joi.number().required(),
     role: Joi.valid('doctor').required(),
   }),
-  headers: Joi.object().keys({
-    devicehash: Joi.string().required(),
-    devicetype: Joi.string().valid('ios', 'android', 'web', 'others').required(),
-    fcmtoken: Joi.string().required(),
-  }),
 };
 
 const login = {
   body: Joi.object().keys({
     email: Joi.string().required(),
     password: Joi.string().required(),
-  }),
-  headers: Joi.object().keys({
-    devicehash: Joi.string().required(),
-    devicetype: Joi.string().valid('ios', 'android', 'web', 'others').required(),
-    fcmtoken: Joi.string().required(),
   }),
 };
 
@@ -54,7 +44,7 @@ const forgotPassword = {
 const resetPassword = {
   body: Joi.object().keys({
     email: Joi.string().email().required(),
-    resetcode: Joi.string().required(),
+    resetcode: Joi.number().required(),
     newPassword: Joi.string().required().custom(password),
     confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
@@ -62,7 +52,7 @@ const resetPassword = {
 
 const verifyEmail = {
   body: Joi.object().keys({
-    emailcode: Joi.string().required(),
+    emailcode: Joi.number().required(),
   }),
 };
 
@@ -74,7 +64,7 @@ const verifyPhone = {
 
 const verifyforget = {
   body: Joi.object().keys({
-    otp: Joi.string().required(),
+    otp: Joi.number().required(),
   }),
 };
 

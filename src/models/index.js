@@ -10,3 +10,4 @@ module.exports.DoctorClinic = require('./doctorClinic');
 module.exports.DoctorExperience = require('./doctorExperience.model');
 module.exports.AppointmentPref = require('./appointmentPreference.model');
 module.exports.DoctorRejection = require('./doctorRejection.model');
+module.exports.Appointment = require('./appointment.model');

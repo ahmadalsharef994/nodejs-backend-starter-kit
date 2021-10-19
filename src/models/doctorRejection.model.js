@@ -28,6 +28,10 @@ const DoctorRejectionSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
+    customMsg: {
+      type: String,
+      default: null,
+    },
     rejectedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

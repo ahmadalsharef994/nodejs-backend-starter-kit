@@ -1,20 +1,43 @@
 const httpStatus = require('http-status');
 /* const axios = require('axios'); */
-const { VerifiedDoctors } = require('../models');
+const { DoctorRejection } = require('../models');
+const { verifiedDoctorService, authService } = require('.');
 const ApiError = require('../utils/ApiError');
 
-const checkVerification = async (AuthData) => {
-  const VerificationExist = await VerifiedDoctors.findOne({ docid: AuthData._id });
-  return VerificationExist;
+const acceptDoctorVerification = async (docId, AuthData) => {
+  const doctorVerifiedData = await verifiedDoctorService.createVerifiedDoctor(docId, AuthData._id);
+  return doctorVerifiedData;
 };
 
-const createVerifiedDoctor = async (docId, AuthData) => {
-  const alreayExist = await checkVerification(AuthData);
-  if (!alreayExist) {
-    const doctorverifieddata = await VerifiedDoctors.create({ verifiedby: AuthData._id, docid: docId });
-    return doctorverifieddata;
+const rejectDoctorVerification = async (
+  docId,
+  AuthData,
+  basicDetails,
+  educationDetails,
+  experienceDetails,
+  payoutDetails,
+  rejectionMsg
+) => {
+  const isExist = await authService.getAuthById(docId);
+  if (!isExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Doctor found with given docid, Rejection Unsuccessful!');
   }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
+
+  const isVerified = await verifiedDoctorService.checkVerification(docId);
+  if (isVerified) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor is Already Verified, Rejection Unsuccessful!');
+  }
+
+  const rejectedVerification = await DoctorRejection.create({
+    doctorAuthId: docId,
+    rejectedBy: AuthData,
+    basicDetails,
+    educationDetails,
+    experienceDetails,
+    payoutDetails,
+    rejectionMsg,
+  });
+  return rejectedVerification;
 };
 
 /* async function getData(registrationNo) {
@@ -49,7 +72,7 @@ const createVerifiedDoctor = async (docId, AuthData) => {
 }; */
 
 module.exports = {
-  createVerifiedDoctor,
-  checkVerification,
+  acceptDoctorVerification,
+  rejectDoctorVerification,
   // AutoverifyDoctorByBNMC,
 };

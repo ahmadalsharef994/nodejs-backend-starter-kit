@@ -49,14 +49,14 @@ const sendEmail = (to, subject, template, OTP) => {
 const sendResetPasswordEmail = async (to, OTP) => {
   const subject = 'Reset password';
   const template = 'index';
-  const emaillink = `https://app.medzgo.com/resetpassword?resetcode=${OTP}`;
+  const emaillink = `${OTP}`;
   await sendEmail(to, subject, template, emaillink);
 };
 
 const sendVerificationEmail = async (to, OTP) => {
   const subject = 'Email Verification';
   const template = 'index';
-  const emaillink = `https://app.medzgo.com/emailverification?emailcode=${OTP}`;
+  const emaillink = `${OTP}`;
   await sendEmail(to, subject, template, emaillink);
 };
 module.exports = {

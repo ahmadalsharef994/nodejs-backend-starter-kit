@@ -13,7 +13,7 @@ const otpSchema = mongoose.Schema(
       default: null,
     },
     emailOtpVerify: {
-      type: String,
+      type: Number,
       default: null,
     },
     emailOtpTimestamp: {
@@ -21,7 +21,7 @@ const otpSchema = mongoose.Schema(
       default: null,
     },
     resetPasswordOtpVerify: {
-      type: String,
+      type: Number,
       default: null,
     },
     resetPasswordOtpTimestamp: {

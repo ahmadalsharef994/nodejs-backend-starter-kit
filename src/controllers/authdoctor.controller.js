@@ -1,7 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const generateOTP = require('../utils/generateOTP');
-const generateString = require('../utils/generateString');
 const checkHeader = require('../utils/chechHeader');
 const {
   authService,
@@ -101,14 +100,14 @@ const changePassword = catchAsync(async (req, res) => {
 
 const forgotPassword = catchAsync(async (req, res) => {
   const service = req.body.choice;
+  const OTP = generateOTP();
   if (service === 'email') {
-    const resetstring = generateString();
     const AuthData = await authService.getAuthByEmail(req.body.email);
     if (!AuthData) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this email please provide correct email');
     }
-    await emailService.sendResetPasswordEmail(req.body.email, resetstring);
-    await otpServices.sendresetpassotp(resetstring, AuthData);
+    await emailService.sendResetPasswordEmail(req.body.email, OTP);
+    await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({
       message: 'Reset Code Sent to Registered EmailID',
@@ -116,7 +115,6 @@ const forgotPassword = catchAsync(async (req, res) => {
       optionalchallenge: challenge.optionalChallenge,
     });
   } else {
-    const OTP = generateOTP();
     const AuthData = await authService.getAuthByPhone(req.body.phone);
     if (!AuthData) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
@@ -145,12 +143,10 @@ const resetPassword = catchAsync(async (req, res) => {
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const resetstring = generateString();
-  await emailService.sendVerificationEmail(AuthData.email, resetstring);
-  await otpServices.sendemailverifyotp(resetstring, AuthData);
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY', otp: resetstring });
+  const OTP = generateOTP();
+  await emailService.sendVerificationEmail(AuthData.email, OTP);
+  await otpServices.sendemailverifyotp(OTP, AuthData);
+  res.status(httpStatus.OK).json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY', otp: OTP });
 });
 
 const changeEmail = catchAsync(async (req, res) => {

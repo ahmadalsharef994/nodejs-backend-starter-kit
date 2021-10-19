@@ -9,6 +9,9 @@ const router = express.Router();
 router
   .route('/verifydoctor')
   .post(authAdmin(), validate(InternalTeamValidator.verifydoctor), InternalTeamController.verifydoctor);
+router
+  .route('/rejectdoctor')
+  .post(authAdmin(), validate(InternalTeamValidator.rejectdoctor), InternalTeamController.rejectdoctor);
 router.post('/restricted/adminsignup', validate(InternalTeamValidator.registeradmin), InternalTeamController.registeradmin);
 router.post('/restricted/adminsignin', validate(InternalTeamValidator.loginadmin), InternalTeamController.loginadmin);
 

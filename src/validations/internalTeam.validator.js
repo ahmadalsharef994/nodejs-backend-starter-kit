@@ -7,6 +7,17 @@ const verifydoctor = {
   }),
 };
 
+const rejectdoctor = {
+  body: Joi.object().keys({
+    docid: Joi.string().required(),
+    basicDetails: Joi.boolean().required(),
+    educationDetails: Joi.boolean().required(),
+    experienceDetails: Joi.boolean().required(),
+    payoutdetails: Joi.boolean().required(),
+    rejectionMsg: Joi.array().required(),
+  }),
+};
+
 const registeradmin = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
@@ -27,6 +38,7 @@ const loginadmin = {
 
 module.exports = {
   verifydoctor,
+  rejectdoctor,
   registeradmin,
   loginadmin,
 };

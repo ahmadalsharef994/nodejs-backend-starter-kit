@@ -50,6 +50,9 @@ const DoctorRejectionSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 DoctorRejectionSchema.plugin(toJSON);
+/**
+ * @typedef DoctorRejection
+ */
 
 const DoctorRejection = mongoose.model('DoctorRejection', DoctorRejectionSchema);
 

@@ -11,3 +11,7 @@ module.exports.DoctorExperience = require('./doctorExperience.model');
 module.exports.AppointmentPref = require('./appointmentPreference.model');
 module.exports.DoctorRejection = require('./doctorRejection.model');
 module.exports.Appointment = require('./appointment.model');
+module.exports.Prescription = require('./prescription.model');
+module.exports.Feedback = require('./feedback.model');
+module.exports.Followup = require('./followup.model');
+module.exports.DoctorRequest = require('./doctorRequest.model');

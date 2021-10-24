@@ -4,6 +4,7 @@ const multer = require('multer');
 const multerS3 = require('multer-s3');
 const path = require('path');
 const uuid = require('uuid');
+const Sharp = require('sharp');
 
 dotenv.config();
 const ID = process.env.AWSID;
@@ -44,6 +45,41 @@ const publicupload = multer({
   limits: { fileSize: 100000000 },
 });
 
+const thumbnail = (filepath) => {
+  Sharp(filepath)
+    .resize(161, 161)
+    .toBuffer()
+    .then((buffer) => {
+      params.Body = buffer;
+      params.Key = `thumbnail/${uuid()}${ext}`;
+      this.s3.upload(params, function (err, data) {
+        if (err) {
+          console.log(err);
+          return err;
+        }
+        return data;
+        
+      });
+    });
+};
+
+const deleteAvatar = (key) => {
+  const params = {
+    Bucket: PUBLICBUCKET_NAME,
+    Key: key,
+  };
+
+  s3.deleteObject(params, function (err, data) {
+    if (err) {
+      console.log(err, err.stack);
+    } else {
+      console.log(data);
+    }
+  });
+};
+
 module.exports = {
   publicupload,
+  deleteAvatar,
+  thumbnail,
 };

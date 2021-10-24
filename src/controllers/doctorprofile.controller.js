@@ -4,6 +4,7 @@ const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const doctorprofileService = require('../services/doctorprofile.service');
 const authDoctorController = require('./authdoctor.controller');
+const profilePhotoUpload = require('../Microservices/profilePhotoUpload')
 const { authService } = require('../services');
 
 const submitbasicdetails = async (req, res) => {
@@ -27,8 +28,30 @@ const submitbasicdetails = async (req, res) => {
 
 const submitprofilepicture = async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const returndata = await doctorprofileService.submitprofilepicture(req.files.avatar[0].location, AuthData);
-  res.status(httpStatus.OK).json(returndata);
+  let profilePhoto = '';
+  try {
+    profilePhoto = req.files.avatar[0].location;
+  } catch (err) {
+    profilePhoto = null;
+  }
+  const returnThumbnail = await profilePhotoUpload.thumbnail(profilePhoto);
+  const returndata = await doctorprofileService.submitprofilepicture(profilePhoto, AuthData, returnThumbnail);
+  if (returndata !== false & returnThumbnail !== false) {
+    res.status(httpStatus.OK).json({ message: 'profile picture added' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'profile picture not added kindlly check your input' });
+  }
+};
+
+const updateprofilepicture = async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
+  const returnThumbnail = await profilePhotoUpload.thumbnail(profilePhoto);
+  if (returndata !== false &  returnThumbnail !== false) {
+    res.status(httpStatus.OK).json({ message: 'profile picture updated' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
+  }
 };
 
 const fetchbasicdetails = catchAsync(async (req, res) => {
@@ -122,4 +145,5 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
+  updateprofilepicture,
 };

@@ -17,6 +17,21 @@ const createAuthData = async (authBody) => {
   return auth;
 };
 
+const createGoogleAuthData = async (profileBody) => {
+  try {
+    let user = await Auth.findOne({ googleId: profile.id })
+    if (user) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
+    } else {
+      // if user is not preset in our database save user data to database.
+      const auth = await Auth.create(profileBody);
+      return auth;
+    }
+  } catch (err) {
+    console.error(err)
+  }
+};
+
 /**
  * Query for authusers
  * @param {Object} filter - Mongo filter
@@ -144,6 +159,7 @@ const resetPassword = async (email, resetcode, newPassword) => {
 module.exports = {
   createAuthData,
   queryAuthData,
+  createGoogleAuthData,
   getAuthById,
   getAuthByEmail,
   getAuthByPhone,

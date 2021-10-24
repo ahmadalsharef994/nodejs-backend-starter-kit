@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
 const { DoctorBasic, DoctorEducation, DoctorClinic, DoctorExperience } = require('../models');
 const ApiError = require('../utils/ApiError');
 
@@ -18,10 +19,22 @@ const submitbasicdetails = async (BasicDetailBody, AuthData) => {
   return false;
 };
 
-const submitprofilepicture = async (ProfilePhoto, AuthData) => {
+const submitprofilepicture = async (ProfilePhoto, AuthData, returnThumbnail) => {
   const alreadyExist = await fetchbasicdetails(AuthData);
   if (alreadyExist) {
-    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
+    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail: returnThumbnail } });
+    return 'profile Picture updated';
+  }
+  return false;
+};
+
+const updateprofilepicture = async (ProfilePhoto, AuthData) => {
+  const alreadyExist = await fetchbasicdetails(AuthData);
+  if (alreadyExist) {
+    const avatarUrl = await DoctorBasic.findOne({ _id: alreadyExist._id });
+    //need to rethink once s3 is working properly
+    await profilePhotoUpload.deleteAvatar(avaterUrl.avatar, avaterUrl.thumbnail );
+    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail: returnThumbnail } });
     return 'profile Picture updated';
   }
 };
@@ -84,4 +97,5 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
+  updateprofilepicture,
 };

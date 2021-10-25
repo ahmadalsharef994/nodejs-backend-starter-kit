@@ -71,7 +71,7 @@ const login = catchAsync(async (req, res) => {
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   let authtoken = '';
   if (verifiedcheckData) {
-    authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.Docid);
+    authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.docid);
   } else {
     authtoken = await tokenService.generateDoctorToken(AuthData.id);
   }

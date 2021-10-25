@@ -52,6 +52,9 @@ const sendphoneverifyotp = async (OTP, user) => {
 
 const verifyEmailOtp = async (emailcode) => {
   const OtpDoc = await Otp.findOne({ emailOtpVerify: emailcode });
+  if (!OtpDoc) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
+  }
   const time = new Date().getTime() - OtpDoc.emailOtpTimestamp.getTime();
 
   if (time > 180000) {
@@ -68,6 +71,9 @@ const verifyEmailOtp = async (emailcode) => {
 
 const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
+  if (!OtpDoc) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
+  }
   const time = new Date().getTime() - OtpDoc.resetPasswordOtpTimestamp.getTime();
 
   if (time > 180000) {
@@ -83,6 +89,9 @@ const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
 
 const verifyPhoneOtp = async (otp, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
+  if (!OtpDoc) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
+  }
   const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
 
   if (time > 30000) {

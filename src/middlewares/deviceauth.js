@@ -8,8 +8,17 @@ const deviceauth = () => async (req, res, next) => {
     if (devicehash === undefined || devicetype === undefined || fcmtoken === undefined) {
       res.status(httpStatus.BAD_REQUEST).json({ message: 'Device Registration Failed' });
     }
-    if (devicetype !== ('web' || 'ios' || 'android' || 'unknown')) {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'DeviceType Authentication Failed' });
+    if (devicetype !== 'web') {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'DeviceType WEB Authentication Failed' });
+    }
+    if (devicetype !== 'ios') {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'DeviceType IOS Authentication Failed' });
+    }
+    if (devicetype !== 'android') {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'DeviceType Android Authentication Failed' });
+    }
+    if (devicetype !== 'unknown') {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'DeviceType Unknown Authentication Failed' });
     } else {
       next();
     }

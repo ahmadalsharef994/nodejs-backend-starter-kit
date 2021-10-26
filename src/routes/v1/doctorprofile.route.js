@@ -4,6 +4,9 @@ const { profilePhotoUpload } = require('../../Microservices');
 const DoctorProfileValidator = require('../../validations/DoctorProfile.validation');
 const DoctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
+const authdoctorverified = require('../../middlewares/authDoctorVerified');
+const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
+const preferenceValidator = require('../../validations/appointmentpreference.validation');
 
 const router = express.Router();
 
@@ -53,5 +56,22 @@ router
     validate(DoctorProfileValidator.ClinicDoctorDetails),
     DoctorProfileController.submitclinicdetails
   );
+
+router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showfollowups);
+router
+  .route('/updatePref')
+  .put(
+    authdoctorverified(),
+    validate(preferenceValidator.PreferenceDetails),
+    appointmentPreferenceController.updateAppointmentPreference
+  );
+router
+  .route('/createPref')
+  .post(
+    authdoctorverified(),
+    validate(preferenceValidator.PreferenceDetails),
+    appointmentPreferenceController.submitAppointmentPreference
+  );
+router.route('/getappointments').post(appointmentPreferenceController.showappointments);
 
 module.exports = router;

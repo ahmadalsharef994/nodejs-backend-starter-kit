@@ -4,8 +4,8 @@ const ApiError = require('../utils/ApiError');
 const docuniqueidgenerator = require('../utils/generateDoctorID');
 const { authService } = require('.');
 
-const checkVerification = async (doctorauthid) => {
-  const VerificationExist = await VerifiedDoctors.findOne({ doctorauthid });
+const checkVerification = async (authid) => {
+  const VerificationExist = await VerifiedDoctors.findOne({ doctorauthid: authid });
   return VerificationExist;
 };
 

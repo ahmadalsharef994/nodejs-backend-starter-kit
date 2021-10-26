@@ -65,7 +65,7 @@ const AppointmentPrefSchema = mongoose.Schema(
       required: true,
       index: true,
     },
-    auth: {
+    doctorAuthId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
     },

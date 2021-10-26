@@ -94,7 +94,7 @@ const verifyPhoneOtp = async (otp, AuthData) => {
   }
   const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
 
-  if (time > 30000) {
+  if (time > 60000) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
   }
 

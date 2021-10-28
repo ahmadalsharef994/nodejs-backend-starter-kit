@@ -2,8 +2,8 @@ const express = require('express');
 const authRouteDoctor = require('./authdoctor.route');
 const authRouteUser = require('./authuser.route');
 const doctorProfileRoute = require('./doctorprofile.route');
+const doctorAppointmentRoute = require('./doctorappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
-const appointmentPreferenceRoute = require('./appointmentpreference.route');
 const document = require('./document.route');
 
 const router = express.Router();
@@ -16,6 +16,10 @@ const defaultRoutes = [
   {
     path: '/doctor/profile', // Doctor Profile Route
     route: doctorProfileRoute,
+  },
+  {
+    path: '/doctor/appointment', // Doctor Appointment Route
+    route: doctorAppointmentRoute,
   },
   {
     path: '/doctor/document',
@@ -32,10 +36,6 @@ const defaultRoutes = [
   {
     path: '/internalteam',
     route: internalTeamRoute, // Internal Team API
-  },
-  {
-    path: '/appointmentpreference',
-    route: appointmentPreferenceRoute, // Appointment Pref API
   },
 ];
 

@@ -49,13 +49,15 @@ const sendEmail = (to, subject, template, OTP) => {
 const sendResetPasswordEmail = async (to, OTP) => {
   const subject = 'Reset password';
   const template = 'index';
-  await sendEmail(to, subject, template, OTP);
+  const emaillink = `${OTP}`;
+  await sendEmail(to, subject, template, emaillink);
 };
 
 const sendVerificationEmail = async (to, OTP) => {
   const subject = 'Email Verification';
   const template = 'index';
-  await sendEmail(to, subject, template, OTP);
+  const emaillink = `${OTP}`;
+  await sendEmail(to, subject, template, emaillink);
 };
 module.exports = {
   transport,

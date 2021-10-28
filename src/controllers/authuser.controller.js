@@ -14,6 +14,7 @@ const register = catchAsync(async (req, res) => {
   const devicetype = req.headers.devicetype;
   const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  await otpServices.initiateOTPData(AuthData);
   res.status(httpStatus.CREATED).json({ AuthData, authtoken });
 });
 

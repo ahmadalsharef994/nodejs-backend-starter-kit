@@ -4,13 +4,10 @@ const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
 
 const createPreference = async (body, doctorID, AuthData, update = false) => {
-  const alreadyExist = await AppointmentPreference.findOne({ docid: doctorID, auth: AuthData });
+  const alreadyExist = await AppointmentPreference.findOne({ docid: doctorID, doctorAuthId: AuthData });
   if (alreadyExist && !update) {
     return Promise.reject(
-      new ApiError(
-        httpStatus.FORBIDDEN,
-        'Appointment preference already exist!. If you wish to make any changes in your preference please update them instead!'
-      )
+      new ApiError(httpStatus.FORBIDDEN, 'Appointment preference already exist!. Please update them instead!')
     );
   }
 
@@ -31,7 +28,7 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
     return Promise.reject(
       new ApiError(
         httpStatus.FORBIDDEN,
-        'Difference between "Start Time" and "End Time" should be multiple of 40 and atleast 120'
+        'Difference between "Start Time" and "End Time" should be atleast 120 mins and divisible by 40'
       )
     );
   }
@@ -73,7 +70,7 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
 
   if (!update) {
     result.docid = doctorID;
-    result.auth = AuthData;
+    result.doctorAuthId = AuthData;
     await AppointmentPreference.create(result);
   }
   return result;
@@ -82,7 +79,7 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
 const updatePreference = async (body, doctorId, AuthData) => {
   const result = await createPreference(body, doctorId, AuthData, true);
   const promise = await AppointmentPreference.findOneAndUpdate(
-    { docid: doctorId, auth: AuthData },
+    { docid: doctorId, doctorAuthId: AuthData },
     result,
     { useFindAndModify: false, new: true },
     (err, docs) => {
@@ -95,17 +92,17 @@ const updatePreference = async (body, doctorId, AuthData) => {
   return promise;
 };
 
-const getfollowups = async (doctorId, AuthData) => {
+const getfollowups = async (doctorId) => {
   const promise = await AppointmentPreference.findOne(
-    { docid: doctorId, auth: AuthData },
+    { docid: doctorId },
     { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1, auth: 1 }
   );
   return promise;
 };
 
-const getappointments = async (doctorId, AuthData) => {
+const getappointments = async (doctorId) => {
   const promise = await AppointmentPreference.findOne(
-    { docid: doctorId, auth: AuthData },
+    { docid: doctorId },
     { MON_A: 1, TUE_A: 1, WED_A: 1, THU_A: 1, FRI_A: 1, SAT_A: 1, SUN_A: 1, docid: 1, auth: 1 }
   );
   return promise;

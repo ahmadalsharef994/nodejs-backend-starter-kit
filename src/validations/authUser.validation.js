@@ -52,7 +52,7 @@ const resetPassword = {
 
 const verifyEmail = {
   body: Joi.object().keys({
-    emailcode: Joi.string().required(),
+    emailcode: Joi.number().required(),
   }),
 };
 

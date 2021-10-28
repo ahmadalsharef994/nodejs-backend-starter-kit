@@ -3,6 +3,7 @@ const validate = require('../../middlewares/validate');
 const authUserValidation = require('../../validations/authUser.validation');
 const authUserController = require('../../controllers/authuser.controller');
 const authuser = require('../../middlewares/authUser');
+const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 

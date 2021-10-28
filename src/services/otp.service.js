@@ -2,6 +2,15 @@ const httpStatus = require('http-status');
 const { Otp, Auth } = require('../models');
 const ApiError = require('../utils/ApiError');
 
+const initiateOTPData = async (user) => {
+  const authDataExist = await Otp.findOne({ auth: user });
+  if (!authDataExist) {
+    const OtpDoc = await Otp.create({ auth: user });
+    return OtpDoc;
+  }
+  throw new ApiError(400, 'Something went Wrong!');
+};
+
 const sendresetpassotp = async (OTP, user) => {
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
@@ -41,8 +50,11 @@ const sendphoneverifyotp = async (OTP, user) => {
   return OtpDoc;
 };
 
-const verifyEmailOtp = async (emailcode, AuthData) => {
-  const OtpDoc = await Otp.findOne({ auth: AuthData });
+const verifyEmailOtp = async (emailcode) => {
+  const OtpDoc = await Otp.findOne({ emailOtpVerify: emailcode });
+  if (!OtpDoc) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
+  }
   const time = new Date().getTime() - OtpDoc.emailOtpTimestamp.getTime();
 
   if (time > 180000) {
@@ -50,7 +62,7 @@ const verifyEmailOtp = async (emailcode, AuthData) => {
   }
 
   if (emailcode === OtpDoc.emailOtpVerify) {
-    await Auth.updateOne({ _id: AuthData._id }, { $set: { isEmailVerified: true } });
+    await Auth.updateOne({ _id: OtpDoc.auth }, { $set: { isEmailVerified: true } });
     return OtpDoc;
   }
 
@@ -59,6 +71,9 @@ const verifyEmailOtp = async (emailcode, AuthData) => {
 
 const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
+  if (!OtpDoc) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
+  }
   const time = new Date().getTime() - OtpDoc.resetPasswordOtpTimestamp.getTime();
 
   if (time > 180000) {
@@ -74,9 +89,12 @@ const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
 
 const verifyPhoneOtp = async (otp, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
+  if (!OtpDoc) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
+  }
   const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
 
-  if (time > 180000) {
+  if (time > 60000) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
   }
 
@@ -103,7 +121,7 @@ const resendOtp = async (OTP, user) => {
 const changeEmail = async (email, user) => {
   const authDataExist = await Auth.findOne({ email });
   if (!authDataExist) {
-    const checkEmailVerified = await Auth.findOne({ isEmailVerified: true });
+    const checkEmailVerified = await Auth.findOne({ _id: user._id, isEmailVerified: true });
     if (checkEmailVerified === null) {
       await Auth.updateOne({ _id: user._id }, { $set: { email } });
       return 'Sucessfully Updated';
@@ -116,7 +134,7 @@ const changeEmail = async (email, user) => {
 const changePhone = async (mobile, user) => {
   const authDataExist = await Auth.findOne({ mobile });
   if (!authDataExist) {
-    const checkemailverified = await Auth.findOne({ isMobileVerified: true });
+    const checkemailverified = await Auth.findOne({ _id: user._id, isMobileVerified: true });
     if (checkemailverified === null) {
       await Auth.updateOne({ _id: user._id }, { $set: { mobile } });
       return 'Sucessfully Updated';
@@ -128,6 +146,7 @@ const changePhone = async (mobile, user) => {
 };
 
 module.exports = {
+  initiateOTPData,
   sendphoneverifyotp,
   sendemailverifyotp,
   sendresetpassotp,

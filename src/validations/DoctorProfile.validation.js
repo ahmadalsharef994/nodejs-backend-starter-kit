@@ -44,8 +44,34 @@ const BasicDoctorDetails = {
         'Delhi',
         'Lakshadweep',
         'Puducherry'
-      ), // Add citites list here using valid or contains
-    languages: Joi.array().items(Joi.string().valid('EN', 'HI')), // Add Languages supported here
+      ),
+    languages: Joi.array().items(
+      Joi.string().valid(
+        'Assamese',
+        'Bengali',
+        'Bodo',
+        'Dogri',
+        'Gujarati',
+        'Hindi',
+        'Kannada',
+        'Kashmiri',
+        'Konkani',
+        'Maithili',
+        'Malayalam',
+        'Manipuri',
+        'Marathi',
+        'Nepali',
+        'Odia',
+        'Punjabi',
+        'Sanskrit',
+        'Santali',
+        'Sindhi',
+        'Tamil',
+        'Telugu',
+        'Urdu',
+        'English'
+      )
+    ), // Add Languages supported here
   }),
 };
 
@@ -97,14 +123,87 @@ const EducationDoctorDetails = {
       'Vidharba Medical Council',
       'West Bengal Medical Council'
     ),
-    registrationNo: Joi.number().required(),
+    registrationNo: Joi.string().required(),
   }),
 };
 
 const ExperienceDoctorDetails = {
   body: Joi.object().keys({
     mainstream: Joi.string().required(), // Add MainStream Validator
-    specialization: Joi.array().required(), // Add Speciality Validator
+    specialization: Joi.array().items(
+      Joi.string().valid(
+        'Aerospace Medicine',
+        'Anaesthesia',
+        'Anaesthesiology',
+        'Bariatric Surgery',
+        'Cardiology - Interventional',
+        'Cardiology - Non Interventional',
+        'Cardiothoracic And Vascular Surgery',
+        'Centre For Spinal Diseases',
+        'Clinical Haematology And BMT',
+        'Corneal Transplant',
+        'Community medicine',
+        'Critical Care Medicine',
+        'Dermatology And Cosmetology',
+        'Dermatology, Venereology & Leprosy',
+        'Ear Nose Throat Head And Neck(ENT)',
+        'Emergency Medicine',
+        'Endocrinology',
+        'Family Medicine',
+        'Forensic Medicine',
+        'General Medicine',
+        'General Surgery',
+        'Geriatrics',
+        'Immunohematology and Blood transfusion',
+        'Infectious Diseases',
+        'Internal Medicine',
+        'In-Vitro Fertilisation (IVF)',
+        'Laboratory Medicine',
+        'Liver Transplant & Hepatic Surgery',
+        'Marine Medicine',
+        'Maxillofacial Surgery',
+        'Medical Gastroenterology',
+        'Medical Genetics',
+        'Medical Oncology & Clinical Haematology',
+        'Medical Oncology',
+        'Microbiology',
+        'Minimally Invasive Gynaecology',
+        'Neonatology',
+        'Nephrology',
+        'Neuro Modulation',
+        'Nutrition & Dietetics',
+        'Neurology',
+        'Neurosurgery',
+        'Obstetrics And Gynaecology',
+        'Ophthalmology',
+        'Orthopaedics',
+        'Otorhinolaryngology',
+        'Pain Management',
+        'Paediatric Surgery',
+        'Palliative Medicine',
+        'Pathology',
+        'Pharmacology',
+        'Physiotherapy',
+        'Plastic Surgery',
+        'Psychiatry',
+        'Pulmonology',
+        'Pulmonary Medicine',
+        'Radiodiagnosis',
+        'Radiotherapy',
+        'Renal Transplant',
+        'Reproductive Medicine & IVF',
+        'Respiratory Medicine',
+        'Rheumatology',
+        'Robotic Surgery',
+        'Surgical Gastroenterology',
+        'Surgical Oncology',
+        'Traumatology & Surgery',
+        'Urology',
+        'Vascular and endovascular surgery',
+        'General Physician',
+        'Others'
+      )
+    ), // Add Speciality Validator
     skills: Joi.array().required(), // Add Skills Validator
     experience: Joi.number().required(),
   }),

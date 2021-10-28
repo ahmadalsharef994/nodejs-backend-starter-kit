@@ -1,12 +1,27 @@
 const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
-const { authService, verifiedDoctorService, tokenService } = require('../services');
+const { authService, verifiedDoctorService, internalTeamService, tokenService } = require('../services');
 
 const verifydoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   await verifiedDoctorService.createVerifiedDoctor(req.body.docid, AuthData);
   res.status(httpStatus.CREATED).json({ message: 'Doctor Verified' });
+});
+
+const rejectdoctor = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const { docid, basicDetails, educationDetails, experienceDetails, payoutDetails, rejectionMsg } = req.body;
+  await internalTeamService.rejectDoctorVerification(
+    docid,
+    AuthData,
+    basicDetails,
+    educationDetails,
+    experienceDetails,
+    payoutDetails,
+    rejectionMsg
+  );
+  res.status(httpStatus.CREATED).json({ message: 'Doctor Verification Rejected Successfully!' });
 });
 
 const registeradmin = catchAsync(async (req, res) => {
@@ -46,6 +61,7 @@ const loginadmin = catchAsync(async (req, res) => {
 
 module.exports = {
   verifydoctor,
+  rejectdoctor,
   registeradmin,
   loginadmin,
 };

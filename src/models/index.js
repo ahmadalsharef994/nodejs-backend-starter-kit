@@ -15,3 +15,4 @@ module.exports.Prescription = require('./prescription.model');
 module.exports.Feedback = require('./feedback.model');
 module.exports.Followup = require('./followup.model');
 module.exports.DoctorRequest = require('./doctorRequest.model');
+module.exports.DoctorPayout = require('./payout.model');

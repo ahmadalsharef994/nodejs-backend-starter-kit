@@ -211,11 +211,21 @@ const ExperienceDoctorDetails = {
 
 const ClinicDoctorDetails = {
   body: Joi.object().keys({
-    clinicName: Joi.string().required(), // Add MainStream Validator
-    AddressFirstline: Joi.string().required(), // Add Speciality Validator
-    AddressSecondline: Joi.string().required(), // Add Skills Validator
+    clinicName: Joi.string().required(),
+    AddressFirstline: Joi.string().required(),
+    AddressSecondline: Joi.string().required(),
     clinicTelephone: Joi.number().required(),
     pin: Joi.number().required(),
+  }),
+};
+
+const PayoutsDoctorDetails = {
+  body: Joi.object().keys({
+    BankAccNo: Joi.string().required(),
+    IFSC: Joi.string().required(),
+    AccountName: Joi.string().required(),
+    AadharCardNo: Joi.string().required(),
+    PanCardNo: Joi.string().required(),
   }),
 };
 
@@ -224,4 +234,5 @@ module.exports = {
   EducationDoctorDetails,
   ExperienceDoctorDetails,
   ClinicDoctorDetails,
+  PayoutsDoctorDetails,
 };

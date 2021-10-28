@@ -84,5 +84,15 @@ router
     appointmentPreferenceController.submitAppointmentPreference
   );
 router.route('/getappointments').post(appointmentPreferenceController.showappointments);
+router.route('/payout-details').get(authdoctornonverified(), DoctorProfileController.fetchpayoutsdetails);
+router
+  .route('/payout-details')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.PayoutsDoctorDetails),
+    DoctorProfileController.submitpayoutsdetails
+  );
+
+router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

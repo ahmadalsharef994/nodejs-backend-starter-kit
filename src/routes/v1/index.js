@@ -3,6 +3,7 @@ const authRouteDoctor = require('./authdoctor.route');
 const authRouteUser = require('./authuser.route');
 const doctorProfileRoute = require('./doctorprofile.route');
 const doctorAppointmentRoute = require('./doctorappointment.route');
+const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
 const document = require('./document.route');
 
@@ -32,6 +33,10 @@ const defaultRoutes = [
   {
     path: '/auth/user', // User Auth Endpoints
     route: authRouteUser,
+  },
+  {
+    path: '/user/appointment', // User Appointment Route
+    route: userAppointmentRoute,
   },
   {
     path: '/internalteam',

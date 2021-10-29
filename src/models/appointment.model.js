@@ -27,11 +27,11 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     StartTime: {
-      type: Date,
-      default: false,
+      type: String,
+      default: null,
     },
     EndTime: {
-      type: Date,
+      type: String,
       default: null,
     },
     UserDocument: {
@@ -70,7 +70,7 @@ const AppointmentSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    DoctorRescheduleding: {
+    DoctorRescheduled: {
       type: String,
       default: null,
     },

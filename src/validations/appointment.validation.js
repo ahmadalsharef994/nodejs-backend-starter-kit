@@ -1,11 +1,11 @@
 const Joi = require('joi');
 
-const initiateappointment = {
+const joinAppointmentDoctor = {
   body: Joi.object().keys({
     appointmentInit: Joi.string().required(),
   }),
 };
 
 module.exports = {
-  initiateappointment,
+  joinAppointmentDoctor,
 };

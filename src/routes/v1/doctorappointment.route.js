@@ -13,4 +13,25 @@ router.post(
   appointmentController.initiateappointmentDoctor
 );
 
+router.get(
+  '/:appointmentId',
+  authdoctornonverified(),
+  validate(appointmentValidation.getappointment),
+  appointmentController.getappointmentDoctor
+);
+
+router.post(
+  ':appointmentId/prescription',
+  authdoctornonverified(),
+  validate(appointmentValidation.createprescription),
+  appointmentController.createPrescription
+);
+
+router.get(
+  ':appointmentId/prescription',
+  authdoctornonverified(),
+  validate(appointmentValidation.getprescription),
+  appointmentController.getPrescription
+);
+
 module.exports = router;

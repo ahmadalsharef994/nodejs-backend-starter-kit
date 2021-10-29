@@ -31,7 +31,13 @@ const submitAppointmentDetails = async (docId, userAuth, status, type, startTime
   return bookedAppointment;
 };
 
+const getappointmentDoctor = async (appointmentID) => {
+  const DoctorAppointmentExist = await Appointment.findOne({ _id: appointmentID });
+  return DoctorAppointmentExist;
+};
+
 module.exports = {
   initiateappointmentviaDoctor,
   submitAppointmentDetails,
+  getappointmentDoctor,
 };

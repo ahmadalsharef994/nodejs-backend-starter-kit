@@ -10,6 +10,10 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
+    googleId: {
+      type: String,
+      default: null,
+    },
     email: {
       type: String,
       required: true,
@@ -25,7 +29,7 @@ const userSchema = mongoose.Schema(
     },
     mobile: {
       type: String,
-      required: true,
+      default: false,
       trim: true,
       unique: true,
     },

@@ -1,16 +1,18 @@
+/* eslint-disable no-undef */
 const dotenv = require('dotenv');
 const AWS = require('aws-sdk');
 const multer = require('multer');
 const multerS3 = require('multer-s3');
 const path = require('path');
 const uuid = require('uuid');
+const Sharp = require('sharp');
 
 dotenv.config();
 const ID = process.env.AWSID;
 const SECRET = process.env.AWSKEY;
 const PUBLICBUCKET_NAME = process.env.PUBLICBUCKET;
 
-const s3 = new AWS.S3({
+const awsS3 = new AWS.S3({
   accessKeyId: ID,
   region: 'ap-south-1',
   secretAccessKey: SECRET,
@@ -28,7 +30,7 @@ const fileFilter = (req, file, cb) => {
 
 const publicupload = multer({
   storage: multerS3({
-    s3,
+    s3: awsS3,
     acl: 'public-read',
     bucket: PUBLICBUCKET_NAME,
     contentType: multerS3.AUTO_CONTENT_TYPE,
@@ -44,6 +46,39 @@ const publicupload = multer({
   limits: { fileSize: 100000000 },
 });
 
+const thumbnail = (filepath) => {
+  Sharp(filepath)
+    .resize(161, 161)
+    .toBuffer()
+    .then((buffer) => {
+      params.Body = buffer;
+      params.Key = `thumbnail/${uuid()}${ext}`;
+      this.awsS3.upload(params, function (err, data) {
+        if (err) {
+          return err;
+        }
+        return data;
+      });
+    });
+};
+
+const deleteAvatar = (key) => {
+  const params = {
+    Bucket: PUBLICBUCKET_NAME,
+    Key: key,
+  };
+
+  awsS3.deleteObject(params, function (err, data) {
+    if (err) {
+      // eslint-disable-next-line no-sequences
+      return err, err.stack;
+    }
+    return data;
+  });
+};
+
 module.exports = {
   publicupload,
+  deleteAvatar,
+  thumbnail,
 };

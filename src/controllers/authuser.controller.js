@@ -2,6 +2,7 @@ const httpStatus = require('../../node_modules/http-status');
 const catchAsync = require('../utils/catchAsync');
 const generateOTP = require('../utils/generateOTP');
 const checkHeader = require('../utils/chechHeader');
+const googleStrategy = require('../utils/googleStrategy');
 const { authService, tokenService, otpServices } = require('../services');
 const { emailService } = require('../Microservices');
 // const SessionCheck = require('../utils/SessionCheck');
@@ -26,6 +27,17 @@ const login = catchAsync(async (req, res) => {
   const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
   res.status(httpStatus.OK).json({ AuthData, authtoken });
+});
+
+const loginWithGoogle = catchAsync(async (req, res) => {
+  const profileData = await googleStrategy();
+  const AuthData = await authService.createGoogleAuthData(profileData);
+  const authtoken = await tokenService.generateUserToken(AuthData.id);
+  const devicehash = req.headers.devicehash;
+  const devicetype = req.headers.devicetype;
+  const fcmtoken = req.headers.fcmtoken;
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  res.status(httpStatus.CREATED).json({ AuthData, authtoken });
 });
 
 const logout = catchAsync(async (req, res) => {
@@ -94,6 +106,7 @@ const resendOtp = catchAsync(async (req, res) => {
 module.exports = {
   register,
   login,
+  loginWithGoogle,
   logout,
   forgotPassword,
   resetPassword,

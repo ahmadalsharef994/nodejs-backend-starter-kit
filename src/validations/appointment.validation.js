@@ -15,13 +15,16 @@ const getappointment = {
 
 const createprescription = {
   body: Joi.object().keys({
-    appointmentInit: Joi.string().required(),
+    Medicines: Joi.array().required(),
+    LabTest: Joi.string().required(),
+    OtherInstructions: Joi.string().required(),
   }),
 };
 
 const getprescription = {
   params: Joi.object().keys({
     appointmentId: Joi.objectId().required(),
+    prescriptionId: Joi.objectId().required(),
   }),
 };
 

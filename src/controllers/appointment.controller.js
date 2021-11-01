@@ -1,7 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, appointmentService } = require('../services');
-const prescriptionUpload = require('../Microservices/generatePrescription.service');
+// const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
 const initiateappointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -23,22 +23,31 @@ const bookAppointment = catchAsync(async (req, res) => {
 });
 
 const getappointmentDoctor = catchAsync(async (req, res) => {
-  // const AuthData = await authService.getAuthById(req.SubjectId);
   const DoctorSession = await appointmentService.getappointmentDoctor(req.params.appointmentId);
-  res.status(httpStatus.CREATED).json({ DoctorSession });
+  if (DoctorSession !== false) {
+    res.status(httpStatus.CREATED).json({ DoctorSession });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Appointment present with this id' });
+  }
 });
 
 const createPrescription = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const prescriptionDoc = await prescriptionUpload.generatePrescription();
-  await appointmentService.createPrescription(prescriptionDoc, req.body, AuthData);
-  res.status(httpStatus.CREATED).json({ prescriptionDoc });
+  const Prescription = await appointmentService.createPrescriptionDoc(req.body, AuthData);
+  if (Prescription !== false) {
+    res.status(httpStatus.CREATED).json({ message: 'Prescription Generated Sucessfully', Prescription });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to create prescription' });
+  }
 });
 
 const getPrescription = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const prescriptionData = await appointmentService.getappointmentDoctor(AuthData);
-  res.status(httpStatus.CREATED).json({ prescriptionData });
+  const prescriptionData = await appointmentService.fetchPrescriptionDoc(req.params.prescriptionId);
+  if (prescriptionData !== false) {
+    res.status(httpStatus.CREATED).json({ prescriptionData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Prescription present with this id' });
+  }
 });
 
 module.exports = {

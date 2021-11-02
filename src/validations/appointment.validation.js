@@ -52,10 +52,34 @@ const getAllAppointments = {
     .max(1),
 };
 
+const getappointment = {
+  params: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+  }),
+};
+
+const createprescription = {
+  body: Joi.object().keys({
+    Medicines: Joi.array().required(),
+    LabTest: Joi.string().required(),
+    OtherInstructions: Joi.string().required(),
+  }),
+};
+
+const getprescription = {
+  params: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+    prescriptionId: Joi.string().custom(objectId),
+  }),
+};
+
 module.exports = {
   initiateappointment,
   bookAppointmentDetails,
   followupDetails,
   getFollowups,
   getAllAppointments,
+  getappointment,
+  createprescription,
+  getprescription,
 };

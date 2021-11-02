@@ -1,5 +1,6 @@
+/* eslint-disable no-param-reassign */
 const VerifiedDoctors = require('../models/verifieddoctor');
-const { Appointment, Followup } = require('../models');
+const { Appointment, Followup, Prescription } = require('../models');
 
 const initiateappointmentviaDoctor = async (appointmentID, AuthData) => {
   // Pusher
@@ -70,6 +71,32 @@ const getFollowups = async (appointmentId) => {
   return promise;
 };
 
+const getappointmentDoctor = async (appointmentID) => {
+  const DoctorAppointmentExist = await Appointment.findOne({ _id: appointmentID });
+  if (DoctorAppointmentExist) {
+    return DoctorAppointmentExist;
+  }
+  return false;
+};
+
+const fetchPrescriptionDoc = async (prescriptionid) => {
+  const DoctorPrescriptionDocument = await Prescription.findOne({ _id: prescriptionid });
+  if (DoctorPrescriptionDocument) {
+    return DoctorPrescriptionDocument;
+  }
+  return false;
+};
+
+const createPrescriptionDoc = async (prescriptionDoc, appointmentID) => {
+  const alreadyExist = await fetchPrescriptionDoc(appointmentID);
+  if (!alreadyExist) {
+    prescriptionDoc.Appointment = appointmentID;
+    const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
+    return DoctorPrescriptionDocument;
+  }
+  return false;
+};
+
 module.exports = {
   initiateappointmentviaDoctor,
   submitAppointmentDetails,
@@ -77,4 +104,7 @@ module.exports = {
   getUpcomingAppointments,
   getAllAppointments,
   getFollowups,
+  getappointmentDoctor,
+  createPrescriptionDoc,
+  fetchPrescriptionDoc,
 };

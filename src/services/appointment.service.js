@@ -6,12 +6,14 @@ const { AppointmentSession, Followup, Prescription } = require('../models');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
+  console.log(AppointmentData);
   // Dyte
   const DyteSessionToken = await DyteService.createDyteMeeting(
     appointmentID,
     AppointmentData.AuthDoctor,
     AppointmentData.AuthUser
   );
+  console.log(DyteSessionToken);
   if (!DyteSessionToken) {
     throw new ApiError(400, 'Error Generating Video Session');
   }

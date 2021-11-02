@@ -98,6 +98,7 @@ const addUserParticipantToMeeting = async (meetingID, patientId) => {
 
 const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
+  console.log(meetingroom);
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
   const SaveSession = await AppointmentSession.create({

@@ -43,16 +43,16 @@ const getOnboardingChallenge = async (AuthData) => {
     challenge = 'EDUCATION_DETAILS';
   } else if (!(await doctorprofileService.fetchexperiencedetails(AuthData))) {
     if (IsDoctorVerified) {
-      challenge = 'ALL_OK';
+      challenge = 'ONBOARDING_SUCCESS';
     }
     optionalChallenge = 'EXPERIENCE_DETAILS';
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
     if (IsDoctorVerified) {
-      challenge = 'ALL_OK';
+      challenge = 'ONBOARDING_SUCCESS';
     }
     optionalChallenge = 'CLINIC_DETAILS';
   } else if (IsDoctorVerified) {
-    challenge = 'ALL_OK';
+    challenge = 'ONBOARDING_SUCCESS';
     optionalChallenge = 'ONBOARDING_SUCCESS';
   }
   return { challenge, optionalChallenge };
@@ -258,12 +258,12 @@ const tryverification = catchAsync(async (req, res) => {
       educationdata.yearofRegistration
     );
     if (try1) {
-      res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ALL_OK' });
+      res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ONBOARDING_SUCCESS' });
     } else {
       res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending', challenge: 'ONBOARDING_ONHOLD' });
     }
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ALL_OK' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ONBOARDING_SUCCESS' });
   }
 });
 

@@ -1,20 +1,44 @@
-const tokenService = require('./token.service');
 const DyteService = require('../Microservices/dyteServices');
 const VerifiedDoctors = require('../models/verifieddoctor');
 const Appointment = require('../models/appointment.model');
+const ApiError = require('../utils/ApiError');
+const { AppointmentSession } = require('../models');
 
-const initiateappointmentSession = async (appointmentID, AuthData) => {
-  // Pusher
+const initiateappointmentSession = async (appointmentID) => {
+  const AppointmentData = await Appointment.findOne({ _id: appointmentID });
   // Dyte
-  const DyteSessionToken = await DyteService.createDyteMeeting(appointmentID, 'doctorID', 'patientID');
+  const DyteSessionToken = await DyteService.createDyteMeeting(
+    appointmentID,
+    AppointmentData.AuthDoctor,
+    AppointmentData.AuthUser
+  );
+  if (!DyteSessionToken) {
+    throw new ApiError(400, 'Error Generating Video Session');
+  }
   // Pusher
   return DyteSessionToken;
 };
 
 const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData) => {
-  // SessionToken
-  const SessionToken = await tokenService.generateAppointmentSessionToken(appointmentID, AuthData._id);
-  return { SessionToken };
+  // Join Appointment Doctor
+  const SessionToken = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthDoctor: AuthData._id });
+  if (!SessionToken) {
+    throw new ApiError(400, 'You do not have access to this Appointment');
+  }
+  const DoctorVideoToken = SessionToken.dytedoctortoken;
+  const DoctorRoomName = SessionToken.dyteroomname;
+  return { DoctorVideoToken, DoctorRoomName };
+};
+
+const JoinappointmentSessionbyPatient = async (appointmentID, AuthData) => {
+  // Join Appointment Doctor
+  const SessionToken = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthUser: AuthData._id });
+  if (!SessionToken) {
+    throw new ApiError(400, 'You do not have access to this Appointment');
+  }
+  const UserVideoToken = SessionToken.dyteusertoken;
+  const UserRoomName = SessionToken.dyteroomname;
+  return { UserVideoToken, UserRoomName };
 };
 
 const submitAppointmentDetails = async (docId, userAuth, status, type, startTime, endTime) => {
@@ -43,5 +67,6 @@ const submitAppointmentDetails = async (docId, userAuth, status, type, startTime
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
+  JoinappointmentSessionbyPatient,
   submitAppointmentDetails,
 };

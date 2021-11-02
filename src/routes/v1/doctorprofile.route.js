@@ -10,6 +10,7 @@ const preferenceValidator = require('../../validations/appointmentpreference.val
 
 const router = express.Router();
 
+router.route('/stats').get(authdoctorverified(), DoctorProfileController.fetchstastics);
 router.route('/basic-details').get(authdoctornonverified(), DoctorProfileController.fetchbasicdetails);
 router
   .route('/basic-details')
@@ -21,6 +22,17 @@ router
 
 router
   .route('/basic-details/profile-picture')
+  .post(
+    profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+    authdoctornonverified(),
+    function (req, res) {
+      DoctorProfileController.submitprofilepicture(req);
+      res.status(201).json('Profile picture Updated!');
+    }
+  );
+
+router
+  .route('/basic-details/update-profile-picture')
   .post(
     profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
     authdoctornonverified(),
@@ -73,5 +85,15 @@ router
     appointmentPreferenceController.submitAppointmentPreference
   );
 router.route('/getappointments').post(appointmentPreferenceController.showappointments);
+router.route('/payout-details').get(authdoctornonverified(), DoctorProfileController.fetchpayoutsdetails);
+router
+  .route('/payout-details')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.PayoutsDoctorDetails),
+    DoctorProfileController.submitpayoutsdetails
+  );
+
+router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

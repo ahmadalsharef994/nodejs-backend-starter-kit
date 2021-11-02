@@ -18,7 +18,7 @@ const DoctorExperienceSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    isEducationVerified: {
+    isExperienceVerified: {
       type: Boolean,
       default: false,
     },

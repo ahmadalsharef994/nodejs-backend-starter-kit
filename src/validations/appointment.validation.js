@@ -1,8 +1,9 @@
 const Joi = require('joi');
+Joi.objectId = require('joi-objectid')(Joi);
 
 const joinAppointmentDoctor = {
   body: Joi.object().keys({
-    appointmentInit: Joi.string().required(),
+    appointmentInit: Joi.objectId().required(),
   }),
 };
 

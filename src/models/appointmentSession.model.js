@@ -3,15 +3,31 @@ const { toJSON } = require('./plugins');
 
 const AppointmentSessionSchema = mongoose.Schema(
   {
+    appointmentid: {
+      type: String,
+      required: true,
+    },
     AuthDoctor: {
       type: String,
       required: true,
     },
-    docid: {
-      type: Number,
+    AuthUser: {
+      type: String,
       required: true,
     },
-    AuthUser: {
+    dytedoctortoken: {
+      type: String,
+      required: true,
+    },
+    dytemeetingid: {
+      type: String,
+      required: true,
+    },
+    dyteusertoken: {
+      type: String,
+      required: true,
+    },
+    dyteroomname: {
       type: String,
       required: true,
     },

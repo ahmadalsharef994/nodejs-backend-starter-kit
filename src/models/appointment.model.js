@@ -19,7 +19,7 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     Status: {
-      type: String,
+      type: String, // SCHEDULED, CANCELLED, FOLLOWED-UP, REFERRED
       required: true,
     },
     Type: {

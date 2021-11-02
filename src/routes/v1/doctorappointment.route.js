@@ -7,7 +7,13 @@ const appointmentController = require('../../controllers/appointment.controller'
 const router = express.Router();
 
 router.post(
-  '/:appointmentId/doctor-join',
+  '/init',
+  authdoctorverified(),
+  validate(appointmentValidation.joinAppointmentDoctor),
+  appointmentController.initAppointmentDoctor
+);
+router.post(
+  '/doctor-join',
   authdoctorverified(),
   validate(appointmentValidation.joinAppointmentDoctor),
   appointmentController.joinAppointmentDoctor

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const ApiError = require('../utils/ApiError');
+const AppointmentSession = require('../models/appointmentSession.model');
 
 const InitiateMeetingRoom = async (appointmentID) => {
   const InitMeeting = JSON.stringify({
@@ -99,6 +100,15 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
+  const SaveSession = await AppointmentSession.create({
+    appointmentid: appointmentID,
+    AuthDoctor: doctorId,
+    AuthUser: patientId,
+    dytemeetingid: meetingroom.meeting.id,
+    dyteroomname: meetingroom.meeting.roomName,
+    dytedoctortoken: doctorparticipation.authResponse.authToken,
+    dyteusertoken: userparticipation.authResponse.authToken,
+  });
   return { meetingroom, doctorparticipation, userparticipation };
 };
 

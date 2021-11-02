@@ -17,8 +17,6 @@ const sendEmail = (to, subject, template, OTP) => {
   transport.use(
     'compile',
     hbs({
-      // viewEngine: 'express-handlebars',
-      // viewPath: './src/views/',
       viewEngine: {
         extName: '.hbs',
         partialsDir: path.resolve('./src/views'),

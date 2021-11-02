@@ -77,9 +77,7 @@ const login = catchAsync(async (req, res) => {
   const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   let authtoken = '';
-  let IsDoctorVerified = false;
   if (verifiedcheckData) {
-    IsDoctorVerified = true;
     authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.docid);
   } else {
     authtoken = await tokenService.generateDoctorToken(AuthData.id);
@@ -92,7 +90,6 @@ const login = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).json({
     AuthData,
     authtoken,
-    IsDoctorVerified,
     challenge: challenge.challenge,
     optionalchallenge: challenge.optionalChallenge,
   });

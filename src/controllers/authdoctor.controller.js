@@ -44,7 +44,7 @@ const getOnboardingChallenge = async (AuthData) => {
     optionalChallenge = 'EXPERIENCE_DETAILS';
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
     optionalChallenge = 'CLINIC_DETAILS';
-  } else if (await verifiedDoctorService.checkVerification(AuthData.auth)) {
+  } else if (await verifiedDoctorService.checkVerification(AuthData._id)) {
     challenge = 'ALL_OK';
     optionalChallenge = 'ONBOARDING_SUCCESS';
   }

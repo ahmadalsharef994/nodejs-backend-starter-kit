@@ -30,6 +30,7 @@ ONBOARDING_ONHOLD
 const getOnboardingChallenge = async (AuthData) => {
   let challenge = 'ONBOARDING_ONHOLD';
   let optionalChallenge = 'NONE';
+  const IsDoctorVerified = await verifiedDoctorService.checkVerification(AuthData.id);
   if (AuthData.isEmailVerified === false) {
     challenge = 'AUTH_EMAILVERIFY';
   } else if (AuthData.isMobileVerified === false) {
@@ -41,12 +42,16 @@ const getOnboardingChallenge = async (AuthData) => {
   } else if (!(await doctorprofileService.fetcheducationdetails(AuthData))) {
     challenge = 'EDUCATION_DETAILS';
   } else if (!(await doctorprofileService.fetchexperiencedetails(AuthData))) {
-    challenge = 'ALL_OK';
+    if (IsDoctorVerified) {
+      challenge = 'ALL_OK';
+    }
     optionalChallenge = 'EXPERIENCE_DETAILS';
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
-    challenge = 'ALL_OK';
+    if (IsDoctorVerified) {
+      challenge = 'ALL_OK';
+    }
     optionalChallenge = 'CLINIC_DETAILS';
-  } else if (await verifiedDoctorService.checkVerification(AuthData.id)) {
+  } else if (IsDoctorVerified) {
     challenge = 'ALL_OK';
     optionalChallenge = 'ONBOARDING_SUCCESS';
   }
@@ -72,7 +77,9 @@ const login = catchAsync(async (req, res) => {
   const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   let authtoken = '';
+  let IsDoctorVerified = false;
   if (verifiedcheckData) {
+    IsDoctorVerified = true;
     authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.docid);
   } else {
     authtoken = await tokenService.generateDoctorToken(AuthData.id);
@@ -82,9 +89,13 @@ const login = catchAsync(async (req, res) => {
   const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
   const challenge = await getOnboardingChallenge(AuthData);
-  res
-    .status(httpStatus.OK)
-    .json({ AuthData, authtoken, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+  res.status(httpStatus.OK).json({
+    AuthData,
+    authtoken,
+    IsDoctorVerified,
+    challenge: challenge.challenge,
+    optionalchallenge: challenge.optionalChallenge,
+  });
 });
 
 const logout = catchAsync(async (req, res) => {

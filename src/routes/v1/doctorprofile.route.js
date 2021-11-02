@@ -4,9 +4,13 @@ const { profilePhotoUpload } = require('../../Microservices');
 const DoctorProfileValidator = require('../../validations/DoctorProfile.validation');
 const DoctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
+const authdoctorverified = require('../../middlewares/authDoctorVerified');
+const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
+const preferenceValidator = require('../../validations/appointmentpreference.validation');
 
 const router = express.Router();
 
+router.route('/stats').get(authdoctorverified(), DoctorProfileController.fetchstastics);
 router.route('/basic-details').get(authdoctornonverified(), DoctorProfileController.fetchbasicdetails);
 router
   .route('/basic-details')
@@ -18,6 +22,17 @@ router
 
 router
   .route('/basic-details/profile-picture')
+  .post(
+    profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+    authdoctornonverified(),
+    function (req, res) {
+      DoctorProfileController.submitprofilepicture(req);
+      res.status(201).json('Profile picture Updated!');
+    }
+  );
+
+router
+  .route('/basic-details/update-profile-picture')
   .post(
     profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
     authdoctornonverified(),
@@ -53,5 +68,32 @@ router
     validate(DoctorProfileValidator.ClinicDoctorDetails),
     DoctorProfileController.submitclinicdetails
   );
+
+router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showfollowups);
+router
+  .route('/updatePref')
+  .put(
+    authdoctorverified(),
+    validate(preferenceValidator.PreferenceDetails),
+    appointmentPreferenceController.updateAppointmentPreference
+  );
+router
+  .route('/createPref')
+  .post(
+    authdoctorverified(),
+    validate(preferenceValidator.PreferenceDetails),
+    appointmentPreferenceController.submitAppointmentPreference
+  );
+router.route('/getappointments').post(appointmentPreferenceController.showappointments);
+router.route('/payout-details').get(authdoctornonverified(), DoctorProfileController.fetchpayoutsdetails);
+router
+  .route('/payout-details')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.PayoutsDoctorDetails),
+    DoctorProfileController.submitpayoutsdetails
+  );
+
+router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

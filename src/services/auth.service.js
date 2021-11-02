@@ -10,11 +10,29 @@ const otpServices = require('./otp.service');
  * @returns {Promise<Auth>}
  */
 const createAuthData = async (authBody) => {
-  if ((await Auth.isEmailTaken(authBody.email)) || (await Auth.isPhoneTaken(authBody.mobile))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email OR Phone Already Taken');
+  if (await Auth.isEmailTaken(authBody.email)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
+  }
+  if (await Auth.isPhoneTaken(authBody.mobile)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone Number Already Taken');
   }
   const auth = await Auth.create(authBody);
   return auth;
+};
+
+const createGoogleAuthData = async (profileBody) => {
+  try {
+    let user = await Auth.findOne({ googleId: profile.id })
+    if (user) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
+    } else {
+      // if user is not preset in our database save user data to database.
+      const auth = await Auth.create(profileBody);
+      return auth;
+    }
+  } catch (err) {
+    console.error(err)
+  }
 };
 
 /**
@@ -144,6 +162,7 @@ const resetPassword = async (email, resetcode, newPassword) => {
 module.exports = {
   createAuthData,
   queryAuthData,
+  createGoogleAuthData,
   getAuthById,
   getAuthByEmail,
   getAuthByPhone,

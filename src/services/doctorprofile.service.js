@@ -1,5 +1,6 @@
 const httpStatus = require('http-status');
-const { DoctorBasic, DoctorEducation, DoctorClinic, DoctorExperience } = require('../models');
+const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
+const { DoctorBasic, DoctorEducation, DoctorClinic, DoctorExperience, DoctorPayout } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const fetchbasicdetails = async (AuthData) => {
@@ -18,10 +19,22 @@ const submitbasicdetails = async (BasicDetailBody, AuthData) => {
   return false;
 };
 
-const submitprofilepicture = async (ProfilePhoto, AuthData) => {
+const submitprofilepicture = async (ProfilePhoto, AuthData, returnThumbnail) => {
   const alreadyExist = await fetchbasicdetails(AuthData);
   if (alreadyExist) {
-    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
+    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail: returnThumbnail } });
+    return 'profile Picture updated';
+  }
+  return false;
+};
+
+const updateprofilepicture = async (ProfilePhoto, AuthData, returnThumbnail) => {
+  const alreadyExist = await fetchbasicdetails(AuthData);
+  if (alreadyExist) {
+    const resultData = await DoctorBasic.findOne({ _id: alreadyExist._id });
+    // need to rethink once s3 is working properly
+    await profilePhotoUpload.deleteAvatar(resultData.avatar, resultData.thumbnail);
+    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail: returnThumbnail } });
     return 'profile Picture updated';
   }
 };
@@ -74,6 +87,22 @@ const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
   throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
 };
 
+const fetchpayoutsdetails = async (AuthData) => {
+  const DoctorPayoutExist = await DoctorPayout.findOne({ auth: AuthData });
+  return DoctorPayoutExist;
+};
+
+const submitpayoutsdetails = async (PayoutDetailBody, AuthData) => {
+  const alreayExist = await fetchpayoutsdetails(AuthData);
+  if (!alreayExist) {
+    // eslint-disable-next-line no-param-reassign
+    PayoutDetailBody.auth = AuthData; // Assign Reference to Req Body
+    const PayoutDetailDoc = await DoctorPayout.create(PayoutDetailBody);
+    return PayoutDetailDoc;
+  }
+  throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
+};
+
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -84,4 +113,7 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
+  updateprofilepicture,
+  fetchpayoutsdetails,
+  submitpayoutsdetails,
 };

@@ -2,21 +2,29 @@ const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 const Auth = require('./auth.model');
 
-const DoctorEducationSchema = mongoose.Schema(
+const DoctorPayoutSchema = mongoose.Schema(
   {
-    registrationNo: {
+    BankAccNo: {
       type: String,
       required: true,
     },
-    yearofRegistration: {
-      type: Number,
-      required: true,
-    },
-    stateMedicalCouncil: {
+    IFSC: {
       type: String,
       required: true,
     },
-    isEducationVerified: {
+    AccountName: {
+      type: String,
+      required: true,
+    },
+    AadharCardNo: {
+      type: String,
+      required: true,
+    },
+    PanCardNo: {
+      type: String,
+      required: true,
+    },
+    isPayoutVerified: {
       type: Boolean,
       default: false,
     },
@@ -31,11 +39,11 @@ const DoctorEducationSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-DoctorEducationSchema.plugin(toJSON);
+DoctorPayoutSchema.plugin(toJSON);
 
 /**
- * @typedef DoctorEducation
+ * @typedef DoctorPayout
  */
-const DoctorEducation = mongoose.model('DoctorEducation', DoctorEducationSchema);
+const DoctorPayout = mongoose.model('DoctorPayout', DoctorPayoutSchema);
 
-module.exports = DoctorEducation;
+module.exports = DoctorPayout;

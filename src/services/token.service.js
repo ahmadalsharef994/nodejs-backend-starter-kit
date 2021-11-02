@@ -60,6 +60,25 @@ const logoutdevice = async (authtoken) => {
 };
 
 /**
+ * Generate Appointment Session token
+ * @param {ObjectId} userId
+ * @param {Moment} expires
+ * @param {string} type
+ * @param {string} [secret]
+ * @returns {string}
+ */
+const generateAppointmentSessionToken = (appointmentID, doctorId, secret = config.jwt.secret) => {
+  const payload = {
+    appointment: appointmentID,
+    doctor: doctorId,
+    iat: moment().unix(),
+    exp: moment().add(20, 'minutes').unix(),
+  };
+  const jwttoken = jwt.sign(payload, secret);
+  return jwttoken;
+};
+
+/**
  * Generate Admin token
  * @param {ObjectId} userId
  * @param {Moment} expires
@@ -141,6 +160,7 @@ module.exports = {
   generateAdminToken,
   generateDoctorToken,
   generateVerifiedDoctorToken,
+  generateAppointmentSessionToken,
   generateUserToken,
   addDeviceHandler,
   logoutdevice,

@@ -10,7 +10,7 @@ const ID = process.env.AWSID;
 const SECRET = process.env.AWSKEY;
 const BUCKET_NAME = process.env.BUCKET;
 
-const s3 = new AWS.S3({
+const AwsS3 = new AWS.S3({
   accessKeyId: ID,
   region: 'us-east-2',
   secretAccessKey: SECRET,
@@ -33,7 +33,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
   storage: multerS3({
-    s3,
+    s3: AwsS3,
     bucket: BUCKET_NAME,
     metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldname });
@@ -56,7 +56,7 @@ const getSingedUrl = async (file) => {
   };
   try {
     const url = await new Promise((resolve, reject) => {
-      s3.getSignedUrl('getObject', params, (err, docs) => {
+      AwsS3.getSignedUrl('getObject', params, (err, docs) => {
         return err ? reject(err) : resolve(docs);
       });
     });

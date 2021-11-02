@@ -18,8 +18,7 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
 });
 
 const showfollowups = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  appointmentPreferenceService.getfollowups(req.Docid, AuthData).then((result) => {
+  appointmentPreferenceService.getfollowups(req.Docid).then((result) => {
     if (result === null) {
       return res.status(httpStatus.NOT_FOUND).json({ message: "Follow up slots doesn't exist." });
     }
@@ -28,7 +27,7 @@ const showfollowups = catchAsync(async (req, res) => {
 });
 
 const showappointments = catchAsync(async (req, res) => {
-  appointmentPreferenceService.getappointments(req.body.Docid, req.body.AuthData).then((result) => {
+  appointmentPreferenceService.getappointments(req.body.docId).then((result) => {
     if (result === null) {
       return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });
     }

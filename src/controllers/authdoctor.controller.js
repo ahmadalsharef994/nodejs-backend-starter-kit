@@ -44,7 +44,7 @@ const getOnboardingChallenge = async (AuthData) => {
     optionalChallenge = 'EXPERIENCE_DETAILS';
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
     optionalChallenge = 'CLINIC_DETAILS';
-  } else if (await verifiedDoctorService.checkVerification(AuthData.auth)) {
+  } else if (await verifiedDoctorService.checkVerification(AuthData.id)) {
     challenge = 'ALL_OK';
     optionalChallenge = 'ONBOARDING_SUCCESS';
   }
@@ -71,7 +71,7 @@ const login = catchAsync(async (req, res) => {
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   let authtoken = '';
   if (verifiedcheckData) {
-    authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.Docid);
+    authtoken = await tokenService.generateVerifiedDoctorToken(AuthData.id, verifiedcheckData.docid);
   } else {
     authtoken = await tokenService.generateDoctorToken(AuthData.id);
   }

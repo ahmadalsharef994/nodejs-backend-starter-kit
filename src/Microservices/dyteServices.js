@@ -42,7 +42,6 @@ const addDoctorParticipantToMeeting = async (meetingID, doctorId) => {
     'Content-Type': 'application/json',
     Authorization: `APIKEY ${process.env.DYTEKey}`,
   };
-  console.log(AddDoctorToMeeting);
   let DocParticipantresult = '';
   await axios
     .post(
@@ -56,7 +55,6 @@ const addDoctorParticipantToMeeting = async (meetingID, doctorId) => {
       DocParticipantresult = response.data.data;
     })
     .catch((error) => {
-      console.log(error.response.data);
       throw new ApiError(400, 'Error Adding Doctor Participant Video Session');
     });
 
@@ -89,7 +87,6 @@ const addUserParticipantToMeeting = async (meetingID, patientId) => {
       UserParticipantresult = response.data.data;
     })
     .catch((error) => {
-      console.log(error.response.data);
       throw new ApiError(400, 'Error Adding User Participant Video Session');
     });
 

@@ -12,9 +12,22 @@ const PrescriptionSchema = mongoose.Schema(
     PrescriptionNo: {
       type: Number,
       required: true,
+      default: 1,
     },
-    Medicines: {
-      type: Number,
+    Medicines: [
+      {
+        name: { type: String },
+        dosage: { type: String },
+        days: { type: Number },
+        dosageInstructions: { type: String },
+      },
+    ],
+    LabTest: {
+      type: String,
+      required: true,
+    },
+    OtherInstructions: {
+      type: String,
       required: true,
     },
   },

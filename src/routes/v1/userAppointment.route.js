@@ -1,16 +1,17 @@
 const express = require('express');
-const authUser = require('../../middlewares/authUser');
+const authuser = require('../../middlewares/authUser');
 const validate = require('../../middlewares/validate');
-const appointmentValidation = require('../../validations/appointment.validation');
 const appointmentController = require('../../controllers/appointment.controller');
+const appointmentValidation = require('../../validations/appointment.validation');
 
 const router = express.Router();
 
-router.post('/book-appointment', authUser(), appointmentController.bookAppointment);
-router.post(
-  '/patient-join',
-  authUser(),
-  validate(appointmentValidation.joinAppointmentDoctor),
-  appointmentController.joinAppointmentPatient
-);
+router
+  .route('/book-appointment')
+  .post(authuser(), validate(appointmentValidation.bookAppointmentDetails), appointmentController.bookAppointment);
+
+router
+  .route('/patient-join')
+  .post(authuser(), validate(appointmentValidation.bookAppointmentDetails), appointmentController.joinAppointmentPatient);
+
 module.exports = router;

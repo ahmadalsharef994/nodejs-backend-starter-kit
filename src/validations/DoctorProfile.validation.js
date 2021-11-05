@@ -4,7 +4,7 @@ const BasicDoctorDetails = {
   body: Joi.object().keys({
     gender: Joi.string().required().valid('M', 'F', 'O'),
     dob: Joi.date().required(),
-    pin: Joi.number().required(),
+    pincode: Joi.number().required(),
     state: Joi.string()
       .required()
       .valid(
@@ -215,7 +215,7 @@ const ClinicDoctorDetails = {
     AddressFirstline: Joi.string().required(),
     AddressSecondline: Joi.string().required(),
     clinicTelephone: Joi.number().required(),
-    pin: Joi.number().required(),
+    pincode: Joi.number().required(),
   }),
 };
 

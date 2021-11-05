@@ -21,7 +21,7 @@ const doctorClinic = mongoose.Schema(
       type: Number,
       required: true,
     },
-    pin: {
+    pincode: {
       type: Number,
       required: true,
     },

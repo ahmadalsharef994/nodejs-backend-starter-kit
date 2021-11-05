@@ -30,6 +30,7 @@ ONBOARDING_ONHOLD
 const getOnboardingChallenge = async (AuthData) => {
   let challenge = 'ONBOARDING_ONHOLD';
   let optionalChallenge = 'NONE';
+  const IsDoctorVerified = await verifiedDoctorService.checkVerification(AuthData.id);
   if (AuthData.isEmailVerified === false) {
     challenge = 'AUTH_EMAILVERIFY';
   } else if (AuthData.isMobileVerified === false) {
@@ -41,11 +42,17 @@ const getOnboardingChallenge = async (AuthData) => {
   } else if (!(await doctorprofileService.fetcheducationdetails(AuthData))) {
     challenge = 'EDUCATION_DETAILS';
   } else if (!(await doctorprofileService.fetchexperiencedetails(AuthData))) {
+    if (IsDoctorVerified) {
+      challenge = 'ONBOARDING_SUCCESS';
+    }
     optionalChallenge = 'EXPERIENCE_DETAILS';
   } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
+    if (IsDoctorVerified) {
+      challenge = 'ONBOARDING_SUCCESS';
+    }
     optionalChallenge = 'CLINIC_DETAILS';
-  } else if (await verifiedDoctorService.checkVerification(AuthData.id)) {
-    challenge = 'ALL_OK';
+  } else if (IsDoctorVerified) {
+    challenge = 'ONBOARDING_SUCCESS';
     optionalChallenge = 'ONBOARDING_SUCCESS';
   }
   return { challenge, optionalChallenge };
@@ -80,9 +87,12 @@ const login = catchAsync(async (req, res) => {
   const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
   const challenge = await getOnboardingChallenge(AuthData);
-  res
-    .status(httpStatus.OK)
-    .json({ AuthData, authtoken, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+  res.status(httpStatus.OK).json({
+    AuthData,
+    authtoken,
+    challenge: challenge.challenge,
+    optionalchallenge: challenge.optionalChallenge,
+  });
 });
 
 const logout = catchAsync(async (req, res) => {
@@ -248,12 +258,12 @@ const tryverification = catchAsync(async (req, res) => {
       educationdata.yearofRegistration
     );
     if (try1) {
-      res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ALL_OK' });
+      res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ONBOARDING_SUCCESS' });
     } else {
       res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending', challenge: 'ONBOARDING_ONHOLD' });
     }
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ALL_OK' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ONBOARDING_SUCCESS' });
   }
 });
 

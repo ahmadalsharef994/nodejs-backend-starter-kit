@@ -20,7 +20,7 @@ const DoctorBasicSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    pin: {
+    pincode: {
       type: Number,
       required: true,
     },

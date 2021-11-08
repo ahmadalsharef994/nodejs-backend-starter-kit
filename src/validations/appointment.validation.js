@@ -1,5 +1,4 @@
 const Joi = require('joi');
-Joi.objectId = require('joi-objectid')(Joi);
 const { objectId } = require('./custom.validation');
 
 const joinAppointmentDoctor = {

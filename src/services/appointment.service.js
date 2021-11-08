@@ -1,8 +1,6 @@
 const DyteService = require('../Microservices/dyteServices');
-const VerifiedDoctors = require('../models/verifieddoctor');
-const Appointment = require('../models/appointment.model');
 const ApiError = require('../utils/ApiError');
-const { AppointmentSession, Followup, Prescription } = require('../models');
+const { AppointmentSession, Followup, Prescription, Appointment, VerifiedDoctors } = require('../models');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });

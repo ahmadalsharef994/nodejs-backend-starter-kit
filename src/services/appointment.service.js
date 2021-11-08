@@ -84,13 +84,13 @@ const getUpcomingAppointments = async (doctorId) => {
 };
 
 // get all appointments (implement query)
-const getAllAppointments = async (doctorId, type) => {
-  if (!type) {
+const getAllAppointments = async (doctorId, status) => {
+  if (!status) {
     const promise = await Appointment.find({ docid: doctorId }).sort();
     // sort using StartTIme
     return promise;
   }
-  const promise = await Appointment.find({ docid: doctorId, Type: type }).sort();
+  const promise = await Appointment.find({ docid: doctorId, Status: status }).sort();
   // sort using StartTIme
   return promise;
 };

@@ -3,12 +3,12 @@ const { objectId } = require('./custom.validation');
 
 const joinAppointmentDoctor = {
   body: Joi.object().keys({
-    appointmentInit: Joi.objectId().required(),
+    appointmentInit: Joi.string().custom(objectId),
   }),
 };
 const joinAppointmentUser = {
   body: Joi.object().keys({
-    appointmentInit: Joi.objectId().required(),
+    appointmentInit: Joi.string().custom(objectId),
   }),
 };
 
@@ -51,7 +51,7 @@ const getFollowups = {
 const getAllAppointments = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
+      type: Joi.string().valid('SCHEDULED', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
     })
     .min(1)
     .max(1),

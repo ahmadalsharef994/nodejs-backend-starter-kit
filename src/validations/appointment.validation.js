@@ -1,14 +1,15 @@
 const Joi = require('joi');
+Joi.objectId = require('joi-objectid')(Joi);
 const { objectId } = require('./custom.validation');
 
 const joinAppointmentDoctor = {
   body: Joi.object().keys({
-    appointmentInit: Joi.string().custom(objectId),
+    appointmentInit: Joi.objectId().required(),
   }),
 };
 const joinAppointmentUser = {
   body: Joi.object().keys({
-    appointmentInit: Joi.string().custom(objectId),
+    appointmentInit: Joi.objectId().required(),
   }),
 };
 
@@ -51,7 +52,7 @@ const getFollowups = {
 const getAllAppointments = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('SCHEDULED', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
+      type: Joi.string().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
     })
     .min(1)
     .max(1),
@@ -78,6 +79,12 @@ const getprescription = {
   }),
 };
 
+const getDetailsPatient = {
+  params: Joi.object().keys({
+    patientId: Joi.string().custom(objectId),
+  }),
+};
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -88,4 +95,5 @@ module.exports = {
   getappointment,
   createprescription,
   getprescription,
+  getDetailsPatient,
 };

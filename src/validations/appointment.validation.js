@@ -16,8 +16,8 @@ const bookAppointmentDetails = {
   body: Joi.object()
     .keys({
       docId: Joi.number().required(),
-      startTime: Joi.string().required(),
-      endTime: Joi.string().required(),
+      slotId: Joi.string().required(),
+      date: Joi.string().required(),
     })
     .min(3)
     .max(3),

@@ -1,6 +1,13 @@
 const DyteService = require('../Microservices/dyteServices');
 const ApiError = require('../utils/ApiError');
-const { AppointmentSession, Followup, Prescription, Appointment, VerifiedDoctors } = require('../models');
+const {
+  AppointmentSession,
+  Followup,
+  Prescription,
+  Appointment,
+  VerifiedDoctors,
+  AppointmentPreference,
+} = require('../models');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
@@ -39,8 +46,25 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData) => {
   return { UserVideoToken, UserRoomName };
 };
 
-const submitAppointmentDetails = async (doctorId, userAuth, startTime, endTime) => {
+const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
+  let startTime = null;
+  let endTime = null;
   const { doctorauthid } = await VerifiedDoctors.findOne({ docid: doctorId });
+  await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+    const day = slotId.split('-')[1];
+    const type = slotId.split('-')[0];
+    const slots = pref[`${day}_${type}`];
+    const slot = slots.filter((e) => e.slotId === slotId);
+    if (!slot) {
+      return null;
+    }
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+  });
+  const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
+  if (appointmentExist) {
+    return null;
+  }
   const bookedAppointment = await Appointment.create({
     AuthDoctor: doctorauthid,
     docid: doctorId,

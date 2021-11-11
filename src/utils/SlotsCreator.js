@@ -54,21 +54,26 @@ const createSlots = async (startTime, day, docId, duration) => {
 };
 
 /**
- * @param {Object} timeObj : {{"FromHour": 11,"FromMinutes": 0,"ToHour": 2,"ToMinutes": 0 }   //24hr format
- * @returns {Object} : "120"   // total duration
+ * @param {Object} timeObjectArray : [{"FromHour": 11,"FromMinutes": 0,"ToHour": 2,"ToMinutes": 0 }]   //24hr format
+ * @returns {Object} : [ 120, 120 ]   // total duration
  */
 
-const calculateDuration = async (timeObj) => {
-  const startTimeHour = timeObj.FromHour;
-  const startTimeMinute = timeObj.FromMinutes;
-  const endTimeHour = timeObj.ToHour;
-  const endTimeMinute = timeObj.ToMinutes;
-  let totalTime =
-    startTimeMinute <= endTimeMinute
-      ? (endTimeHour - startTimeHour) * 60 + (endTimeMinute - startTimeMinute)
-      : (endTimeHour - 1 - startTimeHour) * 60 + (endTimeMinute + 60 - startTimeMinute);
-  totalTime = totalTime > 0 ? totalTime : 1440 + totalTime;
-  return totalTime;
+const calculateDuration = async (timeObjectArray) => {
+  const totalTimeArr = [];
+  timeObjectArray.forEach((timeObj) => {
+    const startTimeHour = timeObj.FromHour;
+    const startTimeMinute = timeObj.FromMinutes;
+    const endTimeHour = timeObj.ToHour;
+    const endTimeMinute = timeObj.ToMinutes;
+    let totalTime =
+      startTimeMinute <= endTimeMinute
+        ? (endTimeHour - startTimeHour) * 60 + (endTimeMinute - startTimeMinute)
+        : (endTimeHour - 1 - startTimeHour) * 60 + (endTimeMinute + 60 - startTimeMinute);
+    totalTime = totalTime > 0 ? totalTime : 1440 + totalTime;
+    totalTimeArr.push(totalTime);
+  });
+
+  return totalTimeArr;
 };
 
 module.exports = {

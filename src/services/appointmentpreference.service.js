@@ -20,8 +20,10 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
     durations.push(await calculateDuration(body[days[i]]));
   }
 
-  const validDurations = durations.every((duration) => {
-    return !(duration % 40) && duration >= 120;
+  const validDurations = durations.every((durationArr) => {
+    return durationArr.every((dur) => {
+      return !(dur % 40) && dur >= 120;
+    });
   });
 
   if (!validDurations) {
@@ -39,33 +41,54 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
   });
 
   const slots = [];
+  // console.log(daysAndDurations);
   // creating slots for each day
+
   for (let i = 0; i < days.length; i += 1) {
     /* converting 12hr to 24hr if input is in 12hr format
     const startHr = body[days[i]].FromMeridian === 1 ? (body[days[i]].FromHour + 12) % 24 : body[days[i]].FromHour;
     const startMin = body[days[i]].FromMinutes;
     */
-    const startHr = body[days[i]].FromHour;
-    const startMin = body[days[i]].FromMinutes;
-    // eslint-disable-next-line no-await-in-loop
-    const element = await createSlots(
-      { FromHour: startHr, FromMinute: startMin },
-      days[i],
-      doctorID,
-      daysAndDurations[days[i]]
-    );
-    slots.push(element);
+
+    for (let j = 0; j < body[days[i]].length; j += 1) {
+      const startHr = body[days[i]][j].FromHour;
+      const startMin = body[days[i]][j].FromMinutes;
+      // eslint-disable-next-line no-await-in-loop
+      const element = await createSlots(
+        { FromHour: startHr, FromMinute: startMin },
+        days[i],
+        doctorID,
+        daysAndDurations[days[i]][j]
+      );
+      slots.push(element);
+    }
+  }
+
+  const finalSlots = [];
+  let ASlots = [];
+  let FSlots = [];
+  let k = 0;
+
+  for (let i = 0; i < days.length; i += 1) {
+    ASlots = [];
+    FSlots = [];
+    for (let j = 0; j < body[days[i]].length; j += 1) {
+      ASlots.push(...slots[k][0]);
+      FSlots.push(...slots[k][1]);
+      k += 1;
+    }
+    finalSlots.push([ASlots, FSlots]);
   }
 
   const Adays = days.map((day) => day.concat('_A'));
   const Fdays = days.map((day) => day.concat('_F'));
 
   Adays.forEach((day, i) => {
-    result[day] = slots[i][0];
+    result[day] = finalSlots[i][0];
   });
 
   Fdays.forEach((day, i) => {
-    result[day] = slots[i][1];
+    result[day] = finalSlots[i][1];
   });
 
   if (!update) {

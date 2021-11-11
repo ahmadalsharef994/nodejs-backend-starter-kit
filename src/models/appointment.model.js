@@ -27,12 +27,12 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     StartTime: {
-      type: String,
-      default: null,
+      type: Date,
+      required: true,
     },
     EndTime: {
-      type: String,
-      default: null,
+      type: Date,
+      required: true,
     },
     UserDocument: {
       type: Array,

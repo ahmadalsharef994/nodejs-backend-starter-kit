@@ -1,8 +1,6 @@
 const DyteService = require('../Microservices/dyteServices');
-const VerifiedDoctors = require('../models/verifieddoctor');
-const Appointment = require('../models/appointment.model');
 const ApiError = require('../utils/ApiError');
-const { AppointmentSession, Followup, Prescription } = require('../models');
+const { AppointmentSession, Followup, Prescription, Appointment, VerifiedDoctors } = require('../models');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
@@ -86,13 +84,13 @@ const getUpcomingAppointments = async (doctorId) => {
 };
 
 // get all appointments (implement query)
-const getAllAppointments = async (doctorId, type) => {
-  if (!type) {
+const getAllAppointments = async (doctorId, status) => {
+  if (!status) {
     const promise = await Appointment.find({ docid: doctorId }).sort();
     // sort using StartTIme
     return promise;
   }
-  const promise = await Appointment.find({ docid: doctorId, Type: type }).sort();
+  const promise = await Appointment.find({ docid: doctorId, Status: status }).sort();
   // sort using StartTIme
   return promise;
 };

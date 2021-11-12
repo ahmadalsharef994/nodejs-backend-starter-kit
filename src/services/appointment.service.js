@@ -55,14 +55,14 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
     const type = slotId.split('-')[0];
     const slots = pref[`${day}_${type}`];
     const slot = slots.filter((e) => e.slotId === slotId);
-    if (!slot) {
+    if (!slot.length) {
       return null;
     }
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
   });
   const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
-  if (appointmentExist) {
+  if (appointmentExist || startTime === null || endTime === null) {
     return null;
   }
   const bookedAppointment = await Appointment.create({
@@ -86,8 +86,28 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
   return bookedAppointment;
 };
 
-const submitFollowupDetails = async (appointmentId, startTime, endTime) => {
-  const AppointmentData = await Appointment.findById(appointmentId);
+const submitFollowupDetails = async (appointmentId, doctorId, slotId, date) => {
+  let startTime = null;
+  let endTime = null;
+  const AppointmentData = await Appointment.findById(appointmentId).exec();
+  if (!AppointmentData) {
+    return null;
+  }
+  await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+    const day = slotId.split('-')[1];
+    const type = slotId.split('-')[0];
+    const slots = pref[`${day}_${type}`];
+    const slot = slots.filter((e) => e.slotId === slotId);
+    if (!slot.length) {
+      return null;
+    }
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+  });
+  const followupExist = await Followup.findOne({ Appointment: AppointmentData.id, StartTime: startTime }).exec();
+  if (followupExist || startTime === null || endTime === null) {
+    return null;
+  }
   const assignedFollowup = await Followup.create({
     Appointment: AppointmentData,
     StartTime: startTime,

@@ -23,7 +23,7 @@ const bookAppointmentDetails = {
     .max(3),
 };
 
-const followupDetails = {
+const assignfollowupDetails = {
   params: Joi.object()
     .keys({
       appointmentId: Joi.string().custom(objectId),
@@ -32,8 +32,8 @@ const followupDetails = {
     .max(1),
   body: Joi.object()
     .keys({
-      startTime: Joi.string().required(),
-      endTime: Joi.string().required(),
+      slotId: Joi.string().required(),
+      date: Joi.string().required(),
     })
     .min(2)
     .max(2),
@@ -82,7 +82,7 @@ module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
   bookAppointmentDetails,
-  followupDetails,
+  assignfollowupDetails,
   getFollowups,
   getAllAppointments,
   getappointment,

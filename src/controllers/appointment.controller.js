@@ -28,20 +28,24 @@ const bookAppointment = catchAsync(async (req, res) => {
       if (result === null) {
         return res
           .status(httpStatus.BAD_REQUEST)
-          .json({ message: 'Error or maybe slot already booked! for given date', data: [] });
+          .json({ message: "Error: Appointment slot doesn't exist or slot already assigned! for given date", data: [] });
       }
-      return res.status(httpStatus.OK).json({ message: 'Hurray! Appointment Booked', data: result });
+      return res.status(httpStatus.CREATED).json({ message: 'Hurray! Appointment Booked', data: result });
     });
 });
 
 // same method as appointment booking to be implemented
 const assignFollowup = catchAsync(async (req, res) => {
-  const FollowupDetails = await appointmentService.submitFollowupDetails(
-    req.params.appointmentId,
-    req.body.startTime,
-    req.body.endTime
-  );
-  res.status(httpStatus.CREATED).json({ message: 'Followup Slot assigned', data: FollowupDetails });
+  await appointmentService
+    .submitFollowupDetails(req.params.appointmentId, req.Docid, req.body.slotId, req.body.date)
+    .then((result) => {
+      if (result === null) {
+        return res
+          .status(httpStatus.BAD_REQUEST)
+          .json({ message: "Error: Appointment doesn't exist or slot already assigned! for given date", data: [] });
+      }
+      return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
+    });
 });
 
 const showFollowups = catchAsync(async (req, res) => {

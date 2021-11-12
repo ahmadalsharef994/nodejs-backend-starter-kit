@@ -13,7 +13,7 @@ if (config.env !== 'test') {
     .catch(() => logger.warn('Unable to connect to email server. Make sure you have configured the SMTP options in .env'));
 }
 
-const sendEmail = (to, subject, template, OTP) => {
+const sendEmail = (to, name, subject, template, OTP) => {
   transport.use(
     'compile',
     hbs({
@@ -34,6 +34,7 @@ const sendEmail = (to, subject, template, OTP) => {
     template,
     context: {
       OTP,
+      name,
     },
   };
   transport.sendMail(mailOptions, (error, info) => {
@@ -44,19 +45,24 @@ const sendEmail = (to, subject, template, OTP) => {
   });
 };
 
-const sendResetPasswordEmail = async (to, OTP) => {
+const sendResetPasswordEmail = async (to, name, OTP) => {
   const subject = 'Reset password';
-  const template = 'index';
+  const template = 'resetPassword';
   const emaillink = `${OTP}`;
-  await sendEmail(to, subject, template, emaillink);
+  const userEmail = `${to}`;
+  const userName = `${name}`;
+  await sendEmail(userEmail, userName, subject, template, emaillink);
 };
 
-const sendVerificationEmail = async (to, OTP) => {
+const sendVerificationEmail = async (to, name, OTP) => {
   const subject = 'Email Verification';
-  const template = 'index';
+  const template = 'verifyEmail';
   const emaillink = `${OTP}`;
-  await sendEmail(to, subject, template, emaillink);
+  const userEmail = `${to}`;
+  const userName = `${name}`;
+  await sendEmail(userEmail, userName, subject, template, emaillink);
 };
+
 module.exports = {
   transport,
   sendEmail,

@@ -25,6 +25,10 @@ const doctorClinic = mongoose.Schema(
       type: Number,
       required: true,
     },
+    timing: {
+      type: Array,
+      required: true,
+    },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

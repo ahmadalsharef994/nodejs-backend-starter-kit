@@ -7,6 +7,8 @@ const {
   Appointment,
   VerifiedDoctors,
   AppointmentPreference,
+  ConsultationFee,
+  Notification,
 } = require('../models');
 const jobservice = require('../Microservices/agendascheduler');
 
@@ -190,6 +192,22 @@ const fetchAllPatientDetails = async (doctorid) => {
   return false;
 };
 
+const addConsultationfee = async (consultationfeeDoc) => {
+  const DoctorConsultationfee = await ConsultationFee.create(consultationfeeDoc);
+  if (DoctorConsultationfee) {
+    return { message: 'Consultation fee added Sucessfully', DoctorConsultationfee };
+  }
+  return false;
+};
+
+const notifications = async (notificationsDoc) => {
+  const DoctorNotifications = await Notification.create(notificationsDoc);
+  if (DoctorNotifications) {
+    return { message: 'notification option added sucessfully', DoctorNotifications };
+  }
+  return false;
+};
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -204,4 +222,6 @@ module.exports = {
   fetchPrescriptionDoc,
   fetchPatientDetails,
   fetchAllPatientDetails,
+  addConsultationfee,
+  notifications,
 };

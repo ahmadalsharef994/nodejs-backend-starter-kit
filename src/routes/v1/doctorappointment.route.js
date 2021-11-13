@@ -20,21 +20,27 @@ router.post(
 );
 
 router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.showUpcomingAppointments);
+
 router
   .route('/all-appointments')
   .get(authdoctorverified(), validate(appointmentValidation.getAllAppointments), appointmentController.showAllAppointments);
+
+router.get(
+  '/patients/:patientId',
+  authdoctorverified(),
+  validate(appointmentValidation.getDetailsPatient),
+  appointmentController.getPatientDetails
+);
+
+router.get('/getpatients', authdoctorverified(), appointmentController.getAllPatientDetails);
+
 router
   .route('/:appointmentId/follow-ups')
   .get(authdoctorverified(), validate(appointmentValidation.getFollowups), appointmentController.showFollowups);
+
 router
   .route('/:appointmentId/assign-followup')
   .post(authdoctorverified(), validate(appointmentValidation.followupDetails), appointmentController.assignFollowup);
-router.get(
-  '/:appointmentId',
-  authdoctorverified(),
-  validate(appointmentValidation.getappointment),
-  appointmentController.getappointmentDoctor
-);
 
 router.post(
   '/:appointmentId/prescription',
@@ -50,16 +56,6 @@ router.get(
   appointmentController.getPrescription
 );
 
-router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.showUpcomingAppointments);
-router
-  .route('/all-appointments')
-  .get(authdoctorverified(), validate(appointmentValidation.getAllAppointments), appointmentController.showAllAppointments);
-router
-  .route('/:appointmentId/follow-ups')
-  .get(authdoctorverified(), validate(appointmentValidation.getFollowups), appointmentController.showFollowups);
-router
-  .route('/:appointmentId/assign-followup')
-  .post(authdoctorverified(), validate(appointmentValidation.followupDetails), appointmentController.assignFollowup);
 router.get(
   '/:appointmentId',
   authdoctorverified(),

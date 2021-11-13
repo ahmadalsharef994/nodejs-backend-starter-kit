@@ -1,0 +1,158 @@
+<html style='margin: 0; padding: 0;'>
+
+  <head>
+    <title>One | Email template!</title>
+    <style>
+      body{
+        font-family: arial;
+      }
+
+      .logo{
+        position: absolute;
+        top:1.5rem;
+        left:4rem;
+      }
+      .main{
+        box-sizing: border-box;
+        background: #E2F5EE;
+        position: relative;
+        padding: 4.5rem 3rem;
+        width: 100%;
+      }
+      .box{
+        text-align: left;
+        margin: auto;
+        background: #fff;
+        padding: 2rem ;
+      }
+      .name{
+        font-size: 1.3rem;
+        color: #003443;
+      }
+      .text1,.text2{
+        font-weight: 400;
+        font-size: 0.7rem;
+        margin-bottom: 1.6rem;
+      }
+      .email{
+        color: #27697E;
+        font-weight: 700;
+      }
+      .text3{
+        font-size: 0.5rem;
+        font-weight: 300;
+        color: #999;
+      }
+      .help{
+        font-style: italic;
+        font-weight: 700;
+        color: #777;
+      }
+      .otp{
+        text-align: center;
+        margin-bottom: 1.6rem;
+        font-weight: 500;
+        letter-spacing: 1rem;
+        color: #00455b;
+      }
+      .icons{
+        width: 100%;
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+      .social{
+        width:2rem;
+      }
+
+      .footer{
+        text-align: center;
+        color: #9B9494;
+        font-size: 0.55rem;
+        margin-top: 0.6rem;
+      }
+
+      .link{
+        color:#9B9494;
+        font-size: 0.5rem;
+        text-decoration: none;
+        padding-right: 0.3rem;
+      }
+      .address{
+        margin-top: 1rem;
+        font-size:0.45rem;
+        line-height:12px;
+      }
+
+      @media (min-width: 599px) {
+        .box{
+          width:600px ;
+          padding:3rem;
+        }
+        .logo{
+        position: absolute;
+        top:1rem;
+        left:20rem;
+        }
+      .name{
+        font-size: 1.4rem;
+      }
+      .text1,.text2{
+        font-size: 0.9rem;
+      }
+
+      .text3{
+        font-size: 0.75rem;
+      }
+      .footer{
+        font-size: 0.7rem;
+      }
+
+      .link{
+        font-size: 0.65rem;
+      }
+      .address{
+        margin-top: 1.4rem;
+        font-size:0.6rem;
+      }
+      }
+    </style>
+  </head>
+
+  <body style='margin: 0; padding: 0;'>
+
+    <div class='main'>
+        <img src="Logo.png" alt="" class="logo">
+      <div class="box">
+        <img class='icon' src="send-email.svg"/>
+        <h2 class='name'>Hi {{name}},</h2>
+        <div class='text1'>Please verify that your email address is <br/>
+        <span class='email'><strong>{{to}}</strong></span>. </div>
+        <div class="text2">We just need to verify your email. Click the button below to let us know this is really you.</div>
+        <h2 class="otp">{{OTP}}</h2>
+        <div class="text3">If you have any questions, please email us a<span class='help'> help@medzgo.com</span>
+           You can also chat with a real live human during our operating hours.
+            They can answer questions about your account.</div>
+        <div class="icons">
+          <img src="twitter.png" alt="" class="social"/>
+          <img src="insta.png" alt="" class="social"/>
+          <img src="facebook.png" alt="" class="social"/>
+        </div>
+              <div class="footer">
+                <a href="" class="link">Medzgo</a>|
+                <a href="" class="link">How it works</a>|
+                <a href="" class="link">FAQ</a>|
+                <a href="" class="link">T&Cs</a>
+                    <div class="address">
+                      You have received this email as a registered user of medzgo.in <br/>
+                      2145 Michigan Ave. | Santa Monica, CA 90404 | USA <br/>
+                      Company Number: XXXXXXXXX <br/>
+                      Medzgo, Inc.
+                    </div>
+              </div>
+      </div>
+
+    </div>
+
+  </body>
+
+</html>

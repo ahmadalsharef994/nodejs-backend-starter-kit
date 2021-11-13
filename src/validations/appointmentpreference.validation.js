@@ -2,48 +2,62 @@ const Joi = require('joi');
 
 const PreferenceDetails = {
   body: Joi.object().keys({
-    MON: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
-    TUE: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
-    WED: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
-    THU: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
-    FRI: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
-    SAT: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
-    SUN: Joi.object().keys({
-      FromHour: Joi.number().integer().min(0).max(23),
-      FromMinutes: Joi.number().integer().min(0).max(59),
-      ToHour: Joi.number().integer().min(0).max(23),
-      ToMinutes: Joi.number().integer().min(0).max(59),
-    }),
+    MON: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
+    TUE: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
+    WED: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
+    THU: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
+    FRI: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
+    SAT: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
+    SUN: Joi.array().items(
+      Joi.object().keys({
+        FromHour: Joi.number().integer().min(0).max(23),
+        FromMinutes: Joi.number().integer().min(0).max(59),
+        ToHour: Joi.number().integer().min(0).max(23),
+        ToMinutes: Joi.number().integer().min(0).max(59),
+      })
+    ),
   }),
 };
 

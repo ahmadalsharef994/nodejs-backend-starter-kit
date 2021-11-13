@@ -1,8 +1,13 @@
-/* eslint-disable no-param-reassign */
-const VerifiedDoctors = require('../models/verifieddoctor');
 const DyteService = require('../Microservices/dyteServices');
 const ApiError = require('../utils/ApiError');
-const { AppointmentSession, Followup, Prescription, Appointment } = require('../models');
+const {
+  AppointmentSession,
+  Followup,
+  Prescription,
+  Appointment,
+  VerifiedDoctors,
+  AppointmentPreference,
+} = require('../models');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
@@ -41,8 +46,25 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData) => {
   return { UserVideoToken, UserRoomName };
 };
 
-const submitAppointmentDetails = async (doctorId, userAuth, startTime, endTime) => {
+const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
+  let startTime = null;
+  let endTime = null;
   const { doctorauthid } = await VerifiedDoctors.findOne({ docid: doctorId });
+  await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+    const day = slotId.split('-')[1];
+    const type = slotId.split('-')[0];
+    const slots = pref[`${day}_${type}`];
+    const slot = slots.filter((e) => e.slotId === slotId);
+    if (!slot.length) {
+      return null;
+    }
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+  });
+  const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
+  if (appointmentExist || startTime === null || endTime === null) {
+    return null;
+  }
   const bookedAppointment = await Appointment.create({
     AuthDoctor: doctorauthid,
     docid: doctorId,
@@ -64,8 +86,28 @@ const submitAppointmentDetails = async (doctorId, userAuth, startTime, endTime) 
   return bookedAppointment;
 };
 
-const submitFollowupDetails = async (appointmentId, startTime, endTime) => {
-  const AppointmentData = await Appointment.findById(appointmentId);
+const submitFollowupDetails = async (appointmentId, doctorId, slotId, date) => {
+  let startTime = null;
+  let endTime = null;
+  const AppointmentData = await Appointment.findById(appointmentId).exec();
+  if (!AppointmentData) {
+    return null;
+  }
+  await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+    const day = slotId.split('-')[1];
+    const type = slotId.split('-')[0];
+    const slots = pref[`${day}_${type}`];
+    const slot = slots.filter((e) => e.slotId === slotId);
+    if (!slot.length) {
+      return null;
+    }
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+  });
+  const followupExist = await Followup.findOne({ Appointment: AppointmentData.id, StartTime: startTime }).exec();
+  if (followupExist || startTime === null || endTime === null) {
+    return null;
+  }
   const assignedFollowup = await Followup.create({
     Appointment: AppointmentData,
     StartTime: startTime,

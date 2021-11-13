@@ -40,7 +40,13 @@ router
 
 router
   .route('/:appointmentId/assign-followup')
-  .post(authdoctorverified(), validate(appointmentValidation.followupDetails), appointmentController.assignFollowup);
+  .post(authdoctorverified(), validate(appointmentValidation.assignfollowupDetails), appointmentController.assignFollowup);
+router.get(
+  '/:appointmentId',
+  authdoctorverified(),
+  validate(appointmentValidation.getappointment),
+  appointmentController.getappointmentDoctor
+);
 
 router.post(
   '/:appointmentId/prescription',

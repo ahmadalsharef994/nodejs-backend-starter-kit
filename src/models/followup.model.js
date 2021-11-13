@@ -10,11 +10,11 @@ const FollowupSchema = mongoose.Schema(
       required: true,
     },
     StartTime: {
-      type: String,
+      type: Date,
       required: true,
     },
     EndTime: {
-      type: String,
+      type: Date,
       required: true,
     },
     FollowupNo: {

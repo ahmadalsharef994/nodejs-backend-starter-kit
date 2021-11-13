@@ -22,37 +22,45 @@ const joinAppointmentPatient = catchAsync(async (req, res) => {
 
 const bookAppointment = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const AppointmentDetails = await appointmentService.submitAppointmentDetails(
-    req.body.docId,
-    AuthData,
-    req.body.startTime,
-    req.body.endTime
-  );
-  res.status(httpStatus.CREATED).json({ message: 'Hurray! Appointment Booked', AppointmentDetails });
+  await appointmentService
+    .submitAppointmentDetails(req.body.docId, AuthData, req.body.slotId, req.body.date)
+    .then((result) => {
+      if (result === null) {
+        return res
+          .status(httpStatus.BAD_REQUEST)
+          .json({ message: "Error: Appointment slot doesn't exist or slot already assigned! for given date", data: [] });
+      }
+      return res.status(httpStatus.CREATED).json({ message: 'Hurray! Appointment Booked', data: result });
+    });
 });
 
+// same method as appointment booking to be implemented
 const assignFollowup = catchAsync(async (req, res) => {
-  const FollowupDetails = await appointmentService.submitFollowupDetails(
-    req.params.appointmentId,
-    req.body.startTime,
-    req.body.endTime
-  );
-  res.status(httpStatus.CREATED).json({ message: 'Followup Slot assigned', FollowupDetails });
+  await appointmentService
+    .submitFollowupDetails(req.params.appointmentId, req.Docid, req.body.slotId, req.body.date)
+    .then((result) => {
+      if (result === null) {
+        return res
+          .status(httpStatus.BAD_REQUEST)
+          .json({ message: "Error: Appointment doesn't exist or slot already assigned! for given date", data: [] });
+      }
+      return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
+    });
 });
 
 const showFollowups = catchAsync(async (req, res) => {
   appointmentService.getFollowups(req.params.appointmentId).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: 'No Followups assigned.' });
+      return res.status(httpStatus.OK).json({ message: 'No Followups assigned.', data: [] });
     }
-    return res.status(httpStatus.OK).json(result);
+    return res.status(httpStatus.OK).json({ message: 'success', data: result });
   });
 });
 
 const showUpcomingAppointments = catchAsync(async (req, res) => {
   appointmentService.getUpcomingAppointments(req.Docid).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: 'No Upcoming Appointments' });
+      return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
     }
     return res.status(httpStatus.OK).json(result);
   });
@@ -61,7 +69,7 @@ const showUpcomingAppointments = catchAsync(async (req, res) => {
 const showAllAppointments = catchAsync(async (req, res) => {
   appointmentService.getAllAppointments(req.Docid, req.query.type).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: 'No Appointments to show' });
+      return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
     }
     return res.status(httpStatus.OK).json(result);
   });
@@ -72,7 +80,7 @@ const getappointmentDoctor = catchAsync(async (req, res) => {
   if (DoctorSession !== false) {
     res.status(httpStatus.CREATED).json({ DoctorSession });
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Appointment present with this id' });
+    res.status(httpStatus.OK).json({ message: 'No Appointment present with this id', data: [] });
   }
 });
 

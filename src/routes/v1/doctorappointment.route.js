@@ -83,4 +83,18 @@ router.get(
   appointmentController.getPrescription
 );
 
+router.post(
+  '/consultationfee',
+  authdoctorverified(),
+  validate(appointmentValidation.addConsultationfee),
+  appointmentController.addConsultationfee
+);
+
+router.post(
+  '/notification',
+  authdoctorverified(),
+  validate(appointmentValidation.notifications),
+  appointmentController.notifications
+);
+
 module.exports = router;

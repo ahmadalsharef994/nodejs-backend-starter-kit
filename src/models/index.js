@@ -17,3 +17,5 @@ module.exports.Followup = require('./followup.model');
 module.exports.DoctorRequest = require('./doctorRequest.model');
 module.exports.AppointmentSession = require('./appointmentSession.model');
 module.exports.DoctorPayout = require('./payout.model');
+module.exports.ConsultationFee = require('./consultationFee.model');
+module.exports.Notification = require('./notification.model');

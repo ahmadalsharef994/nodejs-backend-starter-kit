@@ -7,6 +7,7 @@ const cors = require('cors');
 const passport = require('passport');
 const httpStatus = require('http-status');
 const { getClientIp } = require('@supercharge/request-ip');
+// const Agenda = require('agenda');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const { jwtStrategy } = require('./config/passport');
@@ -21,6 +22,21 @@ if (config.env !== 'test') {
   app.use(morgan.successHandler);
   app.use(morgan.errorHandler);
 }
+
+/* const agenda = new Agenda({
+  db: { address: dbURL, collection: 'Agenda' },
+  processEvery: '20 seconds',
+  useUnifiedTopology: true,
+});
+agenda.define('createSessions', async (job) => {
+  const { name } = job.attrs;
+  console.log(`Hello ${name} 👋`);
+});
+(async function () {
+  await agenda.start(); // Start Agenda instance
+  const date = '2021-11-09T13:44:24.624Z'
+  await agenda.schedule(date, 'createSessions', { name: 'Medium' }); // Run the dummy job in 10 minutes and passing data.
+})(); */
 // set security HTTP headers
 app.use(helmet());
 // parse json request body

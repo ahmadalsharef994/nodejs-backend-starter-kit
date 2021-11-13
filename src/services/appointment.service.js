@@ -8,6 +8,7 @@ const {
   VerifiedDoctors,
   AppointmentPreference,
 } = require('../models');
+const jobservice = require('../Microservices/agendascheduler');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
@@ -83,6 +84,7 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
     isRescheduled: false,
     DoctorRescheduleding: null,
   });
+  await jobservice.ScheduleSessionJob(bookedAppointment.id);
   return bookedAppointment;
 };
 

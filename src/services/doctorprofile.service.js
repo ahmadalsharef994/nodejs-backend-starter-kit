@@ -56,19 +56,15 @@ const submiteducationdetails = async (EducationDetailBody, AuthData) => {
 };
 
 const fetchClinicdetails = async (AuthData) => {
-  const DoctorClinicExist = await DoctorClinic.findOne({ auth: AuthData });
+  const DoctorClinicExist = await DoctorClinic.find({ auth: AuthData });
   return DoctorClinicExist;
 };
 
 const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
-  const alreayExist = await fetchClinicdetails(AuthData);
-  if (!alreayExist) {
-    // eslint-disable-next-line no-param-reassign
-    ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
-    const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
-    return clinicDetailDoc;
-  }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
+  // eslint-disable-next-line no-param-reassign
+  ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
+  const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
+  return clinicDetailDoc;
 };
 
 const fetchexperiencedetails = async (AuthData) => {

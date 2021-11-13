@@ -43,6 +43,9 @@ const upload = multer({
       cb(null, `${file.fieldname}/${uuid()}${ext}`);
     },
   }),
+  onError(err, next) {
+    next(err);
+  },
   fileFilter,
   limits: { fileSize: 100000000 },
 });

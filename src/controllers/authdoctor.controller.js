@@ -154,7 +154,7 @@ const resetPassword = catchAsync(async (req, res) => {
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const OTP = generateOTP();
-  await emailService.sendVerificationEmail(AuthData.email, OTP);
+  await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
   await otpServices.sendemailverifyotp(OTP, AuthData);
   res.status(httpStatus.OK).json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY', otp: OTP });
 });

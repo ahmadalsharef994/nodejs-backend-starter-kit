@@ -103,6 +103,26 @@ const getPrescription = catchAsync(async (req, res) => {
   }
 });
 
+const getPatientDetails = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const patientData = await appointmentService.fetchPatientDetails(req.params.patientId, AuthData);
+  if (patientData !== false) {
+    res.status(httpStatus.CREATED).json({ patientData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Patient present with this id' });
+  }
+});
+
+const getAllPatientDetails = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const patientsData = await appointmentService.fetchAllPatientDetails(AuthData);
+  if (patientsData !== false) {
+    res.status(httpStatus.CREATED).json({ patientsData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Patients Exits' });
+  }
+});
+
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -115,4 +135,6 @@ module.exports = {
   getappointmentDoctor,
   createPrescription,
   getPrescription,
+  getPatientDetails,
+  getAllPatientDetails,
 };

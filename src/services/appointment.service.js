@@ -128,13 +128,13 @@ const getUpcomingAppointments = async (doctorId) => {
 };
 
 // get all appointments (implement query)
-const getAllAppointments = async (doctorId, status) => {
-  if (!status) {
+const getAllAppointments = async (doctorId, type) => {
+  if (!type) {
     const promise = await Appointment.find({ docid: doctorId }).sort();
     // sort using StartTIme
     return promise;
   }
-  const promise = await Appointment.find({ docid: doctorId, Status: status }).sort();
+  const promise = await Appointment.find({ docid: doctorId, Type: type }).sort();
   // sort using StartTIme
   return promise;
 };
@@ -172,6 +172,22 @@ const createPrescriptionDoc = async (prescriptionDoc, appointmentID) => {
   return false;
 };
 
+const fetchPatientDetails = async (patientid, doctorid) => {
+  const PatientidDocument = await Appointment.find({ AuthUser: patientid, AuthDoctor: doctorid });
+  if (PatientidDocument) {
+    return { PatientidDocument };
+  }
+  return false;
+};
+
+const fetchAllPatientDetails = async (doctorid) => {
+  const DoctorPatientidDocument = await Appointment.find({ AuthDoctor: doctorid });
+  if (DoctorPatientidDocument) {
+    return DoctorPatientidDocument;
+  }
+  return false;
+};
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -184,4 +200,6 @@ module.exports = {
   getappointmentDoctor,
   createPrescriptionDoc,
   fetchPrescriptionDoc,
+  fetchPatientDetails,
+  fetchAllPatientDetails,
 };

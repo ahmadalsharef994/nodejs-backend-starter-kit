@@ -216,6 +216,7 @@ const ClinicDoctorDetails = {
     AddressSecondline: Joi.string().required(),
     clinicTelephone: Joi.number().required(),
     pincode: Joi.number().required(),
+    timing: Joi.array().required(),
   }),
 };
 

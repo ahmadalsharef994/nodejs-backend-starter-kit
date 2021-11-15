@@ -45,7 +45,7 @@ const submitbasicdetails = async (req, res) => {
   }
 };
 
-const submitprofilepicture = async (req, res) => {
+const submitprofilepicture = async (req) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   let profilePhoto = '';
   try {
@@ -53,13 +53,7 @@ const submitprofilepicture = async (req, res) => {
   } catch (err) {
     profilePhoto = null;
   }
-  const returnThumbnail = await profilePhotoUpload.thumbnail(profilePhoto);
-  const returndata = await doctorprofileService.submitprofilepicture(profilePhoto, AuthData, returnThumbnail);
-  if ((returndata !== false) & (returnThumbnail !== false)) {
-    res.status(httpStatus.OK).json({ message: 'profile picture added' });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'profile picture not added kindlly check your input' });
-  }
+  await doctorprofileService.submitprofilepicture(profilePhoto, AuthData);
 };
 
 const updateprofilepicture = async (req, res) => {

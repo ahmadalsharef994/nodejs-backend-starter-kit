@@ -27,7 +27,8 @@ router
     authdoctornonverified(),
     function (req, res) {
       DoctorProfileController.submitprofilepicture(req);
-      res.status(201).json('Profile picture Updated!');
+      const location = req.files.avatar[0].location;
+      res.status(201).json({ message: 'Profile picture Updated!', location });
     }
   );
 

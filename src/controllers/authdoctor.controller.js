@@ -116,7 +116,7 @@ const forgotPassword = catchAsync(async (req, res) => {
     if (!AuthData) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this email please provide correct email');
     }
-    await emailService.sendResetPasswordEmail(req.body.email, OTP);
+    await emailService.sendResetPasswordEmail(req.body.email, AuthData.fullname, OTP);
     await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({

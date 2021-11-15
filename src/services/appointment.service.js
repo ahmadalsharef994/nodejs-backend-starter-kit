@@ -112,7 +112,7 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
     isRescheduled: false,
     DoctorRescheduleding: null,
   });
-  await jobservice.ScheduleSessionJob(bookedAppointment.id);
+  await jobservice.ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
   return bookedAppointment;
 };
 

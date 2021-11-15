@@ -11,6 +11,7 @@ const {
   Notification,
 } = require('../models');
 const jobservice = require('../Microservices/agendascheduler');
+const pusherService = require('../Microservices/pusherService');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
@@ -27,7 +28,7 @@ const initiateappointmentSession = async (appointmentID) => {
   return DyteSessionToken;
 };
 
-const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData) => {
+const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID) => {
   // Join Appointment Doctor
   const SessionToken = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthDoctor: AuthData._id });
   if (!SessionToken) {
@@ -35,10 +36,11 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData) => {
   }
   const DoctorVideoToken = SessionToken.dytedoctortoken;
   const DoctorRoomName = SessionToken.dyteroomname;
-  return { DoctorVideoToken, DoctorRoomName };
+  const DoctorChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
+  return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken };
 };
 
-const JoinappointmentSessionbyPatient = async (appointmentID, AuthData) => {
+const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID) => {
   // Join Appointment Doctor
   const SessionToken = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthUser: AuthData._id });
   if (!SessionToken) {
@@ -46,7 +48,8 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData) => {
   }
   const UserVideoToken = SessionToken.dyteusertoken;
   const UserRoomName = SessionToken.dyteroomname;
-  return { UserVideoToken, UserRoomName };
+  const UserChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
+  return { UserVideoToken, UserRoomName, UserChatAuthToken };
 };
 
 const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {

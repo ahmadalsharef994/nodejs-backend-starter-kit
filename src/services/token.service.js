@@ -67,10 +67,20 @@ const logoutdevice = async (authtoken) => {
  * @param {string} [secret]
  * @returns {string}
  */
-const generateAppointmentSessionToken = (appointmentID, doctorId, secret = config.jwt.secret) => {
+const generateChatAppointmentSessionToken = (
+  appointmentID,
+  doctorAuth,
+  userAuth,
+  chatID,
+  requestedby,
+  secret = config.jwt.secret
+) => {
   const payload = {
     appointment: appointmentID,
-    doctor: doctorId,
+    doctor: doctorAuth,
+    user: userAuth,
+    chat: chatID,
+    entity: requestedby,
     iat: moment().unix(),
     exp: moment().add(20, 'minutes').unix(),
   };
@@ -160,7 +170,7 @@ module.exports = {
   generateAdminToken,
   generateDoctorToken,
   generateVerifiedDoctorToken,
-  generateAppointmentSessionToken,
+  generateChatAppointmentSessionToken,
   generateUserToken,
   addDeviceHandler,
   logoutdevice,

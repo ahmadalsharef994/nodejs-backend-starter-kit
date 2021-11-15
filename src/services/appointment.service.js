@@ -1,4 +1,3 @@
-const DyteService = require('../Microservices/dyteServices');
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -10,8 +9,10 @@ const {
   ConsultationFee,
   Notification,
 } = require('../models');
+const DyteService = require('../Microservices/dyteServices');
 const jobservice = require('../Microservices/agendascheduler');
 const pusherService = require('../Microservices/pusherService');
+const tokenService = require('./token.service');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
@@ -30,26 +31,43 @@ const initiateappointmentSession = async (appointmentID) => {
 
 const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID) => {
   // Join Appointment Doctor
-  const SessionToken = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthDoctor: AuthData._id });
-  if (!SessionToken) {
+  const AppointmentSessionData = await AppointmentSession.findOne({
+    appointmentid: appointmentID,
+    AuthDoctor: AuthData._id,
+  });
+  if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
-  const DoctorVideoToken = SessionToken.dytedoctortoken;
-  const DoctorRoomName = SessionToken.dyteroomname;
+  const DoctorVideoToken = AppointmentSessionData.dytedoctortoken;
+  const DoctorRoomName = AppointmentSessionData.dyteroomname;
   const DoctorChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
-  return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken };
+  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+    AppointmentSessionData.appointmentid,
+    AppointmentSessionData.AuthDoctor,
+    AppointmentSessionData.AuthUser,
+    'chatID', // @nitesh pass chat document ID here
+    'doctor'
+  );
+  return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken, ChatExchangeToken };
 };
 
 const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID) => {
   // Join Appointment Doctor
-  const SessionToken = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthUser: AuthData._id });
-  if (!SessionToken) {
+  const AppointmentSessionData = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthUser: AuthData._id });
+  if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
-  const UserVideoToken = SessionToken.dyteusertoken;
-  const UserRoomName = SessionToken.dyteroomname;
+  const UserVideoToken = AppointmentSessionData.dyteusertoken;
+  const UserRoomName = AppointmentSessionData.dyteroomname;
   const UserChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
-  return { UserVideoToken, UserRoomName, UserChatAuthToken };
+  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+    AppointmentSessionData.appointmentid,
+    AppointmentSessionData.AuthDoctor,
+    AppointmentSessionData.AuthUser,
+    'chatID', // @nitesh pass chat document ID here
+    'user'
+  );
+  return { UserVideoToken, UserRoomName, UserChatAuthToken, ChatExchangeToken };
 };
 
 const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {

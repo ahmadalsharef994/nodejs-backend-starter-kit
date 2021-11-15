@@ -22,7 +22,7 @@ const InitiateMeetingRoom = async (appointmentID) => {
     .then((response) => {
       Meetingresult = response.data.data;
     })
-    .catch((error) => {
+    .catch(() => {
       throw new ApiError(400, 'Error Generating Video Session');
     });
 
@@ -54,7 +54,7 @@ const addDoctorParticipantToMeeting = async (meetingID, doctorId) => {
     .then((response) => {
       DocParticipantresult = response.data.data;
     })
-    .catch((error) => {
+    .catch(() => {
       throw new ApiError(400, 'Error Adding Doctor Participant Video Session');
     });
 
@@ -86,7 +86,7 @@ const addUserParticipantToMeeting = async (meetingID, patientId) => {
     .then((response) => {
       UserParticipantresult = response.data.data;
     })
-    .catch((error) => {
+    .catch(() => {
       throw new ApiError(400, 'Error Adding User Participant Video Session');
     });
 
@@ -97,7 +97,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
-  const SaveSession = await AppointmentSession.create({
+  const AppointmentSessiondata = await AppointmentSession.create({
     appointmentid: appointmentID,
     AuthDoctor: doctorId,
     AuthUser: patientId,
@@ -106,6 +106,9 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
     dytedoctortoken: doctorparticipation.authResponse.authToken,
     dyteusertoken: userparticipation.authResponse.authToken,
   });
+  if (!AppointmentSessiondata) {
+    throw new ApiError(400, 'Error Triggered it to Developer DYTE Services down');
+  }
   return { meetingroom, doctorparticipation, userparticipation };
 };
 

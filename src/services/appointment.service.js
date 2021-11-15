@@ -8,6 +8,7 @@ const {
   AppointmentPreference,
   ConsultationFee,
   Notification,
+  Chat,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
 const jobservice = require('../Microservices/agendascheduler');
@@ -25,6 +26,10 @@ const initiateappointmentSession = async (appointmentID) => {
   if (!DyteSessionToken) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
+  await Chat.create({
+    appointment: appointmentID,
+    members: [AppointmentData.AuthDoctor, AppointmentData.AuthUser],
+  });
   // Pusher
   return DyteSessionToken;
 };

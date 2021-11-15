@@ -19,10 +19,10 @@ const submitbasicdetails = async (BasicDetailBody, AuthData) => {
   return false;
 };
 
-const submitprofilepicture = async (ProfilePhoto, AuthData, returnThumbnail) => {
+const submitprofilepicture = async (ProfilePhoto, AuthData) => {
   const alreadyExist = await fetchbasicdetails(AuthData);
   if (alreadyExist) {
-    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail: returnThumbnail } });
+    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
     return 'profile Picture updated';
   }
   return false;

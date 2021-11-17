@@ -1,7 +1,7 @@
 const Agenda = require('agenda');
 const appointmentService = require('../services/appointment.service');
 
-const dbURL = 'mongodb://127.0.0.1:27017/AgendaMedium';
+const dbURL = process.env.MONGODB_URL;
 const agenda = new Agenda({
   db: { address: dbURL, collection: 'Agenda' },
   processEvery: '20 seconds',

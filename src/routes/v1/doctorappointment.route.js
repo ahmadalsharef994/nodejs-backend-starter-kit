@@ -6,12 +6,12 @@ const appointmentController = require('../../controllers/appointment.controller'
 
 const router = express.Router();
 
-router.post(
+/* router.post(
   '/init',
   authdoctorverified(),
   validate(appointmentValidation.joinAppointmentDoctor),
   appointmentController.initAppointmentDoctor
-);
+); Only for creating Session Not needed */
 router.post(
   '/doctor-join',
   authdoctorverified(),

@@ -12,11 +12,6 @@ agenda.define('createSessions', async (job) => {
   const { appointmentID } = job.attrs;
   await appointmentService.initiateappointmentSession(appointmentID);
 });
-/* const CreateSessionJob = async () => {
-  await agenda.start(); // Start Agenda instance
-  const date = '2021-11-09T13:44:24.624Z';
-  await agenda.schedule('in 5 seconds', 'createSessions', { name: 'Medium' }); // Run the dummy job in 10 minutes and passing data.
-}; */
 
 agenda.start();
 

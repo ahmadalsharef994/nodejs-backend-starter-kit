@@ -143,6 +143,24 @@ const notifications = catchAsync(async (req, res) => {
   }
 });
 
+const doctorFeedback = catchAsync(async (req, res) => {
+  const feedbackData = await appointmentService.doctorFeedback(req.body, req.params.appointmentId);
+  if (feedbackData !== false) {
+    res.status(httpStatus.CREATED).json({ feedbackData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
+  }
+});
+
+const userFeedback = catchAsync(async (req, res) => {
+  const feedbackData = await appointmentService.userFeedback(req.body, req.params.appointmentId);
+  if (feedbackData !== false) {
+    res.status(httpStatus.CREATED).json({ feedbackData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
+  }
+});
+
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -159,4 +177,6 @@ module.exports = {
   getAllPatientDetails,
   addConsultationfee,
   notifications,
+  doctorFeedback,
+  userFeedback,
 };

@@ -1,3 +1,4 @@
+/* eslint-disable no-param-reassign */
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -9,6 +10,7 @@ const {
   ConsultationFee,
   Notification,
   Chat,
+  Feedback,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
 const jobservice = require('../Microservices/agendascheduler');
@@ -234,6 +236,42 @@ const notifications = async (notificationsDoc) => {
   return false;
 };
 
+const doctorFeedback = async (feedbackDoc, appointmentId) => {
+  const feedbackData = await Feedback.findOne({ appointmentId });
+  if (feedbackData) {
+    await Feedback.findOneAndUpdate(
+      { appointmentId },
+      { $set: { userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
+      { useFindAndModify: false }
+    );
+    return { message: 'feedback added sucessfully' };
+  }
+  feedbackDoc.appointmentId = appointmentId;
+  const DoctorNotifications = await Feedback.create(feedbackDoc);
+  if (DoctorNotifications) {
+    return { message: 'feedback added sucessfully', feedbackDoc };
+  }
+  return false;
+};
+
+const userFeedback = async (feedbackDoc, appointmentId) => {
+  const feedbackData = await Feedback.findOne({ appointmentId });
+  if (feedbackData) {
+    await Feedback.findOneAndUpdate(
+      { appointmentId },
+      { $set: { doctorRating: feedbackDoc.doctorRating, doctorDescription: feedbackDoc.doctorDescription } },
+      { useFindAndModify: false }
+    );
+    return { message: 'feedback added sucessfully' };
+  }
+  feedbackDoc.appointmentId = appointmentId;
+  const DoctorNotifications = await Feedback.create(feedbackDoc);
+  if (DoctorNotifications) {
+    return { message: 'feedback added sucessfully', feedbackDoc };
+  }
+  return false;
+};
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -250,4 +288,6 @@ module.exports = {
   fetchAllPatientDetails,
   addConsultationfee,
   notifications,
+  userFeedback,
+  doctorFeedback,
 };

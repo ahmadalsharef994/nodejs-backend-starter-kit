@@ -17,6 +17,9 @@ const tokenService = require('./token.service');
 
 const initiateappointmentSession = async (appointmentID) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentID });
+  if (!AppointmentData) {
+    throw new ApiError(400, 'Cannot Initiate Appointment Session');
+  }
   // Dyte
   const DyteSessionToken = await DyteService.createDyteMeeting(
     appointmentID,

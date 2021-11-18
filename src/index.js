@@ -3,7 +3,6 @@ const Agenda = require('agenda');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
-const appointmentService = require('./services/appointment.service');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -15,10 +14,6 @@ let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
   agenda.on('ready', () => console.log('Agenda Started')).on('error', () => console.log('Agenda Connection Error'));
-  agenda.define('createSessions', async (job) => {
-    const { appointmentID } = job.attrs;
-    await appointmentService.initiateappointmentSession(appointmentID);
-  });
   agenda.start();
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

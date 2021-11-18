@@ -10,13 +10,21 @@ const initAppointmentDoctor = catchAsync(async (req, res) => {
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.JoinappointmentSessionbyDoctor(req.body.appointmentInit, AuthData);
+  const DoctorSession = await appointmentService.JoinappointmentSessionbyDoctor(
+    req.body.appointmentInit,
+    AuthData,
+    req.body.socketID
+  );
   res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentPatient = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const UserSession = await appointmentService.JoinappointmentSessionbyPatient(req.body.appointmentInit, AuthData);
+  const UserSession = await appointmentService.JoinappointmentSessionbyPatient(
+    req.body.appointmentInit,
+    AuthData,
+    req.body.socketID
+  );
   res.status(httpStatus.CREATED).json(UserSession);
 });
 

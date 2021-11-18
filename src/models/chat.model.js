@@ -10,12 +10,7 @@ const ChatSchema = mongoose.Schema(
     members: [
       {
         type: String,
-      },
-    ],
-    messagesRef: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Message',
+        required: true,
       },
     ],
   },
@@ -23,10 +18,13 @@ const ChatSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
 // add plugin that converts mongoose to json
 ChatSchema.plugin(toJSON);
+
 /**
  * @typedef Chat
  */
+
 const Chat = mongoose.model('Chat', ChatSchema);
 module.exports = Chat;

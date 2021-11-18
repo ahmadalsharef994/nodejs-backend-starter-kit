@@ -3,9 +3,10 @@ const authRouteDoctor = require('./authdoctor.route');
 const authRouteUser = require('./authuser.route');
 const doctorProfileRoute = require('./doctorprofile.route');
 const doctorAppointmentRoute = require('./doctorappointment.route');
-const userAppointmentRoute = require('./userAppointment.route');
+const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
 const document = require('./document.route');
+const chatRoute = require('./chat.route');
 
 const router = express.Router();
 
@@ -45,6 +46,10 @@ const defaultRoutes = [
   {
     path: '/internalteam',
     route: internalTeamRoute, // Internal Team API
+  },
+  {
+    path: '/chat',
+    route: chatRoute, // chat API
   },
 ];
 

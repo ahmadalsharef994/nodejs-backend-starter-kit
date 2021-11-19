@@ -91,7 +91,6 @@ const ScheduleSessionJob = async (appointmentID, startTime) => {
   await agenda.schedule(datetime, 'createSessions', { appointment: appointmentID }); // Run the dummy job in 10 minutes and passing data.
 };
 
-
 const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
   let startTime = null;
   let endTime = null;
@@ -175,7 +174,6 @@ const getUpcomingAppointments = async (doctorId) => {
   return promise;
 };
 
-// get all appointments (implement query)
 const getAllAppointments = async (doctorId, type) => {
   if (!type) {
     const promise = await Appointment.find({ docid: doctorId }).sort();

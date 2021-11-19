@@ -7,6 +7,7 @@ const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
 const userProfileRoute = require('./userprofile.route');
 const document = require('./document.route');
+const chatRoute = require('./chat.route');
 
 const router = express.Router();
 
@@ -42,6 +43,10 @@ const defaultRoutes = [
   {
     path: '/internalteam',
     route: internalTeamRoute, // Internal Team API
+  },
+  {
+    path: '/chat',
+    route: chatRoute, // chat API
   },
 ];
 

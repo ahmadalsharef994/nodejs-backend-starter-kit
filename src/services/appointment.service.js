@@ -176,7 +176,6 @@ const getUpcomingAppointments = async (doctorId) => {
   return promise;
 };
 
-// get all appointments (implement query)
 const getAllAppointments = async (doctorId, type) => {
   if (!type) {
     const promise = await Appointment.find({ docid: doctorId }).sort();

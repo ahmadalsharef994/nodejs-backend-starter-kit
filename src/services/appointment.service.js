@@ -1,4 +1,5 @@
 /* eslint-disable no-param-reassign */
+const Agenda = require('agenda');
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -9,16 +10,25 @@ const {
   AppointmentPreference,
   ConsultationFee,
   Notification,
-  Chat,
   Feedback,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
-const jobservice = require('../Microservices/agendascheduler');
 const pusherService = require('../Microservices/pusherService');
 const tokenService = require('./token.service');
+const config = require('../config/config');
+
+const dbURL = config.mongoose.url;
+const agenda = new Agenda({
+  db: { address: dbURL, collection: 'jobs' },
+  processEvery: '20 seconds',
+  useUnifiedTopology: true,
+});
 
 const initiateappointmentSession = async (appointmentID) => {
-  const AppointmentData = await Appointment.findOne({ _id: appointmentID });
+  const AppointmentData = await Appointment.findById({ _id: appointmentID });
+  if (!AppointmentData) {
+    throw new ApiError(400, 'Cannot Initiate Appointment Session');
+  }
   // Dyte
   const DyteSessionToken = await DyteService.createDyteMeeting(
     appointmentID,
@@ -28,10 +38,6 @@ const initiateappointmentSession = async (appointmentID) => {
   if (!DyteSessionToken) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
-  await Chat.create({
-    appointment: appointmentID,
-    members: [AppointmentData.AuthDoctor, AppointmentData.AuthUser],
-  });
   // Pusher
   return DyteSessionToken;
 };
@@ -52,7 +58,6 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
-    'chatID', // @nitesh pass chat document ID here
     'doctor'
   );
   return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken, ChatExchangeToken };
@@ -66,15 +71,26 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
   }
   const UserVideoToken = AppointmentSessionData.dyteusertoken;
   const UserRoomName = AppointmentSessionData.dyteroomname;
-  const UserChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
-  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+  let UserChatAuthToken = '';
+  await pusherService.PusherSession(`private-${appointmentID}`, socketID).then((result) => {
+    UserChatAuthToken = result.auth;
+  });
+  const ChatExchangeToken = await tokenService.generateChatAppointmentSessionToken(
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
-    'chatID', // @nitesh pass chat document ID here
     'user'
   );
   return { UserVideoToken, UserRoomName, UserChatAuthToken, ChatExchangeToken };
+};
+
+const ScheduleSessionJob = async (appointmentID, startTime) => {
+  const datetime = startTime.getTime() - 300000; // This comes appointment start time - 5 minutes, 300000 is Milisecond offset
+  agenda.define('createSessions', async (job) => {
+    const { appointment } = job.attrs.data;
+    await initiateappointmentSession(appointment);
+  });
+  await agenda.schedule(datetime, 'createSessions', { appointment: appointmentID }); // Run the dummy job in 10 minutes and passing data.
 };
 
 const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
@@ -114,7 +130,8 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
     isRescheduled: false,
     DoctorRescheduleding: null,
   });
-  await jobservice.ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
+  agenda.start();
+  await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
   return bookedAppointment;
 };
 

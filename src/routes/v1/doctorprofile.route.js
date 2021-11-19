@@ -85,7 +85,7 @@ router
     validate(preferenceValidator.PreferenceDetails),
     appointmentPreferenceController.submitAppointmentPreference
   );
-router.route('/getappointments').post(appointmentPreferenceController.showappointments);
+router.route('/getappointment-slots').post(appointmentPreferenceController.showappointments);
 router.route('/payout-details').get(authdoctornonverified(), DoctorProfileController.fetchpayoutsdetails);
 router
   .route('/payout-details')

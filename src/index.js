@@ -1,11 +1,19 @@
 const mongoose = require('mongoose');
+const Agenda = require('agenda');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
 
+const dbURL = config.mongoose.url;
+const agenda = new Agenda({
+  db: { address: dbURL, collection: 'jobs' },
+  processEvery: '20 seconds',
+  useUnifiedTopology: true,
+});
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
+  agenda.start();
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
   });

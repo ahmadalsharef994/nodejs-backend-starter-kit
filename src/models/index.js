@@ -19,5 +19,4 @@ module.exports.AppointmentSession = require('./appointmentSession.model');
 module.exports.DoctorPayout = require('./payout.model');
 module.exports.ConsultationFee = require('./consultationFee.model');
 module.exports.Notification = require('./notification.model');
-module.exports.Chat = require('./chat.model');
 module.exports.Message = require('./message.model');

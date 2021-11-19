@@ -5,6 +5,7 @@ const doctorProfileRoute = require('./doctorprofile.route');
 const doctorAppointmentRoute = require('./doctorappointment.route');
 const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
+const userProfileRoute = require('./userprofile.route');
 const document = require('./document.route');
 
 const router = express.Router();
@@ -23,16 +24,12 @@ const defaultRoutes = [
     route: doctorAppointmentRoute,
   },
   {
-    path: '/user/appointment', // User Appointment Route
-    route: userAppointmentRoute,
-  },
-  {
     path: '/doctor/document',
     route: document, // Document upload
   },
   {
     path: '/user',
-    route: doctorProfileRoute, // Change it to User route when made
+    route: userProfileRoute,
   },
   {
     path: '/auth/user', // User Auth Endpoints

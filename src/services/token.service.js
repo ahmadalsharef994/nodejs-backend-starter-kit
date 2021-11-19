@@ -71,7 +71,6 @@ const generateChatAppointmentSessionToken = (
   appointmentID,
   doctorAuth,
   userAuth,
-  chatID,
   requestedby,
   secret = config.jwt.secret
 ) => {
@@ -79,7 +78,6 @@ const generateChatAppointmentSessionToken = (
     appointment: appointmentID,
     doctor: doctorAuth,
     user: userAuth,
-    chat: chatID,
     entity: requestedby,
     iat: moment().unix(),
     exp: moment().add(20, 'minutes').unix(),

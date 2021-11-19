@@ -9,7 +9,7 @@ const getChat = {
 
 const sendMessage = {
   params: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId),
+    appointmentId: Joi.string().custom(objectId).required(),
   }),
   body: Joi.object().keys({
     text: Joi.string().required(),

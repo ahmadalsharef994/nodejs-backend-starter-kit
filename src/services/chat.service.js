@@ -1,6 +1,8 @@
 const Pusher = require('pusher');
 const dotenv = require('dotenv');
-const { Message } = require('../models');
+const httpStatus = require('http-status');
+const { Message, Appointment } = require('../models');
+const ApiError = require('../utils/ApiError');
 
 dotenv.config();
 
@@ -13,10 +15,13 @@ const pusher = new Pusher({
 });
 
 // implement pagination
-const getChat = async (appointmentId) => {
-  await Message.find({ appointment: appointmentId }).then((result) => {
+const getChat = async (appointmentId, Auth) => {
+  const AppointmentData = await Appointment.findOne({ _id: appointmentId });
+  if (AppointmentData.AuthDoctor.equals(Auth._id) || AppointmentData.AuthUser.equals(Auth._id)) {
+    const result = await Message.find({ appointment: appointmentId });
     return result;
-  });
+  }
+  throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");
 };
 
 const createMessage = async (appointmentId, senderAuth, text, attachment) => {
@@ -25,14 +30,16 @@ const createMessage = async (appointmentId, senderAuth, text, attachment) => {
     sender: senderAuth,
     text,
     attachment,
-  }).then((message) => {
-    pusher.trigger(`private-${appointmentId}`, 'inserted', {
+  }).then((message, err) => {
+    if (err) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'send message error');
+    }
+    pusher.trigger(`private-${message.appointment}`, 'inserted', {
       id: message._id,
       text: message.text,
-      username: message.username,
+      username: message.sender,
       attachment: message.attachment,
     });
-    return message;
   });
 };
 

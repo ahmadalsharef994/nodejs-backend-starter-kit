@@ -12,7 +12,6 @@ const chatAuth = () => async (req, res, next) => {
     const appointmentID = payload.appointment;
     const doctorAuth = payload.doctor;
     const userAuth = payload.user;
-    const chatId = payload.chat;
     const entity = payload.entity;
 
     if (appointmentID === undefined || doctorAuth === undefined || userAuth === undefined) {
@@ -21,7 +20,6 @@ const chatAuth = () => async (req, res, next) => {
       req.user = userAuth;
       req.doctor = doctorAuth;
       req.appointment = appointmentID;
-      req.chatID = chatId;
       req.entity = entity;
       next();
     }

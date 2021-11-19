@@ -9,10 +9,8 @@ const {
   AppointmentPreference,
   ConsultationFee,
   Notification,
-  Chat,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
-// const jobservice = require('../Microservices/agendascheduler');
 const pusherService = require('../Microservices/pusherService');
 const tokenService = require('./token.service');
 const config = require('../config/config');
@@ -25,7 +23,6 @@ const agenda = new Agenda({
 });
 
 const initiateappointmentSession = async (appointmentID) => {
-  console.log('B', appointmentID);
   const AppointmentData = await Appointment.findById({ _id: appointmentID });
   if (!AppointmentData) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
@@ -39,10 +36,6 @@ const initiateappointmentSession = async (appointmentID) => {
   if (!DyteSessionToken) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
-  await Chat.create({
-    appointment: appointmentID,
-    members: [AppointmentData.AuthDoctor, AppointmentData.AuthUser],
-  });
   // Pusher
   return DyteSessionToken;
 };
@@ -63,7 +56,6 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
-    'chatID', // @nitesh pass chat document ID here
     'doctor'
   );
   return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken, ChatExchangeToken };
@@ -85,7 +77,6 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
-    'chatID', // @nitesh pass chat document ID here
     'user'
   );
   return { UserVideoToken, UserRoomName, UserChatAuthToken, ChatExchangeToken };

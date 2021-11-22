@@ -53,10 +53,21 @@ const addMember = async (req, res) => {
   }
 };
 
+const updateBasicDetails = async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const updatebasicDetails = await userprofileService.updateBasicDetails(req.body, AuthData);
+  if (updatebasicDetails) {
+    res.status(httpStatus.OK).json({ message: 'Basic details updated Successfully ' });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'You have not added your basic details' });
+  }
+};
+
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
   addAddressdetails,
   fetchaddressdetails,
+  updateBasicDetails,
   addMember,
 };

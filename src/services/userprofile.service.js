@@ -38,10 +38,20 @@ const addMember = async (memberDetailBody, AuthData) => {
   return basicDetailDoc;
 };
 
+const updateBasicDetails = async (basicDetailsBody, AuthData) => {
+  const DoctorAddressExist = await UserBasic.find({ auth: AuthData });
+  if (DoctorAddressExist) {
+    await UserBasic.findOneAndUpdate({ auth: AuthData }, { $set: { ...basicDetailsBody } }, { useFindAndModify: false });
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
   addAddressdetails,
   fetchaddressdetails,
+  updateBasicDetails,
   addMember,
 };

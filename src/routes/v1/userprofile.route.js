@@ -10,6 +10,9 @@ router.route('/basic-details').get(authuser(), UserProfileController.fetchbasicd
 router
   .route('/basic-details')
   .post(authuser(), validate(UserProfileValidator.BasicUserDetails), UserProfileController.submitbasicdetails);
+router
+  .route('/basic-details')
+  .put(authuser(), validate(UserProfileValidator.updateBasicDetails), UserProfileController.updateBasicDetails);
 
 router.route('/get-address-details').get(authuser(), UserProfileController.fetchaddressdetails);
 router

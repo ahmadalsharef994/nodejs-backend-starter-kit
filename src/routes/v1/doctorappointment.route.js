@@ -76,13 +76,6 @@ router.post(
   appointmentController.createPrescription
 );
 
-router.get(
-  '/:appointmentId/prescription/:prescriptionId',
-  authdoctorverified(),
-  validate(appointmentValidation.getprescription),
-  appointmentController.getPrescription
-);
-
 router.post(
   '/consultationfee',
   authdoctorverified(),
@@ -95,6 +88,13 @@ router.post(
   authdoctorverified(),
   validate(appointmentValidation.notifications),
   appointmentController.notifications
+);
+
+router.post(
+  '/:appointmentId/doctor-feedback',
+  authdoctorverified(),
+  validate(appointmentValidation.doctorFeedback),
+  appointmentController.doctorFeedback
 );
 
 module.exports = router;

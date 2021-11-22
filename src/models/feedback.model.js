@@ -4,30 +4,30 @@ const Appointment = require('./auth.model');
 
 const FeedbackSchema = mongoose.Schema(
   {
-    Appointment: {
+    appointmentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Appointment,
       required: true,
     },
-    DoctorRating: {
+    doctorRating: {
       type: Number,
-      required: true,
+      default: null,
     },
-    UserRating: {
+    userRating: {
       type: Number,
-      required: true,
+      default: null,
     },
-    DoctorDescription: {
+    doctorDescription: {
       type: String,
-      required: true,
+      default: null,
     },
-    UserDescription: {
+    userDescription: {
       type: String,
-      required: true,
+      default: null,
     },
     referedBy: {
       type: String,
-      required: true,
+      default: null,
     },
   },
   {

@@ -101,6 +101,26 @@ const notifications = {
   }),
 };
 
+const userFeedback = {
+  params: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    doctorRating: Joi.number().required(),
+    doctorDescription: Joi.string().required(),
+  }),
+};
+
+const doctorFeedback = {
+  params: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+  }),
+  body: Joi.object().keys({
+    userRating: Joi.number().required(),
+    userDescription: Joi.string().required(),
+  }),
+};
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -114,4 +134,6 @@ module.exports = {
   getDetailsPatient,
   addConsultationfee,
   notifications,
+  userFeedback,
+  doctorFeedback,
 };

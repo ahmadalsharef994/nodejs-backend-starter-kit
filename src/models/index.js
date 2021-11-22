@@ -20,3 +20,6 @@ module.exports.DoctorPayout = require('./payout.model');
 module.exports.ConsultationFee = require('./consultationFee.model');
 module.exports.Notification = require('./notification.model');
 module.exports.Message = require('./message.model');
+module.exports.UserBasic = require('./userBasic.model');
+module.exports.UserMember = require('./userMember.model');
+module.exports.UserAddress = require('./userAddress.model');

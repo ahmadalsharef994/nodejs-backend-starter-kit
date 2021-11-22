@@ -13,7 +13,6 @@ const agenda = new Agenda({
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   logger.info('Connected to MongoDB');
-  agenda.on('ready', () => console.log('Agenda Started')).on('error', () => console.log('Agenda Connection Error'));
   agenda.start();
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);

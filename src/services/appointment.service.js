@@ -8,8 +8,6 @@ const {
   Appointment,
   VerifiedDoctors,
   AppointmentPreference,
-  ConsultationFee,
-  Notification,
   Feedback,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
@@ -236,22 +234,6 @@ const fetchAllPatientDetails = async (doctorid) => {
   return false;
 };
 
-const addConsultationfee = async (consultationfeeDoc) => {
-  const DoctorConsultationfee = await ConsultationFee.create(consultationfeeDoc);
-  if (DoctorConsultationfee) {
-    return { message: 'Consultation fee added Sucessfully', DoctorConsultationfee };
-  }
-  return false;
-};
-
-const notifications = async (notificationsDoc) => {
-  const DoctorNotifications = await Notification.create(notificationsDoc);
-  if (DoctorNotifications) {
-    return { message: 'notification option added sucessfully', DoctorNotifications };
-  }
-  return false;
-};
-
 const doctorFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
   if (feedbackData) {
@@ -302,8 +284,6 @@ module.exports = {
   fetchPrescriptionDoc,
   fetchPatientDetails,
   fetchAllPatientDetails,
-  addConsultationfee,
-  notifications,
   userFeedback,
   doctorFeedback,
 };

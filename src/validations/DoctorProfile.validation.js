@@ -209,6 +209,20 @@ const ExperienceDoctorDetails = {
   }),
 };
 
+const addConsultationfee = {
+  body: Joi.object().keys({
+    Consultationcharges: Joi.number().required(),
+    MedzgoCharge: Joi.number().required(),
+    NetFeeRecieved: Joi.number().required(),
+  }),
+};
+
+const notifications = {
+  body: Joi.object().keys({
+    appointmentNotification: Joi.boolean().required(),
+  }),
+};
+
 const ClinicDoctorDetails = {
   body: Joi.object().keys({
     clinicName: Joi.string().required(),
@@ -236,4 +250,6 @@ module.exports = {
   ExperienceDoctorDetails,
   ClinicDoctorDetails,
   PayoutsDoctorDetails,
+  addConsultationfee,
+  notifications,
 };

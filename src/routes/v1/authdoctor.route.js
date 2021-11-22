@@ -7,7 +7,7 @@ const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 
-router.get('/onboarding-status', OnboardingAuth(), authDoctorController.onboardingstatus);
+// router.get('/onboarding-status', OnboardingAuth(), authDoctorController.onboardingstatus); Not in use
 
 router.post('/register', deviceauth(), validate(authDoctorValidation.registerdoctor), authDoctorController.register);
 router.post('/login', deviceauth(), validate(authDoctorValidation.login), authDoctorController.login);

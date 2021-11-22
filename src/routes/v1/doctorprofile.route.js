@@ -96,7 +96,18 @@ router
     validate(DoctorProfileValidator.PayoutsDoctorDetails),
     DoctorProfileController.submitpayoutsdetails
   );
-
+router.post(
+  '/consultationfee',
+  authdoctorverified(),
+  validate(DoctorProfileValidator.addConsultationfee),
+  DoctorProfileController.addConsultationfee
+);
+router.post(
+  '/notification',
+  authdoctorverified(),
+  validate(DoctorProfileValidator.notifications),
+  DoctorProfileController.notifications
+);
 router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

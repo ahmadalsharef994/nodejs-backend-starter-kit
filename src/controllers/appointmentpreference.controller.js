@@ -5,6 +5,9 @@ const catchAsync = require('../utils/catchAsync');
 const submitAppointmentPreference = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const result = await appointmentPreferenceService.createPreference(req.body, req.Docid, AuthData);
+  if (!result) {
+    return res.status(httpStatus.NOT_FOUND).json({ message: 'Error Submitting Appointment Preference' });
+  }
   return res.status(httpStatus.CREATED).json(result);
 });
 

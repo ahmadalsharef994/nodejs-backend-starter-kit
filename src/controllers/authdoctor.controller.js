@@ -27,6 +27,7 @@ ONBOARDING_SUCCESS
 ONBOARDING_ONHOLD
 */
 
+// Below Function not in use discarded flow
 const getOnboardingChallenge = async (AuthData) => {
   let challenge = 'ONBOARDING_ONHOLD';
   let optionalChallenge = 'NONE';

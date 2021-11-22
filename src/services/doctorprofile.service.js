@@ -1,6 +1,14 @@
 const httpStatus = require('http-status');
 const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
-const { DoctorBasic, DoctorEducation, DoctorClinic, DoctorExperience, DoctorPayout } = require('../models');
+const {
+  DoctorBasic,
+  DoctorEducation,
+  DoctorClinic,
+  DoctorExperience,
+  DoctorPayout,
+  ConsultationFee,
+  Notification,
+} = require('../models');
 const ApiError = require('../utils/ApiError');
 
 const fetchbasicdetails = async (AuthData) => {
@@ -99,6 +107,22 @@ const submitpayoutsdetails = async (PayoutDetailBody, AuthData) => {
   throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
 };
 
+const addConsultationfee = async (consultationfeeDoc) => {
+  const DoctorConsultationfee = await ConsultationFee.create(consultationfeeDoc);
+  if (DoctorConsultationfee) {
+    return { message: 'Consultation fee added Sucessfully', DoctorConsultationfee };
+  }
+  return false;
+};
+
+const notifications = async (notificationsDoc) => {
+  const DoctorNotifications = await Notification.create(notificationsDoc);
+  if (DoctorNotifications) {
+    return { message: 'notification option added sucessfully', DoctorNotifications };
+  }
+  return false;
+};
+
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -112,4 +136,6 @@ module.exports = {
   updateprofilepicture,
   fetchpayoutsdetails,
   submitpayoutsdetails,
+  addConsultationfee,
+  notifications,
 };

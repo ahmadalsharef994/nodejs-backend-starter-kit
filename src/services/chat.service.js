@@ -15,10 +15,10 @@ const pusher = new Pusher({
 });
 
 // implement pagination
-const getChat = async (appointmentId, Auth) => {
+const getChat = async (appointmentId, Auth, filter, options) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentId });
   if (AppointmentData.AuthDoctor.equals(Auth._id) || AppointmentData.AuthUser.equals(Auth._id)) {
-    const result = await Message.find({ appointment: appointmentId });
+    const result = await Message.paginate({ appointment: appointmentId }, options);
     return result;
   }
   throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");

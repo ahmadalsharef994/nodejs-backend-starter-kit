@@ -7,14 +7,21 @@ const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
 const userProfileRoute = require('./userprofile.route');
 const document = require('./document.route');
-const chatRoute = require('./chat.route');
 
 const router = express.Router();
 
 const defaultRoutes = [
   {
-    path: '/auth/doctor', // doctor Auth Endpoints
+    path: '/auth/doctor', // Doctor Auth Endpoints
     route: authRouteDoctor,
+  },
+  {
+    path: '/auth/user', // User Auth Endpoints
+    route: authRouteUser,
+  },
+  {
+    path: '/internalteam',
+    route: internalTeamRoute, // Internal Team API
   },
   {
     path: '/doctor/profile', // Doctor Profile Route
@@ -25,28 +32,16 @@ const defaultRoutes = [
     route: doctorAppointmentRoute,
   },
   {
-    path: '/doctor/document',
-    route: document, // Document upload
+    path: '/doctor/document', // Document Dedicated Route
+    route: document,
   },
   {
-    path: '/user',
+    path: '/user/profile', // User Profile route
     route: userProfileRoute,
-  },
-  {
-    path: '/auth/user', // User Auth Endpoints
-    route: authRouteUser,
   },
   {
     path: '/user/appointment', // User Appointment Route
     route: userAppointmentRoute,
-  },
-  {
-    path: '/internalteam',
-    route: internalTeamRoute, // Internal Team API
-  },
-  {
-    path: '/chat',
-    route: chatRoute, // chat API
   },
 ];
 

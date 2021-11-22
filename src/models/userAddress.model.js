@@ -10,15 +10,15 @@ const userAddressSchema = mongoose.Schema(
     },
     addressSecondLine: {
       type: String,
-      required: true,
+      default: null,
     },
     state: {
       type: String,
-      default: null,
+      required: true,
     },
     pincode: {
       type: Number,
-      default: null,
+      required: true,
     },
     auth: {
       type: mongoose.Schema.Types.ObjectId,

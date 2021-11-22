@@ -31,7 +31,6 @@ const createGoogleAuthData = async (profileBody) => {
       return auth;
     }
   } catch (err) {
-    console.error(err)
   }
 };
 

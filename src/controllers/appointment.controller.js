@@ -131,26 +131,6 @@ const getAllPatientDetails = catchAsync(async (req, res) => {
   }
 });
 
-const addConsultationfee = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const ConsultationData = await appointmentService.addConsultationfee(req.body, AuthData);
-  if (ConsultationData !== false) {
-    res.status(httpStatus.CREATED).json({ ConsultationData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
-  }
-});
-
-const notifications = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const notificationsData = await appointmentService.notifications(req.body, AuthData);
-  if (notificationsData !== false) {
-    res.status(httpStatus.CREATED).json({ notificationsData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
-  }
-});
-
 const doctorFeedback = catchAsync(async (req, res) => {
   const feedbackData = await appointmentService.doctorFeedback(req.body, req.params.appointmentId);
   if (feedbackData !== false) {
@@ -183,8 +163,6 @@ module.exports = {
   getPrescription,
   getPatientDetails,
   getAllPatientDetails,
-  addConsultationfee,
-  notifications,
   doctorFeedback,
   userFeedback,
 };

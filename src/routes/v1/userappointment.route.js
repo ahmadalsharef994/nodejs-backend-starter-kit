@@ -12,6 +12,6 @@ router
 
 router
   .route('/patient-join')
-  .post(authuser(), validate(appointmentValidation.joinAppointmentUser), appointmentController.joinAppointmentPatient);
+  .post(authuser(), validate(appointmentValidation.bookAppointmentDetails), appointmentController.joinAppointmentPatient);
 
 module.exports = router;

@@ -75,17 +75,19 @@ router
   .route('/updatePref')
   .put(
     authdoctorverified(),
-    validate(preferenceValidator.PreferenceDetails),
+    validate(preferenceValidator.preferenceDetails),
     appointmentPreferenceController.updateAppointmentPreference
   );
 router
   .route('/createPref')
   .post(
     authdoctorverified(),
-    validate(preferenceValidator.PreferenceDetails),
+    validate(preferenceValidator.preferenceDetails),
     appointmentPreferenceController.submitAppointmentPreference
   );
-router.route('/getappointment-slots').post(appointmentPreferenceController.showappointments);
+router
+  .route('/getappointment-slots')
+  .post(validate(preferenceValidator.getAppointmentSlots), appointmentPreferenceController.showappointments);
 router.route('/payout-details').get(authdoctornonverified(), DoctorProfileController.fetchpayoutsdetails);
 router
   .route('/payout-details')
@@ -94,7 +96,18 @@ router
     validate(DoctorProfileValidator.PayoutsDoctorDetails),
     DoctorProfileController.submitpayoutsdetails
   );
-
+router.post(
+  '/consultationfee',
+  authdoctorverified(),
+  validate(DoctorProfileValidator.addConsultationfee),
+  DoctorProfileController.addConsultationfee
+);
+router.post(
+  '/notification',
+  authdoctorverified(),
+  validate(DoctorProfileValidator.notifications),
+  DoctorProfileController.notifications
+);
 router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

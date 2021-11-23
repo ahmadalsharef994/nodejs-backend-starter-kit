@@ -1,14 +1,14 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 
 const MessageSchema = mongoose.Schema(
   {
     appointment: {
-      type: String,
+      type: String, // ref
       required: true,
     },
-    subject: {
-      type: String,
+    sender: {
+      type: String, // ref
       required: true,
     },
     text: {
@@ -24,10 +24,14 @@ const MessageSchema = mongoose.Schema(
     timestamps: true,
   }
 );
+
 // add plugin that converts mongoose to json
 MessageSchema.plugin(toJSON);
+MessageSchema.plugin(paginate);
+
 /**
  * @typedef Message
  */
+
 const Message = mongoose.model('Message', MessageSchema);
 module.exports = Message;

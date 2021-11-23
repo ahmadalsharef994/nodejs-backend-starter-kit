@@ -1,6 +1,6 @@
 const Joi = require('joi');
 
-const PreferenceDetails = {
+const preferenceDetails = {
   body: Joi.object().keys({
     MON: Joi.array().items(
       Joi.object().keys({
@@ -61,6 +61,13 @@ const PreferenceDetails = {
   }),
 };
 
+const getAppointmentSlots = {
+  body: Joi.object().keys({
+    docId: Joi.number().integer().required().min(10000000).max(99999999),
+  }),
+};
+
 module.exports = {
-  PreferenceDetails,
+  preferenceDetails,
+  getAppointmentSlots,
 };

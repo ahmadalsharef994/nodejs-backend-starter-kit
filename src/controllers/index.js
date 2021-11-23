@@ -5,3 +5,5 @@ module.exports.doctorprofileController = require('./doctorprofile.controller');
 module.exports.documentController = require('./document.controller');
 module.exports.appointmentPreferenceController = require('./appointmentpreference.controller');
 module.exports.appointmentController = require('./appointment.controller');
+module.exports.userprofileController = require('./userprofile.controller');
+module.exports.chatController = require('./chat.controller');

@@ -87,17 +87,23 @@ const getDetailsPatient = {
   }),
 };
 
-const addConsultationfee = {
+const userFeedback = {
+  params: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+  }),
   body: Joi.object().keys({
-    Consultationcharges: Joi.number().required(),
-    MedzgoCharge: Joi.number().required(),
-    NetFeeRecieved: Joi.number().required(),
+    doctorRating: Joi.number().required(),
+    doctorDescription: Joi.string().required(),
   }),
 };
 
-const notifications = {
+const doctorFeedback = {
+  params: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+  }),
   body: Joi.object().keys({
-    appointmentNotification: Joi.boolean().required(),
+    userRating: Joi.number().required(),
+    userDescription: Joi.string().required(),
   }),
 };
 
@@ -112,6 +118,6 @@ module.exports = {
   createprescription,
   getprescription,
   getDetailsPatient,
-  addConsultationfee,
-  notifications,
+  userFeedback,
+  doctorFeedback,
 };

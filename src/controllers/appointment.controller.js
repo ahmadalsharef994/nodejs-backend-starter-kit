@@ -10,13 +10,21 @@ const initAppointmentDoctor = catchAsync(async (req, res) => {
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.JoinappointmentSessionbyDoctor(req.body.appointmentInit, AuthData);
+  const DoctorSession = await appointmentService.JoinappointmentSessionbyDoctor(
+    req.body.appointmentInit,
+    AuthData,
+    req.body.socketID
+  );
   res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentPatient = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const UserSession = await appointmentService.JoinappointmentSessionbyPatient(req.body.appointmentInit, AuthData);
+  const UserSession = await appointmentService.JoinappointmentSessionbyPatient(
+    req.body.appointmentInit,
+    AuthData,
+    req.body.socketID
+  );
   res.status(httpStatus.CREATED).json(UserSession);
 });
 
@@ -123,23 +131,21 @@ const getAllPatientDetails = catchAsync(async (req, res) => {
   }
 });
 
-const addConsultationfee = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const ConsultationData = await appointmentService.addConsultationfee(req.body, AuthData);
-  if (ConsultationData !== false) {
-    res.status(httpStatus.CREATED).json({ ConsultationData });
+const doctorFeedback = catchAsync(async (req, res) => {
+  const feedbackData = await appointmentService.doctorFeedback(req.body, req.params.appointmentId);
+  if (feedbackData !== false) {
+    res.status(httpStatus.CREATED).json({ feedbackData });
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
   }
 });
 
-const notifications = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const notificationsData = await appointmentService.notifications(req.body, AuthData);
-  if (notificationsData !== false) {
-    res.status(httpStatus.CREATED).json({ notificationsData });
+const userFeedback = catchAsync(async (req, res) => {
+  const feedbackData = await appointmentService.userFeedback(req.body, req.params.appointmentId);
+  if (feedbackData !== false) {
+    res.status(httpStatus.CREATED).json({ feedbackData });
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
   }
 });
 
@@ -157,6 +163,6 @@ module.exports = {
   getPrescription,
   getPatientDetails,
   getAllPatientDetails,
-  addConsultationfee,
-  notifications,
+  doctorFeedback,
+  userFeedback,
 };

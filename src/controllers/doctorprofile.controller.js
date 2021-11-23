@@ -186,6 +186,26 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
   }
 });
 
+const addConsultationfee = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const ConsultationData = await doctorprofileService.addConsultationfee(req.body, AuthData);
+  if (ConsultationData !== false) {
+    res.status(httpStatus.CREATED).json({ ConsultationData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
+  }
+});
+
+const notifications = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const notificationsData = await doctorprofileService.notifications(req.body, AuthData);
+  if (notificationsData !== false) {
+    res.status(httpStatus.CREATED).json({ notificationsData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
+  }
+});
+
 module.exports = {
   fetchstastics,
   submitbasicdetails,
@@ -201,4 +221,6 @@ module.exports = {
   updateprofilepicture,
   fetchpayoutsdetails,
   fetchprofiledetails,
+  addConsultationfee,
+  notifications,
 };

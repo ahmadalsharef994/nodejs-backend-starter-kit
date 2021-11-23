@@ -1,3 +1,5 @@
+/* eslint-disable no-param-reassign */
+const Agenda = require('agenda');
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -6,21 +8,26 @@ const {
   Appointment,
   VerifiedDoctors,
   AppointmentPreference,
-  ConsultationFee,
-  Notification,
-  Chat,
+  Feedback,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
-const jobservice = require('../Microservices/agendascheduler');
 const pusherService = require('../Microservices/pusherService');
 const tokenService = require('./token.service');
+const config = require('../config/config');
+
+const dbURL = config.mongoose.url;
+const agenda = new Agenda({
+  db: { address: dbURL, collection: 'jobs' },
+  processEvery: '20 seconds',
+  useUnifiedTopology: true,
+});
 
 const initiateappointmentSession = async (appointmentID) => {
-  const AppointmentData = await Appointment.findOne({ _id: appointmentID });
+  const AppointmentData = await Appointment.findById({ _id: appointmentID });
   if (!AppointmentData) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
   }
-  // Dyte
+  // Dyte Service
   const DyteSessionToken = await DyteService.createDyteMeeting(
     appointmentID,
     AppointmentData.AuthDoctor,
@@ -29,16 +36,11 @@ const initiateappointmentSession = async (appointmentID) => {
   if (!DyteSessionToken) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
-  await Chat.create({
-    appointment: appointmentID,
-    members: [AppointmentData.AuthDoctor, AppointmentData.AuthUser],
-  });
-  // Pusher
   return DyteSessionToken;
 };
 
 const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID) => {
-  // Join Appointment Doctor
+  // Join Appointment Doctor called while Doctor requests to Join an Appointment
   const AppointmentSessionData = await AppointmentSession.findOne({
     appointmentid: appointmentID,
     AuthDoctor: AuthData._id,
@@ -46,36 +48,59 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
+  let DoctorChatAuthToken = '';
+  await pusherService
+    .PusherSession(`private-${appointmentID}`, socketID)
+    .then((result) => {
+      DoctorChatAuthToken = result.auth;
+    })
+    .catch(() => {
+      throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
+    });
   const DoctorVideoToken = AppointmentSessionData.dytedoctortoken;
   const DoctorRoomName = AppointmentSessionData.dyteroomname;
-  const DoctorChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
   const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
-    'chatID', // @nitesh pass chat document ID here
     'doctor'
   );
   return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken, ChatExchangeToken };
 };
 
 const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID) => {
-  // Join Appointment Doctor
+  // Join Appointment User called while Doctor requests to Join an Appointment
   const AppointmentSessionData = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthUser: AuthData._id });
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
   const UserVideoToken = AppointmentSessionData.dyteusertoken;
   const UserRoomName = AppointmentSessionData.dyteroomname;
-  const UserChatAuthToken = pusherService.PusherSession(`private-${appointmentID}`, socketID);
-  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+  let UserChatAuthToken = '';
+  await pusherService
+    .PusherSession(`private-${appointmentID}`, socketID)
+    .then((result) => {
+      UserChatAuthToken = result.auth;
+    })
+    .catch(() => {
+      throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
+    });
+  const ChatExchangeToken = await tokenService.generateChatAppointmentSessionToken(
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
-    'chatID', // @nitesh pass chat document ID here
     'user'
   );
   return { UserVideoToken, UserRoomName, UserChatAuthToken, ChatExchangeToken };
+};
+
+const ScheduleSessionJob = async (appointmentID, startTime) => {
+  const datetime = startTime.getTime() - 300000; // Scheduling Job 5mins before Appointment
+  agenda.define('createSessions', async (job) => {
+    const { appointment } = job.attrs.data;
+    await initiateappointmentSession(appointment);
+  });
+  await agenda.schedule(datetime, 'createSessions', { appointment: appointmentID }); // Scheduling a Job in Agenda
 };
 
 const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
@@ -115,7 +140,8 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
     isRescheduled: false,
     DoctorRescheduleding: null,
   });
-  await jobservice.ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
+  agenda.start();
+  await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
   return bookedAppointment;
 };
 
@@ -160,7 +186,6 @@ const getUpcomingAppointments = async (doctorId) => {
   return promise;
 };
 
-// get all appointments (implement query)
 const getAllAppointments = async (doctorId, type) => {
   if (!type) {
     const promise = await Appointment.find({ docid: doctorId }).sort();
@@ -221,18 +246,38 @@ const fetchAllPatientDetails = async (doctorid) => {
   return false;
 };
 
-const addConsultationfee = async (consultationfeeDoc) => {
-  const DoctorConsultationfee = await ConsultationFee.create(consultationfeeDoc);
-  if (DoctorConsultationfee) {
-    return { message: 'Consultation fee added Sucessfully', DoctorConsultationfee };
+const doctorFeedback = async (feedbackDoc, appointmentId) => {
+  const feedbackData = await Feedback.findOne({ appointmentId });
+  if (feedbackData) {
+    await Feedback.findOneAndUpdate(
+      { appointmentId },
+      { $set: { userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
+      { useFindAndModify: false }
+    );
+    return { message: 'feedback added sucessfully' };
+  }
+  feedbackDoc.appointmentId = appointmentId;
+  const DoctorNotifications = await Feedback.create(feedbackDoc);
+  if (DoctorNotifications) {
+    return { message: 'feedback added sucessfully', feedbackDoc };
   }
   return false;
 };
 
-const notifications = async (notificationsDoc) => {
-  const DoctorNotifications = await Notification.create(notificationsDoc);
+const userFeedback = async (feedbackDoc, appointmentId) => {
+  const feedbackData = await Feedback.findOne({ appointmentId });
+  if (feedbackData) {
+    await Feedback.findOneAndUpdate(
+      { appointmentId },
+      { $set: { doctorRating: feedbackDoc.doctorRating, doctorDescription: feedbackDoc.doctorDescription } },
+      { useFindAndModify: false }
+    );
+    return { message: 'feedback added sucessfully' };
+  }
+  feedbackDoc.appointmentId = appointmentId;
+  const DoctorNotifications = await Feedback.create(feedbackDoc);
   if (DoctorNotifications) {
-    return { message: 'notification option added sucessfully', DoctorNotifications };
+    return { message: 'feedback added sucessfully', feedbackDoc };
   }
   return false;
 };
@@ -251,6 +296,6 @@ module.exports = {
   fetchPrescriptionDoc,
   fetchPatientDetails,
   fetchAllPatientDetails,
-  addConsultationfee,
-  notifications,
+  userFeedback,
+  doctorFeedback,
 };

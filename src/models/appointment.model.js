@@ -36,7 +36,7 @@ const AppointmentSchema = mongoose.Schema(
     },
     UserDocument: {
       type: Array,
-      required: true,
+      default: null,
     },
     UserDescription: {
       type: String,
@@ -48,11 +48,11 @@ const AppointmentSchema = mongoose.Schema(
     },
     LabTest: {
       type: Array,
-      required: true,
+      default: null,
     },
     DoctorAction: {
       type: String,
-      required: true,
+      default: null,
     },
     DoctorReason: {
       type: String,
@@ -60,7 +60,7 @@ const AppointmentSchema = mongoose.Schema(
     },
     UserAction: {
       type: String,
-      required: true,
+      default: null,
     },
     UserReason: {
       type: String,

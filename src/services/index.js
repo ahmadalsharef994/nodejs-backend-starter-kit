@@ -8,3 +8,4 @@ module.exports.documentService = require('./document.service');
 module.exports.appointmentPreferenceService = require('./appointmentpreference.service');
 module.exports.appointmentService = require('./appointment.service');
 module.exports.chatService = require('./chat.service');
+module.exports.userProfile = require('./userprofile.service');

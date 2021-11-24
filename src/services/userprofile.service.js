@@ -1,13 +1,13 @@
 /* eslint-disable no-param-reassign */
 const { UserAddress, UserBasic, UserMember } = require('../models');
 
-const fetchbasicdetails = async (AuthData) => {
+const fetchBasicDetails = async (AuthData) => {
   const DoctorBasicExist = await UserBasic.findOne({ auth: AuthData });
   return DoctorBasicExist;
 };
 
-const submitbasicdetails = async (BasicDetailBody, AuthData) => {
-  const alreadyExist = await fetchbasicdetails(AuthData);
+const submitBasicDetails = async (BasicDetailBody, AuthData) => {
+  const alreadyExist = await fetchBasicDetails(AuthData);
   if (!alreadyExist) {
     BasicDetailBody.auth = AuthData;
     const basicDetailDoc = await UserBasic.create(BasicDetailBody);
@@ -16,13 +16,22 @@ const submitbasicdetails = async (BasicDetailBody, AuthData) => {
   return false;
 };
 
-const addAddressdetails = async (addressDetailBody, AuthData) => {
+const updateBasicDetails = async (basicDetailsBody, AuthData) => {
+  const DoctorAddressExist = await UserBasic.find({ auth: AuthData });
+  if (DoctorAddressExist) {
+    await UserBasic.findOneAndUpdate({ auth: AuthData }, { $set: { ...basicDetailsBody } }, { useFindAndModify: false });
+    return true;
+  }
+  return false;
+};
+
+const addAddressDetails = async (addressDetailBody, AuthData) => {
   addressDetailBody.auth = AuthData;
   const addressDoc = await UserAddress.create(addressDetailBody);
   return addressDoc;
 };
 
-const fetchaddressdetails = async (AuthData) => {
+const fetchAddressDetails = async (AuthData) => {
   const DoctorAddressExist = await UserAddress.find({ auth: AuthData });
   return DoctorAddressExist;
 };
@@ -38,10 +47,21 @@ const addMember = async (memberDetailBody, AuthData) => {
   return basicDetailDoc;
 };
 
+const deleteMember = async (basicDetailsBody, AuthData) => {
+  const DoctorAddressExist = await UserMember.find({ auth: AuthData, _id: basicDetailsBody.memberId });
+  if (!DoctorAddressExist.length === 0) {
+    await UserMember.findByIdAndDelete({ _id: basicDetailsBody.memberId });
+    return true;
+  }
+  return false;
+};
+
 module.exports = {
-  submitbasicdetails,
-  fetchbasicdetails,
-  addAddressdetails,
-  fetchaddressdetails,
+  submitBasicDetails,
+  fetchBasicDetails,
+  addAddressDetails,
+  fetchAddressDetails,
+  updateBasicDetails,
   addMember,
+  deleteMember,
 };

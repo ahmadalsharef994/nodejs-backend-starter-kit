@@ -15,7 +15,7 @@ router
   .post(authuser(), validate(appointmentValidation.joinAppointmentUser), appointmentController.joinAppointmentPatient);
 
 router
-  .route('/:appointmentId/user-feedback')
+  .route('/:appointmentId/patient-feedback')
   .post(authuser(), validate(appointmentValidation.userFeedback), appointmentController.userFeedback);
 
 module.exports = router;

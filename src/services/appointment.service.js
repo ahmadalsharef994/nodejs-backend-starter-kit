@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 const Agenda = require('agenda');
+const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -54,7 +55,8 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
     .then((result) => {
       DoctorChatAuthToken = result.auth;
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
   const DoctorVideoToken = AppointmentSessionData.dytedoctortoken;
@@ -82,7 +84,8 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
     .then((result) => {
       UserChatAuthToken = result.auth;
     })
-    .catch(() => {
+    .catch((err) => {
+      console.log(err);
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
   const ChatExchangeToken = await tokenService.generateChatAppointmentSessionToken(
@@ -113,14 +116,14 @@ const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
     const slots = pref[`${day}_${type}`];
     const slot = slots.filter((e) => e.slotId === slotId);
     if (!slot.length) {
-      return null;
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
     }
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
   });
   const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
   if (appointmentExist || startTime === null || endTime === null) {
-    return null;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const bookedAppointment = await Appointment.create({
     AuthDoctor: doctorauthid,

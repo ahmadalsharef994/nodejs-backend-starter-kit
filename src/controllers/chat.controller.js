@@ -6,12 +6,12 @@ const ApiError = require('../utils/ApiError');
 
 const showChat = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const filter = pick(req.query, ['name', 'role']);
+  const filter = pick(req.params.appointmentId, ['appointment']);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   await chatService.getChat(req.params.appointmentId, AuthData, filter, options).then((result, err) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Not Authorized to Access this Chat');
-    } else if (!result.length) {
+    } else if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Messages Found', data: [] });
     }
     return res.status(httpStatus.OK).json({ message: 'Success', data: result });

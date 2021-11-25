@@ -55,8 +55,7 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
     .then((result) => {
       DoctorChatAuthToken = result.auth;
     })
-    .catch((err) => {
-      console.log(err);
+    .catch(() => {
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
   const DoctorVideoToken = AppointmentSessionData.dytedoctortoken;
@@ -84,8 +83,7 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
     .then((result) => {
       UserChatAuthToken = result.auth;
     })
-    .catch((err) => {
-      console.log(err);
+    .catch(() => {
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
   const ChatExchangeToken = await tokenService.generateChatAppointmentSessionToken(
@@ -106,77 +104,109 @@ const ScheduleSessionJob = async (appointmentID, startTime) => {
   await agenda.schedule(datetime, 'createSessions', { appointment: appointmentID }); // Scheduling a Job in Agenda
 };
 
-const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
+const submitAppointmentDetails = async (
+  doctorId,
+  userAuth,
+  slotId,
+  date,
+  status,
+  bookingType,
+  documents,
+  description,
+  issue,
+  doctorAction,
+  doctorReason,
+  userAction,
+  userReason,
+  rescheduled,
+  doctorRescheduleding,
+  labTest
+) => {
+  // add comparison betwwen requested date for booking and todays date and throw error for past dates
+
   let startTime = null;
   let endTime = null;
-  const { doctorauthid } = await VerifiedDoctors.findOne({ docid: doctorId });
+  let doctorauth = null;
+  try {
+    const { doctorauthid } = await VerifiedDoctors.findOne({ docid: doctorId });
+    doctorauth = doctorauthid;
+  } catch (err) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
+  }
+
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
     const day = slotId.split('-')[1];
     const type = slotId.split('-')[0];
     const slots = pref[`${day}_${type}`];
     const slot = slots.filter((e) => e.slotId === slotId);
-    if (!slot.length) {
+    if (slot.length === 0) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
     }
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
   });
+
   const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
   if (appointmentExist || startTime === null || endTime === null) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const bookedAppointment = await Appointment.create({
-    AuthDoctor: doctorauthid,
+    AuthDoctor: doctorauth,
     docid: doctorId,
     AuthUser: userAuth,
-    Status: 'SCHEDULED',
-    Type: 'PREBOOKED',
+    Status: status,
+    Type: bookingType,
     StartTime: startTime,
     EndTime: endTime,
-    UserDocument: ['some document'],
-    UserDescription: 'some description',
-    HealthIssue: 'some issue',
-    DoctorAction: 'Pending',
-    DoctorReason: 'none',
-    UserAction: 'Requested Booking',
-    UserReason: 'none',
-    isRescheduled: false,
-    DoctorRescheduleding: null,
+    UserDocument: documents,
+    UserDescription: description,
+    HealthIssue: issue,
+    DoctorAction: doctorAction,
+    DoctorReason: doctorReason,
+    UserAction: userAction,
+    UserReason: userReason,
+    isRescheduled: rescheduled,
+    DoctorRescheduleding: doctorRescheduleding,
+    LabTest: labTest,
   });
   agenda.start();
   await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
   return bookedAppointment;
 };
 
-const submitFollowupDetails = async (appointmentId, doctorId, slotId, date) => {
+const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, documents, status) => {
+  // add comparison betwwen requested date for booking and todays date and throw error for past dates
+
   let startTime = null;
   let endTime = null;
   const AppointmentData = await Appointment.findById(appointmentId).exec();
   if (!AppointmentData) {
-    return null;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Cannot find Appointment to assign Followup');
   }
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
     const day = slotId.split('-')[1];
     const type = slotId.split('-')[0];
     const slots = pref[`${day}_${type}`];
     const slot = slots.filter((e) => e.slotId === slotId);
-    if (!slot.length) {
-      return null;
+    if (slot.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
     }
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
   });
+  const previousFollwups = await Followup.find({ Appointment: AppointmentData.id }).exec();
+  // console.log(previousFollwups.length);
   const followupExist = await Followup.findOne({ Appointment: AppointmentData.id, StartTime: startTime }).exec();
   if (followupExist || startTime === null || endTime === null) {
-    return null;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const assignedFollowup = await Followup.create({
     Appointment: AppointmentData,
     StartTime: startTime,
     EndTime: endTime,
-    FollowupNo: '1',
-    FollowupDocs: ['some document'],
-    Status: 'SCHEDULED',
+    FollowupNo: previousFollwups.length + 1,
+    FollowupDocs: documents,
+    Status: status,
   });
   return assignedFollowup;
 };

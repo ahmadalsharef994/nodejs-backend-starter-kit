@@ -21,9 +21,21 @@ const bookAppointmentDetails = {
       docId: Joi.number().required(),
       slotId: Joi.string().required(),
       date: Joi.string().required(),
+      status: Joi.string().required(), // valid options needed
+      bookingType: Joi.string().required().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
+      documents: Joi.array(),
+      description: Joi.string().required(),
+      issue: Joi.string().required(),
+      doctorAction: Joi.string(),
+      doctorReason: Joi.string(),
+      userAction: Joi.string(),
+      userReason: Joi.string(),
+      rescheduled: Joi.boolean(),
+      doctorRescheduleding: Joi.string(),
+      labTest: Joi.array(),
     })
-    .min(3)
-    .max(3),
+    .min(7)
+    .max(15),
 };
 
 const assignfollowupDetails = {
@@ -37,9 +49,11 @@ const assignfollowupDetails = {
     .keys({
       slotId: Joi.string().required(),
       date: Joi.string().required(),
+      documents: Joi.string().required(),
+      status: Joi.string().required(),
     })
-    .min(2)
-    .max(2),
+    .min(4)
+    .max(4),
 };
 
 const getFollowups = {
@@ -56,7 +70,7 @@ const getAllAppointments = {
     .keys({
       type: Joi.string().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
     })
-    .min(1)
+    .min(0)
     .max(1),
 };
 

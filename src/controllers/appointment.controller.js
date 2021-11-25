@@ -31,13 +31,25 @@ const joinAppointmentPatient = catchAsync(async (req, res) => {
 const bookAppointment = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   await appointmentService
-    .submitAppointmentDetails(req.body.docId, AuthData, req.body.slotId, req.body.date)
+    .submitAppointmentDetails(
+      req.body.docId,
+      AuthData,
+      req.body.slotId,
+      req.body.date,
+      req.body.status,
+      req.body.bookingType,
+      req.body.documents,
+      req.body.description,
+      req.body.issue,
+      req.body.doctorAction,
+      req.body.doctorReason,
+      req.body.userAction,
+      req.body.userReason,
+      req.body.rescheduled,
+      req.body.doctorRescheduleding,
+      req.body.labTest
+    )
     .then((result) => {
-      if (result === null) {
-        return res
-          .status(httpStatus.BAD_REQUEST)
-          .json({ message: "Error: Appointment slot doesn't exist or slot already assigned! for given date", data: [] });
-      }
       return res.status(httpStatus.CREATED).json({ message: 'Hurray! Appointment Booked', data: result });
     });
 });
@@ -45,13 +57,15 @@ const bookAppointment = catchAsync(async (req, res) => {
 // same method as appointment booking to be implemented
 const assignFollowup = catchAsync(async (req, res) => {
   await appointmentService
-    .submitFollowupDetails(req.params.appointmentId, req.Docid, req.body.slotId, req.body.date)
+    .submitFollowupDetails(
+      req.params.appointmentId,
+      req.Docid,
+      req.body.slotId,
+      req.body.date,
+      req.body.documents,
+      req.body.status
+    )
     .then((result) => {
-      if (result === null) {
-        return res
-          .status(httpStatus.BAD_REQUEST)
-          .json({ message: "Error: Appointment doesn't exist or slot already assigned! for given date", data: [] });
-      }
       return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
     });
 });

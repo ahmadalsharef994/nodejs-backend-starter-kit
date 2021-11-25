@@ -21,6 +21,12 @@ router
   .route('/all-appointments')
   .get(authdoctorverified(), validate(appointmentValidation.getAllAppointments), appointmentController.showAllAppointments);
 router.get(
+  '/:appointmentId/appoinment-details',
+  authdoctorverified(),
+  validate(appointmentValidation.getappointment),
+  appointmentController.getappointmentDetails
+);
+router.get(
   '/:appointmentId',
   authdoctorverified(),
   validate(appointmentValidation.getappointment),

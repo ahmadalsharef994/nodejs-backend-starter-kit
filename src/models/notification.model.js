@@ -10,7 +10,7 @@ const notification = mongoose.Schema(
     },
     appointmentNotification: {
       type: Boolean,
-      required: true,
+      default: true,
     },
   },
   {

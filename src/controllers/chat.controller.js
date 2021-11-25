@@ -6,7 +6,7 @@ const ApiError = require('../utils/ApiError');
 
 const showChat = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const filter = pick(req.params.appointmentId, ['appointment']);
+  const filter = { appointment: req.params.appointmentId };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   await chatService.getChat(req.params.appointmentId, AuthData, filter, options).then((result, err) => {
     if (err) {

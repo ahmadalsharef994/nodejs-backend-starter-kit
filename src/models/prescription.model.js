@@ -24,11 +24,11 @@ const PrescriptionSchema = mongoose.Schema(
     ],
     LabTest: {
       type: String,
-      required: true,
+      default: null,
     },
     OtherInstructions: {
       type: String,
-      required: true,
+      default: null,
     },
   },
   {

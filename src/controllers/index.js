@@ -7,3 +7,4 @@ module.exports.appointmentPreferenceController = require('./appointmentpreferenc
 module.exports.appointmentController = require('./appointment.controller');
 module.exports.userprofileController = require('./userprofile.controller');
 module.exports.chatController = require('./chat.controller');
+module.exports.labTestController = require('./labtest.controller');

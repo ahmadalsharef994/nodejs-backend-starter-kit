@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, appointmentService } = require('../services');
+const { authService, appointmentService, userProfile } = require('../services');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
 const initAppointmentDoctor = catchAsync(async (req, res) => {
@@ -52,6 +52,16 @@ const bookAppointment = catchAsync(async (req, res) => {
     .then((result) => {
       return res.status(httpStatus.CREATED).json({ message: 'Hurray! Appointment Booked', data: result });
     });
+});
+
+const getappointmentDetails = catchAsync(async (req, res) => {
+  const AppointmentSession = await appointmentService.getappointmentDoctor(req.params.appointmentId);
+  const PatientBasic = await userProfile.fetchBasicDetails(AppointmentSession.AuthUser);
+  if (AppointmentSession !== false) {
+    res.status(httpStatus.CREATED).json({ PatientBasic, AppointmentSession });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'No Appointment present with this id', data: [] });
+  }
 });
 
 // same method as appointment booking to be implemented
@@ -127,9 +137,12 @@ const getPrescription = catchAsync(async (req, res) => {
 
 const getPatientDetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const patientData = await appointmentService.fetchPatientDetails(req.params.patientId, AuthData);
-  if (patientData !== false) {
-    res.status(httpStatus.CREATED).json({ patientData });
+  const patientAppointmentData = await appointmentService.fetchPatientDetails(req.params.patientId, AuthData);
+  const PatientBasic = await userProfile.fetchBasicDetails(AuthData);
+  if (patientAppointmentData !== false && PatientBasic !== false) {
+    res
+      .status(httpStatus.CREATED)
+      .json({ 'Patient Basic Details': PatientBasic, 'Pateint Appoinment Details': patientAppointmentData });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'No Patient present with this id' });
   }
@@ -179,4 +192,5 @@ module.exports = {
   getAllPatientDetails,
   doctorFeedback,
   userFeedback,
+  getappointmentDetails,
 };

@@ -38,7 +38,7 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
   // check for time overlap
   const overlapping = slotOverlap(body);
   if (overlapping) {
-    throw new ApiError(httpStatus.FORBIDDEN, 'Overlapped time slots not allowed!');
+    throw new ApiError(httpStatus.FORBIDDEN, 'Overlapped time slots not allowed! maintain 30 mins gap');
   }
 
   const result = {};

@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, appointmentService, userProfile } = require('../services');
+const ApiError = require('../utils/ApiError');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
 const initAppointmentDoctor = catchAsync(async (req, res) => {
@@ -80,13 +81,27 @@ const assignFollowup = catchAsync(async (req, res) => {
     });
 });
 
-const showFollowups = catchAsync(async (req, res) => {
+const showFollowUpsById = catchAsync(async (req, res) => {
   appointmentService.getFollowups(req.params.appointmentId).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Followups assigned.', data: [] });
     }
-    return res.status(httpStatus.OK).json({ message: 'success', data: result });
+    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
   });
+});
+
+const showAvailableFollowUps = catchAsync(async (req, res) => {
+  appointmentService
+    .getAvailableFollowUpSlots(req.Docid)
+    .then((result) => {
+      if (result.length === 0) {
+        return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
+      }
+      return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+    })
+    .catch(() => {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with showAvailableFollowUps controller');
+    });
 });
 
 const showUpcomingAppointments = catchAsync(async (req, res) => {
@@ -182,7 +197,8 @@ module.exports = {
   joinAppointmentPatient,
   bookAppointment,
   assignFollowup,
-  showFollowups,
+  showFollowUpsById,
+  showAvailableFollowUps,
   showUpcomingAppointments,
   showAllAppointments,
   getappointmentDoctor,

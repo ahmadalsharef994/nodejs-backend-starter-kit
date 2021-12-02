@@ -7,6 +7,7 @@ const authdoctornonverified = require('../../middlewares/authDoctorNonVerified')
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
 const preferenceValidator = require('../../validations/appointmentpreference.validation');
+const appointmentController = require('../../controllers/appointment.controller');
 
 const router = express.Router();
 
@@ -71,6 +72,7 @@ router
   );
 
 router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showfollowups);
+router.route('/get-available-followups').get(authdoctorverified(), appointmentController.showAvailableFollowUps);
 router
   .route('/updatePref')
   .put(

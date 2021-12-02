@@ -41,7 +41,7 @@ router.post(
 );
 router
   .route('/:appointmentId/follow-ups')
-  .get(authdoctorverified(), validate(appointmentValidation.getFollowups), appointmentController.showFollowups);
+  .get(authdoctorverified(), validate(appointmentValidation.getFollowups), appointmentController.showFollowUpsById);
 router
   .route('/:appointmentId/assign-followup')
   .post(authdoctorverified(), validate(appointmentValidation.assignfollowupDetails), appointmentController.assignFollowup);

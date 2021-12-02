@@ -3,12 +3,42 @@ const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
 
+const slotOverlap = (timeSlots) => {
+  // input slots should be in ascending order
+  const days = Object.keys(timeSlots);
+  for (let i = 0; i < days.length; i += 1) {
+    if (timeSlots[days[i]].length === 1) {
+      // eslint-disable-next-line no-continue
+      continue;
+    }
+    for (let j = 0; j < timeSlots[days[i]].length - 1; j += 1) {
+      // enforce minimum 30 mins break betwwen two slots range
+      if (
+        timeSlots[days[i]][j + 1].FromHour === timeSlots[days[i]][j].ToHour &&
+        timeSlots[days[i]][j + 1].FromMinutes >= timeSlots[days[i]][j].ToMinutes + 30
+      ) {
+        break;
+      }
+      // if overlapping exist return true
+      if (timeSlots[days[i]][j + 1].FromHour < timeSlots[days[i]][j].ToHour + 1) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 const createPreference = async (body, doctorID, AuthData, update = false) => {
   const alreadyExist = await AppointmentPreference.findOne({ docid: doctorID, doctorAuthId: AuthData });
   if (alreadyExist && !update) {
     return Promise.reject(
       new ApiError(httpStatus.FORBIDDEN, 'Appointment preference already exist!. Please update them instead!')
     );
+  }
+  // check for time overlap
+  const overlapping = slotOverlap(body);
+  if (overlapping) {
+    throw new ApiError(httpStatus.FORBIDDEN, 'Overlapped time slots not allowed!');
   }
 
   const result = {};
@@ -136,4 +166,5 @@ module.exports = {
   updatePreference,
   getfollowups,
   getappointments,
+  slotOverlap,
 };

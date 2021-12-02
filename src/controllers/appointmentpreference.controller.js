@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { appointmentPreferenceService, authService } = require('../services');
 const catchAsync = require('../utils/catchAsync');
+const ApiError = require('../utils/ApiError');
 
 const submitAppointmentPreference = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -21,21 +22,31 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
 });
 
 const showfollowups = catchAsync(async (req, res) => {
-  appointmentPreferenceService.getfollowups(req.Docid).then((result) => {
-    if (result === null) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: "Follow up slots doesn't exist." });
-    }
-    return res.status(httpStatus.OK).json(result);
-  });
+  appointmentPreferenceService
+    .getfollowups(req.Docid)
+    .then((result) => {
+      if (result === null) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: "Follow up slots doesn't exist." });
+      }
+      return res.status(httpStatus.OK).json(result);
+    })
+    .catch(() => {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with getFollwups service');
+    });
 });
 
 const showappointments = catchAsync(async (req, res) => {
-  appointmentPreferenceService.getappointments(req.body.docId).then((result) => {
-    if (result === null) {
-      return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });
-    }
-    return res.status(httpStatus.OK).json(result);
-  });
+  appointmentPreferenceService
+    .getappointments(req.body.docId)
+    .then((result) => {
+      if (result === null) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });
+      }
+      return res.status(httpStatus.OK).json(result);
+    })
+    .catch(() => {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with getAppointments service');
+    });
 });
 
 module.exports = {

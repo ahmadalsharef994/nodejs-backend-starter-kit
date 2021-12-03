@@ -22,7 +22,7 @@ const bookAppointmentDetails = {
       slotId: Joi.string().required(),
       date: Joi.string().required(),
       status: Joi.string().required(), // valid options needed
-      bookingType: Joi.string().required().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
+      bookingType: Joi.string().required().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
       documents: Joi.array(),
       description: Joi.string().required(),
       issue: Joi.string().required(),
@@ -65,10 +65,10 @@ const getFollowups = {
     .max(1),
 };
 
-const getAllAppointments = {
+const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
+      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
     })
     .min(0)
     .max(1),
@@ -127,7 +127,7 @@ module.exports = {
   bookAppointmentDetails,
   assignfollowupDetails,
   getFollowups,
-  getAllAppointments,
+  getAppointmentsByType,
   getappointment,
   createprescription,
   getprescription,

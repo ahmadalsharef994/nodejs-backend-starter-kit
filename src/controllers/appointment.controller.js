@@ -113,8 +113,8 @@ const showUpcomingAppointments = catchAsync(async (req, res) => {
   });
 });
 
-const showAllAppointments = catchAsync(async (req, res) => {
-  appointmentService.getAllAppointments(req.Docid, req.query.type).then((result) => {
+const showAppointmentsByType = catchAsync(async (req, res) => {
+  appointmentService.getAppointmentsByType(req.Docid, req.query.type).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
     }
@@ -200,7 +200,7 @@ module.exports = {
   showFollowUpsById,
   showAvailableFollowUps,
   showUpcomingAppointments,
-  showAllAppointments,
+  showAppointmentsByType,
   getappointmentDoctor,
   createPrescription,
   getPrescription,

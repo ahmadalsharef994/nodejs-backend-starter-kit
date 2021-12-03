@@ -18,8 +18,12 @@ const router = express.Router();
 ); This is used fot Initiaing Appointment Session Manually while testing */
 
 router
-  .route('/all-appointments')
-  .get(authdoctorverified(), validate(appointmentValidation.getAllAppointments), appointmentController.showAllAppointments);
+  .route('/appointments-type')
+  .get(
+    authdoctorverified(),
+    validate(appointmentValidation.getAppointmentsByType),
+    appointmentController.showAppointmentsByType
+  );
 router.get(
   '/:appointmentId/appoinment-details',
   authdoctorverified(),

@@ -142,30 +142,26 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
 
-  await AppointmentPreference.findOne({ docid: doctorId })
-    .then((pref) => {
-      const day = slotId.split('-')[1];
-      const type = slotId.split('-')[0];
-      const slots = pref[`${day}_${type}`];
-      const slot = slots.filter((e) => e.slotId === slotId);
-      if (slot.length === 0) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
-      }
-      startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
-      endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
-      const currentTime = new Date();
-      if (startTime.getTime() <= currentTime.getTime()) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
-      }
-      const correctDay = startTime.getDay();
-      const requestedDay = slotId.split('-')[0];
-      if (weekday[correctDay] !== requestedDay) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
-      }
-    })
-    .catch(() => {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with Appointment creation process');
-    });
+  await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+    const day = slotId.split('-')[1];
+    const type = slotId.split('-')[0];
+    const slots = pref[`${day}_${type}`];
+    const slot = slots.filter((e) => e.slotId === slotId);
+    if (slot.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
+    }
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+    const currentTime = new Date();
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
+    }
+    const correctDay = startTime.getDay();
+    const requestedDay = slotId.split('-')[1];
+    if (weekday[correctDay] !== requestedDay) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+    }
+  });
 
   const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
   if (appointmentExist || startTime === null || endTime === null) {
@@ -219,7 +215,7 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
         throw new ApiError(httpStatus.BAD_REQUEST, 'Followups can be booked only for future dates');
       }
       const correctDay = startTime.getDay();
-      const requestedDay = slotId.split('-')[0];
+      const requestedDay = slotId.split('-')[1];
       if (weekday[correctDay] !== requestedDay) {
         throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
       }
@@ -243,6 +239,7 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
   return assignedFollowup;
 };
 
+// 10 minutes modal req
 const getUpcomingAppointments = async (doctorId) => {
   const promise = await Appointment.find(
     { docid: doctorId, Status: 'SCHEDULED' },
@@ -251,19 +248,19 @@ const getUpcomingAppointments = async (doctorId) => {
   return promise;
 };
 
-const getAllAppointments = async (doctorId, type) => {
+const getAppointmentsByType = async (doctorId, type) => {
   if (!type) {
-    const promise = await Appointment.find({ docid: doctorId }).sort();
+    const result = await Appointment.find({ docid: doctorId }).sort();
     // sort using StartTIme
-    return promise;
+    return result;
   }
-  const promise = await Appointment.find({ docid: doctorId, Type: type }).sort();
+  const result = await Appointment.find({ docid: doctorId, Type: type }).sort();
   // sort using StartTIme
-  return promise;
+  return result;
 };
 
 const getFollowups = async (appointmentId) => {
-  const promise = await Followup.find({ Appointment: appointmentId, Status: 'SCHEDULED' }).sort('-date');
+  const promise = await Followup.find({ Appointment: appointmentId, Status: 'SCHEDULED' }).sort();
   // sort using StartTIme
   return promise;
 };
@@ -365,7 +362,7 @@ module.exports = {
   submitAppointmentDetails,
   submitFollowupDetails,
   getUpcomingAppointments,
-  getAllAppointments,
+  getAppointmentsByType,
   getFollowups,
   getAvailableFollowUpSlots,
   getappointmentDoctor,

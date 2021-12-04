@@ -9,6 +9,14 @@ const FollowupSchema = mongoose.Schema(
       ref: Appointment,
       required: true,
     },
+    docid: {
+      type: String,
+      required: true,
+    },
+    slotId: {
+      type: String,
+      required: true,
+    },
     StartTime: {
       type: Date,
       required: true,

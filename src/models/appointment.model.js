@@ -12,6 +12,11 @@ const AppointmentSchema = mongoose.Schema(
     docid: {
       type: Number,
       required: true,
+      index: true,
+    },
+    slotId: {
+      type: String,
+      required: true,
     },
     AuthUser: {
       type: mongoose.Schema.Types.ObjectId,
@@ -29,6 +34,7 @@ const AppointmentSchema = mongoose.Schema(
     StartTime: {
       type: Date,
       required: true,
+      index: true,
     },
     EndTime: {
       type: Date,

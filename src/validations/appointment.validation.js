@@ -121,6 +121,12 @@ const doctorFeedback = {
   }),
 };
 
+const getAvailableAppointmentSlots = {
+  body: Joi.object().keys({
+    docId: Joi.number().integer().required().min(10000000).max(99999999),
+  }),
+};
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -128,6 +134,7 @@ module.exports = {
   assignfollowupDetails,
   getFollowups,
   getAppointmentsByType,
+  getAvailableAppointmentSlots,
   getappointment,
   createprescription,
   getprescription,

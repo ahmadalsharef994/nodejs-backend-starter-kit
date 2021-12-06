@@ -1,7 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, appointmentService, userProfile } = require('../services');
-const ApiError = require('../utils/ApiError');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
 const initAppointmentDoctor = catchAsync(async (req, res) => {
@@ -82,26 +81,27 @@ const assignFollowup = catchAsync(async (req, res) => {
 });
 
 const showFollowUpsById = catchAsync(async (req, res) => {
-  appointmentService.getFollowups(req.params.appointmentId).then((result) => {
+  appointmentService.getFollowupsById(req.params.appointmentId).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.OK).json({ message: 'No Followups assigned.', data: [] });
+      return res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
     }
     return res.status(httpStatus.OK).json({ message: 'Success', data: result });
   });
 });
 
 const showAvailableFollowUps = catchAsync(async (req, res) => {
-  appointmentService
-    .getAvailableFollowUpSlots(req.Docid)
-    .then((result) => {
-      if (result.length === 0) {
-        return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
-      }
-      return res.status(httpStatus.OK).json({ message: 'Success', data: result });
-    })
-    .catch(() => {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with showAvailableFollowUps controller');
-    });
+  appointmentService.getAvailableFollowUpSlots(req.Docid).then((result) => {
+    if (result.length === 0) {
+      return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
+    }
+    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+  });
+});
+
+const showAvailableAppointments = catchAsync(async (req, res) => {
+  appointmentService.getAvailableAppointmentSlots(req.body.docId).then((result) => {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+  });
 });
 
 const showUpcomingAppointments = catchAsync(async (req, res) => {
@@ -191,6 +191,13 @@ const userFeedback = catchAsync(async (req, res) => {
   }
 });
 
+// to be implemented
+const cancelBooking = catchAsync(async (req, res) => {
+  appointmentService.getAvailableAppointmentSlots(req.body.docId).then((result) => {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+  });
+});
+
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -199,6 +206,7 @@ module.exports = {
   assignFollowup,
   showFollowUpsById,
   showAvailableFollowUps,
+  showAvailableAppointments,
   showUpcomingAppointments,
   showAppointmentsByType,
   getappointmentDoctor,
@@ -209,4 +217,5 @@ module.exports = {
   doctorFeedback,
   userFeedback,
   getappointmentDetails,
+  cancelBooking,
 };

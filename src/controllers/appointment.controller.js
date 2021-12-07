@@ -64,7 +64,6 @@ const getappointmentDetails = catchAsync(async (req, res) => {
   }
 });
 
-// same method as appointment booking to be implemented
 const assignFollowup = catchAsync(async (req, res) => {
   await appointmentService
     .submitFollowupDetails(
@@ -191,11 +190,18 @@ const userFeedback = catchAsync(async (req, res) => {
   }
 });
 
-// to be implemented
 const cancelBooking = catchAsync(async (req, res) => {
-  appointmentService.getAvailableAppointmentSlots(req.body.docId).then((result) => {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
-  });
+  appointmentService
+    .cancelAppointment(req.body.appointmentId)
+    .then((result) => {
+      if (result) {
+        return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+      }
+      return res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointment already in Cancelled state', data: [] });
+    })
+    .catch(() => {
+      return res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointment Cancellation failed', data: [] });
+    });
 });
 
 module.exports = {

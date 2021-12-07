@@ -365,6 +365,15 @@ const userFeedback = async (feedbackDoc, appointmentId) => {
   return false;
 };
 
+const cancelAppointment = async (appointmentId) => {
+  const appointmentData = await Appointment.findById({ _id: appointmentId });
+  if (appointmentData.Status !== 'cancelled') {
+    const result = await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    return result;
+  }
+  return null;
+};
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -383,4 +392,5 @@ module.exports = {
   fetchAllPatientDetails,
   userFeedback,
   doctorFeedback,
+  cancelAppointment,
 };

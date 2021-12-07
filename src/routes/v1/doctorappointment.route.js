@@ -27,8 +27,9 @@ router.post(
 // not implemented
 router.route('/reschedule-appointment').post(authdoctorverified());
 
-// to be implemented
-router.route('/cancel-booking').post(authdoctorverified(), appointmentController.cancelBooking);
+router
+  .route('/cancel-booking')
+  .post(authdoctorverified(), validate(appointmentValidator.cancelAppointment), appointmentController.cancelBooking);
 
 router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.showUpcomingAppointments);
 

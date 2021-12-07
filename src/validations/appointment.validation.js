@@ -127,6 +127,12 @@ const getAvailableAppointmentSlots = {
   }),
 };
 
+const cancelAppointment = {
+  body: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId),
+  }),
+};
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -141,4 +147,5 @@ module.exports = {
   getDetailsPatient,
   userFeedback,
   doctorFeedback,
+  cancelAppointment,
 };

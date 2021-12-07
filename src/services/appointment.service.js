@@ -238,22 +238,22 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
   return assignedFollowup;
 };
 
-const getUpcomingAppointments = async (doctorId) => {
+const getUpcomingAppointments = async (doctorId, limit) => {
   const result = await Appointment.find(
     { docid: doctorId, Status: 'booked' },
     { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1 }
   )
-    .limit(1)
+    .limit(parseInt(limit, 10))
     .sort([['StartTime', 1]]);
   return result;
 };
 
-const getAppointmentsByType = async (doctorId, type) => {
-  if (!type) {
-    const result = await Appointment.find({ docid: doctorId }).sort([['StartTime', 1]]);
+const getAppointmentsByType = async (doctorId, filter, options) => {
+  if (filter.Type === 'ALL') {
+    const result = await Appointment.paginate({ docid: doctorId }, options);
     return result;
   }
-  const result = await Appointment.find({ docid: doctorId, Type: type }).sort([['StartTime', 1]]);
+  const result = await Appointment.paginate(filter, options);
   return result;
 };
 

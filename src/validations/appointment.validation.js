@@ -68,10 +68,13 @@ const getFollowups = {
 const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
+      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'ALL'),
+      limit: Joi.number(),
+      page: Joi.number(),
+      sortBy: Joi.string(),
     })
     .min(0)
-    .max(1),
+    .max(4),
 };
 
 const getappointment = {

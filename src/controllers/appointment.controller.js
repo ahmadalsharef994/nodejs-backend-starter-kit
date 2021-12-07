@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, appointmentService, userProfile } = require('../services');
+const pick = require('../utils/pick');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
 const initAppointmentDoctor = catchAsync(async (req, res) => {
@@ -104,7 +105,7 @@ const showAvailableAppointments = catchAsync(async (req, res) => {
 });
 
 const showUpcomingAppointments = catchAsync(async (req, res) => {
-  appointmentService.getUpcomingAppointments(req.Docid).then((result) => {
+  appointmentService.getUpcomingAppointments(req.Docid, req.query.limit).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
     }
@@ -113,7 +114,9 @@ const showUpcomingAppointments = catchAsync(async (req, res) => {
 });
 
 const showAppointmentsByType = catchAsync(async (req, res) => {
-  appointmentService.getAppointmentsByType(req.Docid, req.query.type).then((result) => {
+  const filter = { Type: req.query.type };
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  await appointmentService.getAppointmentsByType(req.Docid, filter, options).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
     }

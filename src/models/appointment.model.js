@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const Auth = require('./auth.model');
 
 const AppointmentSchema = mongoose.Schema(
@@ -88,6 +88,7 @@ const AppointmentSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 AppointmentSchema.plugin(toJSON);
+AppointmentSchema.plugin(paginate);
 
 /**
  * @typedef Appointment

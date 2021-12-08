@@ -92,7 +92,6 @@ const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
   throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
 };
 
-// working
 const verifyPhoneOtp = async (otp, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
   if (!OtpDoc) {
@@ -100,7 +99,7 @@ const verifyPhoneOtp = async (otp, AuthData) => {
   }
   const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
 
-  if (time > 60000) {
+  if (time > 120000) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
   }
 

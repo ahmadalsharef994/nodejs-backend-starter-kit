@@ -62,6 +62,8 @@ app.use((req, res, next) => {
 if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
+// app.use('/v1/auth/doctor/request-otp', otpratelimiter);
+// app.use('/v1/auth/doctor/resend-otp', otpratelimiter);
 app.use('/v1/auth/doctor/forgot-password', otpratelimiter);
 app.use('/v1/auth/user/forgot-password', otpratelimiter);
 // v1 api routes

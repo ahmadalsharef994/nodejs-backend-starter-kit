@@ -1,24 +1,17 @@
 const axios = require('axios');
 // const otpGenerator = require('otp-generator');
 
-const tlClient = axios.create({
-  baseURL: 'https://api.textlocal.in/',
-  params: {
-    apiKey: 'YOUR API KEY', // Text local api key
-    sender: '6 CHARACTER SENDER ID',
-  },
-});
-
-const smsClient = {
-  sendVerificationMessage: (user) => {
-    if (user && user.phone) {
-      const params = new URLSearchParams();
-      // const verifycode = otpGenerator.generate(6, { upperCase: false, specialChars: false });
-      // params.append('numbers', [parseInt('91'+user.phone)]);
-      // params.append('message', `Your iWheels verification code is` + verifycode );
-      tlClient.post('/send', params);
-    }
-  },
+const sendPhoneOtp2F = async (phoneNo, OTP) => {
+  const res = await axios.get(`https://2factor.in/API/V1/${process.env.TWOFACTOR_API}/SMS/+91${phoneNo}/${OTP}`);
+  return res;
 };
 
-module.exports = smsClient;
+const verifyPhoneOtp2F = async (userOTP, sessionId) => {
+  const res = await axios.get(`https://2factor.in/API/V1/${process.env.TWOFACTOR_API}/SMS/VERIFY/${sessionId}/${userOTP}`);
+  return res;
+};
+
+module.exports = {
+  sendPhoneOtp2F,
+  verifyPhoneOtp2F,
+};

@@ -11,7 +11,7 @@ const {
   documentService,
   internalTeamService,
 } = require('../services');
-const { emailService } = require('../Microservices');
+const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
 
 /* Challenge Heirarchy for Onboarding API
@@ -125,19 +125,21 @@ const forgotPassword = catchAsync(async (req, res) => {
       challenge: challenge.challenge,
       optionalchallenge: challenge.optionalChallenge,
     });
-  } else {
-    const AuthData = await authService.getAuthByPhone(req.body.phone);
+  } else if (service === 'phone') {
+    const AuthData = await authService.getAuthByPhone(parseInt(req.body.phone, 10));
     if (!AuthData) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
     }
-    // await smsService.sendResetPasswordPhone(req.body.phone, OTP); ***to be implemented***
-    await otpServices.sendresetpassotp(OTP, AuthData);
+    const response2F = await smsService.sendPhoneOtp2F(req.body.phone, OTP);
+    const dbresponse = await otpServices.sendresetpassotp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
-    res.status(httpStatus.OK).json({
-      message: 'Reset Code Sent to Registered PhoneNumber',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
-    });
+    if (response2F && dbresponse) {
+      res.status(httpStatus.OK).json({
+        message: 'Reset Code Sent to Registered PhoneNumber',
+        challenge: challenge.challenge,
+        optionalchallenge: challenge.optionalChallenge,
+      });
+    }
   }
 });
 
@@ -157,7 +159,7 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   const OTP = generateOTP();
   await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
   await otpServices.sendemailverifyotp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY', otp: OTP });
+  res.status(httpStatus.OK).json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY' });
 });
 
 const changeEmail = catchAsync(async (req, res) => {
@@ -216,7 +218,6 @@ const requestOtp = catchAsync(async (req, res) => {
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res.status(httpStatus.OK).json({
     message: 'OTP Sent over Phone',
-    otp: OTP,
     challenge: challenge.challenge,
     optionalchallenge: challenge.optionalChallenge,
   });
@@ -242,7 +243,6 @@ const resendOtp = catchAsync(async (req, res) => {
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res.status(httpStatus.OK).json({
     message: 'OTP Sent Over Phone',
-    otp: OTP,
     challenge: challenge.challenge,
     optionalchallenge: challenge.optionalChallenge,
   });

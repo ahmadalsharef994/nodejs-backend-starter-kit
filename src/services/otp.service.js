@@ -1,6 +1,7 @@
 const httpStatus = require('http-status');
 const { Otp, Auth } = require('../models');
 const ApiError = require('../utils/ApiError');
+const { smsService } = require('../Microservices');
 
 const initiateOTPData = async (user) => {
   const authDataExist = await Otp.findOne({ auth: user });
@@ -38,6 +39,10 @@ const sendemailverifyotp = async (OTP, user) => {
 };
 
 const sendphoneverifyotp = async (OTP, user) => {
+  const response2F = await smsService.sendPhoneOtp2F(user.mobile, OTP);
+  if (response2F.data.Status !== 'Success') {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request Phone OTP Failed');
+  }
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
     const OtpDoc = await Otp.updateOne(
@@ -87,6 +92,7 @@ const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
   throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
 };
 
+// working
 const verifyPhoneOtp = async (otp, AuthData) => {
   const OtpDoc = await Otp.findOne({ auth: AuthData });
   if (!OtpDoc) {
@@ -107,6 +113,10 @@ const verifyPhoneOtp = async (otp, AuthData) => {
 };
 
 const resendOtp = async (OTP, user) => {
+  const response2F = await smsService.sendPhoneOtp2F(user.mobile, OTP);
+  if (response2F.data.Status !== 'Success') {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Request Phone OTP Failed');
+  }
   const authData = await Otp.findOne({ auth: user });
   if (authData) {
     const OtpDoc = await Otp.updateOne(

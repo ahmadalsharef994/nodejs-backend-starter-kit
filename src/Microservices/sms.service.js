@@ -1,8 +1,8 @@
 const axios = require('axios');
 // const otpGenerator = require('otp-generator');
 
-const sendPhoneOtp2F = async (phoneNo, OTP) => {
-  const res = await axios.get(`https://2factor.in/API/V1/${process.env.TWOFACTOR_API}/SMS/+91${phoneNo}/${OTP}`);
+const sendPhoneOtp2F = async (phoneNo, OTP, template = 'Login Verification') => {
+  const res = await axios.get(`https://2factor.in/API/V1/${process.env.TWOFACTOR_API}/SMS/+91${phoneNo}/${OTP}/${template}`);
   return res;
 };
 

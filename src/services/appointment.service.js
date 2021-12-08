@@ -374,6 +374,16 @@ const cancelAppointment = async (appointmentId) => {
   return null;
 };
 
+// not implemented
+const rescheduleAppointment = async (appointmentId, newSlotId) => {
+  const appointmentData = await Appointment.findById({ _id: appointmentId, slotId: newSlotId });
+  if (appointmentData.Status !== 'cancelled') {
+    const result = await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    return result;
+  }
+  return null;
+};
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -393,4 +403,5 @@ module.exports = {
   userFeedback,
   doctorFeedback,
   cancelAppointment,
+  rescheduleAppointment,
 };

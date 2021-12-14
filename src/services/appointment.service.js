@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 const Agenda = require('agenda');
 const httpStatus = require('http-status');
@@ -10,12 +11,14 @@ const {
   VerifiedDoctors,
   AppointmentPreference,
   Feedback,
+  UserBasic,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
 const pusherService = require('../Microservices/pusherService');
 const tokenService = require('./token.service');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
+const authService = require('./auth.service');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -87,7 +90,7 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
     .catch(() => {
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
-  const ChatExchangeToken = await tokenService.generateChatAppointmentSessionToken(
+  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
@@ -313,18 +316,47 @@ const createPrescriptionDoc = async (prescriptionDoc, appointmentID) => {
   return false;
 };
 
+// eslint-disable-next-line no-unused-vars
 const fetchPatientDetails = async (patientid, doctorid) => {
-  const PatientidDocument = await Appointment.find({ AuthUser: patientid, AuthDoctor: doctorid });
-  if (PatientidDocument) {
-    return { PatientidDocument };
-  }
-  return false;
+  // const PatientAppointments = await Appointment.find({ AuthUser: patientid, AuthDoctor: doctorid });
+  const PatientBasicDetails = await UserBasic.findOne({ auth: patientid }, { auth: 0 });
+  const PatientAuth = await authService.getAuthById(patientid);
+  const PatientName = PatientAuth.fullname;
+  const PatientContact = { mobile: PatientAuth.mobile, email: PatientAuth.email };
+  // return [PatientName, PatientBasicDetails, PatientContact, PatientAppointments];
+  return [PatientName, PatientBasicDetails, PatientContact];
 };
 
-const fetchAllPatientDetails = async (doctorid) => {
-  const DoctorPatientidDocument = await Appointment.find({ AuthDoctor: doctorid });
-  if (DoctorPatientidDocument) {
-    return DoctorPatientidDocument;
+const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
+  const patientIds = await Appointment.aggregate([
+    { $sort: { StartTime: parseInt(sortBy, 10) } },
+    { $group: { _id: { AuthUser: '$AuthUser' } } },
+    {
+      $facet: {
+        metadata: [{ $count: 'total' }, { $addFields: { page: parseInt(page, 10) } }],
+        data: [{ $skip: (parseInt(page, 10) - 1) * parseInt(limit, 10) }, { $limit: parseInt(limit, 10) }], // add projection here wish you re-shape the docs
+      },
+    },
+  ]);
+
+  const allPatientsData = [];
+  let singlePatientData = {};
+  for (let k = 0; k < patientIds[0].data.length; k += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    singlePatientData = await fetchPatientDetails(patientIds[0].data[k]._id.AuthUser, doctorid);
+    allPatientsData.push({
+      'No.': k,
+      'Patient Name': singlePatientData[0],
+      'Patient Basic Details': singlePatientData[1],
+      'Patient Contact Details': singlePatientData[2],
+    });
+  }
+
+  patientIds[0].metadata[0].totalPages = Math.ceil(patientIds[0].metadata[0].total / limit);
+  patientIds[0].metadata[0].limit = parseInt(limit, 10);
+
+  if (allPatientsData.length) {
+    return [allPatientsData, patientIds[0].metadata[0]];
   }
   return false;
 };

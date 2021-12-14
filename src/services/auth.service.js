@@ -31,7 +31,7 @@ const createGoogleAuthData = async (profileBody) => {
       return auth;
     }
   } catch (err) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Google AUth Data');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Google AUth Data Error');
   }
 };
 

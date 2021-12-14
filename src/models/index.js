@@ -23,3 +23,4 @@ module.exports.Message = require('./message.model');
 module.exports.UserBasic = require('./userBasic.model');
 module.exports.UserMember = require('./userMember.model');
 module.exports.UserAddress = require('./userAddress.model');
+module.exports.ThyroToken = require('./thyroToken.model');

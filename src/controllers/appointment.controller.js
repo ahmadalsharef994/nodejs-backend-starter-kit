@@ -154,22 +154,31 @@ const getPrescription = catchAsync(async (req, res) => {
 
 const getPatientDetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const patientAppointmentData = await appointmentService.fetchPatientDetails(req.params.patientId, AuthData);
-  const PatientBasic = await userProfile.fetchBasicDetails(AuthData);
-  if (patientAppointmentData !== false && PatientBasic !== false) {
-    res
-      .status(httpStatus.CREATED)
-      .json({ 'Patient Basic Details': PatientBasic, 'Pateint Appoinment Details': patientAppointmentData });
+  const patientData = await appointmentService.fetchPatientDetails(req.params.patientId, AuthData);
+  if (patientData.length) {
+    res.status(httpStatus.OK).json({
+      'Patient Name': patientData[0],
+      'Patient Basic Details': patientData[1],
+      'Patient Contact Details': patientData[2],
+      /* Appointments: patientData[3], */
+    });
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Patient present with this id' });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Error in fetching Patient data' });
   }
 });
 
 const getAllPatientDetails = catchAsync(async (req, res) => {
+  const { page, limit, sortBy } = req.query;
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const patientsData = await appointmentService.fetchAllPatientDetails(AuthData);
+  const patientsData = await appointmentService.fetchAllPatientDetails(AuthData, page, limit, sortBy);
   if (patientsData !== false) {
-    res.status(httpStatus.CREATED).json({ patientsData });
+    res.status(httpStatus.CREATED).json({
+      Patients: patientsData[0],
+      page: patientsData[1].page,
+      limit: patientsData[1].limit,
+      totalPages: patientsData[1].totalPages,
+      totalResults: patientsData[1].total,
+    });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'No Patients Exits' });
   }

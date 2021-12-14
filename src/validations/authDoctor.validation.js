@@ -7,7 +7,7 @@ const registerdoctor = {
     password: Joi.string().min(8).max(30).required(),
     fullname: Joi.string().required(),
     isdcode: Joi.required().valid('91', '1'),
-    mobile: Joi.number().required(),
+    mobile: Joi.number().required().min(1000000000).max(9999999999),
     role: Joi.valid('doctor').required(),
   }),
 };

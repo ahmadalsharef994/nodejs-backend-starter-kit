@@ -406,14 +406,60 @@ const cancelAppointment = async (appointmentId) => {
   return null;
 };
 
-// not implemented
-const rescheduleAppointment = async (appointmentId, newSlotId) => {
-  const appointmentData = await Appointment.findById({ _id: appointmentId, slotId: newSlotId });
-  if (appointmentData.Status !== 'cancelled') {
-    const result = await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
-    return result;
+const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, startDateTime, endDateTime) => {
+  // find appointment by id
+  const appointmentData = await Appointment.findById({ _id: appointmentId, docid: doctorId });
+  // initiate timestamps
+  let startTime = null;
+  let endTime = null;
+
+  // if custom date and time provided
+  if (appointmentData && startDateTime && endDateTime) {
+    startTime = new Date(`${startDateTime}:00 GMT+0530`);
+    endTime = new Date(`${endDateTime}:00 GMT+0530`);
+    const currentTime = new Date();
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Rescheduled dateTimes cannot be past time');
+    } else if (endTime.getTime() < startTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Rescheduled startTime cannot be greater than endTime');
+    } else if ((endTime.getTime() - startTime.getTime()) / 1000 > 7200) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'DateTime differences cannot be greater than 2 hours');
+    }
+  } else if (appointmentData && slotId && date) {
+    // if slotid and date provided
+    await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+      const day = slotId.split('-')[1];
+      const type = slotId.split('-')[0];
+      const slots = pref[`${day}_${type}`];
+      const slot = slots.filter((e) => e.slotId === slotId);
+      if (slot.length === 0) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
+      }
+      startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+      endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+      const currentTime = new Date();
+      if (startTime.getTime() <= currentTime.getTime()) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
+      }
+      const correctDay = startTime.getDay();
+      const requestedDay = slotId.split('-')[1];
+      if (weekday[correctDay] !== requestedDay) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+      }
+    });
   }
-  return null;
+  // check for null timestamps
+  if (startTime === null || endTime === null) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Error in creating timestamps!');
+  }
+
+  const result = await Appointment.findOneAndUpdate(
+    { _id: appointmentId },
+    { StartTime: startTime, EndTime: endTime, Status: 'booked', isRescheduled: true, slotId },
+    { new: true }
+  );
+
+  return result;
 };
 
 module.exports = {

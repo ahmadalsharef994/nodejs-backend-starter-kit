@@ -131,9 +131,25 @@ const getAvailableAppointmentSlots = {
 };
 
 const cancelAppointment = {
-  body: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId),
-  }),
+  body: Joi.object()
+    .keys({
+      appointmentId: Joi.string().custom(objectId),
+    })
+    .min(1)
+    .max(1),
+};
+
+const rescheduleAppointment = {
+  body: Joi.object()
+    .keys({
+      appointmentId: Joi.string().custom(objectId),
+      slotId: Joi.string(),
+      date: Joi.string(),
+      startDateTime: Joi.string(),
+      endDateTime: Joi.string(),
+    })
+    .min(3)
+    .max(3),
 };
 
 module.exports = {
@@ -151,4 +167,5 @@ module.exports = {
   userFeedback,
   doctorFeedback,
   cancelAppointment,
+  rescheduleAppointment,
 };

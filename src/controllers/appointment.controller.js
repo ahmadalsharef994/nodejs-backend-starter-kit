@@ -203,7 +203,7 @@ const userFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelBooking = catchAsync(async (req, res) => {
-  appointmentService
+  await appointmentService
     .cancelAppointment(req.body.appointmentId)
     .then((result) => {
       if (result) {
@@ -216,18 +216,15 @@ const cancelBooking = catchAsync(async (req, res) => {
     });
 });
 
-// not implemented
 const rescheduleBooking = catchAsync(async (req, res) => {
-  appointmentService
-    .cancelAppointment(req.body.appointmentId)
+  const { appointmentId, slotId, date, startDateTime, endDateTime } = await req.body;
+  await appointmentService
+    .rescheduleAppointment(req.Docid, appointmentId, slotId, date, startDateTime, endDateTime)
     .then((result) => {
       if (result) {
         return res.status(httpStatus.OK).json({ message: 'Success', data: result });
       }
-      return res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointment already in Cancelled state', data: [] });
-    })
-    .catch(() => {
-      return res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointment Cancellation failed', data: [] });
+      return res.status(httpStatus.BAD_REQUEST).json({ message: "Appointment doesn't exist", data: [] });
     });
 });
 

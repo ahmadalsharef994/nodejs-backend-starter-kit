@@ -68,10 +68,13 @@ const getFollowups = {
 const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
+      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'ALL'),
+      limit: Joi.number(),
+      page: Joi.number(),
+      sortBy: Joi.string(),
     })
     .min(0)
-    .max(1),
+    .max(4),
 };
 
 const getappointment = {
@@ -121,6 +124,34 @@ const doctorFeedback = {
   }),
 };
 
+const getAvailableAppointmentSlots = {
+  body: Joi.object().keys({
+    docId: Joi.number().integer().required().min(10000000).max(99999999),
+  }),
+};
+
+const cancelAppointment = {
+  body: Joi.object()
+    .keys({
+      appointmentId: Joi.string().custom(objectId),
+    })
+    .min(1)
+    .max(1),
+};
+
+const rescheduleAppointment = {
+  body: Joi.object()
+    .keys({
+      appointmentId: Joi.string().custom(objectId),
+      slotId: Joi.string(),
+      date: Joi.string(),
+      startDateTime: Joi.string(),
+      endDateTime: Joi.string(),
+    })
+    .min(3)
+    .max(3),
+};
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -128,10 +159,13 @@ module.exports = {
   assignfollowupDetails,
   getFollowups,
   getAppointmentsByType,
+  getAvailableAppointmentSlots,
   getappointment,
   createprescription,
   getprescription,
   getDetailsPatient,
   userFeedback,
   doctorFeedback,
+  cancelAppointment,
+  rescheduleAppointment,
 };

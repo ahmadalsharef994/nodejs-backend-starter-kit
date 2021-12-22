@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const Auth = require('./auth.model');
 
 const AppointmentSchema = mongoose.Schema(
@@ -11,6 +11,11 @@ const AppointmentSchema = mongoose.Schema(
     },
     docid: {
       type: Number,
+      required: true,
+      index: true,
+    },
+    slotId: {
+      type: String,
       required: true,
     },
     AuthUser: {
@@ -29,6 +34,7 @@ const AppointmentSchema = mongoose.Schema(
     StartTime: {
       type: Date,
       required: true,
+      index: true,
     },
     EndTime: {
       type: Date,
@@ -82,6 +88,7 @@ const AppointmentSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 AppointmentSchema.plugin(toJSON);
+AppointmentSchema.plugin(paginate);
 
 /**
  * @typedef Appointment

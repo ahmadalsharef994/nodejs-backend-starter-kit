@@ -2,6 +2,7 @@ const express = require('express');
 const validate = require('../../middlewares/validate');
 const { profilePhotoUpload } = require('../../Microservices');
 const DoctorProfileValidator = require('../../validations/DoctorProfile.validation');
+const appointmentValidator = require('../../validations/appointment.validation');
 const DoctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
@@ -70,9 +71,6 @@ router
     validate(DoctorProfileValidator.ClinicDoctorDetails),
     DoctorProfileController.submitclinicdetails
   );
-
-router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showfollowups);
-router.route('/get-available-followups').get(authdoctorverified(), appointmentController.showAvailableFollowUps);
 router
   .route('/updatePref')
   .put(
@@ -87,9 +85,13 @@ router
     validate(preferenceValidator.preferenceDetails),
     appointmentPreferenceController.submitAppointmentPreference
   );
-router
-  .route('/getappointment-slots')
-  .post(validate(preferenceValidator.getAppointmentSlots), appointmentPreferenceController.showappointments);
+
+// get all appointment preference slots
+router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.showappointments);
+
+// get all followup preference slots
+router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showfollowups);
+
 router.route('/payout-details').get(authdoctornonverified(), DoctorProfileController.fetchpayoutsdetails);
 router
   .route('/payout-details')

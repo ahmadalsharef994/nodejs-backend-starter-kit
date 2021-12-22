@@ -22,7 +22,7 @@ const createAuthData = async (authBody) => {
 
 const createGoogleAuthData = async (profileBody) => {
   try {
-    let user = await Auth.findOne({ googleId: profile.id })
+    const user = await Auth.findOne({ googleId: profileBody.id });
     if (user) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
     } else {
@@ -31,6 +31,7 @@ const createGoogleAuthData = async (profileBody) => {
       return auth;
     }
   } catch (err) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Google AUth Data Error');
   }
 };
 
@@ -72,7 +73,7 @@ const getAuthByEmail = async (email) => {
  * @returns {Promise<Auth>}
  */
 const getAuthByPhone = async (phone) => {
-  return Auth.findOne({ phone });
+  return Auth.findOne({ mobile: phone });
 };
 /**
  * Update Auth by id

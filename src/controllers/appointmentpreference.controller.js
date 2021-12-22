@@ -37,7 +37,7 @@ const showfollowups = catchAsync(async (req, res) => {
 
 const showappointments = catchAsync(async (req, res) => {
   appointmentPreferenceService
-    .getappointments(req.body.docId)
+    .getappointments(req.Docid)
     .then((result) => {
       if (result === null) {
         return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });

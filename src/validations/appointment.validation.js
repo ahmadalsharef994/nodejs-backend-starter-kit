@@ -21,9 +21,21 @@ const bookAppointmentDetails = {
       docId: Joi.number().required(),
       slotId: Joi.string().required(),
       date: Joi.string().required(),
+      status: Joi.string().required(), // valid options needed
+      bookingType: Joi.string().required().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
+      documents: Joi.array(),
+      description: Joi.string().required(),
+      issue: Joi.string().required(),
+      doctorAction: Joi.string(),
+      doctorReason: Joi.string(),
+      userAction: Joi.string(),
+      userReason: Joi.string(),
+      rescheduled: Joi.boolean(),
+      doctorRescheduleding: Joi.string(),
+      labTest: Joi.array(),
     })
-    .min(3)
-    .max(3),
+    .min(7)
+    .max(15),
 };
 
 const assignfollowupDetails = {
@@ -37,9 +49,11 @@ const assignfollowupDetails = {
     .keys({
       slotId: Joi.string().required(),
       date: Joi.string().required(),
+      documents: Joi.string().required(),
+      status: Joi.string().required(),
     })
-    .min(2)
-    .max(2),
+    .min(4)
+    .max(4),
 };
 
 const getFollowups = {
@@ -51,13 +65,16 @@ const getFollowups = {
     .max(1),
 };
 
-const getAllAppointments = {
+const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('UPCOMING', 'TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'FOLLOWUP'),
+      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'ALL'),
+      limit: Joi.number(),
+      page: Joi.number(),
+      sortBy: Joi.string(),
     })
-    .min(1)
-    .max(1),
+    .min(0)
+    .max(4),
 };
 
 const getappointment = {
@@ -107,17 +124,48 @@ const doctorFeedback = {
   }),
 };
 
+const getAvailableAppointmentSlots = {
+  body: Joi.object().keys({
+    docId: Joi.number().integer().required().min(10000000).max(99999999),
+  }),
+};
+
+const cancelAppointment = {
+  body: Joi.object()
+    .keys({
+      appointmentId: Joi.string().custom(objectId),
+    })
+    .min(1)
+    .max(1),
+};
+
+const rescheduleAppointment = {
+  body: Joi.object()
+    .keys({
+      appointmentId: Joi.string().custom(objectId),
+      slotId: Joi.string(),
+      date: Joi.string(),
+      startDateTime: Joi.string(),
+      endDateTime: Joi.string(),
+    })
+    .min(3)
+    .max(3),
+};
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
   bookAppointmentDetails,
   assignfollowupDetails,
   getFollowups,
-  getAllAppointments,
+  getAppointmentsByType,
+  getAvailableAppointmentSlots,
   getappointment,
   createprescription,
   getprescription,
   getDetailsPatient,
   userFeedback,
   doctorFeedback,
+  cancelAppointment,
+  rescheduleAppointment,
 };

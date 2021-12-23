@@ -1,5 +1,7 @@
+/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 const Agenda = require('agenda');
+const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -9,11 +11,14 @@ const {
   VerifiedDoctors,
   AppointmentPreference,
   Feedback,
+  UserBasic,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
 const pusherService = require('../Microservices/pusherService');
 const tokenService = require('./token.service');
+const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
+const authService = require('./auth.service');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -85,7 +90,7 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
     .catch(() => {
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
-  const ChatExchangeToken = await tokenService.generateChatAppointmentSessionToken(
+  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
@@ -103,104 +108,185 @@ const ScheduleSessionJob = async (appointmentID, startTime) => {
   await agenda.schedule(datetime, 'createSessions', { appointment: appointmentID }); // Scheduling a Job in Agenda
 };
 
-const submitAppointmentDetails = async (doctorId, userAuth, slotId, date) => {
+const weekday = new Array(7);
+weekday[0] = 'SUN';
+weekday[1] = 'MON';
+weekday[2] = 'TUE';
+weekday[3] = 'WED';
+weekday[4] = 'THU';
+weekday[5] = 'FRI';
+weekday[6] = 'SAT';
+
+const submitAppointmentDetails = async (
+  doctorId,
+  userAuth,
+  slotId,
+  date,
+  status,
+  bookingType,
+  documents,
+  description,
+  issue,
+  doctorAction,
+  doctorReason,
+  userAction,
+  userReason,
+  rescheduled,
+  doctorRescheduleding,
+  labTest
+) => {
   let startTime = null;
   let endTime = null;
-  const { doctorauthid } = await VerifiedDoctors.findOne({ docid: doctorId });
+  let doctorauth = null;
+  try {
+    const { doctorauthid } = await VerifiedDoctors.findOne({ docid: doctorId });
+    doctorauth = doctorauthid;
+  } catch (err) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
+  }
+
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
     const day = slotId.split('-')[1];
     const type = slotId.split('-')[0];
     const slots = pref[`${day}_${type}`];
     const slot = slots.filter((e) => e.slotId === slotId);
-    if (!slot.length) {
-      return null;
+    if (slot.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
     }
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+    const currentTime = new Date();
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
+    }
+    const correctDay = startTime.getDay();
+    const requestedDay = slotId.split('-')[1];
+    if (weekday[correctDay] !== requestedDay) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+    }
   });
+
   const appointmentExist = await Appointment.findOne({ docid: doctorId, StartTime: startTime }).exec();
   if (appointmentExist || startTime === null || endTime === null) {
-    return null;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
+
   const bookedAppointment = await Appointment.create({
-    AuthDoctor: doctorauthid,
+    AuthDoctor: doctorauth,
     docid: doctorId,
+    slotId,
     AuthUser: userAuth,
-    Status: 'SCHEDULED',
-    Type: 'PREBOOKED',
+    Status: status,
+    Type: bookingType,
     StartTime: startTime,
     EndTime: endTime,
-    UserDocument: ['some document'],
-    UserDescription: 'some description',
-    HealthIssue: 'some issue',
-    DoctorAction: 'Pending',
-    DoctorReason: 'none',
-    UserAction: 'Requested Booking',
-    UserReason: 'none',
-    isRescheduled: false,
-    DoctorRescheduleding: null,
+    UserDocument: documents,
+    UserDescription: description,
+    HealthIssue: issue,
+    DoctorAction: doctorAction,
+    DoctorReason: doctorReason,
+    UserAction: userAction,
+    UserReason: userReason,
+    isRescheduled: rescheduled,
+    DoctorRescheduleding: doctorRescheduleding,
+    LabTest: labTest,
   });
   agenda.start();
   await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
   return bookedAppointment;
 };
 
-const submitFollowupDetails = async (appointmentId, doctorId, slotId, date) => {
+const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, documents, status) => {
   let startTime = null;
   let endTime = null;
   const AppointmentData = await Appointment.findById(appointmentId).exec();
   if (!AppointmentData) {
-    return null;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Cannot find Appointment to assign Followup');
   }
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
     const day = slotId.split('-')[1];
     const type = slotId.split('-')[0];
     const slots = pref[`${day}_${type}`];
     const slot = slots.filter((e) => e.slotId === slotId);
-    if (!slot.length) {
-      return null;
+    if (slot.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
     }
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+    const currentTime = new Date();
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Followups can be booked only for future dates');
+    }
+    const correctDay = startTime.getDay();
+    const requestedDay = slotId.split('-')[1];
+    if (weekday[correctDay] !== requestedDay) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+    }
   });
+  const previousFollwups = await Followup.find({ Appointment: AppointmentData.id }).exec();
   const followupExist = await Followup.findOne({ Appointment: AppointmentData.id, StartTime: startTime }).exec();
   if (followupExist || startTime === null || endTime === null) {
-    return null;
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Followup Already Booked');
   }
   const assignedFollowup = await Followup.create({
     Appointment: AppointmentData,
+    docid: doctorId,
+    slotId,
     StartTime: startTime,
     EndTime: endTime,
-    FollowupNo: '1',
-    FollowupDocs: ['some document'],
-    Status: 'SCHEDULED',
+    FollowupNo: previousFollwups.length + 1,
+    FollowupDocs: documents,
+    Status: status,
   });
   return assignedFollowup;
 };
 
-const getUpcomingAppointments = async (doctorId) => {
-  const promise = await Appointment.find(
-    { docid: doctorId, Status: 'SCHEDULED' },
+const getUpcomingAppointments = async (doctorId, limit) => {
+  const result = await Appointment.find(
+    { docid: doctorId, Status: 'booked' },
     { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1 }
-  ).limit(1); // sort using StartTIme and limit
-  return promise;
+  )
+    .limit(parseInt(limit, 10))
+    .sort([['StartTime', 1]]);
+  return result;
 };
 
-const getAllAppointments = async (doctorId, type) => {
-  if (!type) {
-    const promise = await Appointment.find({ docid: doctorId }).sort();
-    // sort using StartTIme
-    return promise;
+const getAppointmentsByType = async (doctorId, filter, options) => {
+  if (filter.Type === 'ALL') {
+    const result = await Appointment.paginate({ docid: doctorId }, options);
+    return result;
   }
-  const promise = await Appointment.find({ docid: doctorId, Type: type }).sort();
-  // sort using StartTIme
-  return promise;
+  const result = await Appointment.paginate(filter, options);
+  return result;
 };
 
-const getFollowups = async (appointmentId) => {
-  const promise = await Followup.find({ Appointment: appointmentId, Status: 'SCHEDULED' }).sort('-date');
-  // sort using StartTIme
-  return promise;
+const getFollowupsById = async (appointmentId) => {
+  const result = await Followup.find({ Appointment: appointmentId }).sort([['StartTime', 1]]);
+  return result;
+};
+
+const getAvailableAppointmentSlots = async (doctorId) => {
+  const AllAppointmentSlots = await appointmentPreferenceService.getappointments(doctorId);
+  const bookedAppointmentSlots = await Appointment.find({ docid: doctorId, Status: 'booked' });
+  const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
+  const result = {};
+  for (let i = 0; i < 7; i += 1) {
+    result[`${weekday[i]}_A`] = AllAppointmentSlots[`${weekday[i]}_A`].filter(
+      (item) => !bookedSlotIds.includes(item.slotId)
+    );
+  }
+  return result;
+};
+
+const getAvailableFollowUpSlots = async (doctorId) => {
+  const AllFollwUpSlots = await appointmentPreferenceService.getfollowups(doctorId);
+  const assignedFollowUpSlots = await Followup.find({ docid: doctorId, Status: 'ASSIGNED' });
+  const assignedSlotIds = assignedFollowUpSlots.map((item) => item.slotId);
+  const result = {};
+  for (let i = 0; i < 7; i += 1) {
+    result[`${weekday[i]}_F`] = AllFollwUpSlots[`${weekday[i]}_F`].filter((item) => !assignedSlotIds.includes(item.slotId));
+  }
+  return result;
 };
 
 const getappointmentDoctor = async (appointmentID) => {
@@ -230,18 +316,47 @@ const createPrescriptionDoc = async (prescriptionDoc, appointmentID) => {
   return false;
 };
 
+// eslint-disable-next-line no-unused-vars
 const fetchPatientDetails = async (patientid, doctorid) => {
-  const PatientidDocument = await Appointment.find({ AuthUser: patientid, AuthDoctor: doctorid });
-  if (PatientidDocument) {
-    return { PatientidDocument };
-  }
-  return false;
+  // const PatientAppointments = await Appointment.find({ AuthUser: patientid, AuthDoctor: doctorid });
+  const PatientBasicDetails = await UserBasic.findOne({ auth: patientid }, { auth: 0 });
+  const PatientAuth = await authService.getAuthById(patientid);
+  const PatientName = PatientAuth.fullname;
+  const PatientContact = { mobile: PatientAuth.mobile, email: PatientAuth.email };
+  // return [PatientName, PatientBasicDetails, PatientContact, PatientAppointments];
+  return [PatientName, PatientBasicDetails, PatientContact];
 };
 
-const fetchAllPatientDetails = async (doctorid) => {
-  const DoctorPatientidDocument = await Appointment.find({ AuthDoctor: doctorid });
-  if (DoctorPatientidDocument) {
-    return DoctorPatientidDocument;
+const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
+  const patientIds = await Appointment.aggregate([
+    { $sort: { StartTime: parseInt(sortBy, 10) } },
+    { $group: { _id: { AuthUser: '$AuthUser' } } },
+    {
+      $facet: {
+        metadata: [{ $count: 'total' }, { $addFields: { page: parseInt(page, 10) } }],
+        data: [{ $skip: (parseInt(page, 10) - 1) * parseInt(limit, 10) }, { $limit: parseInt(limit, 10) }], // add projection here wish you re-shape the docs
+      },
+    },
+  ]);
+
+  const allPatientsData = [];
+  let singlePatientData = {};
+  for (let k = 0; k < patientIds[0].data.length; k += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    singlePatientData = await fetchPatientDetails(patientIds[0].data[k]._id.AuthUser, doctorid);
+    allPatientsData.push({
+      'No.': k,
+      'Patient Name': singlePatientData[0],
+      'Patient Basic Details': singlePatientData[1],
+      'Patient Contact Details': singlePatientData[2],
+    });
+  }
+
+  patientIds[0].metadata[0].totalPages = Math.ceil(patientIds[0].metadata[0].total / limit);
+  patientIds[0].metadata[0].limit = parseInt(limit, 10);
+
+  if (allPatientsData.length) {
+    return [allPatientsData, patientIds[0].metadata[0]];
   }
   return false;
 };
@@ -282,6 +397,71 @@ const userFeedback = async (feedbackDoc, appointmentId) => {
   return false;
 };
 
+const cancelAppointment = async (appointmentId) => {
+  const appointmentData = await Appointment.findById({ _id: appointmentId });
+  if (appointmentData.Status !== 'cancelled') {
+    const result = await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    return result;
+  }
+  return null;
+};
+
+const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, startDateTime, endDateTime) => {
+  // find appointment by id
+  const appointmentData = await Appointment.findById({ _id: appointmentId, docid: doctorId });
+  // initiate timestamps
+  let startTime = null;
+  let endTime = null;
+
+  // if custom date and time provided
+  if (appointmentData && startDateTime && endDateTime) {
+    startTime = new Date(`${startDateTime}:00 GMT+0530`);
+    endTime = new Date(`${endDateTime}:00 GMT+0530`);
+    const currentTime = new Date();
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Rescheduled dateTimes cannot be past time');
+    } else if (endTime.getTime() < startTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Rescheduled startTime cannot be greater than endTime');
+    } else if ((endTime.getTime() - startTime.getTime()) / 1000 > 7200) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'DateTime differences cannot be greater than 2 hours');
+    }
+  } else if (appointmentData && slotId && date) {
+    // if slotid and date provided
+    await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+      const day = slotId.split('-')[1];
+      const type = slotId.split('-')[0];
+      const slots = pref[`${day}_${type}`];
+      const slot = slots.filter((e) => e.slotId === slotId);
+      if (slot.length === 0) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
+      }
+      startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+      endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+      const currentTime = new Date();
+      if (startTime.getTime() <= currentTime.getTime()) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
+      }
+      const correctDay = startTime.getDay();
+      const requestedDay = slotId.split('-')[1];
+      if (weekday[correctDay] !== requestedDay) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+      }
+    });
+  }
+  // check for null timestamps
+  if (startTime === null || endTime === null) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Error in creating timestamps!');
+  }
+
+  const result = await Appointment.findOneAndUpdate(
+    { _id: appointmentId },
+    { StartTime: startTime, EndTime: endTime, Status: 'booked', isRescheduled: true, slotId },
+    { new: true }
+  );
+
+  return result;
+};
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -289,8 +469,10 @@ module.exports = {
   submitAppointmentDetails,
   submitFollowupDetails,
   getUpcomingAppointments,
-  getAllAppointments,
-  getFollowups,
+  getAppointmentsByType,
+  getAvailableAppointmentSlots,
+  getFollowupsById,
+  getAvailableFollowUpSlots,
   getappointmentDoctor,
   createPrescriptionDoc,
   fetchPrescriptionDoc,
@@ -298,4 +480,6 @@ module.exports = {
   fetchAllPatientDetails,
   userFeedback,
   doctorFeedback,
+  cancelAppointment,
+  rescheduleAppointment,
 };

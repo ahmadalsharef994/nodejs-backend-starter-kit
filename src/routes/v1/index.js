@@ -6,6 +6,7 @@ const doctorAppointmentRoute = require('./doctorappointment.route');
 const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
 const userProfileRoute = require('./userprofile.route');
+const labTestRoute = require('./labtest.route');
 const document = require('./document.route');
 
 const router = express.Router();
@@ -42,6 +43,10 @@ const defaultRoutes = [
   {
     path: '/user/appointment', // User Appointment Route
     route: userAppointmentRoute,
+  },
+  {
+    path: '/labtest', // LabTests Route
+    route: labTestRoute,
   },
 ];
 

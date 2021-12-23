@@ -113,9 +113,66 @@ const postThyrocareOrder = async (
   return res.data;
 };
 
+const orderSummary = async (orderId) => {
+  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post(
+    'https://velso.thyrocare.cloud/api/OrderSummary/OrderSummary',
+    {
+      ApiKey: `${credentials.thyroApiKey}`,
+      OrderNo: `${orderId}`,
+    },
+    {
+      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
+    }
+  );
+
+  return res.data;
+};
+
+const getReport = async (leadId, userMobileNo) => {
+  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  // [xml|pdf]
+  const res = await axios.get(
+    `https://b2capi.thyrocare.com/API_BETA/order.svc/${credentials.thyroApiKey}/GETREPORTS/${leadId}/pdf/${userMobileNo}/Myreport`
+  );
+  return res.data;
+};
+
+// not supported by thyrocare
+const cancelThyrocareOrder = async (orderId, visitId, bTechId, status, appointmentSlot) => {
+  // const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post('https://b2capi.thyrocare.com/apis/ORDER.svc/cancelledorder', {
+    OrderNo: `${orderId}`,
+    VisitId: `${visitId}`,
+    BTechId: parseInt(bTechId, 10),
+    Status: parseInt(status, 10),
+    AppointmentSlot: parseInt(appointmentSlot, 10),
+  });
+
+  return res.data;
+};
+
+const rescheduleThyrocareOrder = async (orderId, status, others, date, slot) => {
+  // const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post('https://b2capi.thyrocare.com/apis/ORDER.svc/UpdateOrderHistory', {
+    OrderNo: `${orderId}`,
+    VisitId: `${orderId}`,
+    Status: parseInt(status, 10),
+    Others: `${others}`,
+    AppointmentDate: `${date}`,
+    AppointmentSlot: parseInt(slot, 10),
+  });
+
+  return res.data;
+};
+
 module.exports = {
   thyroLogin,
   checkPincodeAvailability,
   checkSlotsAvailability,
   postThyrocareOrder,
+  orderSummary,
+  getReport,
+  rescheduleThyrocareOrder,
+  cancelThyrocareOrder,
 };

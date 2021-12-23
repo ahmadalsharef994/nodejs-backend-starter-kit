@@ -60,10 +60,37 @@ const getAvailableTimeSlots = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', data: slots });
 });
 
+const showOrderSummary = catchAsync(async (req, res) => {
+  const summary = await thyrocareServices.orderSummary(req.body.orderId);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: summary });
+});
+
+const showReport = catchAsync(async (req, res) => {
+  const report = await thyrocareServices.getReport(req.body.leadId, req.body.userMobileNo);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: report });
+});
+
+// not supported by thyrocare
+const cancelOrder = catchAsync(async (req, res) => {
+  const { orderId, visitId, bTechId, status, appointmentSlot } = req.body;
+  const result = await thyrocareServices.cancelThyrocareOrder(orderId, visitId, bTechId, status, appointmentSlot);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+});
+
+const rescheduleOrder = catchAsync(async (req, res) => {
+  const { orderId, status, others, date, slot } = req.body;
+  const result = await thyrocareServices.rescheduleThyrocareOrder(orderId, status, others, date, slot);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+});
+
 module.exports = {
   fetchAllLabtests,
   thyrocareLogin,
   postOrderData,
   checkPincodeAvailability,
   getAvailableTimeSlots,
+  showOrderSummary,
+  showReport,
+  cancelOrder,
+  rescheduleOrder,
 };

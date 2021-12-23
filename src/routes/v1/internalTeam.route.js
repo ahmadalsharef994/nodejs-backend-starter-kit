@@ -4,7 +4,7 @@ const InternalTeamValidator = require('../../validations/internalTeam.validator'
 const InternalTeamController = require('../../controllers/internalTeam.controller');
 const authAdmin = require('../../middlewares/authAdmin');
 const deviceauth = require('../../middlewares/deviceauth');
-const LabtestController = require('../../controllers/labtest.controller');
+const labTestController = require('../../controllers/labtest.controller');
 
 const router = express.Router();
 
@@ -26,6 +26,6 @@ router.post(
   validate(InternalTeamValidator.loginadmin),
   InternalTeamController.loginadmin
 );
-router.route('/restricted/thyrocare-login').post(LabtestController.thyrocareLogin);
+router.route('/restricted/thyrocare-login').get(authAdmin(), labTestController.thyrocareLogin);
 
 module.exports = router;

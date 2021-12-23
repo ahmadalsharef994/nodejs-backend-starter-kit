@@ -21,7 +21,6 @@ const fetchAllLabtests = catchAsync(async (req, res) => {
 const thyrocareLogin = catchAsync(async (req, res) => {
   const isUpdated = await thyrocareServices.thyroLogin();
   // update credentials in db
-  // console.log(res);
   if (isUpdated) {
     return res.status(httpStatus.OK).json({ message: 'Success', data: isUpdated });
   }
@@ -29,23 +28,20 @@ const thyrocareLogin = catchAsync(async (req, res) => {
 });
 
 const postOrderData = catchAsync(async (req, res) => {
-  const orderData = await thyrocareServices.postOrder(
-    req.apiKey,
-    req.thyroAccessToken,
-    req.orderId,
-    req.userFullName,
-    req.userAge,
-    req.gender,
-    req.address,
-    req.pincode,
-    req.productCode,
-    req.userMobile,
-    req.userEmail,
-    req.userRemarks,
-    req.rateB2C,
-    req.dateTime,
-    req.hardCopyReports,
-    req.paymentType
+  const orderData = await thyrocareServices.postThyrocareOrder(
+    req.body.fullName,
+    req.body.age,
+    req.body.gender,
+    req.body.address,
+    req.body.pincode,
+    req.body.productCode,
+    req.body.mobile,
+    req.body.email,
+    req.body.additionalInstructions,
+    req.body.rateB2C,
+    req.body.dateTime,
+    req.body.hardCopyReport,
+    req.body.paymentType
   );
 
   if (orderData) {
@@ -55,12 +51,12 @@ const postOrderData = catchAsync(async (req, res) => {
 });
 
 const checkPincodeAvailability = catchAsync(async (req, res) => {
-  const isAvailable = await thyrocareServices.checkPincodeAvailability(req.apiKey, req.pincode);
+  const isAvailable = await thyrocareServices.checkPincodeAvailability(req.body.pincode);
   return res.status(httpStatus.OK).json({ message: 'Success', data: isAvailable });
 });
 
 const getAvailableTimeSlots = catchAsync(async (req, res) => {
-  const slots = await thyrocareServices.checkSlotsAvailability(req.apiKey, req.pincode, req.date);
+  const slots = await thyrocareServices.checkSlotsAvailability(req.body.pincode, req.body.date);
   return res.status(httpStatus.OK).json({ message: 'Success', data: slots });
 });
 

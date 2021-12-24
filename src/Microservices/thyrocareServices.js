@@ -1,5 +1,15 @@
+const Agenda = require('agenda');
 const axios = require('axios');
+const config = require('../config/config');
+const ThyrocareOrder = require('../models/thyrocareOrder.model');
 const Thyrotoken = require('../models/thyroToken.model');
+
+const dbURL = config.mongoose.url;
+const agenda = new Agenda({
+  db: { address: dbURL, collection: 'thyrocareCronJobs' },
+  processEvery: '30 seconds',
+  useUnifiedTopology: true,
+});
 
 const thyroLogin = async () => {
   const res = await axios.post(
@@ -24,8 +34,16 @@ const thyroLogin = async () => {
     { upsert: true, new: true }
   );
 
+  await agenda.start();
+  await agenda.every('24 hours', 'updateThyrocareApiKeys');
+
   return doc;
 };
+
+// creating a job
+agenda.define('updateThyrocareApiKeys', async () => {
+  await thyroLogin();
+});
 
 const checkPincodeAvailability = async (pincode) => {
   const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
@@ -51,6 +69,24 @@ const checkSlotsAvailability = async (pincode, date) => {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
       Date: `${date}`,
+    },
+    {
+      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
+    }
+  );
+
+  return res.data;
+};
+
+const fixAppointmentSlot = async (orderId, pincode, date) => {
+  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post(
+    'https://velso.thyrocare.cloud/api/TechsoApi/FixAppointment',
+    {
+      ApiKey: `${credentials.thyroApiKey}`,
+      VisitId: `${orderId}`,
+      Pincode: `${pincode}`,
+      AppointmentDate: `${date}`,
     },
     {
       headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
@@ -110,7 +146,8 @@ const postThyrocareOrder = async (
     }
   );
 
-  return res.data;
+  const orderDetails = await ThyrocareOrder.create(res.data);
+  return orderDetails;
 };
 
 const orderSummary = async (orderId) => {
@@ -170,6 +207,7 @@ module.exports = {
   thyroLogin,
   checkPincodeAvailability,
   checkSlotsAvailability,
+  fixAppointmentSlot,
   postThyrocareOrder,
   orderSummary,
   getReport,

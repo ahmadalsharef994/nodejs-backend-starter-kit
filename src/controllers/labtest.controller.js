@@ -60,6 +60,11 @@ const getAvailableTimeSlots = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', data: slots });
 });
 
+const fixTimeSlot = catchAsync(async (req, res) => {
+  const confirmation = await thyrocareServices.checkSlotsAvailability(req.body.pincode, req.body.date);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: confirmation });
+});
+
 const showOrderSummary = catchAsync(async (req, res) => {
   const summary = await thyrocareServices.orderSummary(req.body.orderId);
   return res.status(httpStatus.OK).json({ message: 'Success', data: summary });
@@ -89,6 +94,7 @@ module.exports = {
   postOrderData,
   checkPincodeAvailability,
   getAvailableTimeSlots,
+  fixTimeSlot,
   showOrderSummary,
   showReport,
   cancelOrder,

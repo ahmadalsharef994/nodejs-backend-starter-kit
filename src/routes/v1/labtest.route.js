@@ -18,6 +18,9 @@ router
   .route('/thyrocare/slot-availability')
   .post(authUserDoctor(), validate(labTestValidator.dateAvailability), labTestController.getAvailableTimeSlots);
 router
+  .route('/thyrocare/fix-slot')
+  .post(authUserDoctor(), validate(labTestValidator.fixSlot), labTestController.getAvailableTimeSlots);
+router
   .route('/thyrocare/order-summary')
   .post(authUserDoctor(), validate(labTestValidator.orderSummary), labTestController.showOrderSummary);
 router

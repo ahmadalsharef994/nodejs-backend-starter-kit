@@ -15,6 +15,16 @@ const dateAvailability = {
   }),
 };
 
+const fixSlot = {
+  body: Joi.object().keys({
+    orderId: Joi.string().required(),
+    pincode: Joi.number().required().min(100000).max(999999),
+    date: Joi.string()
+      .required()
+      .regex(/^\d{4}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])\s(1[012]|[0-9]):(5[0-9]|[0-4][0-9])\s(AM|PM)$/),
+  }),
+};
+
 const thyrocareOrder = {
   body: Joi.object().keys({
     fullName: Joi.string().required(),
@@ -48,6 +58,7 @@ const getMyReport = {
   }),
 };
 
+// not supported by thyrocare
 const cancelOrder = {
   body: Joi.object().keys({
     orderId: Joi.string().required(),
@@ -73,6 +84,7 @@ const rescheduleOrder = {
 module.exports = {
   PincodeAvailability,
   dateAvailability,
+  fixSlot,
   thyrocareOrder,
   orderSummary,
   getMyReport,

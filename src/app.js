@@ -1,6 +1,7 @@
 const express = require('express');
 const helmet = require('helmet');
 const xss = require('xss-clean');
+const promclient = require('prom-client');
 const mongoSanitize = require('express-mongo-sanitize');
 const compression = require('compression');
 const cors = require('cors');
@@ -68,10 +69,28 @@ app.use('/v1/auth/doctor/forgot-password', otpratelimiter);
 app.use('/v1/auth/user/forgot-password', otpratelimiter);
 // v1 api routes
 app.use('/v1', routes);
+
+// Create a registry and pull default metrics
+const register = new promclient.Registry();
+
+// Add a default label which is added to all metrics
+register.setDefaultLabels({
+  app: 'medzgo-restAPI',
+});
+
+// Enable the collection of default metrics
+promclient.collectDefaultMetrics({ register });
+
+app.get('/api-metrics', async (req, res) => {
+  res.setHeader('Content-Type', register.contentType);
+  res.send(await register.metrics());
+});
+
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found We are Monitoring It ☠️'));
 });
+
 // convert error to ApiError, if needed
 app.use(errorConverter);
 // handle error

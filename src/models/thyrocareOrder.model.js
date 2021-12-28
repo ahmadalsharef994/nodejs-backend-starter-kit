@@ -3,13 +3,8 @@ const { toJSON } = require('./plugins');
 
 const thyrocareOrderSchema = mongoose.Schema({
   orderResponseDetails: {
-    type: String,
+    type: Object,
     required: true,
-  },
-  orderId: {
-    type: String,
-    required: true,
-    index: true,
   },
   respId: {
     type: String,
@@ -22,6 +17,7 @@ const thyrocareOrderSchema = mongoose.Schema({
   orderNo: {
     type: String,
     required: true,
+    index: true,
   },
   product: {
     type: String,
@@ -74,6 +70,15 @@ const thyrocareOrderSchema = mongoose.Schema({
   fasting: {
     type: String,
     required: true,
+  },
+  qr: {
+    type: String,
+  },
+  collectionType: {
+    type: String,
+  },
+  collectionCenters: {
+    type: String,
   },
 });
 

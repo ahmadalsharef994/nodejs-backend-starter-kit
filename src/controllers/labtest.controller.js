@@ -18,6 +18,22 @@ const fetchAllLabtests = catchAsync(async (req, res) => {
   }
 });
 
+const thyrocareLabTests = catchAsync(async (req, res) => {
+  const tests = await thyrocareServices.getSavedTestProducts();
+  if (tests) {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: tests });
+  }
+  return res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
+});
+
+const updateThyrocareLabTests = catchAsync(async (req, res) => {
+  const tests = await thyrocareServices.updateTestProducts();
+  if (tests) {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: tests });
+  }
+  return res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
+});
+
 const thyrocareLogin = catchAsync(async (req, res) => {
   const isUpdated = await thyrocareServices.thyroLogin();
   // update credentials in db
@@ -61,7 +77,7 @@ const getAvailableTimeSlots = catchAsync(async (req, res) => {
 });
 
 const fixTimeSlot = catchAsync(async (req, res) => {
-  const confirmation = await thyrocareServices.checkSlotsAvailability(req.body.pincode, req.body.date);
+  const confirmation = await thyrocareServices.checkSlotsAvailability(req.body.pincode, req.body.date, req.body.orderId);
   return res.status(httpStatus.OK).json({ message: 'Success', data: confirmation });
 });
 
@@ -91,6 +107,8 @@ const rescheduleOrder = catchAsync(async (req, res) => {
 module.exports = {
   fetchAllLabtests,
   thyrocareLogin,
+  updateThyrocareLabTests,
+  thyrocareLabTests,
   postOrderData,
   checkPincodeAvailability,
   getAvailableTimeSlots,

@@ -27,5 +27,6 @@ router.post(
   InternalTeamController.loginadmin
 );
 router.route('/restricted/thyrocare-login').get(authAdmin(), labTestController.thyrocareLogin);
+router.route('/restricted/update-thyrocare-tests').get(authAdmin(), labTestController.updateThyrocareLabTests);
 
 module.exports = router;

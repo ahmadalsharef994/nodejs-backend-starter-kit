@@ -1,12 +1,15 @@
 const Agenda = require('agenda');
 const axios = require('axios');
+const fs = require('fs');
+const httpStatus = require('http-status');
 const config = require('../config/config');
+const ApiError = require('../utils/ApiError');
 const ThyrocareOrder = require('../models/thyrocareOrder.model');
 const Thyrotoken = require('../models/thyroToken.model');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
-  db: { address: dbURL, collection: 'thyrocareCronJobs' },
+  db: { address: dbURL, collection: 'thyrocarejobs' },
   processEvery: '30 seconds',
   useUnifiedTopology: true,
 });
@@ -35,14 +38,52 @@ const thyroLogin = async () => {
   );
 
   await agenda.start();
-  await agenda.every('24 hours', 'updateThyrocareApiKeys');
-
+  // await agenda.every('24 hours', 'updateThyrocareApiKeys');
+  await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
   return doc;
 };
 
 // creating a job
 agenda.define('updateThyrocareApiKeys', async () => {
   await thyroLogin();
+});
+
+const getSavedTestProducts = async () => {
+  const labtestdataBuffer = fs.readFileSync('src/Microservices/thyrocareTests.json');
+  const labtestdata = JSON.parse(labtestdataBuffer);
+  return labtestdata;
+};
+
+const updateTestProducts = async () => {
+  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post(
+    'https://velso.thyrocare.cloud/api/productsmaster/Products',
+    {
+      ApiKey: `${credentials.thyroApiKey}`,
+      ProductType: 'TEST',
+    },
+    {
+      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
+    }
+  );
+
+  const thyrocareLabTestData = JSON.stringify(res.data.master.tests);
+
+  fs.writeFile('./src/Microservices/thyrocareTests.json', thyrocareLabTestData, (err) => {
+    if (err) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Error updating thyrocareTests file');
+    }
+  });
+
+  await agenda.start();
+  // await agenda.every('24 hours', 'updateThyrocareApiKeys');
+  await agenda.schedule('tomorrow at 3am', 'updateTestData');
+  return res.data.master.tests;
+};
+
+// creating a job
+agenda.define('updateTestData', async () => {
+  await updateTestProducts();
 });
 
 const checkPincodeAvailability = async (pincode) => {
@@ -118,7 +159,7 @@ const postThyrocareOrder = async (
     'https://velso.thyrocare.cloud/api/BookingMaster/DSABooking',
     {
       ApiKey: `${credentials.thyroApiKey}`,
-      OrderId: orderId,
+      OrderId: `${orderId}`,
       Gender: `:${gender.toLowerCase()}`,
       Address: `${address}`,
       Pincode: `${pincode}`,
@@ -146,6 +187,11 @@ const postThyrocareOrder = async (
     }
   );
 
+  // change model rate type to float
+  // add extra field {userId}
+  // ref for payment methods {razorpay}
+  // status for order confirmation
+  // ledger
   const orderDetails = await ThyrocareOrder.create(res.data);
   return orderDetails;
 };
@@ -170,7 +216,7 @@ const getReport = async (leadId, userMobileNo) => {
   const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
   // [xml|pdf]
   const res = await axios.get(
-    `https://b2capi.thyrocare.com/API_BETA/order.svc/${credentials.thyroApiKey}/GETREPORTS/${leadId}/pdf/${userMobileNo}/Myreport`
+    `https://b2capi.thyrocare.com/order.svc/${credentials.thyroApiKey}/GETREPORTS/${leadId}/xml/${userMobileNo}/Myreport`
   );
   return res.data;
 };
@@ -189,6 +235,7 @@ const cancelThyrocareOrder = async (orderId, visitId, bTechId, status, appointme
   return res.data;
 };
 
+// confirm whether this service is functional
 const rescheduleThyrocareOrder = async (orderId, status, others, date, slot) => {
   // const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post('https://b2capi.thyrocare.com/apis/ORDER.svc/UpdateOrderHistory', {
@@ -205,6 +252,8 @@ const rescheduleThyrocareOrder = async (orderId, status, others, date, slot) => 
 
 module.exports = {
   thyroLogin,
+  updateTestProducts,
+  getSavedTestProducts,
   checkPincodeAvailability,
   checkSlotsAvailability,
   fixAppointmentSlot,
@@ -214,3 +263,5 @@ module.exports = {
   rescheduleThyrocareOrder,
   cancelThyrocareOrder,
 };
+
+// a confirmation to user on both email and sms for successful booking on thyrocare

@@ -51,6 +51,7 @@ agenda.define('updateThyrocareApiKeys', async () => {
 const getSavedTestProducts = async () => {
   const labtestdataBuffer = fs.readFileSync('src/Microservices/thyrocareTests.json');
   const labtestdata = JSON.parse(labtestdataBuffer);
+  // console.log('total tests: ', labtestdata.length);
   return labtestdata;
 };
 

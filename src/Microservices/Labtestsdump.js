@@ -7,7 +7,7 @@ const Labtestsdump = async () => {
 };
 
 const Labtestsdatabyid = async (labtestid) => {
-  const matchedResult = labtestdata.find((item) => item.id == labtestid);
+  const matchedResult = labtestdata.find((item) => item.id === labtestid);
   return matchedResult;
 };
 module.exports = {

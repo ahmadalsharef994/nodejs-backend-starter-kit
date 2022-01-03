@@ -82,6 +82,7 @@
     "passport-jwt": "^4.0.0",
     "path": "^0.12.7",
     "pm2": "^4.1.2",
+    "prom-client": "^14.0.1",
     "pusher": "^5.0.0",
     "randomstring": "^1.2.1",
     "request-ip": "^2.1.3",

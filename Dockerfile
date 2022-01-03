@@ -1,15 +1,7 @@
-FROM node:alpine
-
-RUN mkdir -p /usr/src/node-app && chown -R node:node /usr/src/node-app
-
-WORKDIR /usr/src/node-app
-
-COPY package.json yarn.lock ./
-
-USER node
-
-RUN yarn install --pure-lockfile
-
-COPY --chown=node:node . .
-
-EXPOSE 3000
+FROM node:10.19.0
+RUN apt-get update -y && npm install pm2 -g -y
+COPY Medzgo_RestAPI /Medzgo_RestAPI
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+RUN apt-get install net-tools -y
+ENTRYPOINT ["/entrypoint.sh"]

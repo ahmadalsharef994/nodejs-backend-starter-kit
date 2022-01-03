@@ -5,8 +5,7 @@ const _ = require('underscore');
 const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
-const ThyrocareOrder = require('../models/thyrocareOrder.model');
-const Thyrotoken = require('../models/thyroToken.model');
+const { ThyroToken, ThyrocareOrder } = require('../models');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -14,6 +13,10 @@ const agenda = new Agenda({
   processEvery: '30 seconds',
   useUnifiedTopology: true,
 });
+
+const guestBooking = async () => {
+  return true;
+};
 
 const thyroLogin = async () => {
   const res = await axios.post(
@@ -32,7 +35,7 @@ const thyroLogin = async () => {
     }
   );
 
-  const doc = await Thyrotoken.findOneAndUpdate(
+  const doc = await ThyroToken.findOneAndUpdate(
     { identifier: 'medzgo-thyrocare' },
     { thyroAccessToken: res.data.accessToken, thyroApiKey: res.data.apiKey },
     { upsert: true, new: true }
@@ -80,7 +83,7 @@ const getSavedTestProducts = async () => {
 };
 
 const updateTestProducts = async () => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     'https://velso.thyrocare.cloud/api/productsmaster/Products',
     {
@@ -112,7 +115,7 @@ agenda.define('updateTestData', async () => {
 });
 
 const checkPincodeAvailability = async (pincode) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     'https://velso.thyrocare.cloud/api/TechsoApi/PincodeAvailability',
     {
@@ -128,7 +131,7 @@ const checkPincodeAvailability = async (pincode) => {
 };
 
 const checkSlotsAvailability = async (pincode, date) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     'https://velso.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots',
     {
@@ -145,7 +148,7 @@ const checkSlotsAvailability = async (pincode, date) => {
 };
 
 const fixAppointmentSlot = async (orderId, pincode, date) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     'https://velso.thyrocare.cloud/api/TechsoApi/FixAppointment',
     {
@@ -177,7 +180,7 @@ const postThyrocareOrder = async (
   hardCopyReport,
   paymentType
 ) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const date = Date.now();
   const orderId = `MDZGX${Math.floor(Math.random() * 10)}${date.valueOf()}`;
   const res = await axios.post(
@@ -222,7 +225,7 @@ const postThyrocareOrder = async (
 };
 
 const orderSummary = async (orderId) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     'https://velso.thyrocare.cloud/api/OrderSummary/OrderSummary',
     {
@@ -238,7 +241,7 @@ const orderSummary = async (orderId) => {
 };
 
 const getReport = async (leadId, userMobileNo) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   // [xml|pdf]
   const res = await axios.get(
     `https://b2capi.thyrocare.com/order.svc/${credentials.thyroApiKey}/GETREPORTS/${leadId}/xml/${userMobileNo}/Myreport`
@@ -287,6 +290,7 @@ module.exports = {
   getReport,
   rescheduleThyrocareOrder,
   cancelThyrocareOrder,
+  guestBooking,
 };
 
 // a confirmation to user on both email and sms for successful booking on thyrocare

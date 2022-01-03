@@ -4,16 +4,16 @@ const labTestController = require('../../controllers/labtest.controller');
 const labTestValidator = require('../../validations/labTest.validation');
 // const authUserDoctor = require('../../middlewares/authUserDoctor');
 
-// all endpoints are public
 const router = express.Router();
 
+// not in use
 router.route('/').get(labTestController.fetchAllLabtests);
 
+// all endpoints are public
 router.route('/thyrocare/labtests').get(labTestController.thyrocareLabTests);
 router
   .route('/thyrocare/pincode-availability')
   .post(validate(labTestValidator.PincodeAvailability), labTestController.checkPincodeAvailability);
-
 router
   .route('/thyrocare/post-order')
   .post(/* authUserDoctor(), */ validate(labTestValidator.thyrocareOrder), labTestController.postOrderData);

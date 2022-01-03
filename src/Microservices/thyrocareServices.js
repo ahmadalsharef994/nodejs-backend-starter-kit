@@ -1,6 +1,7 @@
 const Agenda = require('agenda');
 const axios = require('axios');
 const fs = require('fs');
+const _ = require('underscore');
 const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
@@ -52,7 +53,30 @@ const getSavedTestProducts = async () => {
   const labtestdataBuffer = fs.readFileSync('src/Microservices/thyrocareTests.json');
   const labtestdata = JSON.parse(labtestdataBuffer);
   // console.log('total tests: ', labtestdata.length);
-  return labtestdata;
+
+  // filtering unique categories
+  let category = _.keys(
+    _.countBy(labtestdata, function (data) {
+      if (data.category) {
+        return data.category.toUpperCase();
+      }
+    })
+  );
+
+  // filtering for undefined values
+  category = category.filter(function (element) {
+    return element !== 'undefined';
+  });
+
+  // breaking complex categories
+  let singleCategories = category.map((e) => e.split(' '));
+
+  // generating the final result for categories
+  singleCategories = singleCategories.flat();
+
+  const unique = [...new Set(singleCategories)].sort();
+
+  return { categories: unique, tests: labtestdata };
 };
 
 const updateTestProducts = async () => {

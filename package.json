@@ -88,6 +88,7 @@
     "sharp": "^0.29.3",
     "swagger-jsdoc": "^6.0.8",
     "swagger-ui-express": "^4.1.6",
+    "underscore": "^1.13.2",
     "uuid": "^3.4.0",
     "validator": "^13.7.0",
     "winston": "^3.2.1",

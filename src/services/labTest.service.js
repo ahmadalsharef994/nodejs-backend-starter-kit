@@ -9,9 +9,13 @@ const getCartValue = async (cart) => {
   const cartDetails = [];
   let totalCartAmount = 0;
   cart.forEach((item) => {
-    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10);
+    let currentAmount = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10);
+    currentAmount = currentAmount < 300 ? currentAmount + 200 : currentAmount;
+    const homeCollectionFee = currentAmount < 300 ? 200 : 0;
+    totalCartAmount += currentAmount;
     cartDetails.push({
       rate: parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10),
+      homeCollectionFee,
       code: item.productCode,
       quantity: item.quantity,
     });
@@ -46,14 +50,14 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
 };
 
 const postpaidOrder = async (orderDetails) => {
-  const { cartDetails } = await getCartValue(orderDetails.cart);
-  const order = [];
-  let curOrder;
+  const { cartDetails, totalCartAmount } = await getCartValue(orderDetails.cart);
   for (let i = 0; i < cartDetails.length; i += 1) {
+    const currentDate = new Date();
+    const thyrocareOrderId = `MDZGX${Math.floor(Math.random() * 10)}${currentDate.valueOf()}`;
     // eslint-disable-next-line no-await-in-loop
-    curOrder = await thyrocareServices.postThyrocareOrder(
+    await thyrocareServices.postThyrocareOrder(
       orderDetails.sessionId,
-      orderDetails.orderId,
+      thyrocareOrderId,
       orderDetails.customerDetails.name,
       orderDetails.customerDetails.age,
       orderDetails.customerDetails.gender,
@@ -68,10 +72,8 @@ const postpaidOrder = async (orderDetails) => {
       'N', // hardCopyReport
       orderDetails.paymentDetails.paymentType
     );
-
-    order.push(curOrder);
   }
-  return order;
+  return { orderId: orderDetails.orderId, collectionTime: orderDetails.testDetails.preferredTestDateTime, totalCartAmount };
 };
 
 const verifyGuestOrder = async (sessionId, otp, orderId) => {

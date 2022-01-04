@@ -65,10 +65,9 @@ const showReport = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', data: report });
 });
 
-// work in progress
 const postOrderData = catchAsync(async (req, res) => {
-  const { customerDetails, testDetails, paymentDetails } = req.body;
-  const orderData = await labTestService.initiateGuestBooking(customerDetails, testDetails, paymentDetails);
+  const { customerDetails, testDetails, paymentDetails, cart } = req.body;
+  const orderData = await labTestService.initiateGuestBooking(customerDetails, testDetails, paymentDetails, cart);
   if (orderData) {
     return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
   }
@@ -77,16 +76,16 @@ const postOrderData = catchAsync(async (req, res) => {
 
 const verifyOrder = catchAsync(async (req, res) => {
   const { sessionId, otp, orderId } = req.body;
-  const resData = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
-  if (resData) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: resData });
+  const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
+  if (orderData) {
+    return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
   }
-  return res.status(httpStatus.OK).json({ message: 'Failed', error: 'order not found' });
+  return res.status(httpStatus.OK).json({ message: 'Failed', isOrderPlaced, error: 'Order Request Failed' });
 });
 
 const cartValue = catchAsync(async (req, res) => {
-  const resData = await labTestService.getCartValue(req.body.cart);
-  return res.status(httpStatus.OK).json({ message: 'Success', totalCartValue: resData });
+  const { cartDetails, totalCartAmount } = await labTestService.getCartValue(req.body.cart);
+  return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, totalCartAmount });
 });
 
 // not supported by thyrocare

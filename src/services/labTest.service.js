@@ -1,19 +1,37 @@
+const httpStatus = require('http-status');
 const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
+const ApiError = require('../utils/ApiError');
 const { GuestOrder } = require('../models');
 
 const getCartValue = async (cart) => {
   const labTests = await thyrocareServices.getSavedTestProducts();
-  let totalAmount = 0;
+  const cartDetails = [];
+  let totalCartAmount = 0;
   cart.forEach((item) => {
-    totalAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10) * item.quantity;
+    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10);
+    cartDetails.push({
+      rate: parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10),
+      code: item.productCode,
+      quantity: item.quantity,
+    });
   });
-  return totalAmount;
+
+  return { cartDetails, totalCartAmount };
 };
 
-const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails) => {
-  const date = Date.now();
-  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${date.valueOf()}`;
+const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart) => {
+  const currentDate = new Date();
+  const bookingDate = new Date(testDetails.preferredTestDateTime);
+  const timeDifference = bookingDate.getTime() - currentDate.getTime();
+  const differenceInDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
+  if (differenceInDays > 7) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'You can only book for 7 days in advance. Please select the date according to it.'
+    );
+  }
+  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${currentDate.valueOf()}`;
   const OTP = generateOTP();
   const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP);
   const guestOrder = await GuestOrder.create({
@@ -22,28 +40,37 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
     paymentDetails,
     sessionId: res.data.Details,
     orderId,
+    cart,
   });
   return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
 };
 
-const postpaidOrder = async (orderDetails, paymentAmount) => {
-  // post Order using thyrocare Order service
-  const order = await thyrocareServices.postThyrocareOrder(
-    orderDetails.orderId,
-    orderDetails.customerDetails.name,
-    orderDetails.customerDetails.age,
-    orderDetails.customerDetails.gender,
-    orderDetails.customerDetails.address,
-    orderDetails.customerDetails.pincode,
-    orderDetails.orderDetails.productCode,
-    orderDetails.customerDetails.mobile,
-    orderDetails.customerDetails.email,
-    '', // remarks
-    paymentAmount,
-    orderDetails.testDetails.preferredTestDateTime,
-    'N', // hardCopyReport
-    'POSTPAID' // payment type
-  );
+const postpaidOrder = async (orderDetails) => {
+  const { cartDetails } = await getCartValue(orderDetails.cart);
+  const order = [];
+  let curOrder;
+  for (let i = 0; i < cartDetails.length; i += 1) {
+    // eslint-disable-next-line no-await-in-loop
+    curOrder = await thyrocareServices.postThyrocareOrder(
+      orderDetails.sessionId,
+      orderDetails.orderId,
+      orderDetails.customerDetails.name,
+      orderDetails.customerDetails.age,
+      orderDetails.customerDetails.gender,
+      orderDetails.customerDetails.address,
+      orderDetails.customerDetails.pincode,
+      cartDetails[i].code,
+      orderDetails.customerDetails.mobile,
+      orderDetails.customerDetails.email,
+      '', // remarks
+      cartDetails[i].rate,
+      orderDetails.testDetails.preferredTestDateTime,
+      'N', // hardCopyReport
+      orderDetails.paymentDetails.paymentType
+    );
+
+    order.push(curOrder);
+  }
   return order;
 };
 
@@ -54,19 +81,17 @@ const verifyGuestOrder = async (sessionId, otp, orderId) => {
   } catch (e) {
     return { Status: 'Failed', Details: "OTP Didn't Matched" };
   }
-  const orderDetails = await GuestOrder.find({ sessionId, orderId });
-  if (res.data.Status === 'Success') {
+  const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
+  if (res.data.Status === 'Success' && orderDetails) {
     if (orderDetails.paymentDetails.paymentType === 'POSTPAID') {
-      const paymentAmount = await getCartValue([{ productCode: orderDetails.testDetails.productCode, quantity: 1 }]);
-
-      const orderData = await postpaidOrder(orderDetails, paymentAmount);
-      return orderData;
+      const orderData = await postpaidOrder(orderDetails);
+      return { isOrderPlaced: true, orderData };
     }
     if (orderDetails.paymentDetails.paymentType === 'PREPAID') {
-      return res.data; // order will be posted after razorpay payment
+      return { isOrderPlaced: false, orderData: res.data };
     }
   }
-  return false;
+  return { isOrderPlaced: false, orderData: null };
 };
 
 module.exports = {
@@ -92,23 +117,4 @@ const authFilter: function (req, res, next) {
       exceptions.customException(req, res, tokenMissingMessage, 403);
     }
   }
-*/
-
-/*
-// {
-//     "cart": [
-//         {
-//             "productCode": "",
-//             "quantity": ""
-//         },
-//         {
-//             "productCode": "",
-//             "quantity": ""
-//         }
-//     ]
-// }
-
-{
-    "totalAmount": ""
-}
 */

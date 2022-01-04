@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 
 const thyrocareOrderSchema = mongoose.Schema({
-  userId: {
+  sessionId: {
     type: String,
     required: true,
   },

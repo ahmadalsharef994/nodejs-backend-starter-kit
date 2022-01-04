@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON, paginate } = require('./plugins');
+const { toJSON } = require('./plugins');
 
 const GuestOrderSchema = mongoose.Schema(
   {
@@ -23,6 +23,10 @@ const GuestOrderSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    cart: {
+      type: Array,
+      required: true,
+    },
   },
   {
     timestamps: true,
@@ -31,7 +35,6 @@ const GuestOrderSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 GuestOrderSchema.plugin(toJSON);
-GuestOrderSchema.plugin(paginate);
 
 /**
  * @typedef GuestOrder

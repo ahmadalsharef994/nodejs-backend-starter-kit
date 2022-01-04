@@ -7,7 +7,7 @@ const labTestValidator = require('../../validations/labTest.validation');
 const router = express.Router();
 
 // not in use
-router.route('/').get(labTestController.fetchAllLabtests);
+// router.route('/').get(labTestController.fetchAllLabtests);
 
 // all endpoints are public
 router.route('/thyrocare/labtests').get(labTestController.thyrocareLabTests);
@@ -15,14 +15,8 @@ router
   .route('/thyrocare/pincode-availability')
   .post(validate(labTestValidator.PincodeAvailability), labTestController.checkPincodeAvailability);
 router
-  .route('/thyrocare/post-order')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.thyrocareOrder), labTestController.postOrderData);
-router
   .route('/thyrocare/slot-availability')
   .post(validate(labTestValidator.dateAvailability), labTestController.getAvailableTimeSlots);
-router
-  .route('/thyrocare/fix-slot')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.fixSlot), labTestController.getAvailableTimeSlots);
 router
   .route('/thyrocare/order-summary')
   .post(/* authUserDoctor(), */ validate(labTestValidator.orderSummary), labTestController.showOrderSummary);
@@ -30,10 +24,29 @@ router
   .route('/thyrocare/my-report')
   .post(/* authUserDoctor(), */ validate(labTestValidator.getMyReport), labTestController.showReport);
 router
-  .route('/thyrocare/reschedule-order')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.rescheduleOrder), labTestController.rescheduleOrder);
+  .route('/thyrocare/guest-order')
+  .post(/* authUserDoctor(), */ validate(labTestValidator.guestOrder), labTestController.postOrderData);
+router
+  .route('/thyrocare/verify-order')
+  .post(/* authUserDoctor(), */ validate(labTestValidator.verifyOrder), labTestController.verifyOrder);
+router
+  .route('/thyrocare/cart-value')
+  .post(/* authUserDoctor(), */ validate(labTestValidator.cartValue), labTestController.cartValue);
 
-// cancel order currently not supported by thyrocare
-// router.route('thyrocare-cancel-order').post(authUserDoctor(), validate(labTestValidator.cancelOrder), labTestController.cancelOrder);
+/* currently not supported by thyrocare */
+// router
+//   .route('/thyrocare/reschedule-order')
+//   .post(/* authUserDoctor(), */ validate(labTestValidator.rescheduleOrder), labTestController.rescheduleOrder);
+// router
+//   .route('thyrocare-cancel-order')
+//   .post(authUserDoctor(), validate(labTestValidator.cancelOrder), labTestController.cancelOrder);
+// router
+//   .route('/thyrocare/fix-slot')
+//   .post(/* authUserDoctor(), */ validate(labTestValidator.fixSlot), labTestController.fixTimeSlot);
+
+// for security reasons
+// router
+//  .route('/thyrocare/post-order')
+//  .post(authUserDoctor(), validate(labTestValidator.thyrocareOrder), labTestController.postOrderData);
 
 module.exports = router;

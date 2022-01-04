@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 
 const thyrocareOrderSchema = mongoose.Schema({
+  userId: {
+    type: String,
+    required: true,
+  },
   orderResponseDetails: {
     type: Object,
     required: true,
@@ -36,7 +40,7 @@ const thyrocareOrderSchema = mongoose.Schema({
     required: true,
   },
   customerRate: {
-    type: String,
+    type: Number,
     required: true,
   },
   bookedBy: {
@@ -52,7 +56,7 @@ const thyrocareOrderSchema = mongoose.Schema({
     required: true,
   },
   mobile: {
-    type: String,
+    type: Number,
     required: true,
   },
   address: {

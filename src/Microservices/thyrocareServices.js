@@ -5,8 +5,7 @@ const _ = require('underscore');
 const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
-const ThyrocareOrder = require('../models/thyrocareOrder.model');
-const Thyrotoken = require('../models/thyroToken.model');
+const { ThyroToken, ThyrocareOrder } = require('../models');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -17,7 +16,7 @@ const agenda = new Agenda({
 
 const thyroLogin = async () => {
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/Login/Login',
+    'https://stagingvelso.thyrocare.cloud/api/Login/Login',
     {
       username: `${process.env.THYROCARE_USERNAME}`,
       password: `${process.env.THYROCARE_PASSWD}`,
@@ -32,7 +31,7 @@ const thyroLogin = async () => {
     }
   );
 
-  const doc = await Thyrotoken.findOneAndUpdate(
+  const doc = await ThyroToken.findOneAndUpdate(
     { identifier: 'medzgo-thyrocare' },
     { thyroAccessToken: res.data.accessToken, thyroApiKey: res.data.apiKey },
     { upsert: true, new: true }
@@ -41,7 +40,7 @@ const thyroLogin = async () => {
   await agenda.start();
   // await agenda.every('24 hours', 'updateThyrocareApiKeys');
   await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
-  return doc;
+  return { 'API Response': res.data, Database: doc };
 };
 
 // creating a job
@@ -72,7 +71,18 @@ const getSavedTestProducts = async () => {
   let singleCategories = category.map((e) => e.split(' '));
 
   // generating the final result for categories
-  singleCategories = singleCategories.flat();
+  singleCategories = singleCategories.flat().sort();
+
+  // eliminate singular/plural forms for a category
+  for (let i = 0; i < singleCategories.length - 1; i += 1) {
+    if (`${singleCategories[i]}S` === singleCategories[i + 1]) {
+      singleCategories[i + 1] = undefined;
+    }
+  }
+
+  singleCategories = singleCategories.filter(function (element) {
+    return element !== undefined;
+  });
 
   const unique = [...new Set(singleCategories)].sort();
 
@@ -80,9 +90,9 @@ const getSavedTestProducts = async () => {
 };
 
 const updateTestProducts = async () => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/productsmaster/Products',
+    'https://stagingvelso.thyrocare.cloud/api/productsmaster/Products',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       ProductType: 'TEST',
@@ -92,13 +102,24 @@ const updateTestProducts = async () => {
     }
   );
 
-  const thyrocareLabTestData = JSON.stringify(res.data.master.tests);
+  try {
+    let thyrocareLabTestData = res.data.master.tests.forEach((element) => {
+      // eslint-disable-next-line no-param-reassign
+      element.rate = element.rate.b2C;
+      // eslint-disable-next-line no-param-reassign
+      delete element.margin;
+    });
 
-  fs.writeFile('./src/Microservices/thyrocareTests.json', thyrocareLabTestData, (err) => {
-    if (err) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Error updating thyrocareTests file');
-    }
-  });
+    thyrocareLabTestData = JSON.stringify(res.data.master.tests);
+
+    fs.writeFile('./src/Microservices/thyrocareTests.json', thyrocareLabTestData, (err) => {
+      if (err) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Error writing thyrocareTests file');
+      }
+    });
+  } catch (e) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Update Thyrocare LabTest Data Failed');
+  }
 
   await agenda.start();
   // await agenda.every('24 hours', 'updateThyrocareApiKeys');
@@ -112,9 +133,9 @@ agenda.define('updateTestData', async () => {
 });
 
 const checkPincodeAvailability = async (pincode) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/TechsoApi/PincodeAvailability',
+    'https://stagingvelso.thyrocare.cloud/api/TechsoApi/PincodeAvailability',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
@@ -128,9 +149,9 @@ const checkPincodeAvailability = async (pincode) => {
 };
 
 const checkSlotsAvailability = async (pincode, date) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots',
+    'https://stagingvelso.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
@@ -144,25 +165,9 @@ const checkSlotsAvailability = async (pincode, date) => {
   return res.data;
 };
 
-const fixAppointmentSlot = async (orderId, pincode, date) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
-  const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/TechsoApi/FixAppointment',
-    {
-      ApiKey: `${credentials.thyroApiKey}`,
-      VisitId: `${orderId}`,
-      Pincode: `${pincode}`,
-      AppointmentDate: `${date}`,
-    },
-    {
-      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
-    }
-  );
-
-  return res.data;
-};
-
 const postThyrocareOrder = async (
+  sessionId,
+  orderId,
   fullName,
   age,
   gender,
@@ -177,11 +182,10 @@ const postThyrocareOrder = async (
   hardCopyReport,
   paymentType
 ) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
-  const date = Date.now();
-  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${date.valueOf()}`;
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/BookingMaster/DSABooking',
+    'https://stagingvelso.thyrocare.cloud/api/BookingMaster/DSABooking',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       OrderId: `${orderId}`,
@@ -212,19 +216,18 @@ const postThyrocareOrder = async (
     }
   );
 
-  // change model rate type to float
-  // add extra field {userId}
   // ref for payment methods {razorpay}
   // status for order confirmation
   // ledger
+  res.data.sessionId = sessionId;
   const orderDetails = await ThyrocareOrder.create(res.data);
   return orderDetails;
 };
 
 const orderSummary = async (orderId) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/OrderSummary/OrderSummary',
+    'https://stagingvelso.thyrocare.cloud/api/OrderSummary/OrderSummary',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       OrderNo: `${orderId}`,
@@ -238,7 +241,7 @@ const orderSummary = async (orderId) => {
 };
 
 const getReport = async (leadId, userMobileNo) => {
-  const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   // [xml|pdf]
   const res = await axios.get(
     `https://b2capi.thyrocare.com/order.svc/${credentials.thyroApiKey}/GETREPORTS/${leadId}/xml/${userMobileNo}/Myreport`
@@ -247,6 +250,26 @@ const getReport = async (leadId, userMobileNo) => {
 };
 
 // not supported by thyrocare
+
+/*
+const fixAppointmentSlot = async (orderId, pincode, date) => {
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post(
+    'https://velso.thyrocare.cloud/api/TechsoApi/FixAppointment',
+    {
+      ApiKey: `${credentials.thyroApiKey}`,
+      VisitId: `${orderId}`,
+      Pincode: `${pincode}`,
+      AppointmentDate: `${date}`,
+    },
+    {
+      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
+    }
+  );
+
+  return res.data;
+};
+
 const cancelThyrocareOrder = async (orderId, visitId, bTechId, status, appointmentSlot) => {
   // const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post('https://b2capi.thyrocare.com/apis/ORDER.svc/cancelledorder', {
@@ -260,7 +283,6 @@ const cancelThyrocareOrder = async (orderId, visitId, bTechId, status, appointme
   return res.data;
 };
 
-// confirm whether this service is functional
 const rescheduleThyrocareOrder = async (orderId, status, others, date, slot) => {
   // const credentials = await Thyrotoken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post('https://b2capi.thyrocare.com/apis/ORDER.svc/UpdateOrderHistory', {
@@ -274,6 +296,7 @@ const rescheduleThyrocareOrder = async (orderId, status, others, date, slot) => 
 
   return res.data;
 };
+*/
 
 module.exports = {
   thyroLogin,
@@ -281,12 +304,10 @@ module.exports = {
   getSavedTestProducts,
   checkPincodeAvailability,
   checkSlotsAvailability,
-  fixAppointmentSlot,
   postThyrocareOrder,
   orderSummary,
   getReport,
-  rescheduleThyrocareOrder,
-  cancelThyrocareOrder,
+  // fixAppointmentSlot,
+  // rescheduleThyrocareOrder,
+  // cancelThyrocareOrder,
 };
-
-// a confirmation to user on both email and sms for successful booking on thyrocare

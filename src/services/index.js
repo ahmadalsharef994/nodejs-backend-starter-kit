@@ -5,6 +5,7 @@ module.exports.doctorprofileService = require('./doctorprofile.service');
 module.exports.verifiedDoctorService = require('./verifiedDoctorService');
 module.exports.internalTeamService = require('./internalteam.service');
 module.exports.documentService = require('./document.service');
+module.exports.labTestService = require('./labTest.service');
 module.exports.appointmentPreferenceService = require('./appointmentpreference.service');
 module.exports.appointmentService = require('./appointment.service');
 module.exports.chatService = require('./chat.service');

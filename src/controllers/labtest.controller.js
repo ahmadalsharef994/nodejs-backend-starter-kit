@@ -3,6 +3,7 @@ const catchAsync = require('../utils/catchAsync');
 // const Labtestsdump = require('../Microservices/Labtestsdump');
 const { thyrocareServices } = require('../Microservices');
 const { labTestService } = require('../services');
+const { emailService } = require('../Microservices');
 
 const thyrocareLogin = catchAsync(async (req, res) => {
   const isUpdated = await thyrocareServices.thyroLogin();
@@ -62,6 +63,13 @@ const verifyOrder = catchAsync(async (req, res) => {
   const { sessionId, otp, orderId } = req.body;
   const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
   if (orderData) {
+    if (isOrderPlaced) {
+      await emailService.sendLabTestOrderDetails(
+        orderData.customerDetails.email,
+        orderData.customerDetails.name,
+        orderData.orderId
+      );
+    }
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
   }
   return res.status(httpStatus.OK).json({ message: 'Failed', isOrderPlaced, error: 'Order Request Failed' });

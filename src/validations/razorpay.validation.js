@@ -1,11 +1,11 @@
 const Joi = require('joi');
 
 const cartAmout = {
-    body: Joi.object().keys({
-      amount: Joi.string().required(),
-    }),
+  body: Joi.object().keys({
+    amount: Joi.string().required(),
+  }),
 };
 
 module.exports = {
-    cartAmout
-}
+  cartAmout,
+};

@@ -5,4 +5,4 @@ module.exports.documentValidation = require('./document.validation');
 module.exports.appointmentValidation = require('./appointment.validation');
 module.exports.chatValidation = require('./chat.validation');
 module.exports.labTestValidation = require('./labTest.validation');
-module.exports.razorpayValidation = require('./razorpay.validation')
+module.exports.razorpayValidation = require('./razorpay.validation');

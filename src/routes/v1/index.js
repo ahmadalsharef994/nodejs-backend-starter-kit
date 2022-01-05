@@ -52,7 +52,7 @@ const defaultRoutes = [
   {
     path: '/razorpay',
     route: razorpayRoute,
-  }
+  },
 ];
 
 defaultRoutes.forEach((route) => {

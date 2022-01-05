@@ -4,22 +4,6 @@ const catchAsync = require('../utils/catchAsync');
 const { thyrocareServices } = require('../Microservices');
 const { labTestService } = require('../services');
 
-/*
-const fetchAllLabtests = catchAsync(async (req, res) => {
-  const dataToFind = req.query.id;
-  if (dataToFind === undefined) {
-    const labdata = await Labtestsdump.Labtestsdump();
-    res.status(httpStatus.OK).json(labdata);
-  } else {
-    const labdatabyid = await Labtestsdump.Labtestsdatabyid(dataToFind);
-    if (labdatabyid === undefined) {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'No Lab-Test Found with this ID' });
-    }
-    res.status(httpStatus.OK).json(labdatabyid);
-  }
-});
-*/
-
 const thyrocareLogin = catchAsync(async (req, res) => {
   const isUpdated = await thyrocareServices.thyroLogin();
   // update credentials in db
@@ -84,8 +68,8 @@ const verifyOrder = catchAsync(async (req, res) => {
 });
 
 const cartValue = catchAsync(async (req, res) => {
-  const { cartDetails, totalCartAmount } = await labTestService.getCartValue(req.body.cart);
-  return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, totalCartAmount });
+  const { cartDetails, homeCollectionFee, totalCartAmount } = await labTestService.getCartValue(req.body.cart);
+  return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, homeCollectionFee, totalCartAmount });
 });
 
 // not supported by thyrocare
@@ -105,6 +89,20 @@ const rescheduleOrder = catchAsync(async (req, res) => {
   const { orderId, status, others, date, slot } = req.body;
   const result = await thyrocareServices.rescheduleThyrocareOrder(orderId, status, others, date, slot);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+});
+
+const fetchAllLabtests = catchAsync(async (req, res) => {
+  const dataToFind = req.query.id;
+  if (dataToFind === undefined) {
+    const labdata = await Labtestsdump.Labtestsdump();
+    res.status(httpStatus.OK).json(labdata);
+  } else {
+    const labdatabyid = await Labtestsdump.Labtestsdatabyid(dataToFind);
+    if (labdatabyid === undefined) {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'No Lab-Test Found with this ID' });
+    }
+    res.status(httpStatus.OK).json(labdatabyid);
+  }
 });
 */
 

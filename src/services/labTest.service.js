@@ -9,19 +9,16 @@ const getCartValue = async (cart) => {
   const cartDetails = [];
   let totalCartAmount = 0;
   cart.forEach((item) => {
-    let currentAmount = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10);
-    currentAmount = currentAmount < 300 ? currentAmount + 200 : currentAmount;
-    const homeCollectionFee = currentAmount < 300 ? 200 : 0;
-    totalCartAmount += currentAmount;
+    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * item.quantity;
     cartDetails.push({
       rate: parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10),
-      homeCollectionFee,
       code: item.productCode,
       quantity: item.quantity,
     });
   });
-
-  return { cartDetails, totalCartAmount };
+  const homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+  totalCartAmount += homeCollectionFee;
+  return { cartDetails, homeCollectionFee, totalCartAmount };
 };
 
 const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart) => {
@@ -50,30 +47,41 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
 };
 
 const postpaidOrder = async (orderDetails) => {
-  const { cartDetails, totalCartAmount } = await getCartValue(orderDetails.cart);
+  const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
+  let finalProductCode = '';
+  // generating multiple order string
   for (let i = 0; i < cartDetails.length; i += 1) {
-    const currentDate = new Date();
-    const thyrocareOrderId = `MDZGX${Math.floor(Math.random() * 10)}${currentDate.valueOf()}`;
-    // eslint-disable-next-line no-await-in-loop
-    await thyrocareServices.postThyrocareOrder(
-      orderDetails.sessionId,
-      thyrocareOrderId,
-      orderDetails.customerDetails.name,
-      orderDetails.customerDetails.age,
-      orderDetails.customerDetails.gender,
-      orderDetails.customerDetails.address,
-      orderDetails.customerDetails.pincode,
-      cartDetails[i].code,
-      orderDetails.customerDetails.mobile,
-      orderDetails.customerDetails.email,
-      '', // remarks
-      cartDetails[i].rate,
-      orderDetails.testDetails.preferredTestDateTime,
-      'N', // hardCopyReport
-      orderDetails.paymentDetails.paymentType
-    );
+    finalProductCode += cartDetails[i].code;
+    finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
   }
-  return { orderId: orderDetails.orderId, collectionTime: orderDetails.testDetails.preferredTestDateTime, totalCartAmount };
+
+  const orderSummary = await thyrocareServices.postThyrocareOrder(
+    orderDetails.sessionId,
+    orderDetails.orderId,
+    orderDetails.customerDetails.name,
+    orderDetails.customerDetails.age,
+    orderDetails.customerDetails.gender,
+    orderDetails.customerDetails.address,
+    orderDetails.customerDetails.pincode,
+    finalProductCode,
+    orderDetails.customerDetails.mobile,
+    orderDetails.customerDetails.email,
+    '', // remarks
+    totalCartAmount,
+    orderDetails.testDetails.preferredTestDateTime,
+    'N', // hardCopyReport
+    'POSTPAID' // paymentType
+  );
+
+  return {
+    response: orderSummary.response,
+    orderId: orderSummary.orderNo,
+    product: orderSummary.product,
+    paymentMode: 'COD',
+    collectionTime: orderDetails.testDetails.preferredTestDateTime,
+    homeCollectionFee,
+    totalCartAmount,
+  };
 };
 
 const verifyGuestOrder = async (sessionId, otp, orderId) => {
@@ -104,7 +112,6 @@ module.exports = {
 };
 
 /*
-
 const authFilter: function (req, res, next) {
     if (_.has(req.headers, 'token')) {
       if (req.headers.token != AUTH_KEY){

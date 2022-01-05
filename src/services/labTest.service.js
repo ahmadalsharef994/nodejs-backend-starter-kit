@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const short = require('short-uuid');
 const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
 const ApiError = require('../utils/ApiError');
@@ -32,7 +33,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       'You can only book for 7 days in advance. Please select the date according to it.'
     );
   }
-  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${currentDate.valueOf()}`;
+  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
   const OTP = generateOTP();
   const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP);
   const guestOrder = await GuestOrder.create({
@@ -73,12 +74,16 @@ const postpaidOrder = async (orderDetails) => {
     'POSTPAID' // paymentType
   );
 
+  const collectionDateTime = orderDetails.testDetails.preferredTestDateTime.split(' ');
+
   return {
     response: orderSummary.response,
     orderId: orderSummary.orderNo,
     product: orderSummary.product,
+    customerDetails: orderDetails.customerDetails,
+    date: collectionDateTime[0],
+    time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
     paymentMode: 'COD',
-    collectionTime: orderDetails.testDetails.preferredTestDateTime,
     homeCollectionFee,
     totalCartAmount,
   };

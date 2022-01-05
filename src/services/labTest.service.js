@@ -9,12 +9,12 @@ const getCartValue = async (cart) => {
   const cartDetails = [];
   let totalCartAmount = 0;
   cart.forEach((item) => {
-    let currentAmount = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10);
+    let currentAmount = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10);
     currentAmount = currentAmount < 300 ? currentAmount + 200 : currentAmount;
     const homeCollectionFee = currentAmount < 300 ? 200 : 0;
     totalCartAmount += currentAmount;
     cartDetails.push({
-      rate: parseInt(labTests.tests.find((test) => test.code === item.productCode).rate.b2C, 10),
+      rate: parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10),
       homeCollectionFee,
       code: item.productCode,
       quantity: item.quantity,

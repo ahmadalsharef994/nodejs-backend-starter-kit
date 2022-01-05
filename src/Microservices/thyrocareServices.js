@@ -71,7 +71,18 @@ const getSavedTestProducts = async () => {
   let singleCategories = category.map((e) => e.split(' '));
 
   // generating the final result for categories
-  singleCategories = singleCategories.flat();
+  singleCategories = singleCategories.flat().sort();
+
+  // eliminate singular/plural forms for a category
+  for (let i = 0; i < singleCategories.length - 1; i += 1) {
+    if (`${singleCategories[i]}S` === singleCategories[i + 1]) {
+      singleCategories[i + 1] = undefined;
+    }
+  }
+
+  singleCategories = singleCategories.filter(function (element) {
+    return element !== undefined;
+  });
 
   const unique = [...new Set(singleCategories)].sort();
 
@@ -91,13 +102,24 @@ const updateTestProducts = async () => {
     }
   );
 
-  const thyrocareLabTestData = JSON.stringify(res.data.master.tests);
+  try {
+    let thyrocareLabTestData = res.data.master.tests.forEach((element) => {
+      // eslint-disable-next-line no-param-reassign
+      element.rate = element.rate.b2C;
+      // eslint-disable-next-line no-param-reassign
+      delete element.margin;
+    });
 
-  fs.writeFile('./src/Microservices/thyrocareTests.json', thyrocareLabTestData, (err) => {
-    if (err) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Error updating thyrocareTests file');
-    }
-  });
+    thyrocareLabTestData = JSON.stringify(res.data.master.tests);
+
+    fs.writeFile('./src/Microservices/thyrocareTests.json', thyrocareLabTestData, (err) => {
+      if (err) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Error writing thyrocareTests file');
+      }
+    });
+  } catch (e) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Update Thyrocare LabTest Data Failed');
+  }
 
   await agenda.start();
   // await agenda.every('24 hours', 'updateThyrocareApiKeys');

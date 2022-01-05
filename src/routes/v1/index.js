@@ -8,6 +8,7 @@ const internalTeamRoute = require('./internalTeam.route');
 const userProfileRoute = require('./userprofile.route');
 const labTestRoute = require('./labtest.route');
 const document = require('./document.route');
+const razorpayRoute = require('./razorpay.route');
 
 const router = express.Router();
 
@@ -48,6 +49,10 @@ const defaultRoutes = [
     path: '/labtest', // LabTests Route
     route: labTestRoute,
   },
+  {
+    path: '/razorpay',
+    route: razorpayRoute,
+  }
 ];
 
 defaultRoutes.forEach((route) => {

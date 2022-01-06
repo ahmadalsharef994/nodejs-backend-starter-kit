@@ -77,6 +77,21 @@ const cartValue = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, homeCollectionFee, totalCartAmount });
 });
 
+const bookPrepaidOrder = catchAsync(async (req, res) => {
+  const {orderId, sessionId} = req.body
+  const { isOrderPlaced, orderData } = await labTestService.prepaidOrder(orderId, sessionId)
+  if (orderData) {
+    if (isOrderPlaced) {
+      await emailService.sendLabTestOrderDetails(
+        orderData.customerDetails.email,
+        orderData.customerDetails.name,
+        orderData.orderId
+      );
+    }
+    return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
+  }
+  return res.status(httpStatus.OK).json({ message: 'Failed', isOrderPlaced, error: 'Order Request Failed' });
+})
 // not supported by thyrocare
 /*
 const fixTimeSlot = catchAsync(async (req, res) => {
@@ -122,6 +137,7 @@ module.exports = {
   showOrderSummary,
   showReport,
   cartValue,
+  bookPrepaidOrder
   // fixTimeSlot,
   // cancelOrder,
   // rescheduleOrder,

@@ -76,6 +76,12 @@ const cartValue = {
   }),
 };
 
+const bookPrepaidOrder = {
+  body: Joi.object().keys({
+    sessionId: Joi.string().required(),
+    orderId: Joi.string().required(),
+  }),
+};
 // not supported by thyrocare
 
 /*
@@ -140,6 +146,7 @@ module.exports = {
   guestOrder,
   verifyOrder,
   cartValue,
+  bookPrepaidOrder
   // cancelOrder,
   // rescheduleOrder,
   // fixSlot,

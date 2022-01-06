@@ -47,6 +47,53 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
 };
 
+const prepaidOrder = async (orderId, sessionId) => {
+  const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
+  if (orderDetails){
+    const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
+    let finalProductCode = '';
+    // generating multiple order string
+    for (let i = 0; i < cartDetails.length; i += 1) {
+      finalProductCode += cartDetails[i].code;
+      finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+    }
+  
+    const orderSummary = await thyrocareServices.postThyrocareOrder(
+      orderDetails.sessionId,
+      orderDetails.orderId,
+      orderDetails.customerDetails.name,
+      orderDetails.customerDetails.age,
+      orderDetails.customerDetails.gender,
+      orderDetails.customerDetails.address,
+      orderDetails.customerDetails.pincode,
+      finalProductCode,
+      orderDetails.customerDetails.mobile,
+      orderDetails.customerDetails.email,
+      '', // remarks
+      totalCartAmount,
+      orderDetails.testDetails.preferredTestDateTime,
+      'N', // hardCopyReport
+      'PREPAID' // paymentType
+    );
+  
+    const collectionDateTime = orderDetails.testDetails.preferredTestDateTime.split(' ');
+  
+    let orderData = {
+      response: orderSummary.response,
+      orderId: orderSummary.orderNo,
+      product: orderSummary.product,
+      customerDetails: orderDetails.customerDetails,
+      date: collectionDateTime[0],
+      time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
+      paymentMode: 'PREPAID',
+      homeCollectionFee,
+      totalCartAmount,
+    };
+    return { isOrderPlaced: true, orderData: orderData };
+  }
+  return { isOrderPlaced: false, orderData: null };
+};
+
 const postpaidOrder = async (orderDetails) => {
   const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
   let finalProductCode = '';
@@ -89,6 +136,7 @@ const postpaidOrder = async (orderDetails) => {
   };
 };
 
+
 const verifyGuestOrder = async (sessionId, otp, orderId) => {
   let res = '';
   try {
@@ -114,6 +162,7 @@ module.exports = {
   verifyGuestOrder,
   postpaidOrder,
   getCartValue,
+  prepaidOrder,
 };
 
 /*

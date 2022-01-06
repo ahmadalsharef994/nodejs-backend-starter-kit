@@ -32,6 +32,10 @@ router
 router
   .route('/thyrocare/cart-value')
   .post(/* authUserDoctor(), */ validate(labTestValidator.cartValue), labTestController.cartValue);
+router
+  .route('/thyrocare/bookPrepaidOrder')
+  .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder)
+
 
 /* currently not supported by thyrocare */
 // router

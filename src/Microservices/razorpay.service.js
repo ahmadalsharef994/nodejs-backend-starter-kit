@@ -9,20 +9,25 @@ const razorpay = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const calculateSHADigest = async (reqBody) => {
+const calculateSHADigest = async (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
   const secret = process.env.RAZORPAY_UAT_SECRET;
 
+  let body = razorpay_order_id + "|" + razorpay_payment_id
   const shasum = crypto.createHmac('sha256', secret);
-  shasum.update(JSON.stringify(reqBody));
-  const digest = shasum.digest('hex');
+  shasum.update(JSON.stringify(body));
+  const calculatedSHADigest = shasum.digest('hex');
 
+  if (calculatedSHADigest === razorpay_signature) {
+    // console.log('request is legit');
+    return "match"
+  }
   // console.log('calculatedSHADigest: ', digest);
-  return digest;
+  return "no_match";
 };
 
 const createRazorpayOrder = async (amount, currency) => {
   const options = {
-    amount,
+    amount: amount * 100,
     currency,
     receipt: short.generate(),
   };

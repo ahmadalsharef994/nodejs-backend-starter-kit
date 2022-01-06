@@ -64,9 +64,19 @@ const sendVerificationEmail = async (to, name, OTP) => {
   await sendEmail(userEmail, userName, subject, template, emaillink);
 };
 
+const sendLabTestOrderDetails = async (to, name, order) => {
+  const subject = 'Lab Test Booked Successfully';
+  const template = 'labTestBooking';
+  const emaillink = `${order}`;
+  const userEmail = `${to}`;
+  const userName = `${name}`;
+  await sendEmail(userEmail, userName, subject, template, emaillink);
+};
+
 module.exports = {
   transport,
   sendEmail,
   sendResetPasswordEmail,
   sendVerificationEmail,
+  sendLabTestOrderDetails,
 };

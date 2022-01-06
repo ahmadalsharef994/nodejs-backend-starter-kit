@@ -3,10 +3,13 @@ const catchAsync = require('../utils/catchAsync');
 const { razporpayPaymentServices } = require('../Microservices');
 
 const razorpayVerification = catchAsync(async (req, res) => {
-  const calculatedSHADigest = await razporpayPaymentServices.calculateSHADigest();
+  const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body.response
+  const {labTestOrderId, sessionId} = req.body
+
+  const calculatedSHADigest = await razporpayPaymentServices.calculateSHADigest(razorpay_order_id, razorpay_payment_id, razorpay_signature, labTestOrderId, sessionId);
   // console.log('x-razorpay-signature: ', req.headers['x-razorpay-signature']);
 
-  if (calculatedSHADigest === req.headers['x-razorpay-signature']) {
+  if (calculatedSHADigest === "match") {
     // console.log('request is legit');
     return res.status(httpStatus.OK).json({ message: 'OK' });
   }

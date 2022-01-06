@@ -3,21 +3,33 @@ const Razorpay = require('razorpay');
 const short = require('short-uuid');
 const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
+const { GuestOrder } = require('../models');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const calculateSHADigest = async (reqBody) => {
+const calculateSHADigest = async (razorpay_order_id, razorpay_payment_id, razorpay_signature, labTestOrderId, sessionId) => {
   const secret = process.env.RAZORPAY_UAT_SECRET;
 
+  let body = razorpay_order_id + "|" + razorpay_payment_id
   const shasum = crypto.createHmac('sha256', secret);
-  shasum.update(JSON.stringify(reqBody));
-  const digest = shasum.digest('hex');
+  shasum.update(JSON.stringify(body));
+  const calculatedSHADigest = shasum.digest('hex');
 
+  if (calculatedSHADigest === razorpay_signature) {
+    // console.log('request is legit');
+    const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
+    if (orderDetails){
+      if (orderDetails.paymentDetails.paymentType === 'PREPAID'){
+        
+      }
+    }
+    return "match"
+  }
   // console.log('calculatedSHADigest: ', digest);
-  return digest;
+  return "no_match";
 };
 
 const createRazorpayOrder = async (amount, currency) => {

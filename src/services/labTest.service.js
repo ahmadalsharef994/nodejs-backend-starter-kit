@@ -49,7 +49,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
 
 const prepaidOrder = async (orderId, sessionId) => {
   const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
-  if (orderDetails){
+  if (orderDetails) {
     const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
     let finalProductCode = '';
     // generating multiple order string
@@ -57,7 +57,7 @@ const prepaidOrder = async (orderId, sessionId) => {
       finalProductCode += cartDetails[i].code;
       finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
     }
-  
+
     const orderSummary = await thyrocareServices.postThyrocareOrder(
       orderDetails.sessionId,
       orderDetails.orderId,
@@ -75,21 +75,21 @@ const prepaidOrder = async (orderId, sessionId) => {
       'N', // hardCopyReport
       'PREPAID' // paymentType
     );
-  
+
     const collectionDateTime = orderDetails.testDetails.preferredTestDateTime.split(' ');
-  
-    let orderData = {
+
+    const orderData = {
       response: orderSummary.response,
       orderId: orderSummary.orderNo,
       product: orderSummary.product,
       customerDetails: orderDetails.customerDetails,
       date: collectionDateTime[0],
       time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
-      paymentMode: 'PREPAID',
+      paymentMode: 'PAID',
       homeCollectionFee,
       totalCartAmount,
     };
-    return { isOrderPlaced: true, orderData: orderData };
+    return { isOrderPlaced: true, orderData };
   }
   return { isOrderPlaced: false, orderData: null };
 };
@@ -135,7 +135,6 @@ const postpaidOrder = async (orderDetails) => {
     totalCartAmount,
   };
 };
-
 
 const verifyGuestOrder = async (sessionId, otp, orderId) => {
   let res = '';

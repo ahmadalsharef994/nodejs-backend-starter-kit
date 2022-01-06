@@ -3,14 +3,13 @@ const Razorpay = require('razorpay');
 const short = require('short-uuid');
 const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
-const { GuestOrder } = require('../models');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const calculateSHADigest = async (razorpay_order_id, razorpay_payment_id, razorpay_signature, labTestOrderId, sessionId) => {
+const calculateSHADigest = async (razorpay_order_id, razorpay_payment_id, razorpay_signature) => {
   const secret = process.env.RAZORPAY_UAT_SECRET;
 
   let body = razorpay_order_id + "|" + razorpay_payment_id
@@ -20,12 +19,6 @@ const calculateSHADigest = async (razorpay_order_id, razorpay_payment_id, razorp
 
   if (calculatedSHADigest === razorpay_signature) {
     // console.log('request is legit');
-    const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
-    if (orderDetails){
-      if (orderDetails.paymentDetails.paymentType === 'PREPAID'){
-        
-      }
-    }
     return "match"
   }
   // console.log('calculatedSHADigest: ', digest);
@@ -34,7 +27,7 @@ const calculateSHADigest = async (razorpay_order_id, razorpay_payment_id, razorp
 
 const createRazorpayOrder = async (amount, currency) => {
   const options = {
-    amount,
+    amount: amount * 100,
     currency,
     receipt: short.generate(),
   };

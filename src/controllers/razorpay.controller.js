@@ -4,9 +4,9 @@ const { razporpayPaymentServices } = require('../Microservices');
 
 const razorpayVerification = catchAsync(async (req, res) => {
   const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body.response
-  const {labTestOrderId, sessionId} = req.body
+  
 
-  const calculatedSHADigest = await razporpayPaymentServices.calculateSHADigest(razorpay_order_id, razorpay_payment_id, razorpay_signature, labTestOrderId, sessionId);
+  const calculatedSHADigest = await razporpayPaymentServices.calculateSHADigest(razorpay_order_id, razorpay_payment_id, razorpay_signature);
   // console.log('x-razorpay-signature: ', req.headers['x-razorpay-signature']);
 
   if (calculatedSHADigest === "match") {
@@ -17,7 +17,7 @@ const razorpayVerification = catchAsync(async (req, res) => {
 });
 
 const razorpayCreateOrder = catchAsync(async (req, res) => {
-  const { amount } = req.body;
+  let { amount } = req.body;
   const currency = 'INR';
 
   const response = await razporpayPaymentServices.createRazorpayOrder(amount, currency);

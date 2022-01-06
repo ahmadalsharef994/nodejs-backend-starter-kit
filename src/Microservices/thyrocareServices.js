@@ -220,7 +220,13 @@ const postThyrocareOrder = async (
   // status for order confirmation
   // ledger
   res.data.sessionId = sessionId;
-  const orderDetails = await ThyrocareOrder.create(res.data);
+  let orderDetails;
+  try {
+    orderDetails = await ThyrocareOrder.create(res.data);
+  } catch (e) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Order Failed');
+  }
+
   return orderDetails;
 };
 

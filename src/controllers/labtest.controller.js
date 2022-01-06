@@ -64,11 +64,8 @@ const verifyOrder = catchAsync(async (req, res) => {
   const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
   if (orderData) {
     if (isOrderPlaced) {
-      await emailService.sendLabTestOrderDetails(
-        orderData.customerDetails.email,
-        orderData.customerDetails.name,
-        orderData.orderId
-      );
+      const details = `OrderId: ${orderData.orderId} <---->Product: ${orderData.product} <----->Date: ${orderData.date} <----->Time: ${orderData.time} <----->Payment Mode: ${orderData.paymentMode} <----->Amount: ${orderData.totalCartAmount}`;
+      await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
     }
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
   }

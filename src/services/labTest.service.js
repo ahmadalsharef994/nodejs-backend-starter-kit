@@ -35,7 +35,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   }
   const orderId = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
   const OTP = generateOTP();
-  const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP);
+  const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
   const guestOrder = await GuestOrder.create({
     customerDetails,
     testDetails,

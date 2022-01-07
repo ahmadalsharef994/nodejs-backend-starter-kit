@@ -51,7 +51,7 @@ const showReport = catchAsync(async (req, res) => {
 });
 
 const postOrderData = catchAsync(async (req, res) => {
-  const { customerDetails, testDetails, paymentDetails, cart } = req.body;
+  const { customerDetails, testDetails, paymentDetails, cart } = await req.body;
   const orderData = await labTestService.initiateGuestBooking(customerDetails, testDetails, paymentDetails, cart);
   if (orderData) {
     return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
@@ -60,7 +60,7 @@ const postOrderData = catchAsync(async (req, res) => {
 });
 
 const verifyOrder = catchAsync(async (req, res) => {
-  const { sessionId, otp, orderId } = req.body;
+  const { sessionId, otp, orderId } = await req.body;
   const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
   if (orderData) {
     if (isOrderPlaced) {
@@ -77,8 +77,14 @@ const cartValue = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, homeCollectionFee, totalCartAmount });
 });
 
+const showGuestOrder = catchAsync(async (req, res) => {
+  const orderId = await req.params.orderId;
+  const orderDetails = await labTestService.getGuestOrder(orderId);
+  return res.status(httpStatus.OK).json({ message: 'Success', orderDetails });
+});
+
 const bookPrepaidOrder = catchAsync(async (req, res) => {
-  const { orderId, sessionId } = req.body;
+  const { orderId, sessionId } = await req.body;
   const { isOrderPlaced, orderData } = await labTestService.prepaidOrder(orderId, sessionId);
   if (orderData) {
     if (isOrderPlaced) {
@@ -139,6 +145,7 @@ module.exports = {
   showReport,
   cartValue,
   bookPrepaidOrder,
+  showGuestOrder,
   // fixTimeSlot,
   // cancelOrder,
   // rescheduleOrder,

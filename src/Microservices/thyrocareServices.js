@@ -38,8 +38,8 @@ const thyroLogin = async () => {
   );
 
   await agenda.start();
-  // await agenda.every('24 hours', 'updateThyrocareApiKeys');
-  await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
+  await agenda.every('24 hours', 'updateThyrocareApiKeys');
+  // await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
   return { 'API Response': res.data, Database: doc };
 };
 
@@ -122,8 +122,8 @@ const updateTestProducts = async () => {
   }
 
   await agenda.start();
-  // await agenda.every('24 hours', 'updateThyrocareApiKeys');
-  await agenda.schedule('tomorrow at 3am', 'updateTestData');
+  await agenda.every('24 hours', 'updateThyrocareApiKeys');
+  // await agenda.schedule('tomorrow at 3am', 'updateTestData');
   return res.data.master.tests;
 };
 
@@ -224,7 +224,7 @@ const postThyrocareOrder = async (
   try {
     orderDetails = await ThyrocareOrder.create(res.data);
   } catch (e) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Order Failed');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Thyrocare Order Save Failed');
   }
 
   return orderDetails;

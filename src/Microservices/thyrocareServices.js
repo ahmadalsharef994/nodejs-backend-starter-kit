@@ -16,7 +16,7 @@ const agenda = new Agenda({
 
 const thyroLogin = async () => {
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/Login/Login',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/Login/Login`,
     {
       username: `${process.env.THYROCARE_USERNAME}`,
       password: `${process.env.THYROCARE_PASSWD}`,
@@ -92,7 +92,7 @@ const getSavedTestProducts = async () => {
 const updateTestProducts = async () => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/productsmaster/Products',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/productsmaster/Products`,
     {
       ApiKey: `${credentials.thyroApiKey}`,
       ProductType: 'TEST',
@@ -135,7 +135,7 @@ agenda.define('updateTestData', async () => {
 const checkPincodeAvailability = async (pincode) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/TechsoApi/PincodeAvailability',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/TechsoApi/PincodeAvailability`,
     {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
@@ -151,7 +151,7 @@ const checkPincodeAvailability = async (pincode) => {
 const checkSlotsAvailability = async (pincode, date) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots`,
     {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
@@ -185,7 +185,7 @@ const postThyrocareOrder = async (
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
 
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/BookingMaster/DSABooking',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/BookingMaster/DSABooking`,
     {
       ApiKey: `${credentials.thyroApiKey}`,
       OrderId: `${orderId}`,
@@ -233,7 +233,7 @@ const postThyrocareOrder = async (
 const orderSummary = async (orderId) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/OrderSummary/OrderSummary',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/OrderSummary/OrderSummary`,
     {
       ApiKey: `${credentials.thyroApiKey}`,
       OrderNo: `${orderId}`,
@@ -261,7 +261,7 @@ const getReport = async (leadId, userMobileNo) => {
 const fixAppointmentSlot = async (orderId, pincode, date) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://velso.thyrocare.cloud/api/TechsoApi/FixAppointment',
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/TechsoApi/FixAppointment`,
     {
       ApiKey: `${credentials.thyroApiKey}`,
       VisitId: `${orderId}`,

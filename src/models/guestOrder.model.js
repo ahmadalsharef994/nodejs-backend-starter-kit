@@ -27,6 +27,14 @@ const GuestOrderSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
+    homeCollectionFee: {
+      type: Number,
+      default: null,
+    },
+    totalCartAmount: {
+      type: Number,
+      default: null,
+    },
   },
   {
     timestamps: true,

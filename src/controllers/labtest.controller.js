@@ -51,7 +51,7 @@ const showReport = catchAsync(async (req, res) => {
 });
 
 const postOrderData = catchAsync(async (req, res) => {
-  const { customerDetails, testDetails, paymentDetails, cart } = req.body;
+  const { customerDetails, testDetails, paymentDetails, cart } = await req.body;
   const orderData = await labTestService.initiateGuestBooking(customerDetails, testDetails, paymentDetails, cart);
   if (orderData) {
     return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
@@ -60,8 +60,32 @@ const postOrderData = catchAsync(async (req, res) => {
 });
 
 const verifyOrder = catchAsync(async (req, res) => {
-  const { sessionId, otp, orderId } = req.body;
+  const { sessionId, otp, orderId } = await req.body;
   const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
+  if (orderData) {
+    if (isOrderPlaced) {
+      const details = `OrderId: ${orderData.orderId} <---->Product: ${orderData.product} <----->Date: ${orderData.date} <----->Time: ${orderData.time} <----->Payment Mode: ${orderData.paymentMode} <----->Amount: ${orderData.totalCartAmount}`;
+      await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
+    }
+    return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
+  }
+  return res.status(httpStatus.OK).json({ message: 'Failed', isOrderPlaced, error: 'Order Request Failed' });
+});
+
+const cartValue = catchAsync(async (req, res) => {
+  const { cartDetails, homeCollectionFee, totalCartAmount } = await labTestService.getCartValue(req.body.cart);
+  return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, homeCollectionFee, totalCartAmount });
+});
+
+const showGuestOrder = catchAsync(async (req, res) => {
+  const orderId = await req.params.orderId;
+  const orderDetails = await labTestService.getGuestOrder(orderId);
+  return res.status(httpStatus.OK).json({ message: 'Success', orderDetails });
+});
+
+const bookPrepaidOrder = catchAsync(async (req, res) => {
+  const { orderId, sessionId } = await req.body;
+  const { isOrderPlaced, orderData } = await labTestService.prepaidOrder(orderId, sessionId);
   if (orderData) {
     if (isOrderPlaced) {
       await emailService.sendLabTestOrderDetails(
@@ -73,11 +97,6 @@ const verifyOrder = catchAsync(async (req, res) => {
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
   }
   return res.status(httpStatus.OK).json({ message: 'Failed', isOrderPlaced, error: 'Order Request Failed' });
-});
-
-const cartValue = catchAsync(async (req, res) => {
-  const { cartDetails, homeCollectionFee, totalCartAmount } = await labTestService.getCartValue(req.body.cart);
-  return res.status(httpStatus.OK).json({ message: 'Success', cartDetails, homeCollectionFee, totalCartAmount });
 });
 
 // not supported by thyrocare
@@ -125,6 +144,8 @@ module.exports = {
   showOrderSummary,
   showReport,
   cartValue,
+  bookPrepaidOrder,
+  showGuestOrder,
   // fixTimeSlot,
   // cancelOrder,
   // rescheduleOrder,

@@ -16,7 +16,7 @@ const agenda = new Agenda({
 
 const thyroLogin = async () => {
   const res = await axios.post(
-    'https://stagingvelso.thyrocare.cloud/api/Login/Login',
+    'https://velso.thyrocare.cloud/api/Login/Login',
     {
       username: `${process.env.THYROCARE_USERNAME}`,
       password: `${process.env.THYROCARE_PASSWD}`,
@@ -38,8 +38,8 @@ const thyroLogin = async () => {
   );
 
   await agenda.start();
-  // await agenda.every('24 hours', 'updateThyrocareApiKeys');
-  await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
+  await agenda.every('24 hours', 'updateThyrocareApiKeys');
+  // await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
   return { 'API Response': res.data, Database: doc };
 };
 
@@ -92,7 +92,7 @@ const getSavedTestProducts = async () => {
 const updateTestProducts = async () => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://stagingvelso.thyrocare.cloud/api/productsmaster/Products',
+    'https://velso.thyrocare.cloud/api/productsmaster/Products',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       ProductType: 'TEST',
@@ -122,8 +122,8 @@ const updateTestProducts = async () => {
   }
 
   await agenda.start();
-  // await agenda.every('24 hours', 'updateThyrocareApiKeys');
-  await agenda.schedule('tomorrow at 3am', 'updateTestData');
+  await agenda.every('24 hours', 'updateThyrocareApiKeys');
+  // await agenda.schedule('tomorrow at 3am', 'updateTestData');
   return res.data.master.tests;
 };
 
@@ -135,7 +135,7 @@ agenda.define('updateTestData', async () => {
 const checkPincodeAvailability = async (pincode) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://stagingvelso.thyrocare.cloud/api/TechsoApi/PincodeAvailability',
+    'https://velso.thyrocare.cloud/api/TechsoApi/PincodeAvailability',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
@@ -151,7 +151,7 @@ const checkPincodeAvailability = async (pincode) => {
 const checkSlotsAvailability = async (pincode, date) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://stagingvelso.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots',
+    'https://velso.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       Pincode: `${pincode}`,
@@ -185,7 +185,7 @@ const postThyrocareOrder = async (
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
 
   const res = await axios.post(
-    'https://stagingvelso.thyrocare.cloud/api/BookingMaster/DSABooking',
+    'https://velso.thyrocare.cloud/api/BookingMaster/DSABooking',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       OrderId: `${orderId}`,
@@ -220,14 +220,20 @@ const postThyrocareOrder = async (
   // status for order confirmation
   // ledger
   res.data.sessionId = sessionId;
-  const orderDetails = await ThyrocareOrder.create(res.data);
+  let orderDetails;
+  try {
+    orderDetails = await ThyrocareOrder.create(res.data);
+  } catch (e) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Thyrocare Order Save Failed');
+  }
+
   return orderDetails;
 };
 
 const orderSummary = async (orderId) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
-    'https://stagingvelso.thyrocare.cloud/api/OrderSummary/OrderSummary',
+    'https://velso.thyrocare.cloud/api/OrderSummary/OrderSummary',
     {
       ApiKey: `${credentials.thyroApiKey}`,
       OrderNo: `${orderId}`,

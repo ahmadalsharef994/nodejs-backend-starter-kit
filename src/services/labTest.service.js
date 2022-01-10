@@ -6,8 +6,12 @@ const ApiError = require('../utils/ApiError');
 const { GuestOrder, ThyrocareOrder } = require('../models');
 
 const getGuestOrder = async (orderID) => {
+  const orderSummary = await GuestOrder.findOne({ orderId: orderID });
+  if (orderSummary === null) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Order not found');
+  }
   const { cart, homeCollectionFee, totalCartAmount, customerDetails, testDetails, paymentDetails, orderId } =
-    await GuestOrder.findOne({ orderId: orderID });
+    await orderSummary;
   const labTests = await thyrocareServices.getSavedTestProducts();
   const products = [];
   cart.forEach((item) => {

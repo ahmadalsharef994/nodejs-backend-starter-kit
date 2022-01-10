@@ -32,9 +32,9 @@ router
 router
   .route('/thyrocare/cart-value')
   .post(/* authUserDoctor(), */ validate(labTestValidator.cartValue), labTestController.cartValue);
-router
-  .route('/thyrocare/bookPrepaidOrder')
-  .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);
+// router
+//  .route('/thyrocare/bookPrepaidOrder')
+//  .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);
 router
   .route('/thyrocare/:orderId')
   .post(/* authUserDoctor(), */ validate(labTestValidator.getGuestOrder), labTestController.showGuestOrder);

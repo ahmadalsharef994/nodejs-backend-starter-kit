@@ -52,10 +52,9 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   const timeDifference = bookingDate.getTime() - currentDate.getTime();
   const differenceInDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
   if (differenceInDays > 7) {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'You can only book for 7 days in advance. Please select the date according to it.'
-    );
+    throw new ApiError(httpStatus.BAD_REQUEST, 'You can only book for 7 days in advance.');
+  } else if (differenceInDays < 1) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "You're providing a past date for booking");
   }
   const orderId = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
   const OTP = generateOTP();

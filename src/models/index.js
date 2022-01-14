@@ -19,6 +19,7 @@ module.exports.Notification = require('./notification.model');
 module.exports.Otp = require('./otp.model');
 module.exports.DoctorPayout = require('./payout.model');
 module.exports.Prescription = require('./prescription.model');
+module.exports.RazorpayPayment = require('./razorpay.model');
 module.exports.ThyrocareOrder = require('./thyrocareOrder.model');
 module.exports.ThyroToken = require('./thyroToken.model');
 module.exports.Token = require('./token.model');

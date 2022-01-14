@@ -1,11 +1,22 @@
 const Joi = require('joi');
 
-const cartAmout = {
+const cartAmount = {
   body: Joi.object().keys({
-    amount: Joi.string().required(),
+    labTestOrderID: Joi.string().required(),
+    sessionID: Joi.string().required(),
+  }),
+};
+
+const checkout = {
+  body: Joi.object().keys({
+    orderCreationId: Joi.string().required(),
+    razorpayOrderId: Joi.string().required(),
+    razorpayPaymentId: Joi.string().required(),
+    razorpaySignature: Joi.string().required(),
   }),
 };
 
 module.exports = {
-  cartAmout,
+  cartAmount,
+  checkout,
 };

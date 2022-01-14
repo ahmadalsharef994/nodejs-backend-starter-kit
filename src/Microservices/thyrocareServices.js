@@ -6,6 +6,7 @@ const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
 const { ThyroToken, ThyrocareOrder } = require('../models');
+const logger = require('../config/logger');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -36,20 +37,84 @@ const thyroLogin = async () => {
     { thyroAccessToken: res.data.accessToken, thyroApiKey: res.data.apiKey },
     { upsert: true, new: true }
   );
-
-  await agenda.start();
-  await agenda.every('24 hours', 'updateThyrocareApiKeys');
-  // await agenda.schedule('tomorrow at 3am', 'updateThyrocareApiKeys');
+  logger.info('Thyrocare API keys updated');
   return { 'API Response': res.data, Database: doc };
 };
 
-// creating a job
-agenda.define('updateThyrocareApiKeys', async () => {
-  await thyroLogin();
+const updateTestProducts = async () => {
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post(
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/productsmaster/Products`,
+    {
+      ApiKey: `${credentials.thyroApiKey}`,
+      ProductType: 'TEST',
+    },
+    {
+      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
+    }
+  );
+
+  try {
+    let thyrocareLabTestData = res.data.master.tests.forEach((element) => {
+      // eslint-disable-next-line no-param-reassign
+      element.rate = element.rate.b2C;
+      // eslint-disable-next-line no-param-reassign
+      delete element.margin;
+    });
+
+    thyrocareLabTestData = JSON.stringify(res.data.master.tests);
+
+    fs.writeFile('./src/assets/thyrocareTests.json', thyrocareLabTestData, (err) => {
+      if (err) {
+        throw new ApiError(httpStatus.BAD_REQUEST, 'Error writing thyrocareTests file');
+      }
+    });
+  } catch (e) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Update Thyrocare LabTest Data Failed. Update Credentials');
+  }
+  logger.info('Thyrocare Labtest Dataset updated');
+  return res.data.master.tests;
+};
+
+// creating jobs for auto update
+agenda.define('updateTestDataset', async (job, done) => {
+  await updateTestProducts();
+  await job.repeatEvery('10 hours', {
+    skipImmediate: true,
+  });
+  await job.priority('high');
+  await job.save();
+  done();
 });
 
+agenda.define('updateApiKeys', async (job, done) => {
+  await thyroLogin();
+  await job.repeatEvery('8 hours', {
+    skipImmediate: true,
+  });
+  await job.priority('highest');
+  await job.save();
+  done();
+});
+
+// endpoint for initiating auto update manually
+const autoUpdateThyrocareCreds = async () => {
+  try {
+    await agenda.start();
+    await agenda.every('4 minutes', 'updateTestDataset');
+    await agenda.every('2 minutes', 'updateApiKeys');
+    logger.info('Agenda Jobs Started');
+    return true;
+  } catch (e) {
+    return false;
+  }
+};
+
+// initiating auto update
+autoUpdateThyrocareCreds();
+
 const getSavedTestProducts = async () => {
-  const labtestdataBuffer = fs.readFileSync('src/Microservices/thyrocareTests.json');
+  const labtestdataBuffer = fs.readFileSync('src/assets/thyrocareTests.json');
   const labtestdata = JSON.parse(labtestdataBuffer);
   // console.log('total tests: ', labtestdata.length);
 
@@ -88,49 +153,6 @@ const getSavedTestProducts = async () => {
 
   return { categories: unique, tests: labtestdata };
 };
-
-const updateTestProducts = async () => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
-  const res = await axios.post(
-    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/productsmaster/Products`,
-    {
-      ApiKey: `${credentials.thyroApiKey}`,
-      ProductType: 'TEST',
-    },
-    {
-      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
-    }
-  );
-
-  try {
-    let thyrocareLabTestData = res.data.master.tests.forEach((element) => {
-      // eslint-disable-next-line no-param-reassign
-      element.rate = element.rate.b2C;
-      // eslint-disable-next-line no-param-reassign
-      delete element.margin;
-    });
-
-    thyrocareLabTestData = JSON.stringify(res.data.master.tests);
-
-    fs.writeFile('./src/Microservices/thyrocareTests.json', thyrocareLabTestData, (err) => {
-      if (err) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Error writing thyrocareTests file');
-      }
-    });
-  } catch (e) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Update Thyrocare LabTest Data Failed');
-  }
-
-  await agenda.start();
-  await agenda.every('24 hours', 'updateThyrocareApiKeys');
-  // await agenda.schedule('tomorrow at 3am', 'updateTestData');
-  return res.data.master.tests;
-};
-
-// creating a job
-agenda.define('updateTestData', async () => {
-  await updateTestProducts();
-});
 
 const checkPincodeAvailability = async (pincode) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
@@ -215,19 +237,14 @@ const postThyrocareOrder = async (
       headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
     }
   );
-
-  // ref for payment methods {razorpay}
-  // status for order confirmation
-  // ledger
   res.data.sessionId = sessionId;
-  let orderDetails;
+
   try {
-    orderDetails = await ThyrocareOrder.create(res.data);
+    const orderDetails = await ThyrocareOrder.create(res.data);
+    return orderDetails;
   } catch (e) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Thyrocare Order Save Failed');
   }
-
-  return orderDetails;
 };
 
 const orderSummary = async (orderId) => {
@@ -307,6 +324,7 @@ const rescheduleThyrocareOrder = async (orderId, status, others, date, slot) => 
 module.exports = {
   thyroLogin,
   updateTestProducts,
+  autoUpdateThyrocareCreds,
   getSavedTestProducts,
   checkPincodeAvailability,
   checkSlotsAvailability,

@@ -1,9 +1,10 @@
 const httpStatus = require('http-status');
 const short = require('short-uuid');
+const fs = require('fs');
 const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
 const ApiError = require('../utils/ApiError');
-const { GuestOrder, ThyrocareOrder } = require('../models');
+const { GuestOrder, ThyrocareOrder, RazorpayPayment } = require('../models');
 
 const getGuestOrder = async (orderID) => {
   const orderSummary = await GuestOrder.findOne({ orderId: orderID });
@@ -12,15 +13,20 @@ const getGuestOrder = async (orderID) => {
   }
   const { cart, homeCollectionFee, totalCartAmount, customerDetails, testDetails, paymentDetails, orderId } =
     await orderSummary;
+
+  // getting full test name
   const labTests = await thyrocareServices.getSavedTestProducts();
   const products = [];
   cart.forEach((item) => {
     const product = labTests.tests.find((test) => test.code === item.productCode);
     products.push(product.name);
   });
+
+  // splitting date and time
   const dateTimeArr = testDetails.preferredTestDateTime.split(' ');
   const date = dateTimeArr[0];
   const time = `${dateTimeArr[1]} ${dateTimeArr[2]}`;
+
   return {
     orderId,
     customerDetails,
@@ -62,61 +68,69 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   }
   const orderId = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
   const OTP = generateOTP();
-  const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
-  const guestOrder = await GuestOrder.create({
-    customerDetails,
-    testDetails,
-    paymentDetails,
-    sessionId: res.data.Details,
-    orderId,
-    cart,
-  });
-  return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
+  try {
+    const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
+    const guestOrder = await GuestOrder.create({
+      customerDetails,
+      testDetails,
+      paymentDetails,
+      sessionId: res.data.Details,
+      orderId,
+      cart,
+    });
+    return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
+  } catch (e) {
+    return false;
+  }
 };
 
-const prepaidOrder = async (orderId, sessionId) => {
-  const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
-  if (orderDetails) {
-    const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
-    let finalProductCode = '';
-    // generating multiple order string
-    for (let i = 0; i < cartDetails.length; i += 1) {
-      finalProductCode += cartDetails[i].code;
-      finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
+  const orderDetails = await GuestOrder.findOne({ orderId: labTestOrderID });
+  const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID });
+  // console.log('---', paymentDetails);
+  if (paymentDetails) {
+    if (orderDetails && paymentDetails.isPaid === true) {
+      const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
+      let finalProductCode = '';
+      // generating multiple order string
+      for (let i = 0; i < cartDetails.length; i += 1) {
+        finalProductCode += cartDetails[i].code;
+        finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+      }
+
+      const orderSummary = await thyrocareServices.postThyrocareOrder(
+        orderDetails.sessionId,
+        orderDetails.orderId,
+        orderDetails.customerDetails.name,
+        orderDetails.customerDetails.age,
+        orderDetails.customerDetails.gender,
+        orderDetails.customerDetails.address,
+        orderDetails.customerDetails.pincode,
+        finalProductCode,
+        orderDetails.customerDetails.mobile,
+        orderDetails.customerDetails.email,
+        '', // remarks
+        totalCartAmount,
+        orderDetails.testDetails.preferredTestDateTime,
+        'N', // hardCopyReport
+        'PREPAID' // paymentType
+      );
+
+      const collectionDateTime = orderDetails.testDetails.preferredTestDateTime.split(' ');
+
+      const orderData = {
+        response: orderSummary.response,
+        orderId: orderSummary.orderNo,
+        product: orderSummary.product,
+        customerDetails: orderDetails.customerDetails,
+        date: collectionDateTime[0],
+        time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
+        paymentMode: 'PAID',
+        homeCollectionFee,
+        totalCartAmount,
+      };
+      return { isOrderPlaced: true, orderData };
     }
-
-    const orderSummary = await thyrocareServices.postThyrocareOrder(
-      orderDetails.sessionId,
-      orderDetails.orderId,
-      orderDetails.customerDetails.name,
-      orderDetails.customerDetails.age,
-      orderDetails.customerDetails.gender,
-      orderDetails.customerDetails.address,
-      orderDetails.customerDetails.pincode,
-      finalProductCode,
-      orderDetails.customerDetails.mobile,
-      orderDetails.customerDetails.email,
-      '', // remarks
-      totalCartAmount,
-      orderDetails.testDetails.preferredTestDateTime,
-      'N', // hardCopyReport
-      'PREPAID' // paymentType
-    );
-
-    const collectionDateTime = orderDetails.testDetails.preferredTestDateTime.split(' ');
-
-    const orderData = {
-      response: orderSummary.response,
-      orderId: orderSummary.orderNo,
-      product: orderSummary.product,
-      customerDetails: orderDetails.customerDetails,
-      date: collectionDateTime[0],
-      time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
-      paymentMode: 'PAID',
-      homeCollectionFee,
-      totalCartAmount,
-    };
-    return { isOrderPlaced: true, orderData };
   }
   return { isOrderPlaced: false, orderData: null };
 };
@@ -191,6 +205,48 @@ const verifyGuestOrder = async (sessionId, otp, orderId) => {
   return { isOrderPlaced: false, orderData: null };
 };
 
+const getPincodeDetails = async (pincode) => {
+  try {
+    const pincodeBuffer = fs.readFileSync('src/assets/pincode.json');
+    const allPincodes = await JSON.parse(pincodeBuffer);
+    const result = await allPincodes.find((pinData) => pinData.Pincode === parseInt(pincode, 10));
+    // console.log(allPincodes.length);  total = 39734
+    return result;
+  } catch (e) {
+    return false;
+  }
+};
+
+const getLabTestDetails = async (testCode) => {
+  try {
+    const labTestDetailsBuffer = fs.readFileSync('src/assets/labTestDetails.json');
+    const allTestDetails = await JSON.parse(labTestDetailsBuffer);
+    const result = await allTestDetails.find((test) => test['Test Code'] === testCode);
+    return result;
+  } catch (e) {
+    return false;
+  }
+};
+
+const resetGuestOtp = async (orderId) => {
+  const order = await GuestOrder.findOne({ orderId });
+  if (order === null) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Order Not Found');
+  }
+  const OTP = generateOTP();
+  try {
+    const res = await smsService.sendPhoneOtp2F(order.customerDetails.mobile, OTP, 'Booking Confirmation');
+    const updatedOrder = await GuestOrder.findOneAndUpdate(
+      { orderId },
+      { $set: { sessionId: res.data.Details } },
+      { new: true }
+    );
+    return { sessionId: updatedOrder.sessionId, orderId: updatedOrder.orderId };
+  } catch (e) {
+    return false;
+  }
+};
+
 module.exports = {
   initiateGuestBooking,
   verifyGuestOrder,
@@ -198,6 +254,9 @@ module.exports = {
   getCartValue,
   prepaidOrder,
   getGuestOrder,
+  getPincodeDetails,
+  resetGuestOtp,
+  getLabTestDetails,
 };
 
 /*

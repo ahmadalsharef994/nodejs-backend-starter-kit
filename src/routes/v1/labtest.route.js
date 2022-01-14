@@ -2,6 +2,7 @@ const express = require('express');
 const validate = require('../../middlewares/validate');
 const labTestController = require('../../controllers/labtest.controller');
 const labTestValidator = require('../../validations/labTest.validation');
+const authAdmin = require('../../middlewares/authAdmin');
 // const authUserDoctor = require('../../middlewares/authUserDoctor');
 
 const router = express.Router();
@@ -11,9 +12,13 @@ const router = express.Router();
 
 // all endpoints are public
 router.route('/thyrocare/labtests').get(labTestController.thyrocareLabTests);
+// admin endpoint
+router.route('/thyrocare/auto-update').get(authAdmin(), labTestController.startAutoUpdateCreds);
 router
   .route('/thyrocare/pincode-availability')
-  .post(validate(labTestValidator.PincodeAvailability), labTestController.checkPincodeAvailability);
+  .post(validate(labTestValidator.pincode), labTestController.checkPincodeAvailability);
+router.route('/thyrocare/pincode-details').post(validate(labTestValidator.pincode), labTestController.showPincodeDetails);
+router.route('/thyrocare/test-details').post(validate(labTestValidator.testCode), labTestController.showTestDetails);
 router
   .route('/thyrocare/slot-availability')
   .post(validate(labTestValidator.dateAvailability), labTestController.getAvailableTimeSlots);
@@ -27,14 +32,17 @@ router
   .route('/thyrocare/guest-order')
   .post(/* authUserDoctor(), */ validate(labTestValidator.guestOrder), labTestController.postOrderData);
 router
+  .route('/thyrocare/resend-guestotp')
+  .post(/* authUserDoctor(), */ validate(labTestValidator.resendGuestOtp), labTestController.resendGuestOtp);
+router
   .route('/thyrocare/verify-order')
   .post(/* authUserDoctor(), */ validate(labTestValidator.verifyOrder), labTestController.verifyOrder);
 router
   .route('/thyrocare/cart-value')
   .post(/* authUserDoctor(), */ validate(labTestValidator.cartValue), labTestController.cartValue);
-// router
-//  .route('/thyrocare/bookPrepaidOrder')
-//  .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);
+router
+  .route('/thyrocare/bookPrepaidOrder')
+  .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);
 router
   .route('/thyrocare/:orderId')
   .post(/* authUserDoctor(), */ validate(labTestValidator.getGuestOrder), labTestController.showGuestOrder);
@@ -49,10 +57,5 @@ router
 // router
 //   .route('/thyrocare/fix-slot')
 //   .post(/* authUserDoctor(), */ validate(labTestValidator.fixSlot), labTestController.fixTimeSlot);
-
-// for security reasons
-// router
-//  .route('/thyrocare/post-order')
-//  .post(authUserDoctor(), validate(labTestValidator.thyrocareOrder), labTestController.postOrderData);
 
 module.exports = router;

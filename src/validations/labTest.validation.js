@@ -1,6 +1,6 @@
 const Joi = require('joi').extend(require('@joi/date'));
 
-const PincodeAvailability = {
+const pincode = {
   body: Joi.object().keys({
     pincode: Joi.number().required().min(100000).max(999999),
   }),
@@ -78,13 +78,25 @@ const cartValue = {
 
 const bookPrepaidOrder = {
   body: Joi.object().keys({
-    sessionId: Joi.string().required(),
-    orderId: Joi.string().required(),
+    razorpayOrderID: Joi.string().required(),
+    labTestOrderID: Joi.string().required(),
   }),
 };
 
 const getGuestOrder = {
   params: Joi.object().keys({ orderId: Joi.string().required() }),
+};
+
+const resendGuestOtp = {
+  body: Joi.object().keys({
+    orderId: Joi.string().required(),
+  }),
+};
+
+const testCode = {
+  body: Joi.object().keys({
+    testCode: Joi.string().required(),
+  }),
 };
 
 // not supported by thyrocare
@@ -144,7 +156,7 @@ const rescheduleOrder = {
 */
 
 module.exports = {
-  PincodeAvailability,
+  pincode,
   dateAvailability,
   orderSummary,
   getMyReport,
@@ -153,6 +165,8 @@ module.exports = {
   cartValue,
   bookPrepaidOrder,
   getGuestOrder,
+  resendGuestOtp,
+  testCode,
   // cancelOrder,
   // rescheduleOrder,
   // fixSlot,

@@ -5,6 +5,14 @@ const { thyrocareServices } = require('../Microservices');
 const { labTestService } = require('../services');
 const { emailService } = require('../Microservices');
 
+const startAutoUpdateCreds = catchAsync(async (req, res) => {
+  const result = await thyrocareServices.autoUpdateThyrocareCreds();
+  if (result) {
+    return res.status(httpStatus.OK).json({ message: 'Success' });
+  }
+  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed' });
+});
+
 const thyrocareLogin = catchAsync(async (req, res) => {
   const isUpdated = await thyrocareServices.thyroLogin();
   // update credentials in db
@@ -33,6 +41,22 @@ const updateThyrocareLabTests = catchAsync(async (req, res) => {
 const checkPincodeAvailability = catchAsync(async (req, res) => {
   const isAvailable = await thyrocareServices.checkPincodeAvailability(req.body.pincode);
   return res.status(httpStatus.OK).json({ message: 'Success', data: isAvailable });
+});
+
+const showPincodeDetails = catchAsync(async (req, res) => {
+  const pincodeDetails = await labTestService.getPincodeDetails(req.body.pincode);
+  if (pincodeDetails) {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: pincodeDetails });
+  }
+  return res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
+});
+
+const showTestDetails = catchAsync(async (req, res) => {
+  const testDetails = await labTestService.getLabTestDetails(req.body.testCode);
+  if (testDetails) {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: testDetails });
+  }
+  return res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
 });
 
 const getAvailableTimeSlots = catchAsync(async (req, res) => {
@@ -83,16 +107,21 @@ const showGuestOrder = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', orderDetails });
 });
 
+const resendGuestOtp = catchAsync(async (req, res) => {
+  const orderData = await labTestService.resetGuestOtp(req.body.orderId);
+  if (orderData) {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+  }
+  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed', data: [] });
+});
+
 const bookPrepaidOrder = catchAsync(async (req, res) => {
-  const { orderId, sessionId } = await req.body;
-  const { isOrderPlaced, orderData } = await labTestService.prepaidOrder(orderId, sessionId);
+  const { razorpayOrderID, labTestOrderID } = await req.body;
+  const { isOrderPlaced, orderData } = await labTestService.prepaidOrder(razorpayOrderID, labTestOrderID);
   if (orderData) {
     if (isOrderPlaced) {
-      await emailService.sendLabTestOrderDetails(
-        orderData.customerDetails.email,
-        orderData.customerDetails.name,
-        orderData.orderId
-      );
+      const details = `OrderId: ${orderData.orderId} <---->Product: ${orderData.product} <----->Date: ${orderData.date} <----->Time: ${orderData.time} <----->Payment Mode: ${orderData.paymentMode} <----->Amount: ${orderData.totalCartAmount}`;
+      await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
     }
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
   }
@@ -134,18 +163,22 @@ const fetchAllLabtests = catchAsync(async (req, res) => {
 */
 
 module.exports = {
+  startAutoUpdateCreds,
   thyrocareLogin,
   updateThyrocareLabTests,
   thyrocareLabTests,
   postOrderData,
   verifyOrder,
   checkPincodeAvailability,
+  showPincodeDetails,
   getAvailableTimeSlots,
   showOrderSummary,
   showReport,
   cartValue,
   bookPrepaidOrder,
   showGuestOrder,
+  resendGuestOtp,
+  showTestDetails,
   // fixTimeSlot,
   // cancelOrder,
   // rescheduleOrder,

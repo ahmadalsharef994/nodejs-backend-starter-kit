@@ -1,15 +1,17 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { razporpayPaymentServices } = require('../Microservices');
+const { razorpayPaymentServices } = require('../Microservices');
 
 const razorpayVerification = catchAsync(async (req, res) => {
-  const {razorpay_order_id, razorpay_payment_id, razorpay_signature} = req.body.response
-  
-
-  const calculatedSHADigest = await razporpayPaymentServices.calculateSHADigest(razorpay_order_id, razorpay_payment_id, razorpay_signature);
+  const calculatedSHADigest = await razorpayPaymentServices.calculateSHADigest(
+    req.body.orderCreationId,
+    req.body.razorpayOrderId,
+    req.body.razorpayPaymentId,
+    req.body.razorpaySignature
+  );
   // console.log('x-razorpay-signature: ', req.headers['x-razorpay-signature']);
 
-  if (calculatedSHADigest === "match") {
+  if (calculatedSHADigest === 'match') {
     // console.log('request is legit');
     return res.status(httpStatus.OK).json({ message: 'OK' });
   }
@@ -17,10 +19,10 @@ const razorpayVerification = catchAsync(async (req, res) => {
 });
 
 const razorpayCreateOrder = catchAsync(async (req, res) => {
-  let { amount } = req.body;
-  const currency = 'INR';
+  const { labTestOrderID, sessionID } = req.body;
 
-  const response = await razporpayPaymentServices.createRazorpayOrder(amount, currency);
+  const currency = 'INR';
+  const response = await razorpayPaymentServices.createRazorpayOrder(currency, labTestOrderID, sessionID);
   res.status(httpStatus.OK).json({
     id: response.id,
     currency: response.currency,

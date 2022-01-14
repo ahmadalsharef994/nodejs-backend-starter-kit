@@ -2,39 +2,54 @@ const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const short = require('short-uuid');
 const httpStatus = require('http-status');
+// const { compareSync } = require('bcryptjs');
 const ApiError = require('../utils/ApiError');
+const { RazorpayPayment, GuestOrder } = require('../models');
+const { getCartValue } = require('../services/labTest.service');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-const calculateSHADigest = async (razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
-  const secret = process.env.RAZORPAY_UAT_SECRET;
-
-  const body = `${razorpayOrderId}|${razorpayPaymentId}`;
-  const shasum = crypto.createHmac('sha256', secret);
-  shasum.update(JSON.stringify(body));
+const calculateSHADigest = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
+  const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+  shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
   const calculatedSHADigest = shasum.digest('hex');
 
   if (calculatedSHADigest === razorpaySignature) {
     // console.log('request is legit');
+    await RazorpayPayment.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } }, { new: true });
     return 'match';
   }
   // console.log('calculatedSHADigest: ', digest);
   return 'no_match';
 };
 
-const createRazorpayOrder = async (amount, currency) => {
+const createRazorpayOrder = async (currency, labTestOrderID, sessionID) => {
+  const labTestObject = await GuestOrder.findOne({ orderId: labTestOrderID });
+  const cartObject = await getCartValue(labTestObject.cart);
+  const orderAmount = cartObject.totalCartAmount;
+
   const options = {
-    amount: amount * 100,
+    amount: orderAmount * 100,
     currency,
     receipt: short.generate(),
   };
 
   try {
     const response = await razorpay.orders.create(options);
-    // console.log('razorpayResponse: ', response); // response shown
+    response.amount /= 100;
+
+    const razorpayOrderID = response.id;
+    await RazorpayPayment.create({
+      razorpayOrderID,
+      labTestOrderID,
+      amount: orderAmount,
+      currency,
+      sessionID,
+    });
+
     return response;
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND);

@@ -86,7 +86,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
 
 const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
   const orderDetails = await GuestOrder.findOne({ orderId: labTestOrderID });
-  const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID });
+  const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID, labTestOrderID });
   // console.log('---', paymentDetails);
   if (paymentDetails) {
     if (orderDetails && paymentDetails.isPaid === true) {

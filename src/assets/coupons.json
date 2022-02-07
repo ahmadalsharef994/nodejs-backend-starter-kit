@@ -1,0 +1,42 @@
+[
+{
+    "code": "NEWUSER",
+    "offerTitle": "Some title 1",
+    "color": "blue/HexCode",
+    "isValidOnce": true,
+    "discountPercent": null,
+    "discountFlat": 300,
+    "expiresOn": null,
+    "description": "Flat INR 300/- Discount on Consultation"
+},
+{
+    "code": "MEDZLUV",
+    "offerTitle": "Some title 2",
+    "color": "green/HexCode",
+    "isValidOnce": false,
+    "discountPercent": 50,
+    "discountFlat": null,
+    "expiresOn": "2022-02-28T18:30:00.000Z",
+    "description": "50% off on Health packages booking and lab test booking"
+},
+{
+    "code": "DIABETIC30",
+    "offerTitle": "Some title 3",
+    "color": "yellow/HexCode",
+    "isValidOnce": false,
+    "discountPercent": 60,
+    "discountFlat": null,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "description": "60% off on all lab test booking"
+},
+{
+    "code": "MEDZLAB",
+    "offerTitle": "Some title 4",
+    "color": "pink/HexCode",
+    "isValidOnce": false,
+    "discountPercent": 60,
+    "discountFlat": null,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "description": "60% off on all lab test booking"
+}
+]

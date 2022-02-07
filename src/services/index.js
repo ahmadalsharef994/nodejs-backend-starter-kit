@@ -12,3 +12,4 @@ module.exports.userAppointmentService = require('./userAppointment.service');
 module.exports.chatService = require('./chat.service');
 module.exports.userProfile = require('./userprofile.service');
 module.exports.verifiedUserService = require('./verifiedUser.service');
+module.exports.couponService = require('./coupon.service');

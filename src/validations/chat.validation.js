@@ -3,7 +3,7 @@ const { objectId } = require('./custom.validation');
 
 const getChat = {
   params: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId),
+    appointmentId: Joi.string().custom(objectId).required(),
   }),
 };
 

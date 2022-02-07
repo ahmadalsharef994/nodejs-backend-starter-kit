@@ -16,7 +16,15 @@ const userMemberSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    Dob: {
+    mobile: {
+      type: Number,
+      required: true,
+    },
+    email: {
+      type: String,
+      default: null,
+    },
+    dob: {
       type: Date,
       required: true,
     },

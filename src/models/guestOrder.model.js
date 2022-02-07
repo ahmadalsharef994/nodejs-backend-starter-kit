@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 
 const GuestOrderSchema = mongoose.Schema(
   {
@@ -43,6 +43,7 @@ const GuestOrderSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 GuestOrderSchema.plugin(toJSON);
+GuestOrderSchema.plugin(paginate);
 
 /**
  * @typedef GuestOrder

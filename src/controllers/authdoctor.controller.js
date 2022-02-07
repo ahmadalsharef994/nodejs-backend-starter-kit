@@ -118,10 +118,10 @@ const forgotPassword = catchAsync(async (req, res) => {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this email please provide correct email');
     }
     await emailService.sendResetPasswordEmail(req.body.email, AuthData.fullname, OTP);
-    await otpServices.sendresetpassotp(OTP, AuthData);
+    await otpServices.sendResetPassOtp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({
-      message: 'Reset Code Sent to Registered EmailID',
+      message: 'Reset Code Sent to Registered Email ID',
       challenge: challenge.challenge,
       optionalchallenge: challenge.optionalChallenge,
     });
@@ -131,11 +131,11 @@ const forgotPassword = catchAsync(async (req, res) => {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
     }
     const response2F = await smsService.sendPhoneOtp2F(req.body.phone, OTP);
-    const dbresponse = await otpServices.sendresetpassotp(OTP, AuthData);
+    const dbresponse = await otpServices.sendResetPassOtp(OTP, AuthData);
     const challenge = await getOnboardingChallenge(AuthData);
     if (response2F && dbresponse) {
       res.status(httpStatus.OK).json({
-        message: 'Reset Code Sent to Registered PhoneNumber',
+        message: 'Reset Code Sent to Registered Phone Number',
         challenge: challenge.challenge,
         optionalchallenge: challenge.optionalChallenge,
       });
@@ -144,8 +144,15 @@ const forgotPassword = catchAsync(async (req, res) => {
 });
 
 const resetPassword = catchAsync(async (req, res) => {
-  await authService.resetPassword(req.body.email, req.body.resetcode, req.body.newPassword);
-  const AuthData = await authService.getAuthByEmail(req.body.email);
+  const service = req.body.choice;
+  let AuthData;
+  if (service === 'email') {
+    AuthData = await authService.getAuthByEmail(req.body.email);
+    await authService.resetPassword(AuthData.email, req.body.resetcode, req.body.newPassword);
+  } else if (service === 'phone') {
+    AuthData = await authService.getAuthByPhone(req.body.phone);
+    await authService.resetPassword(AuthData.email, req.body.resetcode, req.body.newPassword);
+  }
   const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({
     message: 'Password Reset Successful',
@@ -158,8 +165,8 @@ const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const OTP = generateOTP();
   await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
-  await otpServices.sendemailverifyotp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'Email Verification Link Sent', challenge: 'AUTH_EMAILVERIFY' });
+  await otpServices.sendEmailVerifyOtp(OTP, AuthData);
+  res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent', challenge: 'AUTH_EMAILVERIFY' });
 });
 
 const changeEmail = catchAsync(async (req, res) => {
@@ -201,8 +208,8 @@ const changePhone = catchAsync(async (req, res) => {
 });
 
 const verifyEmail = catchAsync(async (req, res) => {
-  // const AuthData = await authService.getAuthByEmail(req.body.emailcode);
-  const verifystatus = await otpServices.verifyEmailOtp(req.body.emailcode);
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const verifystatus = await otpServices.verifyEmailOtp(req.body.emailcode, AuthData);
   const AuthDataUpdated = await authService.getAuthById(verifystatus.auth);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res
@@ -213,7 +220,7 @@ const verifyEmail = catchAsync(async (req, res) => {
 const requestOtp = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const OTP = generateOTP();
-  await otpServices.sendphoneverifyotp(OTP, AuthData);
+  await otpServices.sendPhoneVerifyOtp(OTP, AuthData);
   const AuthDataUpdated = await authService.getAuthById(req.SubjectId);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res.status(httpStatus.OK).json({

@@ -198,8 +198,8 @@ const addConsultationfee = catchAsync(async (req, res) => {
 
 const notifications = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const notificationsData = await doctorprofileService.notifications(req.body, AuthData);
-  if (notificationsData !== false) {
+  const notificationsData = await doctorprofileService.notificationSettings(req.body, AuthData);
+  if (notificationsData) {
     res.status(httpStatus.CREATED).json({ notificationsData });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });

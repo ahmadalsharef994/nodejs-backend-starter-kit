@@ -219,7 +219,9 @@ const addConsultationfee = {
 
 const notifications = {
   body: Joi.object().keys({
-    appointmentNotification: Joi.boolean().required(),
+    appNotifications: Joi.boolean().required(),
+    promotionalEmails: Joi.boolean().required(),
+    offersAndDiscounts: Joi.boolean().required(),
   }),
 };
 

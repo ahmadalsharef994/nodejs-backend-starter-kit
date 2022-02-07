@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 
 const thyrocareOrderSchema = mongoose.Schema({
   sessionId: {
@@ -70,6 +70,7 @@ const thyrocareOrderSchema = mongoose.Schema({
 
 // add plugin that converts mongoose to json
 thyrocareOrderSchema.plugin(toJSON);
+thyrocareOrderSchema.plugin(paginate);
 
 /**
  * @typedef ThyrocareOrder

@@ -1,14 +1,35 @@
 const Joi = require('joi');
-const { password } = require('./custom.validation');
+const { password, objectId } = require('./custom.validation');
+
+const createUser = {
+  body: Joi.object().keys({
+    mobile: Joi.number().required().min(1000000000).max(9999999999),
+  }),
+};
+
+const resendCreateUserOtp = {
+  body: Joi.object().keys({
+    mobile: Joi.number().required().min(1000000000).max(9999999999),
+  }),
+};
+
+const verifyCreatedUser = {
+  body: Joi.object().keys({
+    userId: Joi.string().custom(objectId).required(),
+    otp: Joi.number().required().min(100000).max(999999),
+  }),
+};
 
 const registeruser = {
   body: Joi.object().keys({
+    userId: Joi.string().custom(objectId).required(),
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
     fullname: Joi.string().required(),
-    isdcode: Joi.required().valid('91', '1'),
-    mobile: Joi.number().required(),
     role: Joi.valid('user'),
+    gender: Joi.string().valid('male', 'female', 'other').required(),
+    dob: Joi.date().required(),
+    pincode: Joi.number().required().min(100000).max(999999),
   }),
 };
 
@@ -27,9 +48,9 @@ const logout = {
 
 const changepassword = {
   body: Joi.object().keys({
-    oldpassword: Joi.string().required(),
-    newpassword: Joi.string().required(),
-    newconfirmpassword: Joi.string().required().valid(Joi.ref('newpassword')),
+    oldPassword: Joi.string().required(),
+    newPassword: Joi.string().required(),
+    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
 };
 
@@ -37,16 +58,18 @@ const forgotPassword = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
   }),
 };
 
 const resetPassword = {
   body: Joi.object().keys({
-    email: Joi.string().email().required(),
+    choice: Joi.string().required().valid('email', 'phone'),
+    email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
     resetcode: Joi.number().required(),
-    newpassword: Joi.string().required().custom(password),
-    newconfirmpassword: Joi.string().required().valid(Joi.ref('newpassword')),
+    newPassword: Joi.string().required().custom(password),
+    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
 };
 
@@ -69,6 +92,9 @@ const verifyforget = {
 };
 
 module.exports = {
+  createUser,
+  resendCreateUserOtp,
+  verifyCreatedUser,
   registeruser,
   login,
   logout,

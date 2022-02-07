@@ -77,9 +77,9 @@ const updateTestProducts = async () => {
 };
 
 // creating jobs for auto update
-agenda.define('updateTestDataset', async (job, done) => {
+agenda.define('updateTestDatasetx1', async (job, done) => {
   await updateTestProducts();
-  await job.repeatEvery('10 hours', {
+  await job.repeatEvery('3 hours', {
     skipImmediate: true,
   });
   await job.priority('high');
@@ -87,9 +87,9 @@ agenda.define('updateTestDataset', async (job, done) => {
   done();
 });
 
-agenda.define('updateApiKeys', async (job, done) => {
+agenda.define('updateApiKeysx1', async (job, done) => {
   await thyroLogin();
-  await job.repeatEvery('8 hours', {
+  await job.repeatEvery('30 minutes', {
     skipImmediate: true,
   });
   await job.priority('highest');

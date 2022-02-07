@@ -115,10 +115,14 @@ const addConsultationfee = async (consultationfeeDoc) => {
   return false;
 };
 
-const notifications = async (notificationsDoc) => {
-  const DoctorNotifications = await Notification.create(notificationsDoc);
-  if (DoctorNotifications) {
-    return { message: 'notification option added sucessfully', DoctorNotifications };
+const notificationSettings = async (notifications, auth) => {
+  const notificationDoc = await Notification.findOneAndUpdate(
+    { auth },
+    { $set: { ...notifications, auth } },
+    { upsert: true, new: true }
+  );
+  if (notificationDoc) {
+    return { message: 'Notification Options Updated!', notificationDoc };
   }
   return false;
 };
@@ -137,5 +141,5 @@ module.exports = {
   fetchpayoutsdetails,
   submitpayoutsdetails,
   addConsultationfee,
-  notifications,
+  notificationSettings,
 };

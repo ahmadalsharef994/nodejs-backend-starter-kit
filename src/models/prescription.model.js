@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const Appointment = require('./auth.model');
 
 const PrescriptionSchema = mongoose.Schema(
@@ -38,6 +38,8 @@ const PrescriptionSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 PrescriptionSchema.plugin(toJSON);
+PrescriptionSchema.plugin(paginate);
+
 /**
  * @typedef Prescription
  */

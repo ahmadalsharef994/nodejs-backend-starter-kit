@@ -12,9 +12,13 @@ const UserBasicSchema = mongoose.Schema(
       type: Date,
       required: true,
     },
+    pincode: {
+      type: Number,
+      default: null,
+    },
     languages: {
       type: Array,
-      require: true,
+      default: null,
     },
     avatar: {
       type: String,

@@ -81,7 +81,7 @@ const assignFollowup = catchAsync(async (req, res) => {
 });
 
 const showFollowUpsById = catchAsync(async (req, res) => {
-  appointmentService.getFollowupsById(req.params.appointmentId).then((result) => {
+  await appointmentService.getFollowupsById(req.params.appointmentId).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
     }
@@ -90,7 +90,7 @@ const showFollowUpsById = catchAsync(async (req, res) => {
 });
 
 const showAvailableFollowUps = catchAsync(async (req, res) => {
-  appointmentService.getAvailableFollowUpSlots(req.Docid).then((result) => {
+  await appointmentService.getAvailableFollowUpSlots(req.Docid).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
     }
@@ -99,13 +99,12 @@ const showAvailableFollowUps = catchAsync(async (req, res) => {
 });
 
 const showAvailableAppointments = catchAsync(async (req, res) => {
-  appointmentService.getAvailableAppointmentSlots(req.body.docId).then((result) => {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
-  });
+  const result = await appointmentService.getAvailableAppointmentSlots(req.body.docId);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
 
 const showUpcomingAppointments = catchAsync(async (req, res) => {
-  appointmentService.getUpcomingAppointments(req.Docid, req.query.limit).then((result) => {
+  await appointmentService.getUpcomingAppointments(req.Docid, req.query.limit).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
     }

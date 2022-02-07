@@ -2,13 +2,11 @@ const express = require('express');
 const validate = require('../../middlewares/validate');
 const { profilePhotoUpload } = require('../../Microservices');
 const DoctorProfileValidator = require('../../validations/DoctorProfile.validation');
-const appointmentValidator = require('../../validations/appointment.validation');
 const DoctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
 const preferenceValidator = require('../../validations/appointmentpreference.validation');
-const appointmentController = require('../../controllers/appointment.controller');
 
 const router = express.Router();
 
@@ -107,7 +105,7 @@ router.post(
   DoctorProfileController.addConsultationfee
 );
 router.post(
-  '/notification',
+  '/notifications',
   authdoctorverified(),
   validate(DoctorProfileValidator.notifications),
   DoctorProfileController.notifications

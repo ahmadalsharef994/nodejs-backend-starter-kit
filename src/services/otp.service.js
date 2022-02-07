@@ -12,33 +12,33 @@ const initiateOTPData = async (user) => {
   throw new ApiError(400, 'Something went Wrong!');
 };
 
-const sendresetpassotp = async (OTP, user) => {
+const sendResetPassOtp = async (OTP, user) => {
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
     const OtpDoc = await Otp.updateOne(
       { _id: authDataExist._id },
-      { $set: { resetPasswordOtpVerify: OTP, resetPasswordOtpTimestamp: new Date() } }
+      { $set: { resetPasswordOtp: OTP, resetPasswordOtpTimestamp: new Date() } }
     );
     return OtpDoc;
   }
-  const OtpDoc = await Otp.create({ resetPasswordOtpVerify: OTP, auth: user, resetPasswordOtpTimestamp: new Date() });
+  const OtpDoc = await Otp.create({ resetPasswordOtp: OTP, auth: user, resetPasswordOtpTimestamp: new Date() });
   return OtpDoc;
 };
 
-const sendemailverifyotp = async (OTP, user) => {
+const sendEmailVerifyOtp = async (OTP, user) => {
   const authDataExist = await Otp.findOne({ auth: user });
   if (authDataExist) {
     const OtpDoc = await Otp.updateOne(
       { _id: authDataExist._id },
-      { $set: { emailOtpVerify: OTP, emailOtpTimestamp: new Date() } }
+      { $set: { emailOtp: OTP, emailOtpTimestamp: new Date() } }
     );
     return OtpDoc;
   }
-  const OtpDoc = await Otp.create({ emailOtpVerify: OTP, auth: user, emailOtpTimestamp: new Date() });
+  const OtpDoc = await Otp.create({ emailOtp: OTP, auth: user, emailOtpTimestamp: new Date() });
   return OtpDoc;
 };
 
-const sendphoneverifyotp = async (OTP, user) => {
+const sendPhoneVerifyOtp = async (OTP, user) => {
   const response2F = await smsService.sendPhoneOtp2F(user.mobile, OTP);
   if (response2F.data.Status !== 'Success') {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Request Phone OTP Failed');
@@ -47,16 +47,16 @@ const sendphoneverifyotp = async (OTP, user) => {
   if (authDataExist) {
     const OtpDoc = await Otp.updateOne(
       { _id: authDataExist._id },
-      { $set: { phoneOtpVerify: OTP, phoneOtpTimestamp: new Date() } }
+      { $set: { phoneOtp: OTP, phoneOtpTimestamp: new Date() } }
     );
     return OtpDoc;
   }
-  const OtpDoc = await Otp.create({ phoneOtpVerify: OTP, auth: user, phoneOtpTimestamp: new Date() });
+  const OtpDoc = await Otp.create({ phoneOtp: OTP, auth: user, phoneOtpTimestamp: new Date() });
   return OtpDoc;
 };
 
-const verifyEmailOtp = async (emailcode) => {
-  const OtpDoc = await Otp.findOne({ emailOtpVerify: emailcode });
+const verifyEmailOtp = async (emailcode, authId) => {
+  const OtpDoc = await Otp.findOne({ auth: authId });
   if (!OtpDoc) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
   }
@@ -66,7 +66,7 @@ const verifyEmailOtp = async (emailcode) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
   }
 
-  if (emailcode === OtpDoc.emailOtpVerify) {
+  if (emailcode === OtpDoc.emailOtp) {
     await Auth.updateOne({ _id: OtpDoc.auth }, { $set: { isEmailVerified: true } });
     return OtpDoc;
   }
@@ -85,7 +85,7 @@ const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
   }
 
-  if (resetcode === OtpDoc.resetPasswordOtpVerify) {
+  if (resetcode === OtpDoc.resetPasswordOtp) {
     return OtpDoc;
   }
 
@@ -103,7 +103,7 @@ const verifyPhoneOtp = async (otp, AuthData) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
   }
 
-  if (otp === OtpDoc.phoneOtpVerify) {
+  if (otp === OtpDoc.phoneOtp) {
     await Auth.updateOne({ _id: AuthData._id }, { $set: { isMobileVerified: true } });
     return OtpDoc;
   }
@@ -118,10 +118,7 @@ const resendOtp = async (OTP, user) => {
   }
   const authData = await Otp.findOne({ auth: user });
   if (authData) {
-    const OtpDoc = await Otp.updateOne(
-      { _id: authData._id },
-      { $set: { phoneOtpVerify: OTP, phoneOtpTimestamp: new Date() } }
-    );
+    const OtpDoc = await Otp.updateOne({ _id: authData._id }, { $set: { phoneOtp: OTP, phoneOtpTimestamp: new Date() } });
     return OtpDoc;
   }
   throw new ApiError(httpStatus.BAD_REQUEST, 'You are being Monitored');
@@ -156,9 +153,9 @@ const changePhone = async (mobile, user) => {
 
 module.exports = {
   initiateOTPData,
-  sendphoneverifyotp,
-  sendemailverifyotp,
-  sendresetpassotp,
+  sendPhoneVerifyOtp,
+  sendEmailVerifyOtp,
+  sendResetPassOtp,
   verifyEmailOtp,
   verifyForgetPasswordOtp,
   verifyPhoneOtp,

@@ -8,5 +8,7 @@ module.exports.documentService = require('./document.service');
 module.exports.labTestService = require('./labTest.service');
 module.exports.appointmentPreferenceService = require('./appointmentpreference.service');
 module.exports.appointmentService = require('./appointment.service');
+module.exports.userAppointmentService = require('./userAppointment.service');
 module.exports.chatService = require('./chat.service');
 module.exports.userProfile = require('./userprofile.service');
+module.exports.verifiedUserService = require('./verifiedUser.service');

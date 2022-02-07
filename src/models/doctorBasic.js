@@ -4,6 +4,10 @@ const Auth = require('./auth.model');
 
 const DoctorBasicSchema = mongoose.Schema(
   {
+    appointmentPrice: {
+      type: Number,
+      required: true,
+    },
     gender: {
       type: String,
       required: true,

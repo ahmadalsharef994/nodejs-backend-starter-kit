@@ -267,6 +267,9 @@ const getFollowupsById = async (appointmentId) => {
 
 const getAvailableAppointmentSlots = async (doctorId) => {
   const AllAppointmentSlots = await appointmentPreferenceService.getappointments(doctorId);
+  if (!AllAppointmentSlots) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+  }
   const bookedAppointmentSlots = await Appointment.find({ docid: doctorId, Status: 'booked' });
   const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
   const result = {};

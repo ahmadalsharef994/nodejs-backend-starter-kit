@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 
 const RazorpayPaymentSchema = mongoose.Schema(
   {
@@ -38,6 +38,7 @@ const RazorpayPaymentSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 RazorpayPaymentSchema.plugin(toJSON);
+RazorpayPaymentSchema.plugin(paginate);
 
 /**
  * @typedef RazorpayPayment

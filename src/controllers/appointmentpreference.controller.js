@@ -5,6 +5,10 @@ const ApiError = require('../utils/ApiError');
 
 const submitAppointmentPreference = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
+  const isPriceSet = await appointmentPreferenceService.checkForAppointmentPrice(AuthData);
+  if (!isPriceSet) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'General Appointment Price Not Set');
+  }
   const result = await appointmentPreferenceService.createPreference(req.body, req.Docid, AuthData);
   if (!result) {
     return res.status(httpStatus.NOT_FOUND).json({ message: 'Error Submitting Appointment Preference' });

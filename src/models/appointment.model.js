@@ -14,6 +14,30 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
       index: true,
     },
+    doctorName: {
+      type: String,
+      required: true,
+    },
+    doctorSpeciality: {
+      type: String,
+      required: true,
+    },
+    price: {
+      type: Number,
+      required: true,
+    },
+    paymentStatus: {
+      type: String,
+      required: true,
+    },
+    paymentType: {
+      type: String,
+      required: true,
+    },
+    patientName: {
+      type: String,
+      required: true,
+    },
     slotId: {
       type: String,
       required: true,
@@ -24,7 +48,7 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     Status: {
-      type: String, // SCHEDULED, CANCELLED, FOLLOWED-UP, REFERRED
+      type: String, // SCHEDULED, CANCELLED, FOLLOW-UP, REFERRED
       required: true,
     },
     Type: {

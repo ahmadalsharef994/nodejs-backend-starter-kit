@@ -8,7 +8,15 @@ const notification = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
     },
-    appointmentNotification: {
+    appNotifications: {
+      type: Boolean,
+      default: true,
+    },
+    promotionalEmails: {
+      type: Boolean,
+      default: true,
+    },
+    offersAndDiscounts: {
       type: Boolean,
       default: true,
     },

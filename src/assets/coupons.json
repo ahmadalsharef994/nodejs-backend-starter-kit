@@ -1,54 +1,56 @@
 [
   {
-    "code": "NEWUSER",
-    "offerTitle": "Some title 1",
-    "color": {
-      "bg": "rgba(255, 167, 114, 1)",
-      "text": "rgba(111, 41, 0, 1)"
-    },
-    "isValidOnce": true,
-    "discountPercent": null,
-    "discountFlat": 300,
-    "expiresOn": null,
-    "description": "Flat INR 300/- Discount on Consultation"
-  },
-  {
-    "code": "MEDZLUV",
-    "offerTitle": "Some title 2",
-    "color": {
-      "bg": "rgba(255, 167, 114, 1)",
-      "text": "rgba(111, 41, 0, 1)"
-    },
-    "isValidOnce": false,
-    "discountPercent": 70,
-    "discountFlat": null,
-    "expiresOn": "2022-02-28T18:30:00.000Z",
-    "description": "70% off on Health packages booking and lab test booking"
-  },
-  {
-    "code": "DIABETIC30",
-    "offerTitle": "Some title 3",
-    "color": {
-      "bg": "rgba(255, 167, 114, 1)",
-      "text": "rgba(111, 41, 0, 1)"
-    },
-    "isValidOnce": false,
-    "discountPercent": 70,
-    "discountFlat": null,
-    "expiresOn": "2022-03-31T18:30:00.000Z",
-    "description": "70% off on all diabetes lab test booking"
-  },
-  {
+    "offerTitle": "On Lab Tests",
     "code": "MEDZLAB",
-    "offerTitle": "Some title 4",
-    "color": {
-      "bg": "rgba(255, 167, 114, 1)",
-      "text": "rgba(111, 41, 0, 1)"
-    },
-    "isValidOnce": false,
-    "discountPercent": 60,
+    "discountPercent": 10,
     "discountFlat": null,
-    "expiresOn": "2022-02-08T18:30:00.000Z",
-    "description": "60% off on all lab test booking"
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(255, 255, 179, 1)", "text": "rgba(107, 107, 0, 1)" }
+  },
+  {
+    "offerTitle": "For New Users",
+    "code": "NEWUSER",
+    "discountPercent": null,
+    "discountFlat": 400,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(229, 255, 196, 1)", "text": "rgba(58, 101, 4, 1)" }
+  },
+  {
+    "offerTitle": "Diabetes care",
+    "code": "DIABETIC30",
+    "discountPercent": 40,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(201, 255, 250, 1)", "text": "rgba(2, 107, 98, 1)" }
+  },
+  {
+    "offerTitle": "On Lab Tests",
+    "code": "MEDZLAB2",
+    "discountPercent": 35,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(255, 230, 196, 1)", "text": "rgba(115, 65, 0, 1)" }
+  },
+  {
+    "offerTitle": "For New Users",
+    "code": "NEWUSER2",
+    "discountPercent": null,
+    "discountFlat": 499,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(226, 210, 255, 1)", "text": "rgba(40, 2, 108, 1)" }
+  },
+  {
+    "offerTitle": "Valentine’s Day Offer",
+    "code": "MEDZLUV",
+    "discountPercent": 69,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(255, 196, 215, 1)", "text": "rgba(123, 8, 74, 1)" }
   }
 ]

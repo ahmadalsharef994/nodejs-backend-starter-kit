@@ -5,6 +5,7 @@ const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
 const ApiError = require('../utils/ApiError');
 const { GuestOrder, ThyrocareOrder, RazorpayPayment } = require('../models');
+const couponCode = require('../assets/coupons.json');
 
 const getGuestOrder = async (orderID) => {
   const orderSummary = await GuestOrder.findOne({ orderId: orderID });
@@ -39,7 +40,7 @@ const getGuestOrder = async (orderID) => {
   };
 };
 
-const getCartValue = async (cart) => {
+const getCartValue = async (cart, couponcode) => {
   const labTests = await thyrocareServices.getSavedTestProducts();
   const cartDetails = [];
   let totalCartAmount = 0;
@@ -53,7 +54,15 @@ const getCartValue = async (cart) => {
   });
   const homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
-  return { cartDetails, homeCollectionFee, totalCartAmount };
+
+  couponCode.forEach((element) => {
+    if (element.code === couponcode) {
+      // eslint-disable-next-line no-unused-vars
+      const a = couponCode;
+    } else {
+      return { cartDetails, homeCollectionFee, totalCartAmount };
+    }
+  });
 };
 
 const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart) => {

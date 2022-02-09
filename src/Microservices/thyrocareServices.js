@@ -59,6 +59,8 @@ const updateTestProducts = async () => {
       // eslint-disable-next-line no-param-reassign
       element.rate = element.rate.b2C;
       // eslint-disable-next-line no-param-reassign
+      element.rate *= process.env.LABTEST_RATE_MULTIPLIER;
+      // eslint-disable-next-line no-param-reassign
       delete element.margin;
     });
 

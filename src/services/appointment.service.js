@@ -1,4 +1,3 @@
-/* eslint-disable no-restricted-syntax */
 /* eslint-disable no-param-reassign */
 const Agenda = require('agenda');
 const httpStatus = require('http-status');

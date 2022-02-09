@@ -20,10 +20,10 @@
       "text": "rgba(111, 41, 0, 1)"
     },
     "isValidOnce": false,
-    "discountPercent": 50,
+    "discountPercent": 70,
     "discountFlat": null,
     "expiresOn": "2022-02-28T18:30:00.000Z",
-    "description": "50% off on Health packages booking and lab test booking"
+    "description": "70% off on Health packages booking and lab test booking"
   },
   {
     "code": "DIABETIC30",
@@ -33,10 +33,10 @@
       "text": "rgba(111, 41, 0, 1)"
     },
     "isValidOnce": false,
-    "discountPercent": 60,
+    "discountPercent": 70,
     "discountFlat": null,
     "expiresOn": "2022-03-31T18:30:00.000Z",
-    "description": "60% off on all lab test booking"
+    "description": "70% off on all diabetes lab test booking"
   },
   {
     "code": "MEDZLAB",

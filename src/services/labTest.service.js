@@ -5,7 +5,7 @@ const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
 const ApiError = require('../utils/ApiError');
 const { GuestOrder, ThyrocareOrder, RazorpayPayment } = require('../models');
-const couponCode = require('../assets/coupons.json');
+const coupons = require('../assets/coupons.json');
 
 const getGuestOrder = async (orderID) => {
   const orderSummary = await GuestOrder.findOne({ orderId: orderID });
@@ -40,7 +40,7 @@ const getGuestOrder = async (orderID) => {
   };
 };
 
-const getCartValue = async (cart, couponcode) => {
+const getCartValue = async (cart, couponCode) => {
   const labTests = await thyrocareServices.getSavedTestProducts();
   const cartDetails = [];
   let totalCartAmount = 0;
@@ -55,14 +55,35 @@ const getCartValue = async (cart, couponcode) => {
   const homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
 
-  couponCode.forEach((element) => {
-    if (element.code === couponcode) {
-      // eslint-disable-next-line no-unused-vars
-      const a = couponCode;
-    } else {
-      return { cartDetails, homeCollectionFee, totalCartAmount };
+  // console.log('couponcode: ', couponCode);
+  // implement coupon code if given
+  if (couponCode) {
+    const coupon = coupons.find((obj) => obj.code === couponCode);
+    // console.log('coupon: ', coupon);
+    if (coupon) {
+      const expiryTime = new Date(coupon.expiresOn);
+      const time = expiryTime.getTime() - new Date().getTime();
+      // console.log(time);
+      if (time > 0) {
+        // apply coupon
+        // console.log('coupon applied');
+        totalCartAmount =
+          coupon.discountPercent !== null
+            ? (totalCartAmount / 100) * coupon.discountPercent
+            : totalCartAmount - coupon.discountFlat;
+        return { cartDetails, homeCollectionFee, totalCartAmount, message: 'Coupon Applied' };
+      }
+      // console.log('coupon expired');
+      // coupon expired
+      return { cartDetails, homeCollectionFee, totalCartAmount, message: 'Coupon Expired' };
     }
-  });
+    // console.log('coupon not found');
+    // coupon not found
+    return { cartDetails, homeCollectionFee, totalCartAmount, message: 'Coupon Not Found' };
+  }
+  // console.log('coupon not passed');
+  // No coupons passed
+  return { cartDetails, homeCollectionFee, totalCartAmount, message: 'No Coupon' };
 };
 
 const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart) => {

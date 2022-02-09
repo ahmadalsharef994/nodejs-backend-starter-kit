@@ -73,6 +73,7 @@ const cartValue = {
         quantity: Joi.number().required(),
       })
     ),
+    couponCode: Joi.string(),
   }),
 };
 

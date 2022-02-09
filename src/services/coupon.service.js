@@ -7,7 +7,15 @@ const getAllCoupons = async () => {
   try {
     const couponBuffer = fs.readFileSync('src/assets/coupons.json');
     const allCoupons = await JSON.parse(couponBuffer);
-    return allCoupons;
+    // eslint-disable-next-line array-callback-return
+    const validcoupouns = allCoupons.filter((coupon) => {
+      const expiryTime = new Date(coupon.expiresOn);
+      const time = expiryTime.getTime() - new Date().getTime();
+      if (time > 0 || coupon.expiresOn === null) {
+        return coupon;
+      }
+    });
+    return validcoupouns;
   } catch (e) {
     return [];
   }

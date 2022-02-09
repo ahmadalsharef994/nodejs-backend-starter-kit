@@ -75,8 +75,14 @@ const showReport = catchAsync(async (req, res) => {
 });
 
 const postOrderData = catchAsync(async (req, res) => {
-  const { customerDetails, testDetails, paymentDetails, cart } = await req.body;
-  const orderData = await labTestService.initiateGuestBooking(customerDetails, testDetails, paymentDetails, cart);
+  const { customerDetails, testDetails, paymentDetails, cart, couponCode } = await req.body;
+  const orderData = await labTestService.initiateGuestBooking(
+    customerDetails,
+    testDetails,
+    paymentDetails,
+    cart,
+    couponCode
+  );
   if (orderData) {
     return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
   }

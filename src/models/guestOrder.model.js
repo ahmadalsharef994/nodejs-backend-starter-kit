@@ -27,6 +27,10 @@ const GuestOrderSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
+    coupon: {
+      type: String,
+      default: null,
+    },
     homeCollectionFee: {
       type: Number,
       default: null,

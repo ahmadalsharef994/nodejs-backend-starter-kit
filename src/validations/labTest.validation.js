@@ -41,6 +41,7 @@ const guestOrder = {
         quantity: Joi.number().required(),
       })
     ),
+    coupon: Joi.string(),
   }),
 };
 

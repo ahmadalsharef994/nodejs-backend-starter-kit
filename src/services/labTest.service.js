@@ -86,7 +86,7 @@ const getCartValue = async (cart, couponCode) => {
   return { cartDetails, homeCollectionFee, totalCartAmount, message: 'No Coupon' };
 };
 
-const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart) => {
+const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart, couponCode) => {
   const currentDate = new Date();
   const bookingDate = new Date(testDetails.preferredTestDateTime);
   const timeDifference = bookingDate.getTime() - currentDate.getTime();
@@ -107,6 +107,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       sessionId: res.data.Details,
       orderId,
       cart,
+      couponCode,
     });
     return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
   } catch (e) {

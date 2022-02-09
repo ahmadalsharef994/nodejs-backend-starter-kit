@@ -12,8 +12,9 @@ const getAllCoupons = async () => {
       const expiryTime = new Date(coupon.expiresOn);
       const time = expiryTime.getTime() - new Date().getTime();
       if (time > 0 || coupon.expiresOn === null) {
-        return coupon;
+        return true;
       }
+      return false;
     });
     return validcoupouns;
   } catch (e) {

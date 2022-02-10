@@ -136,7 +136,7 @@ const bookPrepaidOrder = catchAsync(async (req, res) => {
     }
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
   }
-  return res.status(httpStatus.OK).json({ message: 'Failed', isOrderPlaced, error: 'Order Request Failed' });
+  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Order Request Failed' });
 });
 
 // not supported by thyrocare

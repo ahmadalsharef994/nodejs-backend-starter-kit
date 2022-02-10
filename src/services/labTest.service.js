@@ -65,11 +65,11 @@ const getCartValue = async (cart, couponCode) => {
         // apply coupon
         let discount = 0;
         if (coupon.discountPercent) {
-          discount = (coupon.discountPercent / 100) * totalCartAmount;
-          totalCartAmount = Number(totalCartAmount - discount).toFixed(2);
+          discount = Number((coupon.discountPercent / 100) * totalCartAmount).toFixed(2);
+          totalCartAmount -= discount;
         }
         if (coupon.discountFlat) {
-          discount = coupon.discountFlat;
+          discount = Number(coupon.discountFlat);
           totalCartAmount = Number(totalCartAmount - coupon.discountFlat).toFixed(2);
         }
         // const moneySaved = coupon.discountPercent !== null

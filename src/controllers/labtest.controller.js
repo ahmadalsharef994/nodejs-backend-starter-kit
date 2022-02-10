@@ -94,7 +94,7 @@ const verifyOrder = catchAsync(async (req, res) => {
   const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
   if (orderData) {
     if (isOrderPlaced) {
-      const details = `OrderId: ${orderData.orderId} <---->Product: ${orderData.product} <----->Date: ${orderData.date} <----->Time: ${orderData.time} <----->Payment Mode: ${orderData.paymentMode} <----->Amount: ${orderData.totalCartAmount}`;
+      const details = `OrderId: ${orderData.orderId} ------------------------- Product: ${orderData.product} ------------------------- Date: ${orderData.date} ------------------------- Time: ${orderData.time} ------------------------- Payment Mode: ${orderData.paymentMode} ------------------------- Amount: ${orderData.totalCartAmount}`;
       await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
     }
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
@@ -131,7 +131,7 @@ const bookPrepaidOrder = catchAsync(async (req, res) => {
   const { isOrderPlaced, orderData } = await labTestService.prepaidOrder(razorpayOrderID, labTestOrderID);
   if (orderData) {
     if (isOrderPlaced) {
-      const details = `OrderId: ${orderData.orderId} <---->Product: ${orderData.product} <----->Date: ${orderData.date} <----->Time: ${orderData.time} <----->Payment Mode: ${orderData.paymentMode} <----->Amount: ${orderData.totalCartAmount}`;
+      const details = `OrderId: ${orderData.orderId} ------------------------- Product: ${orderData.product} ------------------------- Date: ${orderData.date} ------------------------- Time: ${orderData.time} ------------------------- Payment Mode: ${orderData.paymentMode} ------------------------- Amount: ${orderData.totalCartAmount}`;
       await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
     }
     return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });

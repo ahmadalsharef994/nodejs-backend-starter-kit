@@ -67,12 +67,11 @@ const getCartValue = async (cart, couponCode) => {
       if (time > 0) {
         // apply coupon
         // console.log('coupon applied');
-        const discountAmount =
+        const moneySaved =
           coupon.discountPercent !== null
             ? (totalCartAmount / 100) * coupon.discountPercent
             : totalCartAmount - coupon.discountFlat;
-        const moneySaved = totalCartAmount - discountAmount;
-        totalCartAmount = discountAmount;
+        totalCartAmount -= moneySaved;
         return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus: 'Coupon Applied' };
       }
       // console.log('coupon expired');
@@ -122,7 +121,10 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
   const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID, labTestOrderID });
   if (paymentDetails) {
     if (orderDetails && paymentDetails.isPaid === true) {
-      const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart, orderDetails.coupon);
+      const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
+        orderDetails.cart,
+        orderDetails.coupon
+      );
       let finalProductCode = '';
       // generating multiple order string
       for (let i = 0; i < cartDetails.length; i += 1) {
@@ -160,6 +162,8 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
         paymentMode: 'PAID',
         homeCollectionFee,
         totalCartAmount,
+        moneySaved,
+        couponStatus,
       };
       return { isOrderPlaced: true, orderData };
     }
@@ -168,7 +172,10 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
 };
 
 const postpaidOrder = async (orderDetails) => {
-  const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart, orderDetails.coupon);
+  const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
+    orderDetails.cart,
+    orderDetails.coupon
+  );
   // updating guestOrderDetais
   await GuestOrder.findOneAndUpdate({ orderId: orderDetails.orderId }, { $set: { homeCollectionFee, totalCartAmount } });
   let finalProductCode = '';
@@ -208,6 +215,8 @@ const postpaidOrder = async (orderDetails) => {
     paymentMode: 'COD',
     homeCollectionFee,
     totalCartAmount,
+    moneySaved,
+    couponStatus,
   };
 };
 

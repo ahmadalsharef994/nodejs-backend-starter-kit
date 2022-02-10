@@ -9,6 +9,7 @@ const userProfileRoute = require('./userprofile.route');
 const labTestRoute = require('./labtest.route');
 const document = require('./document.route');
 const razorpayRoute = require('./razorpay.route');
+const couponRoute = require('./coupon.route');
 
 const router = express.Router();
 
@@ -52,6 +53,10 @@ const defaultRoutes = [
   {
     path: '/razorpay',
     route: razorpayRoute,
+  },
+  {
+    path: '/coupons',
+    route: couponRoute,
   },
 ];
 

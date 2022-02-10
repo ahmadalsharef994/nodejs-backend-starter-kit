@@ -5,6 +5,7 @@ const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
 const ApiError = require('../utils/ApiError');
 const { GuestOrder, ThyrocareOrder, RazorpayPayment } = require('../models');
+const coupons = require('../assets/coupons.json');
 
 const getGuestOrder = async (orderID) => {
   const orderSummary = await GuestOrder.findOne({ orderId: orderID });
@@ -39,7 +40,7 @@ const getGuestOrder = async (orderID) => {
   };
 };
 
-const getCartValue = async (cart) => {
+const getCartValue = async (cart, couponCode) => {
   const labTests = await thyrocareServices.getSavedTestProducts();
   const cartDetails = [];
   let totalCartAmount = 0;
@@ -53,10 +54,43 @@ const getCartValue = async (cart) => {
   });
   const homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
-  return { cartDetails, homeCollectionFee, totalCartAmount };
+
+  // implement coupon code if given
+  if (couponCode) {
+    const coupon = coupons.find((obj) => obj.code === couponCode);
+    if (coupon) {
+      const expiryTime = new Date(coupon.expiresOn);
+      const time = expiryTime.getTime() - new Date().getTime();
+      if (time > 0) {
+        // apply coupon
+        let discount = 0;
+        if (coupon.discountPercent) {
+          discount = Number((coupon.discountPercent / 100) * totalCartAmount).toFixed(2);
+          totalCartAmount -= discount;
+        }
+        if (coupon.discountFlat) {
+          discount = Number(coupon.discountFlat);
+          totalCartAmount = Number(totalCartAmount - coupon.discountFlat).toFixed(2);
+        }
+        // const moneySaved = coupon.discountPercent !== null
+        //    ? (totalCartAmount / 100) * coupon.discountPercent
+        //    : totalCartAmount - coupon.discountFlat;
+        // totalCartAmount -= moneySaved;
+        return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: discount, couponStatus: 'Coupon Applied' };
+      }
+      // coupon expired
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Coupon Expired');
+      // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Expired' };
+    }
+    // coupon not found
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Coupon Not Found');
+    // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Not Found' };
+  }
+  // No coupons passed
+  return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon' };
 };
 
-const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart) => {
+const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart, couponCode) => {
   const currentDate = new Date();
   const bookingDate = new Date(testDetails.preferredTestDateTime);
   const timeDifference = bookingDate.getTime() - currentDate.getTime();
@@ -70,6 +104,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   const OTP = generateOTP();
   try {
     const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
+    const { homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(cart, couponCode);
     const guestOrder = await GuestOrder.create({
       customerDetails,
       testDetails,
@@ -77,7 +112,13 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       sessionId: res.data.Details,
       orderId,
       cart,
+      couponCode,
+      homeCollectionFee,
+      totalCartAmount,
+      moneySaved,
+      couponStatus,
     });
+
     return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
   } catch (e) {
     return false;
@@ -89,12 +130,11 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
   const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID, labTestOrderID });
   if (paymentDetails) {
     if (orderDetails && paymentDetails.isPaid === true) {
-      const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
       let finalProductCode = '';
       // generating multiple order string
-      for (let i = 0; i < cartDetails.length; i += 1) {
-        finalProductCode += cartDetails[i].code;
-        finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+      for (let i = 0; i < orderDetails.cart.length; i += 1) {
+        finalProductCode += orderDetails.cart[i].productCode;
+        finalProductCode = i < orderDetails.cart.length - 1 ? `${finalProductCode},` : finalProductCode;
       }
 
       const orderSummary = await thyrocareServices.postThyrocareOrder(
@@ -109,7 +149,7 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
         orderDetails.customerDetails.mobile,
         orderDetails.customerDetails.email,
         '', // remarks
-        totalCartAmount,
+        orderDetails.totalCartAmount,
         orderDetails.testDetails.preferredTestDateTime,
         'N', // hardCopyReport
         'PREPAID' // paymentType
@@ -125,8 +165,10 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
         date: collectionDateTime[0],
         time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
         paymentMode: 'PAID',
-        homeCollectionFee,
-        totalCartAmount,
+        homeCollectionFee: orderDetails.homeCollectionFee,
+        totalCartAmount: orderDetails.totalCartAmount,
+        moneySaved: orderDetails.moneySaved,
+        couponStatus: orderDetails.couponStatus,
       };
       return { isOrderPlaced: true, orderData };
     }
@@ -135,14 +177,11 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
 };
 
 const postpaidOrder = async (orderDetails) => {
-  const { cartDetails, homeCollectionFee, totalCartAmount } = await getCartValue(orderDetails.cart);
-  // updating guestOrderDetais
-  await GuestOrder.findOneAndUpdate({ orderId: orderDetails.orderId }, { $set: { homeCollectionFee, totalCartAmount } });
   let finalProductCode = '';
   // generating multiple order string
-  for (let i = 0; i < cartDetails.length; i += 1) {
-    finalProductCode += cartDetails[i].code;
-    finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+  for (let i = 0; i < orderDetails.cart.length; i += 1) {
+    finalProductCode += orderDetails.cart[i].productCode;
+    finalProductCode = i < orderDetails.cart.length - 1 ? `${finalProductCode},` : finalProductCode;
   }
 
   const orderSummary = await thyrocareServices.postThyrocareOrder(
@@ -157,7 +196,7 @@ const postpaidOrder = async (orderDetails) => {
     orderDetails.customerDetails.mobile,
     orderDetails.customerDetails.email,
     '', // remarks
-    totalCartAmount,
+    orderDetails.totalCartAmount,
     orderDetails.testDetails.preferredTestDateTime,
     'N', // hardCopyReport
     'POSTPAID' // paymentType
@@ -173,8 +212,10 @@ const postpaidOrder = async (orderDetails) => {
     date: collectionDateTime[0],
     time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
     paymentMode: 'COD',
-    homeCollectionFee,
-    totalCartAmount,
+    homeCollectionFee: orderDetails.homeCollectionFee,
+    totalCartAmount: orderDetails.totalCartAmount,
+    moneySaved: orderDetails.moneySaved,
+    couponStatus: orderDetails.couponStatus,
   };
 };
 
@@ -183,15 +224,14 @@ const verifyGuestOrder = async (sessionId, otp, orderId) => {
   try {
     verifyOtpRes = await smsService.verifyPhoneOtp2F(otp, sessionId);
   } catch (e) {
-    return { Status: 'Failed', Details: "OTP Didn't Matched" };
+    throw new ApiError(httpStatus.BAD_REQUEST, "OTP Didn't Matched");
   }
-
   const orderExist = await ThyrocareOrder.findOne({ orderNo: orderId });
   if (orderExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Order Already Placed');
   }
-
   const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
+
   if (verifyOtpRes.data.Status === 'Success' && orderDetails) {
     if (orderDetails.paymentDetails.paymentType === 'POSTPAID') {
       const orderData = await postpaidOrder(orderDetails);

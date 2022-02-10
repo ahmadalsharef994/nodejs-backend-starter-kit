@@ -41,6 +41,7 @@ const guestOrder = {
         quantity: Joi.number().required(),
       })
     ),
+    couponCode: Joi.string(),
   }),
 };
 
@@ -73,6 +74,7 @@ const cartValue = {
         quantity: Joi.number().required(),
       })
     ),
+    couponCode: Joi.string(),
   }),
 };
 

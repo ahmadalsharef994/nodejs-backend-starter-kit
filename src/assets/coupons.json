@@ -1,0 +1,38 @@
+[
+  {
+    "offerTitle": "On Lab Tests",
+    "code": "MEDZLAB",
+    "discountPercent": 60,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(255, 255, 179, 1)", "text": "rgba(107, 107, 0, 1)" }
+  },
+  {
+    "offerTitle": "For New Users",
+    "code": "NEWUSER",
+    "discountPercent": null,
+    "discountFlat": 300,
+    "isValidOnce": false,
+    "expiresOn": null,
+    "color": { "bg": "rgba(229, 255, 196, 1)", "text": "rgba(58, 101, 4, 1)" }
+  },
+  {
+    "offerTitle": "Diabetes care",
+    "code": "DIABETIC30",
+    "discountPercent": 70,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "color": { "bg": "rgba(201, 255, 250, 1)", "text": "rgba(2, 107, 98, 1)" }
+  },
+  {
+    "offerTitle": "Valentine's Day Offer",
+    "code": "MEDZLUV",
+    "discountPercent": 70,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-02-28T18:30:00.000Z",
+    "color": { "bg": "rgba(255, 196, 215, 1)", "text": "rgba(123, 8, 74, 1)" }
+  }
+]

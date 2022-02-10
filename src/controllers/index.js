@@ -10,3 +10,4 @@ module.exports.userprofileController = require('./userprofile.controller');
 module.exports.chatController = require('./chat.controller');
 module.exports.labTestController = require('./labtest.controller');
 module.exports.razorpayController = require('./razorpay.controller');
+module.exports.couponController = require('./coupon.controller');

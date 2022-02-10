@@ -28,7 +28,7 @@ const calculateSHADigest = async (orderCreationId, razorpayOrderId, razorpayPaym
 
 const createRazorpayOrder = async (currency, labTestOrderID, sessionID) => {
   const labTestObject = await GuestOrder.findOne({ orderId: labTestOrderID });
-  const cartObject = await getCartValue(labTestObject.cart);
+  const cartObject = await getCartValue(labTestObject.cart, labTestObject.couponCode);
   const orderAmount = cartObject.totalCartAmount;
 
   const options = {

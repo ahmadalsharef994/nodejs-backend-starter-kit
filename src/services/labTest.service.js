@@ -63,12 +63,20 @@ const getCartValue = async (cart, couponCode) => {
       const time = expiryTime.getTime() - new Date().getTime();
       if (time > 0) {
         // apply coupon
-        const moneySaved =
-          coupon.discountPercent !== null
-            ? (totalCartAmount / 100) * coupon.discountPercent
-            : totalCartAmount - coupon.discountFlat;
-        totalCartAmount -= moneySaved;
-        return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus: 'Coupon Applied' };
+        let discount = 0;
+        if (coupon.discountPercent) {
+          discount = (coupon.discountPercent / 100) * totalCartAmount;
+          totalCartAmount = Number(totalCartAmount - discount).toFixed(2);
+        }
+        if (coupon.discountFlat) {
+          discount = coupon.discountFlat;
+          totalCartAmount = Number(totalCartAmount - coupon.discountFlat).toFixed(2);
+        }
+        // const moneySaved = coupon.discountPercent !== null
+        //    ? (totalCartAmount / 100) * coupon.discountPercent
+        //    : totalCartAmount - coupon.discountFlat;
+        // totalCartAmount -= moneySaved;
+        return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: discount, couponStatus: 'Coupon Applied' };
       }
       // coupon expired
       throw new ApiError(httpStatus.BAD_REQUEST, 'Coupon Expired');

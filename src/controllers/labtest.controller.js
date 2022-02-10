@@ -157,20 +157,6 @@ const rescheduleOrder = catchAsync(async (req, res) => {
   const result = await thyrocareServices.rescheduleThyrocareOrder(orderId, status, others, date, slot);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
-
-const fetchAllLabtests = catchAsync(async (req, res) => {
-  const dataToFind = req.query.id;
-  if (dataToFind === undefined) {
-    const labdata = await Labtestsdump.Labtestsdump();
-    res.status(httpStatus.OK).json(labdata);
-  } else {
-    const labdatabyid = await Labtestsdump.Labtestsdatabyid(dataToFind);
-    if (labdatabyid === undefined) {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'No Lab-Test Found with this ID' });
-    }
-    res.status(httpStatus.OK).json(labdatabyid);
-  }
-});
 */
 
 module.exports = {

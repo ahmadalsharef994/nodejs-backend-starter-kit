@@ -37,6 +37,14 @@ const GuestOrderSchema = mongoose.Schema(
     },
     totalCartAmount: {
       type: Number,
+      required: true,
+    },
+    moneySaved: {
+      type: Number,
+      default: null,
+    },
+    couponStatus: {
+      type: String,
       default: null,
     },
   },

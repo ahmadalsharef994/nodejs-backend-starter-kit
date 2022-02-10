@@ -101,6 +101,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   const OTP = generateOTP();
   try {
     const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
+    const { homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(cart, couponCode);
     const guestOrder = await GuestOrder.create({
       customerDetails,
       testDetails,
@@ -109,6 +110,10 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       orderId,
       cart,
       couponCode,
+      homeCollectionFee,
+      totalCartAmount,
+      moneySaved,
+      couponStatus,
     });
     return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
   } catch (e) {
@@ -121,15 +126,15 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
   const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID, labTestOrderID });
   if (paymentDetails) {
     if (orderDetails && paymentDetails.isPaid === true) {
-      const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
-        orderDetails.cart,
-        orderDetails.coupon
-      );
+      // const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
+      //  orderDetails.cart,
+      //  orderDetails.coupon
+      // );
       let finalProductCode = '';
       // generating multiple order string
-      for (let i = 0; i < cartDetails.length; i += 1) {
-        finalProductCode += cartDetails[i].code;
-        finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+      for (let i = 0; i < orderDetails.cart.length; i += 1) {
+        finalProductCode += orderDetails.cart[i].code;
+        finalProductCode = i < orderDetails.cart.length - 1 ? `${finalProductCode},` : finalProductCode;
       }
 
       const orderSummary = await thyrocareServices.postThyrocareOrder(
@@ -144,7 +149,7 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
         orderDetails.customerDetails.mobile,
         orderDetails.customerDetails.email,
         '', // remarks
-        totalCartAmount,
+        orderDetails.totalCartAmount,
         orderDetails.testDetails.preferredTestDateTime,
         'N', // hardCopyReport
         'PREPAID' // paymentType
@@ -160,10 +165,10 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
         date: collectionDateTime[0],
         time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
         paymentMode: 'PAID',
-        homeCollectionFee,
-        totalCartAmount,
-        moneySaved,
-        couponStatus,
+        homeCollectionFee: orderDetails.homeCollectionFee,
+        totalCartAmount: orderDetails.totalCartAmount,
+        moneySaved: orderDetails.moneySaved,
+        couponStatus: orderDetails.couponStatus,
       };
       return { isOrderPlaced: true, orderData };
     }
@@ -172,17 +177,17 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
 };
 
 const postpaidOrder = async (orderDetails) => {
-  const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
-    orderDetails.cart,
-    orderDetails.coupon
-  );
+  // const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
+  //  orderDetails.cart,
+  //  orderDetails.coupon
+  // );
   // updating guestOrderDetais
-  await GuestOrder.findOneAndUpdate({ orderId: orderDetails.orderId }, { $set: { homeCollectionFee, totalCartAmount } });
+  // await GuestOrder.findOneAndUpdate({ orderId: orderDetails.orderId }, { $set: { homeCollectionFee, totalCartAmount } });
   let finalProductCode = '';
   // generating multiple order string
-  for (let i = 0; i < cartDetails.length; i += 1) {
-    finalProductCode += cartDetails[i].code;
-    finalProductCode = i < cartDetails.length - 1 ? `${finalProductCode},` : finalProductCode;
+  for (let i = 0; i < orderDetails.cart.length; i += 1) {
+    finalProductCode += orderDetails.cart[i].code;
+    finalProductCode = i < orderDetails.cart.length - 1 ? `${finalProductCode},` : finalProductCode;
   }
 
   const orderSummary = await thyrocareServices.postThyrocareOrder(
@@ -197,7 +202,7 @@ const postpaidOrder = async (orderDetails) => {
     orderDetails.customerDetails.mobile,
     orderDetails.customerDetails.email,
     '', // remarks
-    totalCartAmount,
+    orderDetails.totalCartAmount,
     orderDetails.testDetails.preferredTestDateTime,
     'N', // hardCopyReport
     'POSTPAID' // paymentType
@@ -213,10 +218,10 @@ const postpaidOrder = async (orderDetails) => {
     date: collectionDateTime[0],
     time: `${collectionDateTime[1]} ${collectionDateTime[2]}`,
     paymentMode: 'COD',
-    homeCollectionFee,
-    totalCartAmount,
-    moneySaved,
-    couponStatus,
+    homeCollectionFee: orderDetails.homeCollectionFee,
+    totalCartAmount: orderDetails.totalCartAmount,
+    moneySaved: orderDetails.moneySaved,
+    couponStatus: orderDetails.couponStatus,
   };
 };
 

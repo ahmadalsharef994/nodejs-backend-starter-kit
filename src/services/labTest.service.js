@@ -55,18 +55,14 @@ const getCartValue = async (cart, couponCode) => {
   const homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
 
-  // console.log('couponcode: ', couponCode);
   // implement coupon code if given
   if (couponCode) {
     const coupon = coupons.find((obj) => obj.code === couponCode);
-    // console.log('coupon: ', coupon);
     if (coupon) {
       const expiryTime = new Date(coupon.expiresOn);
       const time = expiryTime.getTime() - new Date().getTime();
-      // console.log(time);
       if (time > 0) {
         // apply coupon
-        // console.log('coupon applied');
         const moneySaved =
           coupon.discountPercent !== null
             ? (totalCartAmount / 100) * coupon.discountPercent
@@ -74,15 +70,14 @@ const getCartValue = async (cart, couponCode) => {
         totalCartAmount -= moneySaved;
         return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus: 'Coupon Applied' };
       }
-      // console.log('coupon expired');
       // coupon expired
-      return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Expired' };
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Coupon Expired');
+      // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Expired' };
     }
-    // console.log('coupon not found');
     // coupon not found
-    return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Not Found' };
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Coupon Not Found');
+    // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Not Found' };
   }
-  // console.log('coupon not passed');
   // No coupons passed
   return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon' };
 };
@@ -115,6 +110,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       moneySaved,
       couponStatus,
     });
+
     return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
   } catch (e) {
     return false;
@@ -126,14 +122,10 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
   const paymentDetails = await RazorpayPayment.findOne({ razorpayOrderID, labTestOrderID });
   if (paymentDetails) {
     if (orderDetails && paymentDetails.isPaid === true) {
-      // const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
-      //  orderDetails.cart,
-      //  orderDetails.coupon
-      // );
       let finalProductCode = '';
       // generating multiple order string
       for (let i = 0; i < orderDetails.cart.length; i += 1) {
-        finalProductCode += orderDetails.cart[i].code;
+        finalProductCode += orderDetails.cart[i].productCode;
         finalProductCode = i < orderDetails.cart.length - 1 ? `${finalProductCode},` : finalProductCode;
       }
 
@@ -177,16 +169,10 @@ const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
 };
 
 const postpaidOrder = async (orderDetails) => {
-  // const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(
-  //  orderDetails.cart,
-  //  orderDetails.coupon
-  // );
-  // updating guestOrderDetais
-  // await GuestOrder.findOneAndUpdate({ orderId: orderDetails.orderId }, { $set: { homeCollectionFee, totalCartAmount } });
   let finalProductCode = '';
   // generating multiple order string
   for (let i = 0; i < orderDetails.cart.length; i += 1) {
-    finalProductCode += orderDetails.cart[i].code;
+    finalProductCode += orderDetails.cart[i].productCode;
     finalProductCode = i < orderDetails.cart.length - 1 ? `${finalProductCode},` : finalProductCode;
   }
 
@@ -230,15 +216,14 @@ const verifyGuestOrder = async (sessionId, otp, orderId) => {
   try {
     verifyOtpRes = await smsService.verifyPhoneOtp2F(otp, sessionId);
   } catch (e) {
-    return { Status: 'Failed', Details: "OTP Didn't Matched" };
+    throw new ApiError(httpStatus.BAD_REQUEST, "OTP Didn't Matched");
   }
-
   const orderExist = await ThyrocareOrder.findOne({ orderNo: orderId });
   if (orderExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Order Already Placed');
   }
-
   const orderDetails = await GuestOrder.findOne({ sessionId, orderId });
+
   if (verifyOtpRes.data.Status === 'Success' && orderDetails) {
     if (orderDetails.paymentDetails.paymentType === 'POSTPAID') {
       const orderData = await postpaidOrder(orderDetails);

@@ -27,7 +27,7 @@ const GuestOrderSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
-    coupon: {
+    couponCode: {
       type: String,
       default: null,
     },

@@ -44,9 +44,19 @@ const showLabTestOrders = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json(result);
 });
 
+const fetchallHealthPackages = catchAsync(async (req, res) => {
+  const healthpackage = await userAppointmentService.fetchHealthPackages();
+  if (healthpackage) {
+    res.status(httpStatus.OK).json(healthpackage);
+  } else {
+    res.status(httpStatus[400]).json({ message: 'something went wrong' });
+  }
+});
+
 module.exports = {
   upcomingAppointments,
   showAppointmentsByType,
   showPrescriptions,
   showLabTestOrders,
+  fetchallHealthPackages,
 };

@@ -72,10 +72,11 @@ const getCartValue = async (cart, couponCode) => {
           discount = Number(coupon.discountFlat);
           totalCartAmount = Number(totalCartAmount - coupon.discountFlat).toFixed(2);
         }
-        // const moneySaved = coupon.discountPercent !== null
-        //    ? (totalCartAmount / 100) * coupon.discountPercent
-        //    : totalCartAmount - coupon.discountFlat;
-        // totalCartAmount -= moneySaved;
+        const moneySaved =
+          coupon.discountPercent !== null
+            ? (totalCartAmount / 100) * coupon.discountPercent
+            : totalCartAmount - coupon.discountFlat;
+        totalCartAmount -= moneySaved;
         return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: discount, couponStatus: 'Coupon Applied' };
       }
       // coupon expired

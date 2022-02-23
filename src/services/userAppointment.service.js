@@ -1,4 +1,4 @@
-const { Prescription, Appointment, ThyrocareOrder } = require('../models');
+const { Prescription, Appointment, ThyrocareOrder, HealthPackage } = require('../models');
 
 const getNextAppointment = async (auth, limit) => {
   const result = await Appointment.find({ AuthUser: auth, Status: 'booked' })
@@ -27,10 +27,15 @@ const getAllLabTestOrders = async (auth, options) => {
   const result = await ThyrocareOrder.paginate({ mobile: auth.mobile }, options);
   return result;
 };
+const fetchHealthPackages = async () => {
+  const healthpackage = await HealthPackage.find({});
+  return { Healthpackages: healthpackage };
+};
 
 module.exports = {
   getNextAppointment,
   getAppointmentsByType,
   getAllPrescriptions,
   getAllLabTestOrders,
+  fetchHealthPackages,
 };

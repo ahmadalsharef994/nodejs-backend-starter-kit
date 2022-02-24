@@ -45,18 +45,22 @@ const getCartValue = async (cart, couponCode) => {
   const cartDetails = [];
   let totalCartAmount = 0;
   await cart.forEach((item) => {
-    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * item.quantity;
+    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * item.quantity * 2;
+    const eachItemPrice = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * 2;
+    // console.log(`displayPrice${displayItemPrice}`, `actualprice:${actualprice}`, `eachitemPrice${eachItemPrice}`);
     cartDetails.push({
-      rate: parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10),
+      rate: eachItemPrice,
       code: item.productCode,
       quantity: item.quantity,
     });
   });
-  const homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
-  totalCartAmount += homeCollectionFee;
-
+  let homeCollectionFee = 0;
   // implement coupon code if given
   if (couponCode) {
+    totalCartAmount = 0;
+    // eslint-disable-next-line prefer-const
+    let Cart = [];
+    let totalAmount = 0;
     const coupon = coupons.find((obj) => obj.code === couponCode);
     if (coupon) {
       const expiryTime = new Date(coupon.expiresOn);
@@ -65,19 +69,45 @@ const getCartValue = async (cart, couponCode) => {
         // apply coupon
         let discount = 0;
         if (coupon.discountPercent) {
-          discount = Number((coupon.discountPercent / 100) * totalCartAmount).toFixed(2);
-          totalCartAmount -= discount;
+          // eslint-disable-next-line no-plusplus
+          for (let index = 0; index < cartDetails.length; index++) {
+            totalAmount += cartDetails[index].rate;
+            let displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
+            if (displayPrice > 1000) {
+              displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
+            }
+            if (displayPrice < 1000 && displayPrice > 500) {
+              displayPrice =
+                cartDetails[index].rate - 55 / 100 - (cartDetails[index].ratecartDetails * 55) / 100 - cartDetails;
+            }
+            if (displayPrice < 500) {
+              displayPrice = cartDetails[index].rate - (50 / 100) * cartDetails[index].rate;
+            }
+            Cart.push({
+              code: cartDetails[index].code,
+              quantity: cartDetails[index].quantity,
+              rate: displayPrice,
+            });
+            discount += cartDetails[index].rate - displayPrice;
+          }
         }
+        Cart.forEach((item) => {
+          totalCartAmount += item.rate;
+        });
+        homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+        totalCartAmount += homeCollectionFee;
         if (coupon.discountFlat) {
           discount = Number(coupon.discountFlat);
           totalCartAmount = Number(totalCartAmount - coupon.discountFlat).toFixed(2);
         }
-        const moneySaved =
-          coupon.discountPercent !== null
-            ? (totalCartAmount / 100) * coupon.discountPercent
-            : totalCartAmount - coupon.discountFlat;
-        totalCartAmount -= moneySaved;
-        return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: discount, couponStatus: 'Coupon Applied' };
+        return {
+          Cart,
+          homeCollectionFee,
+          totalCartAmount,
+          moneySaved: discount,
+          couponStatus: 'Coupon Applied',
+          Actualtotal: totalAmount,
+        };
       }
       // coupon expired
       throw new ApiError(httpStatus.BAD_REQUEST, 'Coupon Expired');
@@ -88,6 +118,8 @@ const getCartValue = async (cart, couponCode) => {
     // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Not Found' };
   }
   // No coupons passed
+  homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+  totalCartAmount += homeCollectionFee;
   return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon' };
 };
 

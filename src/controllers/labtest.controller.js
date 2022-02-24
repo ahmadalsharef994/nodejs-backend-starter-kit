@@ -103,13 +103,18 @@ const verifyOrder = catchAsync(async (req, res) => {
 });
 
 const cartValue = catchAsync(async (req, res) => {
-  const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await labTestService.getCartValue(
-    req.body.cart,
-    req.body.couponCode
-  );
+  const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus, Cart, Actualtotal } =
+    await labTestService.getCartValue(req.body.cart, req.body.couponCode);
+  let cart = cartDetails;
+  if (cartDetails) {
+    cart = cartDetails;
+  }
+  if (Cart) {
+    cart = Cart;
+  }
   return res
     .status(httpStatus.OK)
-    .json({ message: 'Success', couponStatus, cartDetails, homeCollectionFee, moneySaved, totalCartAmount });
+    .json({ message: 'Success', couponStatus, cart, homeCollectionFee, Actualtotal, moneySaved, totalCartAmount });
 });
 
 const showGuestOrder = catchAsync(async (req, res) => {

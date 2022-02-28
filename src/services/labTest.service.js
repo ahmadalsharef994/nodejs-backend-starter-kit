@@ -117,13 +117,14 @@ const getCartValue = async (cart, couponCode) => {
     // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Not Found' };
   }
   // No coupons passed
-  homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
   totalCartAmount /= 2;
+  homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
   const cartdetails = cartDetails.map((element) => {
     return element.rate / 2;
   });
-  return { cartdetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon' };
+  const Actualtotal = totalCartAmount;
+  return { cartdetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon', Actualtotal };
 };
 
 const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart, couponCode) => {

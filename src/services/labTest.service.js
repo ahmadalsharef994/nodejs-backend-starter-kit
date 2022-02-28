@@ -47,7 +47,6 @@ const getCartValue = async (cart, couponCode) => {
   await cart.forEach((item) => {
     totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * item.quantity * 2;
     const eachItemPrice = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * 2;
-    // console.log(`displayPrice${displayItemPrice}`, `actualprice:${actualprice}`, `eachitemPrice${eachItemPrice}`);
     cartDetails.push({
       rate: eachItemPrice,
       code: item.productCode,
@@ -86,7 +85,7 @@ const getCartValue = async (cart, couponCode) => {
             Cart.push({
               code: cartDetails[index].code,
               quantity: cartDetails[index].quantity,
-              rate: displayPrice,
+              rate: displayPrice / 2,
             });
             discount += cartDetails[index].rate - displayPrice;
           }
@@ -104,9 +103,9 @@ const getCartValue = async (cart, couponCode) => {
           Cart,
           homeCollectionFee,
           totalCartAmount,
-          moneySaved: discount,
+          moneySaved: discount / 2,
           couponStatus: 'Coupon Applied',
-          Actualtotal: totalAmount,
+          Actualtotal: totalAmount / 2,
         };
       }
       // coupon expired
@@ -119,8 +118,12 @@ const getCartValue = async (cart, couponCode) => {
   }
   // No coupons passed
   homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+  totalCartAmount /= 2;
   totalCartAmount += homeCollectionFee;
-  return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon' };
+  const cartdetails = cartDetails.map((element) => {
+    return element.rate / 2;
+  });
+  return { cartdetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon' };
 };
 
 const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails, cart, couponCode) => {

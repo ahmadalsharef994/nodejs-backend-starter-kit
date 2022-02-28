@@ -103,11 +103,11 @@ const verifyOrder = catchAsync(async (req, res) => {
 });
 
 const cartValue = catchAsync(async (req, res) => {
-  const { cartDetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus, Cart, Actualtotal } =
+  const { cartdetails, homeCollectionFee, totalCartAmount, moneySaved, couponStatus, Cart, Actualtotal } =
     await labTestService.getCartValue(req.body.cart, req.body.couponCode);
-  let cart = cartDetails;
-  if (cartDetails) {
-    cart = cartDetails;
+  let cart = cartdetails;
+  if (cartdetails) {
+    cart = cartdetails;
   }
   if (Cart) {
     cart = Cart;

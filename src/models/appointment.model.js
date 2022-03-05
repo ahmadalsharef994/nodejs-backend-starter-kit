@@ -20,7 +20,6 @@ const AppointmentSchema = mongoose.Schema(
     },
     doctorSpeciality: {
       type: String,
-      required: true,
     },
     price: {
       type: Number,
@@ -28,15 +27,22 @@ const AppointmentSchema = mongoose.Schema(
     },
     paymentStatus: {
       type: String,
+      default: 'NOT PAID',
       required: true,
     },
     paymentType: {
       type: String,
-      required: true,
     },
     patientName: {
       type: String,
       required: true,
+    },
+    patientMobile: {
+      type: Number,
+      required: true,
+    },
+    patientMail: {
+      type: String,
     },
     slotId: {
       type: String,
@@ -48,12 +54,10 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     Status: {
-      type: String, // SCHEDULED, CANCELLED, FOLLOW-UP, REFERRED
-      required: true,
+      type: String,
     },
     Type: {
       type: String,
-      required: true,
     },
     StartTime: {
       type: Date,
@@ -70,7 +74,6 @@ const AppointmentSchema = mongoose.Schema(
     },
     UserDescription: {
       type: String,
-      required: true,
     },
     HealthIssue: {
       type: String,
@@ -103,6 +106,10 @@ const AppointmentSchema = mongoose.Schema(
     DoctorRescheduled: {
       type: String,
       default: null,
+    },
+    orderId: {
+      type: String,
+      required: true,
     },
   },
   {

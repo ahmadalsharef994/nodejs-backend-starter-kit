@@ -29,8 +29,30 @@ const razorpayCreateOrder = catchAsync(async (req, res) => {
     amount: response.amount,
   });
 });
+const razorpayAppointment = catchAsync(async (req, res) => {
+  const { orderId, appointmentId } = req.body;
+  const currency = 'INR';
+  const response = await razorpayPaymentServices.createAppointmentOrder(currency, appointmentId, orderId);
+  res.send(response);
+});
+const razorpayAppointmentVerification = catchAsync(async (req, res) => {
+  const calculatedSHADigest = await razorpayPaymentServices.calculateSHADigestAppointment(
+    req.body.orderCreationId,
+    req.body.razorpayOrderId,
+    req.body.razorpayPaymentId,
+    req.body.razorpaySignature
+  );
+  // console.log('x-razorpay-signature: ', req.headers['x-razorpay-signature']);
 
+  if (calculatedSHADigest === 'match') {
+    // console.log('request is legit');
+    return res.status(httpStatus.OK).json({ message: 'OK' });
+  }
+  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Signature' });
+});
 module.exports = {
   razorpayVerification,
   razorpayCreateOrder,
+  razorpayAppointment,
+  razorpayAppointmentVerification,
 };

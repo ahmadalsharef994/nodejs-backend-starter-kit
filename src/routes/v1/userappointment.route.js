@@ -24,5 +24,16 @@ router
 router
   .route('/:appointmentId/patient-feedback')
   .post(authuser(), validate(appointmentValidation.userFeedback), appointmentController.userFeedback);
+router
+  .route('/fetchdoctors-by-categories')
+  .post(
+    authuser(),
+    validate(appointmentValidation.getDoctorsByCategories),
+    userAppointmentController.getDoctorsByCategories
+  );
+router
+  .route('/bookingConfirmation')
+  .post(validate(appointmentValidation.bookingConfirmation), appointmentController.bookingConfirmation);
 router.route('/fetchHealthPackages').get(authuser(), userAppointmentController.fetchallHealthPackages);
+
 module.exports = router;

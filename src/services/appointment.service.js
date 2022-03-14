@@ -1,6 +1,7 @@
 /* eslint-disable no-param-reassign */
 const Agenda = require('agenda');
 const httpStatus = require('http-status');
+const short = require('short-uuid');
 const ApiError = require('../utils/ApiError');
 const {
   AppointmentSession,
@@ -11,6 +12,7 @@ const {
   AppointmentPreference,
   Feedback,
   UserBasic,
+  doctordetails,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
 const pusherService = require('../Microservices/pusherService');
@@ -121,18 +123,11 @@ const submitAppointmentDetails = async (
   userAuth,
   slotId,
   date,
-  status,
   bookingType,
-  documents,
-  description,
   issue,
-  doctorAction,
-  doctorReason,
-  userAction,
-  userReason,
-  rescheduled,
-  doctorRescheduleding,
-  labTest
+  patientname,
+  patientmobile,
+  patientmail
 ) => {
   let startTime = null;
   let endTime = null;
@@ -143,6 +138,10 @@ const submitAppointmentDetails = async (
   } catch (err) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
+  // eslint-disable-next-line object-shorthand
+  const Doctordetails = await doctordetails.findOne({ doctorId: doctorId });
+  const doctorname = Doctordetails.name;
+  const appointmentPrice = Doctordetails.appointmentPrice;
 
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
     const day = slotId.split('-')[1];
@@ -169,30 +168,30 @@ const submitAppointmentDetails = async (
   if (appointmentExist || startTime === null || endTime === null) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
-
-  const bookedAppointment = await Appointment.create({
-    AuthDoctor: doctorauth,
-    docid: doctorId,
-    slotId,
-    AuthUser: userAuth,
-    Status: status,
-    Type: bookingType,
-    StartTime: startTime,
-    EndTime: endTime,
-    UserDocument: documents,
-    UserDescription: description,
-    HealthIssue: issue,
-    DoctorAction: doctorAction,
-    DoctorReason: doctorReason,
-    UserAction: userAction,
-    UserReason: userReason,
-    isRescheduled: rescheduled,
-    DoctorRescheduleding: doctorRescheduleding,
-    LabTest: labTest,
-  });
-  agenda.start();
-  await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
-  return bookedAppointment;
+  const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
+  try {
+    const bookedAppointment = await Appointment.create({
+      AuthDoctor: doctorauth,
+      docid: doctorId,
+      doctorName: doctorname,
+      slotId,
+      AuthUser: userAuth,
+      Type: bookingType,
+      StartTime: startTime,
+      EndTime: endTime,
+      HealthIssue: issue,
+      price: appointmentPrice,
+      patientName: patientname,
+      patientMobile: patientmobile,
+      patientMail: patientmail,
+      orderId: orderid,
+    });
+    agenda.start();
+    await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
+    return { id: bookedAppointment.id, orderId: bookedAppointment.orderId };
+  } catch (error) {
+    return false;
+  }
 };
 
 const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, documents, status) => {
@@ -428,7 +427,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, star
       throw new ApiError(httpStatus.BAD_REQUEST, 'DateTime differences cannot be greater than 2 hours');
     }
   } else if (appointmentData && slotId && date) {
-    // if slotid and date provided
+    // if slotId and date provided
     await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
       const day = slotId.split('-')[1];
       const type = slotId.split('-')[0];
@@ -463,7 +462,34 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, star
 
   return result;
 };
+const getDoctorsByCategories = async (category) => {
+  const Doctordetails = await doctordetails.find({ specializations: { $in: [category] } });
+  const isVerified = async (doctorid) => {
+    const doctor = await VerifiedDoctors.findOne({ docid: doctorid });
+    if (doctor) {
+      return true;
+    }
+    return false;
+  };
+  const doctors = Doctordetails.filter(async (doctor) => {
+    isVerified(doctor.doctorId);
+    if (isVerified) {
+      return doctor;
+    }
+  });
+  if (doctors) {
+    return { doctorDetails: doctors };
+  }
+  throw new ApiError(httpStatus.NOT_FOUND, 'No doctors in this category');
+};
 
+const verifyAppointment = async (orderId, appointmentId) => {
+  const BookingDetails = await Appointment.findOne({ orderId });
+  if (appointmentId === `${BookingDetails._id}`) {
+    return { status: 'success', Message: 'Order confirmed', bookingDetails: BookingDetails, appointmentId };
+  }
+  return { status: 'failed', Message: 'Order not confirmed !' };
+};
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -484,4 +510,6 @@ module.exports = {
   doctorFeedback,
   cancelAppointment,
   rescheduleAppointment,
+  getDoctorsByCategories,
+  verifyAppointment,
 };

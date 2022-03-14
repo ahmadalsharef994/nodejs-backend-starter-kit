@@ -31,28 +31,18 @@ const joinAppointmentPatient = catchAsync(async (req, res) => {
 
 const bookAppointment = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  await appointmentService
-    .submitAppointmentDetails(
-      req.body.docId,
-      AuthData,
-      req.body.slotId,
-      req.body.date,
-      req.body.status,
-      req.body.bookingType,
-      req.body.documents,
-      req.body.description,
-      req.body.issue,
-      req.body.doctorAction,
-      req.body.doctorReason,
-      req.body.userAction,
-      req.body.userReason,
-      req.body.rescheduled,
-      req.body.doctorRescheduleding,
-      req.body.labTest
-    )
-    .then((result) => {
-      return res.status(httpStatus.CREATED).json({ message: 'Hurray! Appointment Booked', data: result });
-    });
+  const { id, orderId } = await appointmentService.submitAppointmentDetails(
+    req.body.docId,
+    AuthData,
+    req.body.slotId,
+    req.body.date,
+    req.body.bookingType,
+    req.body.issue,
+    req.body.patientName,
+    req.body.patientMobile,
+    req.body.patientMail
+  );
+  res.status(httpStatus.OK).json({ AppointmentId: id, orderId });
 });
 
 const getappointmentDetails = catchAsync(async (req, res) => {
@@ -227,6 +217,18 @@ const rescheduleBooking = catchAsync(async (req, res) => {
     });
 });
 
+const bookingConfirmation = catchAsync(async (req, res) => {
+  const { status, bookingDetails, Message, appointmentId } = await appointmentService.verifyAppointment(
+    req.body.orderId,
+    req.body.appointmentId
+  );
+  if (status === 'success') {
+    res.status(httpStatus.OK).json({ status, bookingDetails, Message, appointmentId });
+  } else {
+    res.status(httpStatus.CONFLICT).json({ reason: 'orderId not matched ', Message, status });
+  }
+});
+
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -248,4 +250,5 @@ module.exports = {
   getappointmentDetails,
   cancelBooking,
   rescheduleBooking,
+  bookingConfirmation,
 };

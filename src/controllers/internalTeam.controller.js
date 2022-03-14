@@ -59,9 +59,29 @@ const loginadmin = catchAsync(async (req, res) => {
   }
 });
 
+const addDoctorDetails = catchAsync(async (req, res) => {
+  const doctorDetails = await internalTeamService.addDoctorDetails(
+    req.body.doctorname,
+    req.body.doctorauthId,
+    req.body.Experience,
+    req.body.specializations,
+    req.body.doctorDegree,
+    req.body.doctorClinicAddress,
+    req.body.appointmentPrice,
+    req.body.doctorId,
+    req.SubjectId
+  );
+  if (doctorDetails) {
+    res.status(httpStatus.CREATED).json({ message: 'created', data: doctorDetails });
+  } else {
+    res.status(httpStatus[400]).json({ message: 'data that passed is not matching the requirements' });
+  }
+});
+
 module.exports = {
   verifydoctor,
   rejectdoctor,
   registeradmin,
   loginadmin,
+  addDoctorDetails,
 };

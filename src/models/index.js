@@ -29,3 +29,5 @@ module.exports.UserMember = require('./userMember.model');
 module.exports.VerifiedDoctors = require('./verifieddoctor');
 module.exports.VerifiedUser = require('./verifieduser.model');
 module.exports.HealthPackage = require('./healthpackage.model');
+module.exports.doctordetails = require('./doctordetails.model');
+module.exports.razorpayConsultation = require('./razorpay.consultation');

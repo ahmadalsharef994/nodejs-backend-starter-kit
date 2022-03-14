@@ -21,10 +21,10 @@ const bookAppointmentDetails = {
       docId: Joi.number().required(),
       slotId: Joi.string().required(),
       date: Joi.string().required(),
-      status: Joi.string().required(), // valid options needed
+      status: Joi.string(), // valid options needed
       bookingType: Joi.string().required().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
       documents: Joi.array(),
-      description: Joi.string().required(),
+      description: Joi.string(),
       issue: Joi.string().required(),
       doctorAction: Joi.string(),
       doctorReason: Joi.string(),
@@ -33,8 +33,11 @@ const bookAppointmentDetails = {
       rescheduled: Joi.boolean(),
       doctorRescheduleding: Joi.string(),
       labTest: Joi.array(),
+      patientName: Joi.string().required(),
+      patientMobile: Joi.number().required(),
+      patientMail: Joi.string().required(),
     })
-    .min(7)
+    .min(8)
     .max(15),
 };
 
@@ -151,7 +154,17 @@ const rescheduleAppointment = {
     .min(3)
     .max(3),
 };
-
+const getDoctorsByCategories = {
+  body: Joi.object().keys({
+    Category: Joi.string().required(),
+  }),
+};
+const bookingConfirmation = {
+  body: Joi.object().keys({
+    orderId: Joi.string().required(),
+    appointmentId: Joi.string().required(),
+  }),
+};
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -168,4 +181,6 @@ module.exports = {
   doctorFeedback,
   cancelAppointment,
   rescheduleAppointment,
+  getDoctorsByCategories,
+  bookingConfirmation,
 };

@@ -57,9 +57,23 @@ const loginadmin = {
   }),
 };
 
+const doctordetails = {
+  body: Joi.object().keys({
+    specializations: Joi.array().required(),
+    name: Joi.string().required(),
+    doctorauthId: Joi.string().required(),
+    Experience: Joi.number().required(),
+    doctorDegree: Joi.string().required(),
+    doctorClinicAddress: Joi.string().required(),
+    appointmentPrice: Joi.number().required(),
+    doctorId: Joi.number().required(),
+  }),
+};
+
 module.exports = {
   verifydoctor,
   rejectdoctor,
   registeradmin,
   loginadmin,
+  doctordetails,
 };

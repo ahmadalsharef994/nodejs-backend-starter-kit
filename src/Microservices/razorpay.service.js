@@ -4,7 +4,7 @@ const short = require('short-uuid');
 const httpStatus = require('http-status');
 // const { compareSync } = require('bcryptjs');
 const ApiError = require('../utils/ApiError');
-const { RazorpayPayment, GuestOrder } = require('../models');
+const { RazorpayPayment, GuestOrder, Appointment, razorpayConsultation } = require('../models');
 const { getCartValue } = require('../services/labTest.service');
 
 const razorpay = new Razorpay({
@@ -56,7 +56,48 @@ const createRazorpayOrder = async (currency, labTestOrderID, sessionID) => {
   }
 };
 
+const createAppointmentOrder = async (currency, appointmentid, orderId) => {
+  const { _id, price } = await Appointment.findOne({ orderId });
+  const options = {
+    amount: price * 100,
+    currency,
+    receipt: short.generate(),
+  };
+  try {
+    const response = await razorpay.orders.create(options);
+    response.amount /= 100;
+
+    const razorpayOrderID = response.id;
+    razorpayConsultation.create({
+      razorpayOrderID,
+      AppointmentOrderID: orderId,
+      amount: price,
+      currency,
+      appointmentId: _id,
+    });
+    return response;
+  } catch (err) {
+    throw new ApiError(httpStatus.NOT_FOUND);
+  }
+};
+
+const calculateSHADigestAppointment = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
+  const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+  shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
+  const calculatedSHADigest = shasum.digest('hex');
+  if (calculatedSHADigest === razorpaySignature) {
+    // console.log('request is legit');
+    await razorpayConsultation.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
+    await Appointment.findOneAndUpdate({ orderId: orderCreationId }, { $set: { paymentStatus: 'PAID' } });
+    return 'match';
+  }
+  // console.log('calculatedSHADigest: ', digest);
+  return 'no_match';
+};
+
 module.exports = {
   calculateSHADigest,
   createRazorpayOrder,
+  createAppointmentOrder,
+  calculateSHADigestAppointment,
 };

@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 /* const axios = require('axios'); */
-const { DoctorRejection } = require('../models');
+const { DoctorRejection, doctordetails } = require('../models');
 const { verifiedDoctorService, authService } = require('.');
 const ApiError = require('../utils/ApiError');
 
@@ -40,6 +40,31 @@ const rejectDoctorVerification = async (
   return rejectedVerification;
 };
 
+const addDoctorDetails = async (
+  doctorName,
+  doctorauth,
+  experience,
+  Specialaizations,
+  doctordegree,
+  doctorClincaddress,
+  appointmentprice,
+  doctorid,
+  adminauth
+) => {
+  const Doctordetails = await doctordetails.insertMany({
+    specializations: Specialaizations,
+    doctorname: doctorName,
+    doctorauthId: doctorauth,
+    Experience: experience,
+    doctorDegree: doctordegree,
+    doctorClinicAddress: doctorClincaddress,
+    appointmentPrice: appointmentprice,
+    doctorId: doctorid,
+    Adminauth: adminauth,
+  });
+  return Doctordetails;
+};
+
 /* async function getData(registrationNo) {
   try {
     let data = JSON.stringify({
@@ -75,4 +100,5 @@ module.exports = {
   acceptDoctorVerification,
   rejectDoctorVerification,
   // AutoverifyDoctorByBNMC,
+  addDoctorDetails,
 };

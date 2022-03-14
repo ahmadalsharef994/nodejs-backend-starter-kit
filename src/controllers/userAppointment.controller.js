@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, userAppointmentService } = require('../services');
+const { authService, userAppointmentService, appointmentService } = require('../services');
 const pick = require('../utils/pick');
 
 const upcomingAppointments = catchAsync(async (req, res) => {
@@ -52,11 +52,18 @@ const fetchallHealthPackages = catchAsync(async (req, res) => {
     res.status(httpStatus[400]).json({ message: 'something went wrong' });
   }
 });
-
+const getDoctorsByCategories = catchAsync(async (req, res) => {
+  const { doctorDetails } = await appointmentService.getDoctorsByCategories(req.body.Category);
+  if (doctorDetails.length > 0) {
+    res.status(httpStatus.OK).json(doctorDetails);
+  }
+  res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
+});
 module.exports = {
   upcomingAppointments,
   showAppointmentsByType,
   showPrescriptions,
   showLabTestOrders,
   fetchallHealthPackages,
+  getDoctorsByCategories,
 };

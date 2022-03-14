@@ -6,7 +6,6 @@ const googleStrategy = require('../utils/googleStrategy');
 const { authService, tokenService, otpServices, verifiedUserService, userProfile } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
-// const SessionCheck = require('../utils/SessionCheck');
 
 const createUser = catchAsync(async (req, res) => {
   const userId = await verifiedUserService.createVerifiedUser(req.body.mobile);
@@ -56,8 +55,8 @@ const register = catchAsync(async (req, res) => {
 });
 
 const login = catchAsync(async (req, res) => {
-  const { email, password } = req.body;
-  const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
+  const { username, password } = req.body;
+  const AuthData = await authService.loginAuthWithEmailAndPassword(username, password);
   const authtoken = await tokenService.generateUserToken(AuthData.id);
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;

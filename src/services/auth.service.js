@@ -122,12 +122,15 @@ const deleteAuthById = async (authId) => {
 
 /**
  * Login with email and password
- * @param {string} email
+ * @param {string} username
  * @param {string} password
  * @returns {Promise<Auth>}
  */
-const loginAuthWithEmailAndPassword = async (email, password) => {
-  const user = await getAuthByEmail(email);
+const loginAuthWithEmailAndPassword = async (username, password) => {
+  let user = await getAuthByEmail(username);
+  if (!user) {
+    user = await getAuthByPhone(username);
+  }
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }

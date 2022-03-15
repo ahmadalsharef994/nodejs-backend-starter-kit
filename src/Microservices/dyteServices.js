@@ -99,7 +99,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
   const isIntiated = await AppointmentSession.find({ appointmentid: appointmentID });
   if (isIntiated.length > 0) {
-    throw new ApiError(400, 'There was Already A Session Intiated For This Appointment');
+    throw new ApiError(400, 'There was Already A Session Intiated For This Appointment Use appointment id to Live Join !');
   }
   const AppointmentSessiondata = await AppointmentSession.create({
     appointmentid: appointmentID,

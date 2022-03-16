@@ -59,6 +59,10 @@ const AppointmentSchema = mongoose.Schema(
     Type: {
       type: String,
     },
+    Date: {
+      type: String,
+      required: true,
+    },
     StartTime: {
       type: Date,
       required: true,

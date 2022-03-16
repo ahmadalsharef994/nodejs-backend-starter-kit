@@ -89,7 +89,7 @@ const showAvailableFollowUps = catchAsync(async (req, res) => {
 });
 
 const showAvailableAppointments = catchAsync(async (req, res) => {
-  const result = await appointmentService.getAvailableAppointmentSlots(req.body.docId);
+  const result = await appointmentService.getAvailableAppointmentSlots(req.body.docId, req.body.date);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
 

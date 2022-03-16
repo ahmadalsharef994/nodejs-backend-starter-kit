@@ -169,6 +169,8 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
+  let appointmentDate = `${new Date(date)}`;
+  appointmentDate = appointmentDate.substring(4, 15);
   try {
     const bookedAppointment = await Appointment.create({
       AuthDoctor: doctorauth,
@@ -177,6 +179,7 @@ const submitAppointmentDetails = async (
       slotId,
       AuthUser: userAuth,
       Type: bookingType,
+      Date: appointmentDate,
       StartTime: startTime,
       EndTime: endTime,
       HealthIssue: issue,
@@ -251,7 +254,9 @@ const getUpcomingAppointments = async (doctorId, limit) => {
 
 const getAppointmentsByType = async (doctorId, filter, options) => {
   if (filter.Type === 'ALL') {
-    const result = await Appointment.paginate({ docid: doctorId }, options);
+    const data = await Appointment.find({ docid: doctorId, paymentStatus: 'PAID' });
+    const result = await Appointment.paginate(filter, options);
+    result.results = data;
     return result;
   }
   const result = await Appointment.paginate(filter, options);
@@ -263,12 +268,20 @@ const getFollowupsById = async (appointmentId) => {
   return result;
 };
 
-const getAvailableAppointmentSlots = async (doctorId) => {
+const getAvailableAppointmentSlots = async (doctorId, date) => {
+  const getDayOfWeek = (requiredDate) => {
+    const dayOfWeek = new Date(requiredDate).getDay();
+    // eslint-disable-next-line no-restricted-globals
+    return isNaN(dayOfWeek) ? null : ['SUN_A', 'MON_A', 'TUE_A', 'WED_A', 'THU_A', 'FRI_A', 'SAT_A'][dayOfWeek];
+  };
+
   const AllAppointmentSlots = await appointmentPreferenceService.getappointments(doctorId);
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
   }
-  const bookedAppointmentSlots = await Appointment.find({ docid: doctorId, Status: 'booked' });
+  let appointmentDate = `${new Date(date)}`;
+  appointmentDate = appointmentDate.substring(4, 15);
+  const bookedAppointmentSlots = await Appointment.find({ docid: doctorId, paymentStatus: 'PAID', Date: appointmentDate });
   const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
   const result = {};
   for (let i = 0; i < 7; i += 1) {
@@ -276,7 +289,19 @@ const getAvailableAppointmentSlots = async (doctorId) => {
       (item) => !bookedSlotIds.includes(item.slotId)
     );
   }
-  return result;
+  const Day = getDayOfWeek(date);
+  let allslots = [];
+  // eslint-disable-next-line array-callback-return
+  Object.keys(result).map((k) => {
+    if (k === Day) {
+      allslots = result[k];
+    }
+  });
+  const res = allslots.filter(function (slots) {
+    return !bookedSlotIds.includes(slots);
+  });
+
+  return res;
 };
 
 const getAvailableFollowUpSlots = async (doctorId) => {

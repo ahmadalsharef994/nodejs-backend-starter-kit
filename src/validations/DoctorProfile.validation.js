@@ -5,6 +5,7 @@ const BasicDoctorDetails = {
     gender: Joi.string().required().valid('M', 'F', 'O'),
     dob: Joi.date().required(),
     pincode: Joi.number().required(),
+    appointmentPrice: Joi.number().required(),
     state: Joi.string()
       .required()
       .valid(

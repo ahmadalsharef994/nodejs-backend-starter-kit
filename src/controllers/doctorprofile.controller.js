@@ -26,7 +26,7 @@ const fetchstastics = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ AveragePatientsPerDay, Revenue, Income });
 });
 
-const submitbasicdetails = async (req, res) => {
+const submitbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const resultData = await doctorprofileService.submitbasicdetails(req.body, AuthData);
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
@@ -43,9 +43,9 @@ const submitbasicdetails = async (req, res) => {
       optionalchallenge: challenge.optionalChallenge,
     });
   }
-};
+});
 
-const submitprofilepicture = async (req) => {
+const submitprofilepicture = catchAsync(async (req) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   let profilePhoto = '';
   try {
@@ -54,9 +54,9 @@ const submitprofilepicture = async (req) => {
     profilePhoto = null;
   }
   await doctorprofileService.submitprofilepicture(profilePhoto, AuthData);
-};
+});
 
-const updateprofilepicture = async (req, res) => {
+const updateprofilepicture = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
   const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
@@ -65,7 +65,7 @@ const updateprofilepicture = async (req, res) => {
   } else {
     res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
   }
-};
+});
 
 const fetchbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);

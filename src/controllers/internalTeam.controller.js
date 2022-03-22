@@ -78,10 +78,30 @@ const addDoctorDetails = catchAsync(async (req, res) => {
   }
 });
 
+const unverifiedDoctors = catchAsync(async (req, res) => {
+  const result = await internalTeamService.unverifiedDoctors();
+  if (result) {
+    res.status(httpStatus.OK).json({ result });
+  } else {
+    res.status(httpStatus[400]).json({ Message: 'DOCTORS NOT FOUND' });
+  }
+});
+const Doctorsprofile = catchAsync(async (req, res) => {
+  const { basicDetails, educationDetails, clinicDetails, experienceDetails } = await internalTeamService.fetchDoctorProfile(
+    req.query.id
+  );
+  if (basicDetails || educationDetails || clinicDetails || experienceDetails) {
+    res.json({ basicDetails, educationDetails, clinicDetails, experienceDetails });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).send('USER WITH THIS ID NOT FOUND');
+  }
+});
 module.exports = {
   verifydoctor,
   rejectdoctor,
   registeradmin,
   loginadmin,
   addDoctorDetails,
+  unverifiedDoctors,
+  Doctorsprofile,
 };

@@ -22,7 +22,7 @@ const bookAppointmentDetails = {
       slotId: Joi.string().required(),
       date: Joi.string().required(),
       status: Joi.string(), // valid options needed
-      bookingType: Joi.string().required().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST'),
+      bookingType: Joi.string().required().valid('TODAY', 'REFERRED', 'CANCELLED', 'SCHEDULED'),
       documents: Joi.array(),
       description: Joi.string(),
       issue: Joi.string().required(),

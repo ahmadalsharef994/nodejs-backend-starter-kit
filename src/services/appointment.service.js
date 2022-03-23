@@ -129,6 +129,19 @@ const submitAppointmentDetails = async (
   patientmobile,
   patientmail
 ) => {
+  const users = await UserBasic.find({ auth: `${userAuth._id}` }, { auth: 1, dob: 1, gender: 1 });
+
+  let Gender = '';
+  let age = 0;
+  if (users) {
+    Gender = users[0].gender;
+    age = new Date().getFullYear() - users[0].dob.getFullYear();
+  } else {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'IN ORDER TO COMPLETE YOUR APPOINTMENT BOOKING YOU NEED TO COMPLETE YOUR BASIC PROFILE FIRST !'
+    );
+  }
   let startTime = null;
   let endTime = null;
   let doctorauth = null;
@@ -171,6 +184,7 @@ const submitAppointmentDetails = async (
   const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
   let appointmentDate = `${new Date(date)}`;
   appointmentDate = appointmentDate.substring(4, 15);
+
   try {
     const bookedAppointment = await Appointment.create({
       AuthDoctor: doctorauth,
@@ -182,6 +196,8 @@ const submitAppointmentDetails = async (
       Date: appointmentDate,
       StartTime: startTime,
       EndTime: endTime,
+      Gender,
+      age,
       HealthIssue: issue,
       price: appointmentPrice,
       patientName: patientname,
@@ -244,12 +260,18 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
 
 const getUpcomingAppointments = async (doctorId, limit) => {
   const result = await Appointment.find(
-    { docid: doctorId, Status: 'booked' },
-    { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1 }
-  )
-    .limit(parseInt(limit, 10))
-    .sort([['StartTime', 1]]);
-  return result;
+    { docid: doctorId, paymentStatus: 'PAID' },
+    { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1, patientName: 1, HealthIssue: 1, age: 1, gender: 1 }
+  ).sort([['StartTime', 1]]);
+  const currentTime = new Date();
+  // eslint-disable-next-line array-callback-return
+  let res = result.filter((appointment) => {
+    if (appointment.StartTime > currentTime) {
+      return appointment;
+    }
+  });
+  res = res.slice(0, limit);
+  return res;
 };
 
 const getAppointmentsByType = async (doctorId, filter, options) => {
@@ -258,6 +280,10 @@ const getAppointmentsByType = async (doctorId, filter, options) => {
     const result = await Appointment.paginate(filter, options);
     result.results = data;
     return result;
+  }
+  if (filter.Type === 'CANCELLED') {
+    const res = await Appointment.paginate({ Status: 'cancelled' }, filter, options);
+    return res;
   }
   const result = await Appointment.paginate(filter, options);
   return result;

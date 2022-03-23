@@ -1,7 +1,7 @@
 const { Prescription, Appointment, ThyrocareOrder, HealthPackage } = require('../models');
 
 const getNextAppointment = async (auth, limit) => {
-  const result = await Appointment.find({ AuthUser: auth, Status: 'booked' })
+  const result = await Appointment.find({ AuthUser: auth, paymentStatus: 'PAID' })
     .limit(parseInt(limit, 10))
     .sort([['StartTime', 1]]);
   return result;
@@ -11,10 +11,10 @@ const getAppointmentsByType = async (filter, options) => {
   if (filter.Type === 'ALL') {
     // eslint-disable-next-line no-param-reassign
     delete filter.Type;
-    const result = await Appointment.paginate(filter, options);
+    const result = await Appointment.paginate({ paymentStatus: 'PAID' }, filter, options);
     return result;
   }
-  const result = await Appointment.paginate(filter, options);
+  const result = await Appointment.paginate({ paymentStatus: 'PAID' }, filter, options);
   return result;
 };
 

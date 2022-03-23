@@ -53,6 +53,14 @@ const AppointmentSchema = mongoose.Schema(
       ref: Auth,
       required: true,
     },
+    Gender: {
+      type: String,
+      required: true,
+    },
+    age: {
+      type: Number,
+      required: true,
+    },
     Status: {
       type: String,
     },

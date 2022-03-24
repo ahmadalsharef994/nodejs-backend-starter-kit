@@ -99,32 +99,28 @@ const unverifiedDoctors = async () => {
 };
 
 const fetchDoctorProfile = async (id) => {
-  try {
-    let basicDetails = await DoctorBasic.find({ auth: `${id}` });
-    let educationDetails = await DoctorEducation.find({ auth: `${id}` });
-    let clinicDetails = await DoctorClinic.find({ auth: `${id}` });
-    let experienceDetails = await DoctorExperience.find({ auth: `${id}` });
-    let documentDetails = await Document.findOne({ auth: `${id}` });
-    if (basicDetails.length === 0) {
-      basicDetails = 'NOT FOUND';
-    }
-    if (educationDetails.length === 0) {
-      educationDetails = 'NOT FOUND';
-    }
-    if (clinicDetails.length === 0) {
-      clinicDetails = 'NOT FOUND';
-    }
-    if (experienceDetails.length === 0) {
-      experienceDetails = 'NOT FOUND';
-    }
-    if (documentDetails.length === 0) {
-      documentDetails = 'NOT FOUND';
-    }
-    const res = { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails };
-    return res;
-  } catch (err) {
-    return err;
+  let basicDetails = await DoctorBasic.find({ auth: `${id}` });
+  let educationDetails = await DoctorEducation.find({ auth: `${id}` });
+  let clinicDetails = await DoctorClinic.find({ auth: `${id}` });
+  let experienceDetails = await DoctorExperience.find({ auth: `${id}` });
+  let documentDetails = await Document.findOne({ auth: `${id}` });
+  if (basicDetails.length === 0) {
+    basicDetails = 'NOT FOUND';
   }
+  if (educationDetails === null || educationDetails === undefined || educationDetails.length === 0) {
+    educationDetails = 'NOT FOUND';
+  }
+  if (clinicDetails === null || clinicDetails === undefined || clinicDetails.length === 0) {
+    clinicDetails = 'NOT FOUND';
+  }
+  if (experienceDetails === null || experienceDetails === undefined || experienceDetails.length === 0) {
+    experienceDetails = 'NOT FOUND';
+  }
+  if (documentDetails === null || documentDetails === undefined || documentDetails.length === 0) {
+    documentDetails = 'NOT FOUND';
+  }
+  const res = { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails };
+  return res;
 };
 /* async function getData(registrationNo) {
   try {

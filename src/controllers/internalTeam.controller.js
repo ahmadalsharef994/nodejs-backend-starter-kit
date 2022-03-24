@@ -87,11 +87,10 @@ const unverifiedDoctors = catchAsync(async (req, res) => {
   }
 });
 const Doctorsprofile = catchAsync(async (req, res) => {
-  const { basicDetails, educationDetails, clinicDetails, experienceDetails } = await internalTeamService.fetchDoctorProfile(
-    req.query.id
-  );
-  if (basicDetails || educationDetails || clinicDetails || experienceDetails) {
-    res.json({ basicDetails, educationDetails, clinicDetails, experienceDetails });
+  const { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails } =
+    await internalTeamService.fetchDoctorProfile(req.query.id);
+  if (basicDetails || educationDetails || clinicDetails || experienceDetails || documentDetails) {
+    res.json({ basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails });
   } else {
     res.status(httpStatus.BAD_REQUEST).send('USER WITH THIS ID NOT FOUND');
   }

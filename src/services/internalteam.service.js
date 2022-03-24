@@ -9,6 +9,7 @@ const {
   DoctorClinic,
   DoctorEducation,
   DoctorExperience,
+  Document,
 } = require('../models');
 const { verifiedDoctorService, authService } = require('.');
 const ApiError = require('../utils/ApiError');
@@ -103,6 +104,7 @@ const fetchDoctorProfile = async (id) => {
     let educationDetails = await DoctorEducation.find({ auth: `${id}` });
     let clinicDetails = await DoctorClinic.find({ auth: `${id}` });
     let experienceDetails = await DoctorExperience.find({ auth: `${id}` });
+    let documentDetails = await Document.findOne({ auth: `${id}` });
     if (basicDetails.length === 0) {
       basicDetails = 'NOT FOUND';
     }
@@ -115,7 +117,10 @@ const fetchDoctorProfile = async (id) => {
     if (experienceDetails.length === 0) {
       experienceDetails = 'NOT FOUND';
     }
-    const res = { basicDetails, educationDetails, clinicDetails, experienceDetails };
+    if (documentDetails.length === 0) {
+      documentDetails = 'NOT FOUND';
+    }
+    const res = { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails };
     return res;
   } catch (err) {
     return err;

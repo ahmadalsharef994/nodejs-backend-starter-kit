@@ -261,7 +261,7 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
 const getUpcomingAppointments = async (doctorId, limit) => {
   const result = await Appointment.find(
     { docid: doctorId, paymentStatus: 'PAID' },
-    { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1, patientName: 1, HealthIssue: 1, age: 1, gender: 1 }
+    { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1, patientName: 1, HealthIssue: 1, age: 1, Gender: 1 }
   ).sort([['StartTime', 1]]);
   const currentTime = new Date();
   // eslint-disable-next-line array-callback-return

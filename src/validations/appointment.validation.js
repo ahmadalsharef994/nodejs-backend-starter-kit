@@ -62,7 +62,8 @@ const assignfollowupDetails = {
 const getFollowups = {
   params: Joi.object()
     .keys({
-      appointmentId: Joi.string().custom(objectId),
+      appointmentId: Joi.string(),
+      limit: Joi.string(),
     })
     .min(1)
     .max(1),

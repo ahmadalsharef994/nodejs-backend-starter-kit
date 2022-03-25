@@ -71,7 +71,7 @@ const assignFollowup = catchAsync(async (req, res) => {
 });
 
 const showFollowUpsById = catchAsync(async (req, res) => {
-  await appointmentService.getFollowupsById(req.params.appointmentId).then((result) => {
+  await appointmentService.getFollowupsById(req.query.limit).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
     }

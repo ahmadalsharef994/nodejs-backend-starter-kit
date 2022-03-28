@@ -28,6 +28,15 @@ const FollowupSchema = mongoose.Schema(
       type: Date,
       required: true,
     },
+    Gender: {
+      type: String,
+      required: true,
+      default: 'Not Mentioned',
+    },
+    Date: {
+      type: String,
+      required: true,
+    },
     FollowupNo: {
       type: Number,
       required: true,

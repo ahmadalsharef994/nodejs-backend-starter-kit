@@ -130,7 +130,14 @@ const submitAppointmentDetails = async (
   patientmail
 ) => {
   const users = await UserBasic.find({ auth: `${userAuth._id}` }, { auth: 1, dob: 1, gender: 1 });
-
+  const appointmentDate = new Date(date).toDateString();
+  if (bookingType === 'TODAY') {
+    const currentdate = new Date().toDateString();
+    const bookingdate = new Date(date).toDateString();
+    if (currentdate !== bookingdate) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Your booking date is not todays date');
+    }
+  }
   let Gender = '';
   let age = 0;
   if (users) {
@@ -151,8 +158,7 @@ const submitAppointmentDetails = async (
   } catch (err) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
-  // eslint-disable-next-line object-shorthand
-  const Doctordetails = await doctordetails.findOne({ doctorId: doctorId });
+  const Doctordetails = await doctordetails.findOne({ doctorId });
   const doctorname = Doctordetails.name;
   const appointmentPrice = Doctordetails.appointmentPrice;
 
@@ -182,8 +188,6 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
-  let appointmentDate = `${new Date(date)}`;
-  appointmentDate = appointmentDate.substring(4, 15);
 
   try {
     const bookedAppointment = await Appointment.create({
@@ -245,6 +249,7 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
   if (followupExist || startTime === null || endTime === null) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Followup Already Booked');
   }
+  const appointmentDate = new Date(date).toDateString();
   const assignedFollowup = await Followup.create({
     Appointment: AppointmentData,
     docid: doctorId,
@@ -254,43 +259,64 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
     FollowupNo: previousFollwups.length + 1,
     FollowupDocs: documents,
     Status: status,
+    Date: appointmentDate,
+    Gender: AppointmentData.Gender,
   });
   return assignedFollowup;
 };
 
 const getUpcomingAppointments = async (doctorId, limit) => {
-  const result = await Appointment.find(
-    { docid: doctorId, paymentStatus: 'PAID' },
-    { AuthUser: 1, StartTime: 1, EndTime: 1, Type: 1, Status: 1, patientName: 1, HealthIssue: 1, age: 1, Gender: 1 }
-  ).sort([['StartTime', 1]]);
-  const currentTime = new Date();
-  // eslint-disable-next-line array-callback-return
-  let res = result.filter((appointment) => {
-    if (appointment.StartTime > currentTime) {
-      return appointment;
-    }
-  });
-  res = res.slice(0, limit);
+  const res = await Appointment.find({
+    docid: doctorId,
+    paymentStatus: 'PAID',
+    Status: { $nin: 'cancelled' },
+    StartTime: { $gte: new Date() },
+  })
+    .sort([['StartTime', 1]])
+    .limit(parseInt(limit, 10));
   return res;
 };
 
 const getAppointmentsByType = async (doctorId, filter, options) => {
   if (filter.Type === 'ALL') {
-    const data = await Appointment.find({ docid: doctorId, paymentStatus: 'PAID' });
-    const result = await Appointment.paginate(filter, options);
-    result.results = data;
+    const result = await Appointment.paginate({ paymentStatus: 'PAID' }, filter, options);
     return result;
   }
   if (filter.Type === 'CANCELLED') {
-    const res = await Appointment.paginate({ Status: 'cancelled' }, filter, options);
+    const res = await Appointment.paginate({ Status: 'cancelled', docid: doctorId }, filter, options);
     return res;
   }
-  const result = await Appointment.paginate(filter, options);
-  return result;
+  if (filter.Type === 'PAST') {
+    const result = await Appointment.paginate(
+      { StartTime: { $lt: new Date() }, paymentStatus: 'PAID', docid: doctorId, Status: { $nin: 'cancelled' } },
+      filter,
+      options
+    );
+    return result;
+  }
+  if (filter.Type === 'TODAY') {
+    const result = await Appointment.paginate(
+      { Date: new Date().toDateString(), paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      filter,
+      options
+    );
+    return result;
+  }
+  if (filter.Type === 'REFERRED') {
+    const result = await Appointment.paginate(
+      { Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      filter,
+      options
+    );
+    return result;
+  }
 };
 
-const getFollowupsById = async (appointmentId) => {
-  const result = await Followup.find({ Appointment: appointmentId }).sort([['StartTime', 1]]);
+const getFollowupsById = async (limit) => {
+  const count = parseInt(limit, 10);
+  const result = await Followup.find()
+    .sort([['StartTime', 1]])
+    .limit(count);
   return result;
 };
 
@@ -305,8 +331,7 @@ const getAvailableAppointmentSlots = async (doctorId, date) => {
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
   }
-  let appointmentDate = `${new Date(date)}`;
-  appointmentDate = appointmentDate.substring(4, 15);
+  const appointmentDate = new Date(date).toDateString();
   const bookedAppointmentSlots = await Appointment.find({ docid: doctorId, paymentStatus: 'PAID', Date: appointmentDate });
   const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
   const result = {};

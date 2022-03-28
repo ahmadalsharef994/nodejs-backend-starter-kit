@@ -27,4 +27,6 @@ router
   .post(authAdmin(), validate(InternalTeamValidator.doctordetails), InternalTeamController.addDoctorDetails);
 router.route('/fetch-unverified-doctors').get(authAdmin(), InternalTeamController.unverifiedDoctors);
 router.route('/fetch-unverified-doctors-profile').get(authAdmin(), InternalTeamController.Doctorsprofile);
+router.route('/verified-doctors').get(authAdmin(), InternalTeamController.verifiedDoctors);
+router.route('/rejected-doctors').get(authAdmin(), InternalTeamController.rejectedDoctors);
 module.exports = router;

@@ -14,28 +14,7 @@ const rejectdoctor = {
     educationDetails: Joi.boolean().required(),
     experienceDetails: Joi.boolean().required(),
     payoutdetails: Joi.boolean().required(),
-    rejectionMsg: Joi.array()
-      .items(
-        Joi.string().valid(
-          'BSC01',
-          'BSC02',
-          'BSC03',
-          'BSC04',
-          'BSC05',
-          'BSC06',
-          'BSC07',
-          'EDU01',
-          'EDU02',
-          'EDU03',
-          'EXP01',
-          'EXP02',
-          'EXP03',
-          'PAY01',
-          'PAY02'
-        )
-      )
-      .required(),
-    customMsg: Joi.string(),
+    rejectionMsg: Joi.string().required(),
   }),
 };
 

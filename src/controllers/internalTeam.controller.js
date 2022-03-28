@@ -90,8 +90,22 @@ const Doctorsprofile = catchAsync(async (req, res) => {
   const { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails } =
     await internalTeamService.fetchDoctorProfile(req.query.id);
   if (basicDetails || educationDetails || clinicDetails || experienceDetails || documentDetails) {
-    res.json({ basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails });
+    res.json({
+      basicDetails,
+      educationDetails,
+      clinicDetails,
+      experienceDetails,
+      documentDetails,
+    });
   }
+});
+const verifiedDoctors = catchAsync(async (req, res) => {
+  const result = await internalTeamService.verfieddoctors();
+  res.status(httpStatus.OK).json({ result });
+});
+const rejectedDoctors = catchAsync(async (req, res) => {
+  const result = await internalTeamService.RejectedDoctors();
+  res.status(httpStatus.OK).json({ result });
 });
 module.exports = {
   verifydoctor,
@@ -101,4 +115,6 @@ module.exports = {
   addDoctorDetails,
   unverifiedDoctors,
   Doctorsprofile,
+  verifiedDoctors,
+  rejectedDoctors,
 };

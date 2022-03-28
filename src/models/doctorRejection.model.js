@@ -25,7 +25,7 @@ const DoctorRejectionSchema = mongoose.Schema(
       required: true,
     },
     rejectionMsg: {
-      type: Array,
+      type: String,
       required: true,
     },
     customMsg: {

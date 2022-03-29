@@ -83,28 +83,23 @@ const unverifiedDoctors = async () => {
     { role: { $in: ['doctor'] } },
     { _id: 1, fullname: 1, isEmailVerified: 1, isMobileVerified: 1, isbanned: 1 }
   );
-  const verifiedlist = await VerifiedDoctors.find({}, { doctorauthid: 1, _id: 0 });
-  const rejectedlist = await DoctorRejection.find({}, { doctorAuthId: 1, _id: 0 });
-  const verifiedDoctors = [];
-  verifiedlist.forEach((id) => {
-    verifiedDoctors.push(id.doctorauthid);
+  const verified = await VerifiedDoctors.find({}, { doctorauthid: 1 });
+  const unverified = await DoctorRejection.find({}, { doctorAuthId: 1 });
+  const verfieddoctors = [];
+  verified.forEach((item) => {
+    verfieddoctors.push(`${item.doctorauthid}`);
   });
-  const rejectedDoctors = [];
-  rejectedlist.forEach((id) => {
-    rejectedDoctors.push(`${id.doctorAuthId}`);
+  const unverfieddoctors = [];
+  unverified.forEach((item) => {
+    unverfieddoctors.push(`${item.doctorAuthId}`);
   });
-  const Doctors = [];
-  doctorslist.forEach((id) => {
-    Doctors.push(id._id);
-  });
-
   // eslint-disable-next-line array-callback-return
-  const Unverifieddoctors = doctorslist.filter((item) => {
-    if (verifiedDoctors.includes(`${item._id}`) === false || rejectedDoctors.includes(`${item._id}`) === false) {
+  const result = doctorslist.filter((item) => {
+    if (!verfieddoctors.includes(`${item._id}`) && !unverfieddoctors.includes(`${item._id}`)) {
       return item;
     }
   });
-  return Unverifieddoctors;
+  return result;
 };
 
 const fetchDoctorProfile = async (id) => {

@@ -80,11 +80,7 @@ const addDoctorDetails = catchAsync(async (req, res) => {
 
 const unverifiedDoctors = catchAsync(async (req, res) => {
   const result = await internalTeamService.unverifiedDoctors();
-  if (result) {
-    res.status(httpStatus.OK).json({ result });
-  } else {
-    res.status(httpStatus[400]).json({ Message: 'DOCTORS NOT FOUND' });
-  }
+  res.status(httpStatus.OK).json({ result });
 });
 const Doctorsprofile = catchAsync(async (req, res) => {
   const { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails } =

@@ -108,6 +108,12 @@ const fetchDoctorProfile = async (id) => {
   let clinicDetails = await DoctorClinic.find({ auth: `${id}` });
   let experienceDetails = await DoctorExperience.find({ auth: `${id}` });
   let documentDetails = await Document.findOne({ auth: `${id}` });
+  let { fullname } = await Auth.findById(`${id}`);
+  // eslint-disable-next-line no-console
+  console.log(fullname);
+  if (!fullname) {
+    fullname = 'NOT FOUND';
+  }
   if (basicDetails.length === 0) {
     basicDetails = 'NOT FOUND';
   }
@@ -132,7 +138,7 @@ const fetchDoctorProfile = async (id) => {
     educationDetails = educationDetails[0];
   }
 
-  const res = { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails };
+  const res = { fullname, basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails };
   return res;
 };
 

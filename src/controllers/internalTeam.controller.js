@@ -83,10 +83,11 @@ const unverifiedDoctors = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).json({ result });
 });
 const Doctorsprofile = catchAsync(async (req, res) => {
-  const { basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails } =
+  const { fullname, basicDetails, educationDetails, clinicDetails, experienceDetails, documentDetails } =
     await internalTeamService.fetchDoctorProfile(req.query.id);
   if (basicDetails || educationDetails || clinicDetails || experienceDetails || documentDetails) {
     res.json({
+      fullname,
       basicDetails,
       educationDetails,
       clinicDetails,

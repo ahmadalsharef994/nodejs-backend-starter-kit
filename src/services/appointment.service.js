@@ -159,7 +159,7 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
   const Doctordetails = await doctordetails.findOne({ doctorId });
-  const doctorname = Doctordetails.name;
+  const doctorname = Doctordetails.doctorname;
   const appointmentPrice = Doctordetails.appointmentPrice;
 
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
@@ -188,7 +188,6 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
-
   try {
     const bookedAppointment = await Appointment.create({
       AuthDoctor: doctorauth,

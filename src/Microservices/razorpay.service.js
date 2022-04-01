@@ -3,6 +3,7 @@ const Razorpay = require('razorpay');
 const short = require('short-uuid');
 const httpStatus = require('http-status');
 // const { compareSync } = require('bcryptjs');
+const axios = require('axios');
 const ApiError = require('../utils/ApiError');
 const { RazorpayPayment, GuestOrder, Appointment, razorpayConsultation } = require('../models');
 const { getCartValue } = require('../services/labTest.service');
@@ -95,9 +96,79 @@ const calculateSHADigestAppointment = async (orderCreationId, razorpayOrderId, r
   return 'no_match';
 };
 
+const withdrawFromWallet = async (options) => {
+  let body = {
+    name: options.name,
+    email: options.email,
+    contact: options.contact,
+  };
+  const contact = await axios
+    .post(`https://api.razorpay.com/v1/contacts`, body, {
+      auth: {
+        username: process.env.RAZORPAY_KEY_ID,
+        password: process.env.RAZORPAY_KEY_SECRET,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      throw new ApiError(400, 'Error Creating Contact');
+    });
+
+  body = {
+    contact_id: contact.id,
+    account_type: 'bank_account',
+    bank_account: {
+      name: options.name,
+      ifsc: options.ifsc,
+      account_number: options.account_number,
+    },
+  };
+
+  const fundAccount = await axios
+    .post(`https://api.razorpay.com/v1/fund_accounts`, body, {
+      auth: {
+        username: process.env.RAZORPAY_KEY_ID,
+        password: process.env.RAZORPAY_KEY_SECRET,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      throw new ApiError(400, 'Error Creating Fund Account');
+    });
+
+  body = {
+    account_number: options.account_number,
+    fund_account_id: fundAccount.id,
+    amount: options.amount,
+    currency: 'INR',
+    mode: 'IMPS',
+    purpose: 'payout',
+  };
+
+  const payout = await axios
+    .post(`https://api.razorpay.com/v1/payouts`, body, {
+      auth: {
+        username: process.env.RAZORPAY_KEY_ID,
+        password: process.env.RAZORPAY_KEY_SECRET,
+      },
+    })
+    .then((response) => {
+      return response.data;
+    })
+    .catch(() => {
+      throw new ApiError(400, 'Error Paying Out');
+    });
+  return { contact, fundAccount, payout };
+};
+
 module.exports = {
   calculateSHADigest,
   createRazorpayOrder,
   createAppointmentOrder,
   calculateSHADigestAppointment,
+  withdrawFromWallet,
 };

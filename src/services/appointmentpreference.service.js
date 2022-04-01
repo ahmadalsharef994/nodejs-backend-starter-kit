@@ -29,7 +29,13 @@ const slotOverlap = (timeSlots) => {
   }
   return false;
 };
-
+const checkforDoctorPreference = async (AuthData) => {
+  const preference = await AppointmentPreference.find({ doctorAuthId: AuthData._id });
+  if (typeof preference[0] === 'object') {
+    return preference;
+  }
+  return null;
+};
 const checkForAppointmentPrice = async (AuthData) => {
   const basicDetails = await doctorprofileService.fetchbasicdetails(AuthData);
   if (!basicDetails || !basicDetails.appointmentPrice) {
@@ -178,4 +184,5 @@ module.exports = {
   getfollowups,
   getappointments,
   slotOverlap,
+  checkforDoctorPreference,
 };

@@ -206,6 +206,15 @@ const notifications = catchAsync(async (req, res) => {
   }
 });
 
+const updateClinicDetails = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'Clinic Timings Updated' });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
+  }
+});
+
 module.exports = {
   fetchstastics,
   submitbasicdetails,
@@ -223,4 +232,5 @@ module.exports = {
   fetchprofiledetails,
   addConsultationfee,
   notifications,
+  updateClinicDetails,
 };

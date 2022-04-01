@@ -225,6 +225,11 @@ const notifications = {
     offersAndDiscounts: Joi.boolean().required(),
   }),
 };
+const timings = {
+  body: Joi.object().keys({
+    timing: Joi.array().required(),
+  }),
+};
 
 const ClinicDoctorDetails = {
   body: Joi.object().keys({
@@ -233,7 +238,7 @@ const ClinicDoctorDetails = {
     AddressSecondline: Joi.string().required(),
     clinicTelephone: Joi.number().required(),
     pincode: Joi.number().required(),
-    timing: Joi.array().required(),
+    timing: Joi.array(),
   }),
 };
 
@@ -255,4 +260,5 @@ module.exports = {
   PayoutsDoctorDetails,
   addConsultationfee,
   notifications,
+  timings,
 };

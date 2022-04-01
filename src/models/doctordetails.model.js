@@ -8,7 +8,7 @@ const DoctorDetailsSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
-    name: {
+    doctorname: {
       type: String,
       required: true,
     },

@@ -10,6 +10,7 @@ const {
   doctorprofileService,
   documentService,
   internalTeamService,
+  appointmentPreferenceService,
 } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
@@ -52,6 +53,11 @@ const getOnboardingChallenge = async (AuthData) => {
       challenge = 'ONBOARDING_SUCCESS';
     }
     optionalChallenge = 'CLINIC_DETAILS';
+  } else if (!appointmentPreferenceService.checkforDoctorPreference(AuthData)) {
+    if (IsDoctorVerified) {
+      challenge = 'ONBOARDING_SUCCESS';
+    }
+    optionalChallenge = 'APPOINTMENT_PREFERENCES';
   } else if (IsDoctorVerified) {
     challenge = 'ONBOARDING_SUCCESS';
     optionalChallenge = 'ONBOARDING_SUCCESS';

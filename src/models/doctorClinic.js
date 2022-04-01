@@ -27,7 +27,7 @@ const doctorClinic = mongoose.Schema(
     },
     timing: {
       type: Array,
-      required: true,
+      default: null,
     },
     auth: {
       type: mongoose.Schema.Types.ObjectId,

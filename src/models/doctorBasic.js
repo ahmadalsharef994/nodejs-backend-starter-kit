@@ -40,6 +40,10 @@ const DoctorBasicSchema = mongoose.Schema(
       type: String,
       default: null,
     },
+    about: {
+      type: String,
+      default: null,
+    },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

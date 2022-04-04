@@ -214,6 +214,26 @@ const updateClinicDetails = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
   }
 });
+const doctorExpandEducation = catchAsync(async (req, res) => {
+  const { Education, Experience } = await doctorprofileService.doctorExpEducation(
+    req.SubjectId,
+    req.body.experience,
+    req.body.education
+  );
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
+  if (Education || Experience) {
+    res.status(httpStatus.CREATED).json({
+      message: 'Experience and Education Details Submitted!',
+      challenge: challenge.challenge,
+      optionalchallenge: challenge.optionalChallenge,
+    });
+  }
+});
+const updateAbout = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updateAbout(req.body.about, req.SubjectId);
+  res.status(httpStatus.OK).json({ About: result, message: 'Updated successfully' });
+});
 
 module.exports = {
   fetchstastics,
@@ -233,4 +253,6 @@ module.exports = {
   addConsultationfee,
   notifications,
   updateClinicDetails,
+  updateAbout,
+  doctorExpandEducation,
 };

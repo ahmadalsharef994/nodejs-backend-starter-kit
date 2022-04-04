@@ -27,5 +27,12 @@ router.post(
 router.get('/view/:doctype', validate(documentValidation.documentUrl), authdoctornonverified(), function (req, res) {
   documentController.getUrl(req, res);
 });
-
+router.post(
+  '/update-esign',
+  authdoctornonverified(),
+  fileUpload.upload.fields([{ name: 'esign', maxCount: 1 }]),
+  function (req, res) {
+    documentController.updateEsign(req, res);
+  }
+);
 module.exports = router;

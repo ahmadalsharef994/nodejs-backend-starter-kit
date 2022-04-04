@@ -251,7 +251,26 @@ const PayoutsDoctorDetails = {
     PanCardNo: Joi.string().required(),
   }),
 };
-
+const updatebio = {
+  body: Joi.object().keys({
+    about: Joi.string().required().max(150),
+  }),
+};
+const EducationExperience = {
+  body: Joi.object().keys({
+    education: Joi.object().keys({
+      registrationNo: Joi.number().required(),
+      yearofRegistration: Joi.number().required(),
+      stateMedicalCouncil: Joi.string().required(),
+    }),
+    experience: Joi.object().keys({
+      mainstream: Joi.string().required(),
+      specialization: Joi.array().required(),
+      skills: Joi.array().required(),
+      experience: Joi.number().required(),
+    }),
+  }),
+};
 module.exports = {
   BasicDoctorDetails,
   EducationDoctorDetails,
@@ -261,4 +280,6 @@ module.exports = {
   addConsultationfee,
   notifications,
   timings,
+  updatebio,
+  EducationExperience,
 };

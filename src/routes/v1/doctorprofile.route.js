@@ -110,10 +110,19 @@ router.post(
   validate(DoctorProfileValidator.notifications),
   DoctorProfileController.notifications
 );
-/* router.route('/submit-doctorclinic-and-doctorexperience').post(DoctorProfileController.doctorDetails); */
+router
+  .route('/submit-education-and-experience')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.EducationExperience),
+    DoctorProfileController.doctorExpandEducation
+  );
 router
   .route('/update-clinic-timings')
   .post(authdoctorverified(), validate(DoctorProfileValidator.timings), DoctorProfileController.updateClinicDetails);
+router
+  .route('/update-about')
+  .post(authdoctornonverified(), validate(DoctorProfileValidator.updatebio), DoctorProfileController.updateAbout);
 router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

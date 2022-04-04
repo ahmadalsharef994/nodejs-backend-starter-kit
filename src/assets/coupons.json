@@ -5,7 +5,7 @@
     "discountPercent": 60,
     "discountFlat": null,
     "isValidOnce": false,
-    "expiresOn": "2022-03-31T18:30:00.000Z",
+    "expiresOn": "2022-12-31T18:30:00.000Z",
     "color": { "bg": "rgba(255, 255, 179, 1)", "text": "rgba(107, 107, 0, 1)" }
   }
 ]

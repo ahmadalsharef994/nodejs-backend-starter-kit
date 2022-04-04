@@ -82,8 +82,19 @@ const getUrl = async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Sorry, Document Error' });
   }
 };
-
+const updateEsign = async (req, res) => {
+  const esignlocation = req.files.esign[0].location;
+  const esignkey = req.files.esign[0].key;
+  const auth = req.SubjectId;
+  const result = await documentService.updateEsign(req.files.esign[0], auth);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'Esign updated ', esignlocation, esignkey });
+  } else {
+    res.status(httpStatus.BAD_GATEWAY).json({ message: 'cannot upload Esign' });
+  }
+};
 module.exports = {
   upload,
   getUrl,
+  updateEsign,
 };

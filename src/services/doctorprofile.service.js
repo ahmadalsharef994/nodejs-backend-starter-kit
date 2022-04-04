@@ -134,6 +134,28 @@ const updteClinicDetails = async (Auth, timings) => {
   }
   return false;
 };
+const updateAbout = async (about, auth) => {
+  const Auth = { auth };
+  const About = { about };
+  const result = await DoctorBasic.findOneAndUpdate(Auth, About);
+  return result.about;
+};
+
+const doctorExpEducation = async (auth, experience, education) => {
+  // eslint-disable-next-line no-param-reassign
+  education.auth = auth;
+  // eslint-disable-next-line no-param-reassign
+  experience.auth = auth;
+  const edu = await DoctorEducation.findOne({ auth });
+  const exp = await DoctorExperience.findOne({ auth });
+  if (edu || exp) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'these details were already submitted ');
+  } else {
+    const Education = await DoctorEducation.create(education);
+    const Experience = await DoctorExperience.create(experience);
+    return { Education, Experience };
+  }
+};
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -150,4 +172,6 @@ module.exports = {
   addConsultationfee,
   notificationSettings,
   updteClinicDetails,
+  updateAbout,
+  doctorExpEducation,
 };

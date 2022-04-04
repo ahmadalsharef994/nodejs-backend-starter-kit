@@ -1,7 +1,9 @@
 /* eslint-disable no-nested-ternary */
 /* eslint-disable no-unused-expressions */
+const httpStatus = require('http-status');
 const { Document } = require('../models');
 const fileUpload = require('../Microservices/fileUpload.service');
+const ApiError = require('../utils/ApiError');
 
 const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData._id });
@@ -90,9 +92,21 @@ const fetchDocumentdata = async (AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
   return DocDataExist;
 };
+const updateEsign = async (Esign, Auth) => {
+  await Document.updateOne({ auth: Auth }, { $set: { esign: Esign.key } });
+  const { esign } = await Document.findOne({ auth: Auth });
+  if (esign === undefined) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'ID not found please contact support ');
+  }
+  if (esign === Esign.key) {
+    return true;
+  }
+  return false;
+};
 
 module.exports = {
   Upload,
   signedUrl,
   fetchDocumentdata,
+  updateEsign,
 };

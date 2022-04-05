@@ -1,8 +1,9 @@
 const httpStatus = require('http-status');
 const { authService, documentService } = require('../services');
 const authDoctorController = require('./authdoctor.controller');
+const catchAsync = require('../utils/catchAsync');
 
-const upload = async (req, res) => {
+const upload = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   let resume = '';
   try {
@@ -70,9 +71,9 @@ const upload = async (req, res) => {
       optionalchallenge: challenge.optionalChallenge,
     });
   }
-};
+});
 
-const getUrl = async (req, res) => {
+const getUrl = catchAsync(async (req, res) => {
   const Documenttype = req.params.doctype;
   const Authdata = await authService.getAuthById(req.SubjectId);
   const Url = await documentService.signedUrl(Authdata, Documenttype);
@@ -81,8 +82,8 @@ const getUrl = async (req, res) => {
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Sorry, Document Error' });
   }
-};
-const updateEsign = async (req, res) => {
+});
+const updateEsign = catchAsync(async (req, res) => {
   const esignlocation = req.files.esign[0].location;
   const esignkey = req.files.esign[0].key;
   const auth = req.SubjectId;
@@ -92,7 +93,7 @@ const updateEsign = async (req, res) => {
   } else {
     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cannot upload Esign' });
   }
-};
+});
 module.exports = {
   upload,
   getUrl,

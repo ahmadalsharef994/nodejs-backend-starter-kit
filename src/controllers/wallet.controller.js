@@ -20,7 +20,6 @@ const refundToWallet = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
 
   const refundCondition = req.body.refundCondition;
-
   let amount = req.body.amount;
   let cashbackAmount = req.body.cashbackAmount;
   let refundSatisfied = false;

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable jest/no-disabled-tests */
 /* eslint-disable no-unused-vars */
 /* eslint-disable prettier/prettier */
@@ -5,6 +6,7 @@ const request = require('supertest');
 const httpStatus = require('http-status');
 const app = require('../../src/app');
 const setupTestDB = require('../utils/setupTestDB');
+const { objectId } = require('../../src/validations/custom.validation');
 
 setupTestDB();
 
@@ -43,15 +45,32 @@ describe('Wallet Routes', () => {
         })
     })
 
-    // implement cancelled appointment
     // implement add balance
     // implement doctor earning
+
+    describe('POST /v1/wallet/refund-to-wallet Cancelled Appointment', () => {
+        test('Expect to refund Cancelled Appointment (Cancelled Appointment)', async() => {
+            const reqBody = {
+                amount: 100,
+                cashbackAmount: 100,
+                refundCondition: 'Cancelled Appointment',
+                appointmentId: '624bef43a0ea900948fbe9aa'
+            }
+            await request(app).post('/v1/wallet/refund-to-wallet').set('Authorization', `Bearer ${token}`)
+            .send(reqBody).expect(httpStatus.OK)
+            .then((response)=>{res = response.body});
+
+            console.log(`Cancelled Appointment RESPONSE BODY: ${res}`)
+            console.log(res)
+
+        })
+    })
 
     describe('POST /v1/wallet/refund-to-wallet Cashback', () => {
         test('Expect to refund cashback (cashback)', async() => {
             const reqBody = {
-                amount: 10,
-                cashbackAmount: 100,
+                amount: 1000,
+                cashbackAmount: 1000,
                 refundCondition: 'Cashback'
             }
             await request(app).post('/v1/wallet/refund-to-wallet').set('Authorization', `Bearer ${token}`)
@@ -60,6 +79,7 @@ describe('Wallet Routes', () => {
 
             // eslint-disable-next-line no-console
             console.log(`CASHBACK RESPONSE BODY: ${res}`)
+            console.log(res)
 
         })
     })
@@ -76,6 +96,7 @@ describe('Wallet Routes', () => {
             .then((response)=>{res = response.body});
             // eslint-disable-next-line no-console
             console.log(`DISCOUNT FROM WALLET RESPONSE BODY: ${res}`)
+            console.log(res)
 
         })
     })
@@ -90,8 +111,8 @@ describe('Wallet Routes', () => {
             await request(app).post('/v1/wallet/pay-from-wallet').set('Authorization', `Bearer ${token}`)
             .send(reqBody).expect(httpStatus.OK)
             .then((response)=>{res = response.body});
-            // eslint-disable-next-line no-console
             console.log(`PAY FROM WALLET RESPONSE BODY: ${res}`)
+            console.log(res)
 
         })
     })
@@ -111,7 +132,8 @@ describe('Wallet Routes', () => {
             .send(reqBody)
             .then((response)=>{res = response.body});
             // eslint-disable-next-line no-console
-            console.log(`DISCOUNT FROM WALLET RESPONSE BODY: ${res}`)
+            console.log(`WITHDRAW FROM WALLET RESPONSE BODY: ${res}`)
+            console.log(res)
         })
     })
 })

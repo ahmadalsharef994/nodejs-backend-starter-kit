@@ -230,9 +230,22 @@ const doctorExpandEducation = catchAsync(async (req, res) => {
     });
   }
 });
-const updateAbout = catchAsync(async (req, res) => {
-  const result = await doctorprofileService.updateAbout(req.body.about, req.SubjectId);
-  res.status(httpStatus.OK).json({ About: result, message: 'Updated successfully' });
+const updateDetails = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updateDetails(
+    req.body.about,
+    req.body.address,
+    req.body.pincode,
+    req.body.experience,
+    req.body.country,
+    req.body.state,
+    req.body.city,
+    req.SubjectId
+  );
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'Details Updated successfully' });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'something went wrong please contact our support team' });
+  }
 });
 
 module.exports = {
@@ -253,6 +266,6 @@ module.exports = {
   addConsultationfee,
   notifications,
   updateClinicDetails,
-  updateAbout,
+  updateDetails,
   doctorExpandEducation,
 };

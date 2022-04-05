@@ -44,6 +44,18 @@ const DoctorBasicSchema = mongoose.Schema(
       type: String,
       default: null,
     },
+    address: {
+      type: String,
+      default: null,
+    },
+    country: {
+      type: String,
+      default: null,
+    },
+    city: {
+      type: String,
+      default: null,
+    },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

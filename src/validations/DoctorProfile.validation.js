@@ -251,9 +251,15 @@ const PayoutsDoctorDetails = {
     PanCardNo: Joi.string().required(),
   }),
 };
-const updatebio = {
+const updateDetails = {
   body: Joi.object().keys({
     about: Joi.string().required().max(150),
+    address: Joi.string().required(),
+    city: Joi.string().required(),
+    state: Joi.string().required(),
+    pincode: Joi.number().required(),
+    country: Joi.string().required(),
+    experience: Joi.number().required(),
   }),
 };
 const EducationExperience = {
@@ -280,6 +286,6 @@ module.exports = {
   addConsultationfee,
   notifications,
   timings,
-  updatebio,
+  updateDetails,
   EducationExperience,
 };

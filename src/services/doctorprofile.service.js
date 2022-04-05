@@ -134,11 +134,16 @@ const updteClinicDetails = async (Auth, timings) => {
   }
   return false;
 };
-const updateAbout = async (about, auth) => {
+const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
   const Auth = { auth };
-  const About = { about };
-  const result = await DoctorBasic.findOneAndUpdate(Auth, About);
-  return result.about;
+  const About = { about, address, pincode, experience, country, state, city };
+  try {
+    await DoctorBasic.findOneAndUpdate(Auth, About);
+    await DoctorExperience.updateOne({ auth }, { $set: { experience } });
+    return true;
+  } catch (error) {
+    return error;
+  }
 };
 
 const doctorExpEducation = async (auth, experience, education) => {
@@ -172,6 +177,6 @@ module.exports = {
   addConsultationfee,
   notificationSettings,
   updteClinicDetails,
-  updateAbout,
+  updateDetails,
   doctorExpEducation,
 };

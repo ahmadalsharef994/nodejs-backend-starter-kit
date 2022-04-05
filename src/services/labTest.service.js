@@ -93,7 +93,7 @@ const getCartValue = async (cart, couponCode) => {
         Cart.forEach((item) => {
           totalCartAmount += item.rate;
         });
-        homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+        homeCollectionFee = totalCartAmount < 500 ? 200 : 0;
         totalCartAmount += homeCollectionFee;
         if (coupon.discountFlat) {
           discount = Number(coupon.discountFlat);
@@ -118,7 +118,7 @@ const getCartValue = async (cart, couponCode) => {
   }
   // No coupons passed
   totalCartAmount /= 2;
-  homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+  homeCollectionFee = totalCartAmount < 500 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
   const cartdetails = cartDetails.map((element) => {
     return element.rate / 2;

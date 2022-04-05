@@ -121,8 +121,8 @@ router
   .route('/update-clinic-timings')
   .post(authdoctorverified(), validate(DoctorProfileValidator.timings), DoctorProfileController.updateClinicDetails);
 router
-  .route('/update-about')
-  .post(authdoctornonverified(), validate(DoctorProfileValidator.updatebio), DoctorProfileController.updateAbout);
+  .route('/update-details')
+  .post(authdoctornonverified(), validate(DoctorProfileValidator.updateDetails), DoctorProfileController.updateDetails);
 router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

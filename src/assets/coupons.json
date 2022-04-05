@@ -7,5 +7,23 @@
     "isValidOnce": false,
     "expiresOn": "2022-12-31T18:30:00.000Z",
     "color": { "bg": "rgba(255, 255, 179, 1)", "text": "rgba(107, 107, 0, 1)" }
+  },
+  {
+    "offerTitle": "On Lab Tests",
+    "code": "MEDZDIS40",
+    "discountPercent": 40,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-05-31T18:30:00.000Z",
+    "color": { "bg": "rgb(229, 255, 196)", "text": "rgb(58, 101, 4)" }
+  },
+  {
+    "offerTitle": "On Lab Tests",
+    "code": "MEDZDIS30",
+    "discountPercent": 30,
+    "discountFlat": null,
+    "isValidOnce": false,
+    "expiresOn": "2022-06-30T18:30:00.000Z",
+    "color": { "bg": "rgb(201, 255, 250)", "text": "rgb(2, 107, 98)" }
   }
 ]

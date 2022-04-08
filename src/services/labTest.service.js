@@ -72,12 +72,12 @@ const getCartValue = async (cart, couponCode) => {
           for (let index = 0; index < cartDetails.length; index++) {
             totalAmount += cartDetails[index].rate;
             let displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
+
             if (displayPrice > 1000) {
               displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
             }
             if (displayPrice < 1000 && displayPrice > 500) {
-              displayPrice =
-                cartDetails[index].rate - 55 / 100 - (cartDetails[index].ratecartDetails * 55) / 100 - cartDetails;
+              displayPrice = cartDetails[index].rate - (55 / 100) * cartDetails[index].rate;
             }
             if (displayPrice < 500) {
               displayPrice = cartDetails[index].rate - (50 / 100) * cartDetails[index].rate;
@@ -137,7 +137,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   } else if (differenceInDays < 1) {
     throw new ApiError(httpStatus.BAD_REQUEST, "You're providing a past date for booking");
   }
-  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
+  const orderId = `MDZGX${short.generate().toUpperCase().slice(8, 25)}`;
   const OTP = generateOTP();
   try {
     const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');

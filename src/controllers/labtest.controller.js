@@ -83,10 +83,7 @@ const postOrderData = catchAsync(async (req, res) => {
     cart,
     couponCode
   );
-  if (orderData) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
-  }
-  return res.status(httpStatus.OK).json({ message: 'Failed', data: [] });
+  return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
 });
 
 const verifyOrder = catchAsync(async (req, res) => {

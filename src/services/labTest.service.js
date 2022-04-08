@@ -154,7 +154,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
     moneySaved,
     couponStatus,
   });
-  return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
+  return guestOrder;
 };
 
 const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {

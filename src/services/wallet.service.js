@@ -1,7 +1,7 @@
 const Wallet = require('../models/wallet.model');
+const WalletWithdrawRequest = require('../models/withrawRequest.model');
 
 const createNewWallet = async (auth) => {
-  // eslint-disable-next-line no-shadow
   const wallet = new Wallet({
     balance: 0,
     cashback: 0,
@@ -12,13 +12,11 @@ const createNewWallet = async (auth) => {
 };
 
 const getBalanceInWallet = async (AuthData) => {
-  // eslint-disable-next-line no-shadow
   const wallet = await Wallet.findOne({ auth: AuthData.id });
-  return { balance: wallet.balance, cashback: wallet.cashback };
+  return { balance: wallet.balance, cashback: wallet.cashback }; // equals to return Promise.resolve({xxx}) or promise.reject( new Error)
 };
 
 const refundToWallet = async (AuthData, amount, cashback) => {
-  // eslint-disable-next-line no-shadow
   const wallet = await Wallet.findOne({ auth: AuthData.id });
   const newCashback = Number(wallet.cashback) + Number(cashback);
   const newBalance = Number(wallet.balance) + Number(amount);
@@ -27,7 +25,6 @@ const refundToWallet = async (AuthData, amount, cashback) => {
 };
 
 const payFromWallet = async (AuthData, payFromCashback, payFromBalance) => {
-  // eslint-disable-next-line no-shadow
   const wallet = await Wallet.findOne({ auth: AuthData });
   const result = await wallet.updateOne({
     cashback: wallet.cashback - payFromCashback,
@@ -37,17 +34,31 @@ const payFromWallet = async (AuthData, payFromCashback, payFromBalance) => {
 };
 
 const withdrawFromWallet = async (AuthData, amount) => {
-  // eslint-disable-next-line no-shadow
   const wallet = await Wallet.findOne({ auth: AuthData });
   const result = await Wallet.findByIdAndUpdate(wallet.walletId, { balance: wallet.balance - amount });
   return result;
 };
 
 const logTransaction = async (AuthData, transactionDetails) => {
-  // eslint-disable-next-line no-shadow
   const wallet = await Wallet.findOne({ auth: AuthData });
   wallet.transactions.push(transactionDetails);
   const result = await wallet.save();
+  return result;
+};
+
+const getWithdrawRequests = async () => {
+  const walletWithdrawRequest = await WalletWithdrawRequest.find();
+  return walletWithdrawRequest;
+};
+
+const postWithdrawRequest = async (AuthData, transactionDetails) => {
+  const walletWithdrawRequest = new WalletWithdrawRequest({ AuthData, transactionDetails, status: 'NOT FULFILLED' });
+  const result = await walletWithdrawRequest.save();
+  return result;
+};
+
+const fulfillWithdrawRequest = async (withdrawRequestId) => {
+  const result = await WalletWithdrawRequest.findById(withdrawRequestId);
   return result;
 };
 
@@ -58,4 +69,7 @@ module.exports = {
   payFromWallet,
   withdrawFromWallet,
   logTransaction,
+  getWithdrawRequests,
+  postWithdrawRequest,
+  fulfillWithdrawRequest,
 };

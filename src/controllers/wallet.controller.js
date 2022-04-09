@@ -1,16 +1,16 @@
 const httpStatus = require('http-status');
-const walletService = require('../services/wallet.service');
-const authService = require('../services/auth.service');
 const catchAsync = require('../utils/catchAsync');
+const authService = require('../services/auth.service');
+const walletService = require('../services/wallet.service');
 const appointmentService = require('../services/appointment.service');
+// const razorpayPaymentServices = require('../Microservices/razorpay.service');
 const RazorpayPayment = require('../models/razorpay.model');
-const razorpayPaymentServices = require('../Microservices/razorpay.service');
 
 const getBalanceInWallet = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const resultData = await walletService.getBalanceInWallet(AuthData);
   if (resultData) {
-    res.status(httpStatus.OK).json({ balanceInWallet: resultData });
+    res.status(httpStatus.OK).json(resultData);
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to getBalance' });
   }
@@ -23,6 +23,7 @@ const refundToWallet = catchAsync(async (req, res) => {
   let amount = req.body.amount;
   let cashbackAmount = req.body.cashbackAmount;
   let refundSatisfied = false;
+  let razorPayOrder = {};
 
   if (refundCondition === 'Cancelled Appointment') {
     const appointmentId = req.body.appointmentId;
@@ -33,7 +34,6 @@ const refundToWallet = catchAsync(async (req, res) => {
       cashbackAmount = 0;
     }
   }
-  let razorPayOrder = {};
   if (refundCondition === 'Add Balance') {
     const razorpayOrderID = req.body.razorpayOrderID;
     razorPayOrder = await RazorpayPayment.findOne({ razorpayOrderID });
@@ -43,7 +43,6 @@ const refundToWallet = catchAsync(async (req, res) => {
       cashbackAmount = 0;
     }
   }
-
   if (refundCondition === 'Cashback') {
     cashbackAmount = req.body.cashbackAmount;
     amount = 0;
@@ -51,10 +50,8 @@ const refundToWallet = catchAsync(async (req, res) => {
       refundSatisfied = true;
     }
   }
-
   if (refundCondition === 'Doctor Earning') {
     const razorpayOrderID = req.body.razorpayOrderID;
-    // after consultation is complete
     razorPayOrder = await RazorpayPayment.findOne({ razorpayOrderID });
     if (razorPayOrder.isPaid) {
       refundSatisfied = true;
@@ -145,43 +142,63 @@ const payFromWallet = catchAsync(async (req, res) => {
 const withdrawFromWallet = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
 
-  const options = {
-    amount: req.body.amount,
-    name: req.body.name,
-    email: req.body.email,
-    contact: req.body.contact,
-    account_type: req.body.account_type,
-    ifsc: req.body.ifsc,
-    account_number: req.body.account_number,
-    purpose: req.body.purpose,
-    narration: req.body.narration,
-    currency: 'INR',
-  };
-
-  const result = razorpayPaymentServices.withdrawFromWallet(options);
-  if (result) {
-    const resultData = await walletService.withdrawFromWallet(AuthData, req.body.amount);
-    if (resultData) {
-      res.status(httpStatus.OK).json({ message: 'Success: Paid to account and  withdrawn from wallet', resultData });
-    } else {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed: Paid to  account but not withdrawn from wallet' });
-    }
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to pay to bank account and withdrawn from wallet' });
-  }
-
-  // eslint-disable-next-line no-unused-vars
-  const transactionLog = walletService.logTransaction(AuthData, {
+  await walletService.logTransaction(AuthData, {
     transactionType: 'WITHDRAW',
+    account_type: 'Bank Account',
     amount: req.body.amount,
     name: req.body.name,
     email: req.body.email,
     contact: req.body.contact,
-    account_type: 'Bank Account',
     ifsc: req.body.ifsc,
-    account_number: req.body.account_number,
+    account_number: req.body.accountNumber,
     currency: 'INR',
   });
+  await walletService.postWithdrawRequest(AuthData, {
+    amount: req.body.amount,
+    name: req.body.name,
+    email: req.body.email,
+    contact: req.body.contact,
+    ifsc: req.body.ifsc,
+    account_number: req.body.accountNumber,
+  });
+
+  res.status(httpStatus.SERVICE_UNAVAILABLE).json({
+    message:
+      'Failed to pay to bank account or withdraw from wallet. Transaction Details are logged for future manual processing of withdrawal ',
+  });
+
+  // const result = razorpayPaymentServices.withdrawFromWallet(options);
+  // if (result) {
+  //   const resultData = await walletService.withdrawFromWallet(AuthData, req.body.amount);
+  //   if (resultData) {
+  //     res.status(httpStatus.OK).json({ message: 'Success: Paid to account and  withdrawn from wallet', resultData });
+  //   } else {
+  //     res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed: Paid to  account but not withdrawn from wallet' });
+  //   }
+  // } else {
+  // res.status(httpStatus.SERVICE_UNAVAILABLE).json({
+  //   message:
+  //     'Failed to pay to bank account or withdraw from wallet. Transaction Details will be logged for future manual processing of withdrawal ',
+  // });
+  // }
+});
+
+const getWithdrawRequests = catchAsync(async (req, res) => {
+  const resultData = await walletService.getWithdrawRequests();
+  if (resultData) {
+    res.status(httpStatus.OK).json({ resultData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to getWithdrawRequests' });
+  }
+});
+
+const fulfillWithdrawRequest = catchAsync(async (req, res) => {
+  const resultData = await walletService.fulfillWithdrawRequest(req.body.withdrawRequestId);
+  if (resultData) {
+    res.status(httpStatus.OK).json({ resultData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to fulfillWithdrawRequest' });
+  }
 });
 
 module.exports = {
@@ -190,4 +207,6 @@ module.exports = {
   discountFromWallet,
   payFromWallet,
   withdrawFromWallet,
+  getWithdrawRequests,
+  fulfillWithdrawRequest,
 };

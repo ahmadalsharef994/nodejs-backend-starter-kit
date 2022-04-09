@@ -38,10 +38,10 @@ describe('Wallet Routes', () => {
             .expect(httpStatus.OK)
             .then((response)=>{res = response.body});
 
-            const balanceInWallet = res.balanceInWallet;
-            expect(balanceInWallet.balance).not.toBeNull();
-            expect(balanceInWallet.cashback).not.toBeNull();
-
+        
+            expect(res.balance).not.toBeNull();
+            expect(res.cashback).not.toBeNull();
+            console.log(res)
         })
     })
 
@@ -118,10 +118,10 @@ describe('Wallet Routes', () => {
     })
 
     describe('POST /v1/wallet/withdraw-from-wallet', () => {
-        test.skip('Expect to withdraw from wallet', async() => {
+        test('Expect to withdraw from wallet', async() => {
             const reqBody = {
                 name: "AAAAAAAAAAAAA",
-                account_number: "3923014245098",
+                accountNumber: "3923014245098",
                 amount: 1000,
                 ifsc: "11243144243",
                 contact: "9845904321",
@@ -129,10 +129,45 @@ describe('Wallet Routes', () => {
             }
 
             await request(app).post('/v1/wallet/withdraw-from-wallet').set('Authorization', `Bearer ${token}`)
-            .send(reqBody)
+            .send(reqBody).expect(httpStatus.SERVICE_UNAVAILABLE)
             .then((response)=>{res = response.body});
-            // eslint-disable-next-line no-console
             console.log(`WITHDRAW FROM WALLET RESPONSE BODY: ${res}`)
+            console.log(res)
+        })
+    })
+})
+
+describe('Wallet Withraw Requests Routes', () => {
+
+    let adminToken;
+    let res;
+
+    describe('POST /v1/internalteam/restricted/adminsignin', () => {
+        test('Admin login and response with an adminToken', async() => {
+            const loginCredentials = {
+                email: 'sadikshaik139@gmail.com',
+                password: 'pass@123',
+              };
+              
+              await request(app).post('/v1/internalteam/restricted/adminsignin')
+              .set('Accept', '*/*').set('fcmtoken','abcdddd').set('devicehash','abcd').set('devicetype','ios').set('Content-Type', 'application/json').set('Connection', 'keep-alive')
+              .set('secretadminkey', process.env.SECRETADMINKEY)
+              .send(loginCredentials).then((response)=>{res = response.body})
+              
+              expect(res.AuthData).not.toBeNull();
+              expect(res.authtoken).not.toBeNull();
+              adminToken = res.authtoken;
+        })
+    })
+
+    
+    describe('GET /v1/wallet/get-withdraw-requests', () => {
+        test('responses with all withdraw requests', async() => {
+            await request(app).get('/v1/wallet/get-withdraw-requests').set('Authorization', `Bearer ${adminToken}`)
+            .set('Accept', '*/*').set('fcmtoken','abcdddd').set('devicehash','abcd').set('devicetype','ios').set('Content-Type', 'application/json').set('Connection', 'keep-alive')
+            .expect(httpStatus.OK)
+            .then((response)=>{res = response.body});
+            console.log(`GET WITHDRAW REQUESTS ${res}`)
             console.log(res)
         })
     })

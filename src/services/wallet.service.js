@@ -1,15 +1,15 @@
 const Wallet = require('../models/wallet.model');
 const WalletWithdrawRequest = require('../models/withrawRequest.model');
 
-const createNewWallet = async (auth) => {
-  const wallet = new Wallet({
-    balance: 0,
-    cashback: 0,
-    auth,
-  });
-  const result = await wallet.save();
-  return result;
-};
+// const createNewWallet = async (auth) => {
+//   const wallet = new Wallet({
+//     balance: 0,
+//     cashback: 0,
+//     auth,
+//   });
+//   const result = await wallet.save();
+//   return result;
+// };
 
 const getBalanceInWallet = async (AuthData) => {
   const wallet = await Wallet.findOne({ auth: AuthData.id });
@@ -63,7 +63,7 @@ const fulfillWithdrawRequest = async (withdrawRequestId) => {
 };
 
 module.exports = {
-  createNewWallet,
+  // createNewWallet,
   getBalanceInWallet,
   refundToWallet,
   payFromWallet,

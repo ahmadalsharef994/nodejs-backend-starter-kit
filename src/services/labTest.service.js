@@ -139,22 +139,27 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   }
   const orderId = `MDZGX${short.generate().toUpperCase().slice(8, 25)}`;
   const OTP = generateOTP();
-  const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
-  const { homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(cart, couponCode);
-  const guestOrder = await GuestOrder.create({
-    customerDetails,
-    testDetails,
-    paymentDetails,
-    sessionId: res.data.Details,
-    orderId,
-    cart,
-    couponCode,
-    homeCollectionFee,
-    totalCartAmount,
-    moneySaved,
-    couponStatus,
-  });
-  return guestOrder;
+
+  try {
+    const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
+    const { homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(cart, couponCode);
+    const guestOrder = await GuestOrder.create({
+      customerDetails,
+      testDetails,
+      paymentDetails,
+      sessionId: res.data.Details,
+      orderId,
+      cart,
+      couponCode,
+      homeCollectionFee,
+      totalCartAmount,
+      moneySaved,
+      couponStatus,
+    });
+    return { orderId: guestOrder.orderId, sessionId: guestOrder.sessionId };
+  } catch (err) {
+    return err;
+  }
 };
 
 const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {

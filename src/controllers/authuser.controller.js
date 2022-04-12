@@ -97,18 +97,26 @@ const forgotPassword = catchAsync(async (req, res) => {
     if (!AuthData) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this email please provide correct email');
     }
-    await emailService.sendResetPasswordEmail(req.body.email, AuthData.fullname, OTP);
-    await otpServices.sendResetPassOtp(OTP, AuthData);
-    res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered Email ID' });
+    try {
+      await emailService.sendResetPasswordEmail(req.body.email, AuthData.fullname, OTP);
+      await otpServices.sendResetPassOtp(OTP, AuthData);
+      res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered Email ID' });
+    } catch (err) {
+      throw new ApiError(httpStatus.NOT_FOUND, `email service: ${err}`);
+    }
   } else if (service === 'phone') {
     const AuthData = await authService.getAuthByPhone(parseInt(req.body.phone, 10));
     if (!AuthData) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
     }
-    const response2F = await smsService.sendPhoneOtp2F(req.body.phone, OTP);
-    const dbresponse = await otpServices.sendResetPassOtp(OTP, AuthData);
-    if (response2F && dbresponse) {
-      res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered Phone Number' });
+    try {
+      const response2F = await smsService.sendPhoneOtp2F(req.body.phone, OTP);
+      const dbresponse = await otpServices.sendResetPassOtp(OTP, AuthData);
+      if (response2F && dbresponse) {
+        res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered Phone Number' });
+      }
+    } catch (err) {
+      throw new ApiError(httpStatus.NOT_FOUND, `sms service: ${err}`);
     }
   }
 });
@@ -128,9 +136,13 @@ const resetPassword = catchAsync(async (req, res) => {
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const OTP = generateOTP();
-  await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
-  await otpServices.sendEmailVerifyOtp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent' });
+  try {
+    await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
+    await otpServices.sendEmailVerifyOtp(OTP, AuthData);
+    res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent' });
+  } catch (err) {
+    throw new ApiError(httpStatus.NOT_FOUND, `email service: ${err}`);
+  }
 });
 
 const verifyEmail = catchAsync(async (req, res) => {

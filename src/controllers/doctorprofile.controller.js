@@ -59,11 +59,15 @@ const submitprofilepicture = catchAsync(async (req) => {
 const updateprofilepicture = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
-  const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
-  if ((returndata !== false) & (returnThumbnail !== false)) {
-    res.status(httpStatus.OK).json({ message: 'profile picture updated' });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
+  try {
+    const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
+    if ((returndata !== false) & (returnThumbnail !== false)) {
+      res.status(httpStatus.OK).json({ message: 'profile picture updated' });
+    } else {
+      res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
+    }
+  } catch (err) {
+    throw new ApiError(httpStatus.NOT_FOUND, `profilePhotoUpload service: ${err}`);
   }
 });
 

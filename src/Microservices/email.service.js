@@ -13,7 +13,7 @@ if (config.env !== 'test') {
     .catch(() => logger.warn('Unable to connect to email server. Make sure you have configured the SMTP options in .env'));
 }
 
-const sendEmail = (to, name, subject, template, OTP) => {
+const sendEmail = async (to, name, subject, template, OTP) => {
   transport.use(
     'compile',
     hbs({
@@ -38,12 +38,19 @@ const sendEmail = (to, name, subject, template, OTP) => {
       to,
     },
   };
-  transport.sendMail(mailOptions, (error, info) => {
-    if (error) {
-      return error;
-    }
-    return `Email sent:${info.response}`;
-  });
+  const response = await transport
+    .sendMail(mailOptions)
+    .then((result) => {
+      return result;
+    })
+    .catch((err) => {
+      return err;
+    });
+  const status = response.response;
+  if (status === '250 Message received') {
+    return true;
+  }
+  return response;
 };
 
 const sendResetPasswordEmail = async (to, name, OTP) => {
@@ -61,7 +68,8 @@ const sendVerificationEmail = async (to, name, OTP) => {
   const emaillink = `${OTP}`;
   const userEmail = `${to}`;
   const userName = `${name}`;
-  await sendEmail(userEmail, userName, subject, template, emaillink);
+  const status = await sendEmail(userEmail, userName, subject, template, emaillink);
+  return status;
 };
 
 const sendLabTestOrderDetails = async (to, name, OTP) => {

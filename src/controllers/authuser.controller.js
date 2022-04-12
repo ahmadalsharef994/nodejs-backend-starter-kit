@@ -128,9 +128,13 @@ const resetPassword = catchAsync(async (req, res) => {
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const OTP = generateOTP();
-  await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
-  await otpServices.sendEmailVerifyOtp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent' });
+  const response = await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
+  if (response === true) {
+    await otpServices.sendEmailVerifyOtp(OTP, AuthData);
+    res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent' });
+  } else {
+    res.status(httpStatus.BAD_GATEWAY).json({ message: 'Email Verification Not Sent ', response });
+  }
 });
 
 const verifyEmail = catchAsync(async (req, res) => {

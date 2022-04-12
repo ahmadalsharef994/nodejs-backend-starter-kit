@@ -4,21 +4,16 @@ const Auth = require('./auth.model');
 const Wallet = require('./wallet.model');
 
 const WalletOrderSchema = mongoose.Schema({
-  auth: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: Auth,
-    required: true,
-  },
-  walletId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: Wallet,
-    required: true,
-  },
   razorpayOrderID: {
     type: String,
     required: true,
     index: true,
     unique: true,
+  },
+  walletId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Wallet,
+    required: true,
   },
   amount: {
     type: String,
@@ -32,6 +27,11 @@ const WalletOrderSchema = mongoose.Schema({
     type: Boolean,
     required: true,
     default: false,
+  },
+  auth: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: Auth,
+    required: true,
   },
 });
 

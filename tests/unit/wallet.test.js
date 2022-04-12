@@ -6,7 +6,6 @@ const request = require('supertest');
 const httpStatus = require('http-status');
 const app = require('../../src/app');
 const setupTestDB = require('../utils/setupTestDB');
-const { objectId } = require('../../src/validations/custom.validation');
 
 setupTestDB();
 
@@ -168,6 +167,43 @@ describe('Wallet Withraw Requests Routes', () => {
             .expect(httpStatus.OK)
             .then((response)=>{res = response.body});
             console.log(`GET WITHDRAW REQUESTS ${res}`)
+            console.log(res)
+        })
+    })
+})
+
+describe('Wallet Order', ()=>{
+    let token;
+    let res;
+    describe('POST /v1/auth/user/login', () => {
+
+        test('Expect to login and response with a token', async() => {
+            const loginCredentials = {
+                username: '11111111111@gmail.com',
+                password: 'Pass@123',
+              };
+              
+              await request(app).post('/v1/auth/user/login')
+              .set('Accept', '*/*').set('fcmtoken','abcdddd').set('devicehash','abcd').set('devicetype','ios').set('Content-Type', 'application/json').set('Connection', 'keep-alive')
+              .send(loginCredentials).then((response)=>{res = response.body})
+              
+              expect(res.AuthData).not.toBeNull();
+              expect(res.authtoken).not.toBeNull();
+              token = res.authtoken;
+        })
+    })
+
+    describe('POST /v1/razorpay/createorder-wallet', ()=>{
+        test('creates a wallet order of 1000', async()=>{
+            const reqBody = {
+                walletId: '62445133514fd632e47527d7',
+                amount: 1000,
+            }
+
+            await request(app).post('/v1/razorpay/createorder-wallet').set('Authorization', `Bearer ${token}`)
+            .send(reqBody).expect(httpStatus.OK)
+            .then((response)=>{res = response.body});
+            console.log(`CREATE WALLET ORDER RESPONSE BODY: ${res}`)
             console.log(res)
         })
     })

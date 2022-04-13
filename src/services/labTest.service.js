@@ -4,7 +4,7 @@ const fs = require('fs');
 const { smsService, thyrocareServices } = require('../Microservices');
 const generateOTP = require('../utils/generateOTP');
 const ApiError = require('../utils/ApiError');
-const { GuestOrder, ThyrocareOrder, labtestOrder } = require('../models');
+const { GuestOrder, ThyrocareOrder, LabtestOrder } = require('../models');
 const coupons = require('../assets/coupons.json');
 
 const getGuestOrder = async (orderID) => {
@@ -164,7 +164,7 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
 
 const prepaidOrder = async (razorpayOrderID, labTestOrderID) => {
   const orderDetails = await GuestOrder.findOne({ orderId: labTestOrderID });
-  const paymentDetails = await labtestOrder.findOne({ razorpayOrderID, labTestOrderID });
+  const paymentDetails = await LabtestOrder.findOne({ razorpayOrderID, labTestOrderID });
   if (paymentDetails) {
     if (orderDetails && paymentDetails.isPaid === true) {
       let finalProductCode = '';

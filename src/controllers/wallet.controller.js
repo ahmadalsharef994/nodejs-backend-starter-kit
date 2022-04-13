@@ -4,7 +4,7 @@ const authService = require('../services/auth.service');
 const walletService = require('../services/wallet.service');
 const appointmentService = require('../services/appointment.service');
 // const razorpayPaymentServices = require('../Microservices/razorpay.service');
-const labtestOrder = require('../models/labtestOrder.model');
+const LabtestOrder = require('../models/labtestOrder.model');
 
 const getBalanceInWallet = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -36,7 +36,7 @@ const refundToWallet = catchAsync(async (req, res) => {
   }
   // if (refundCondition === 'Add Balance') {
   //   const razorpayOrderID = req.body.razorpayOrderID;
-  //   razorPayOrder = await labtestOrder.findOne({ razorpayOrderID });
+  //   razorPayOrder = await LabtestOrder.findOne({ razorpayOrderID });
   //   if (razorPayOrder.isPaid) {
   //     refundSatisfied = true;
   //     amount = razorPayOrder.amount;
@@ -52,7 +52,7 @@ const refundToWallet = catchAsync(async (req, res) => {
   }
   if (refundCondition === 'Doctor Earning') {
     const razorpayOrderID = req.body.razorpayOrderID;
-    razorPayOrder = await labtestOrder.findOne({ razorpayOrderID });
+    razorPayOrder = await LabtestOrder.findOne({ razorpayOrderID });
     if (razorPayOrder.isPaid) {
       refundSatisfied = true;
       amount = razorPayOrder.amount * process.env.DOCTORE_PERCENTAGE;

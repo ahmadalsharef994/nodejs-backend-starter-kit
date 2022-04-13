@@ -5,7 +5,7 @@ const httpStatus = require('http-status');
 // const { compareSync } = require('bcryptjs');
 // const axios = require('axios');
 const ApiError = require('../utils/ApiError');
-const { labtestOrder, GuestOrder, Appointment, appointmentOrder } = require('../models');
+const { LabtestOrder, GuestOrder, Appointment, AppointmentOrder } = require('../models');
 const { getCartValue } = require('../services/labTest.service');
 const WalletOrder = require('../models/walletOrder.model');
 const walletService = require('../services/wallet.service');
@@ -32,8 +32,8 @@ const createLabtestOrder = async (currency, labTestOrderID, sessionID) => {
     response.amount /= 100;
 
     const razorpayOrderID = response.id;
-    await labtestOrder.create({
-      // labtestOrder
+    await LabtestOrder.create({
+      // LabtestOrder
       razorpayOrderID,
       labTestOrderID,
       amount: orderAmount,
@@ -54,7 +54,7 @@ const calculateSHADigest = async (orderCreationId, razorpayOrderId, razorpayPaym
 
   if (calculatedSHADigest === razorpaySignature) {
     // console.log('request is legit');
-    await labtestOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } }, { new: true });
+    await LabtestOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } }, { new: true });
     return 'match';
   }
   // console.log('calculatedSHADigest: ', digest);
@@ -73,7 +73,7 @@ const createAppointmentOrder = async (currency, appointmentid, orderId) => {
     response.amount /= 100;
 
     const razorpayOrderID = response.id;
-    appointmentOrder.create({
+    AppointmentOrder.create({
       // appointmentOrder
       razorpayOrderID,
       AppointmentOrderID: orderId,
@@ -93,7 +93,7 @@ const calculateSHADigestAppointment = async (orderCreationId, razorpayOrderId, r
   const calculatedSHADigest = shasum.digest('hex');
   if (calculatedSHADigest === razorpaySignature) {
     // console.log('request is legit');
-    await appointmentOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
+    await AppointmentOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
     await Appointment.findOneAndUpdate({ orderId: orderCreationId }, { $set: { paymentStatus: 'PAID' } });
     return 'match';
   }

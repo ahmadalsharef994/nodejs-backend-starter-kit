@@ -44,8 +44,10 @@ labtestOrderSchema.plugin(toJSON);
 labtestOrderSchema.plugin(paginate);
 
 /**
- * @typedef labtestOrder
+ * @typedef LabtestOrder
  */
 
-const labtestOrder = mongoose.model('labtestOrder', labtestOrderSchema);
-module.exports = labtestOrder;
+const LabtestOrder = mongoose.model('LabtestOrder', labtestOrderSchema);
+module.exports = LabtestOrder;
+// labtestOrderSchema -> LabtestOrderSchema
+// labtestOrder -> LabtestOrder

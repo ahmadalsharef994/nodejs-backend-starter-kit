@@ -42,8 +42,9 @@ appointmentOrderSchema.plugin(toJSON);
 appointmentOrderSchema.plugin(paginate);
 
 /**
- * @typedef appointmentOrder
+ * @typedef AppointmentOrder
  */
 
-const appointmentOrder = mongoose.model('appointmentOrder', appointmentOrderSchema);
-module.exports = appointmentOrder;
+const AppointmentOrder = mongoose.model('AppointmentOrder', appointmentOrderSchema);
+module.exports = AppointmentOrder;
+// appointmentOrder -> AppointmentOrder

@@ -2,8 +2,7 @@ const crypto = require('crypto');
 const Razorpay = require('razorpay');
 const short = require('short-uuid');
 const httpStatus = require('http-status');
-// const { compareSync } = require('bcryptjs');
-// const axios = require('axios');
+const events = require('events');
 const ApiError = require('../utils/ApiError');
 const { LabtestOrder, GuestOrder, Appointment, AppointmentOrder } = require('../models');
 const { getCartValue } = require('../services/labTest.service');
@@ -14,6 +13,17 @@ const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
+
+const eventEmitter = new events.EventEmitter();
+
+const fetchRazorpayOrderStatus = async (razorpayOrderId) => {
+  try {
+    const response = await razorpay.orders.fetch(razorpayOrderId);
+    return response.status;
+  } catch (err) {
+    throw new ApiError(httpStatus.NOT_FOUND, `fetchRazorpayOrderStatus service: ${err}`);
+  }
+};
 
 // createLabtestOrder
 const createLabtestOrder = async (currency, labTestOrderID, sessionID) => {
@@ -32,8 +42,8 @@ const createLabtestOrder = async (currency, labTestOrderID, sessionID) => {
     response.amount /= 100;
 
     const razorpayOrderID = response.id;
+    // LabtestOrder
     await LabtestOrder.create({
-      // LabtestOrder
       razorpayOrderID,
       labTestOrderID,
       amount: orderAmount,
@@ -81,6 +91,7 @@ const createAppointmentOrder = async (currency, appointmentid, orderId) => {
       currency,
       appointmentId: _id,
     });
+
     return response;
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND);
@@ -101,40 +112,53 @@ const calculateSHADigestAppointment = async (orderCreationId, razorpayOrderId, r
   return 'no_match';
 };
 
-const createWalletOrder = async (AuthData, walletId, amount, currency) => {
+const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
   const options = {
-    amount: amount * 100,
+    amount: orderAmount * 100,
     currency,
     receipt: short.generate(),
   };
   try {
+    // 1st: pay
     const response = await razorpay.orders.create(options);
     const razorpayPaymentStatus = response.status;
     response.razorpayPaymentStatus = razorpayPaymentStatus;
-    response.amount /= 100;
     const razorpayOrderID = response.id;
 
-    const cashbackAmount = 0;
-    await walletService.refundToWallet(AuthData, amount, cashbackAmount);
-    await walletService.logTransaction(AuthData, {
-      transactionType: 'REFUND',
-      refundCondition: 'Add Balance',
-      amount,
-      cashbackAmount,
-      razorpayOrderID,
-    });
     const auth = AuthData.id;
+    // 2nd: create walletOrder
     const walletOrder = await WalletOrder.create({
       auth,
       razorpayOrderID,
       walletId,
-      amount,
+      orderAmount,
       currency,
-      // isPaid: true,
+      isPaid: false,
     });
-    const walletOrderId = walletOrder.id;
-    response.walletOrderId = walletOrderId;
-    response.walletOrder = walletOrder;
+    response.walletOrderId = walletOrder.id;
+
+    // 3rd: listen on payment status. perform and log wallet transaction when paid.
+    eventEmitter.on('isPaid', async () => {
+      const cashbackAmount = 0;
+      await walletService.refundToWallet(AuthData, orderAmount, cashbackAmount);
+      await walletService.logTransaction(AuthData, {
+        transactionType: 'REFUND',
+        refundCondition: 'Add Balance',
+        amount: orderAmount,
+        cashbackAmount,
+        razorpayOrderID,
+      });
+    });
+
+    // 4th: when payment gets confirmed (check every 5 mins), trigger isPaid event (execute 3rd)
+    const timer = setInterval(async () => {
+      if (fetchRazorpayOrderStatus(razorpayOrderID) === 'paid') {
+        await WalletOrder.findByIdAndUpdate(walletOrder.id, { isPaid: true });
+        eventEmitter.emit('isPaid');
+        clearInterval(timer);
+      }
+    }, 5000);
+
     return response;
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, 'razorpay failed to create wallet order');
@@ -153,15 +177,6 @@ const createWalletOrder = async (AuthData, walletId, amount, currency) => {
 //   // console.log('calculatedSHADigest: ', digest);
 //   return 'no_match';
 // };
-
-const fetchRazorpayOrderStatus = async (razorpayOrderId) => {
-  try {
-    const response = await razorpay.orders.fetch(razorpayOrderId);
-    return response;
-  } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `fetchRazorpayOrderStatus service: ${err}`);
-  }
-};
 
 /* const withdrawFromWallet = async (options) => {
   let body = {

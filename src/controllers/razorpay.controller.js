@@ -67,19 +67,13 @@ const createWalletOrder = catchAsync(async (req, res) => {
   res.send(response);
 });
 
-// const verifyWalletOrder = catchAsync(async (req, res) => {
-//   const calculatedSHADigest = await razorpayPaymentServices.calculateSHADigestWalletOrder(
-//     req.body.orderCreationId,
-//     req.body.razorpayOrderId,
-//     req.body.razorpayPaymentId,
-//     req.body.razorpaySignature,
-//   );
-//   if (calculatedSHADigest === 'match') {
-//     // console.log('request is legit');
-//     return res.status(httpStatus.OK).json({ message: 'OK' });
-//   }
-//   return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Signature' });
-// });
+const verifyWalletOrder = catchAsync(async (req, res) => {
+  const razorpayOrderStatus = await razorpayPaymentServices.fetchRazorpayOrderStatus(req.body.razorpayOrderId);
+  if (razorpayOrderStatus === 'paid') {
+    return res.status(httpStatus.OK).json({ message: 'OK' });
+  }
+  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Signature' });
+});
 
 const fetchRazorpayOrderStatus = catchAsync(async (req, res) => {
   const response = await razorpayPaymentServices.fetchRazorpayOrderStatus(req.body.razorpayOrderId);
@@ -92,5 +86,6 @@ module.exports = {
   createAppointmentOrder,
   verifyAppointmentOrder,
   createWalletOrder,
+  verifyWalletOrder,
   fetchRazorpayOrderStatus,
 };

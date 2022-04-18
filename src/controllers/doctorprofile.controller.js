@@ -247,7 +247,14 @@ const updateDetails = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'something went wrong please contact our support team' });
   }
 });
-
+const updateAppointmentPrice = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'appointmentPrice updated' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
+  }
+});
 module.exports = {
   fetchstastics,
   submitbasicdetails,
@@ -268,4 +275,5 @@ module.exports = {
   updateClinicDetails,
   updateDetails,
   doctorExpandEducation,
+  updateAppointmentPrice,
 };

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const Appointment = require('./auth.model');
 
 const FollowupSchema = mongoose.Schema(
@@ -9,6 +9,14 @@ const FollowupSchema = mongoose.Schema(
       ref: Appointment,
       required: true,
       index: true,
+    },
+    patientName: {
+      type: String,
+      required: true,
+    },
+    orderId: {
+      type: String,
+      required: true,
     },
     docid: {
       type: String,
@@ -57,6 +65,7 @@ const FollowupSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 FollowupSchema.plugin(toJSON);
+FollowupSchema.plugin(paginate);
 /**
  * @typedef Followup
  */

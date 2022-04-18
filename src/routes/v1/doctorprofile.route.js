@@ -123,6 +123,13 @@ router
 router
   .route('/update-details')
   .post(authdoctornonverified(), validate(DoctorProfileValidator.updateDetails), DoctorProfileController.updateDetails);
+router
+  .route('/update-appointmentPrice')
+  .post(
+    authdoctornonverified(),
+    validate(DoctorProfileValidator.updateAppointmentPrice),
+    DoctorProfileController.updateAppointmentPrice
+  );
 router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

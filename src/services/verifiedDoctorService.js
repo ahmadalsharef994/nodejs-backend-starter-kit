@@ -58,8 +58,12 @@ const createVerifiedDoctor = async (doctorauthid, AuthData) => {
   });
   return doctorverifieddata;
 };
-
+const fetchdoctorId = async (doctorauthid) => {
+  const { docid } = await VerifiedDoctors.findOne({ doctorauthid: `${doctorauthid}` });
+  return docid;
+};
 module.exports = {
   createVerifiedDoctor,
   checkVerification,
+  fetchdoctorId,
 };

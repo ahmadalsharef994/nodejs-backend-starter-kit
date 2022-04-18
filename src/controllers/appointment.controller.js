@@ -94,7 +94,8 @@ const showAvailableAppointments = catchAsync(async (req, res) => {
 });
 
 const showUpcomingAppointments = catchAsync(async (req, res) => {
-  await appointmentService.getUpcomingAppointments(req.Docid, req.query.limit).then((result) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  await appointmentService.getUpcomingAppointments(req.Docid, req.query.limit, options).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
     }
@@ -105,12 +106,14 @@ const showUpcomingAppointments = catchAsync(async (req, res) => {
 const showAppointmentsByType = catchAsync(async (req, res) => {
   const filter = { Type: req.query.type };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  await appointmentService.getAppointmentsByType(req.Docid, filter, options).then((result) => {
-    if (result.length === 0) {
-      return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
-    }
-    return res.status(httpStatus.OK).json(result);
-  });
+  appointmentService
+    .getAppointmentsByType(req.Docid, filter, options)
+    .then((result) => {
+      return res.status(httpStatus.OK).send(result);
+    })
+    .catch((err) => {
+      return res.status(httpStatus.BAD_REQUEST).send(err);
+    });
 });
 
 const getappointmentDoctor = catchAsync(async (req, res) => {

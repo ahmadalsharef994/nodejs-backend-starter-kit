@@ -161,6 +161,14 @@ const doctorExpEducation = async (auth, experience, education) => {
     return { Education, Experience };
   }
 };
+const updateappointmentPrice = async (appointmentPrice, auth) => {
+  await DoctorBasic.updateOne({ auth }, { $set: { appointmentPrice } });
+  const result = await DoctorBasic.findOne({ appointmentPrice });
+  if (result.appointmentPrice === appointmentPrice) {
+    return true;
+  }
+  return false;
+};
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -179,4 +187,5 @@ module.exports = {
   updteClinicDetails,
   updateDetails,
   doctorExpEducation,
+  updateappointmentPrice,
 };

@@ -2,7 +2,7 @@ const express = require('express');
 const { documentController } = require('../../controllers');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const authdoctorVerified = require('../../middlewares/authDoctorVerified');
-const { fileUpload } = require('../../Microservices');
+const { fileUpload, profilePhotoUpload } = require('../../Microservices');
 const validate = require('../../middlewares/validate');
 const documentValidation = require('../../validations/document.validation');
 
@@ -31,7 +31,7 @@ router.get('/view/:doctype', validate(documentValidation.documentUrl), authdocto
 router.post(
   '/update-esign',
   authdoctorVerified(),
-  fileUpload.upload.fields([{ name: 'esign', maxCount: 1 }]),
+  profilePhotoUpload.publicupload.fields([{ name: 'esign', maxCount: 1 }]),
   documentController.updateEsign
 );
 module.exports = router;

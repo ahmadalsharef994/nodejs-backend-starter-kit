@@ -93,12 +93,12 @@ const fetchDocumentdata = async (AuthData) => {
   return DocDataExist;
 };
 const updateEsign = async (Esign, Auth) => {
-  await Document.updateOne({ auth: Auth }, { $set: { esign: Esign.key } });
+  await Document.updateOne({ auth: Auth }, { $set: { esign: Esign.location } });
   const { esign } = await Document.findOne({ auth: Auth });
   if (esign === undefined) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'ID not found please contact support ');
   }
-  if (esign === Esign.key) {
+  if (esign === Esign.location) {
     return true;
   }
   return false;

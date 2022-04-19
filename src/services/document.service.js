@@ -90,7 +90,7 @@ const signedUrl = async (Authdata, document) => {
 
 const fetchDocumentdata = async (AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
-  return DocDataExist;
+  return { esign: DocDataExist.esign };
 };
 const updateEsign = async (Esign, Auth) => {
   await Document.updateOne({ auth: Auth }, { $set: { esign: Esign.location } });

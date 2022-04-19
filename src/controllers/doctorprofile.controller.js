@@ -7,7 +7,7 @@ const doctorprofileService = require('../services/doctorprofile.service');
 const appointmentPreferenceService = require('../services/appointmentpreference.service');
 const authDoctorController = require('./authdoctor.controller');
 const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
-const { authService } = require('../services');
+const { authService, documentService } = require('../services');
 
 const fetchstastics = catchAsync(async (req, res) => {
   const PERCENT = 2.6;
@@ -177,11 +177,13 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
   const clinicData = await doctorprofileService.fetchClinicdetails(AuthData);
   const experienceData = await doctorprofileService.fetchexperiencedetails(AuthData);
   const appointmentPreference = await appointmentPreferenceService.getappointments(req.Docid, AuthData);
+  const doctorDocumentData = await documentService.fetchDocumentdata(AuthData);
   if (!doctorBasicData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'first create your account');
   } else {
     res.status(httpStatus.OK).json({
       'Basic Details': doctorBasicData,
+      'Document Details': doctorDocumentData,
       'Education Details': doctorEducationData,
       'Experience Details': experienceData,
       'Clinic Details': clinicData,

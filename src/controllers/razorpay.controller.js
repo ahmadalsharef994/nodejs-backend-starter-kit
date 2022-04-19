@@ -1,9 +1,25 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { razorpayPaymentServices } = require('../Microservices');
+const { authService } = require('../services');
 
-const razorpayVerification = catchAsync(async (req, res) => {
+const createLabtestOrder = catchAsync(async (req, res) => {
+  // createRazorpayOrder -> createLabtestOrder
+  const { labTestOrderID, sessionID } = req.body; // orderId, labtestId
+
+  const currency = 'INR';
+  const response = await razorpayPaymentServices.createLabtestOrder(currency, labTestOrderID, sessionID);
+  res.status(httpStatus.OK).json({
+    id: response.id,
+    currency: response.currency,
+    amount: response.amount,
+  });
+});
+
+const verifyLabtestOrder = catchAsync(async (req, res) => {
+  // razorpayVerification -> verifyLabtestOrder
   const calculatedSHADigest = await razorpayPaymentServices.calculateSHADigest(
+    // calculateSHADigestLabtest
     req.body.orderCreationId,
     req.body.razorpayOrderId,
     req.body.razorpayPaymentId,
@@ -18,24 +34,16 @@ const razorpayVerification = catchAsync(async (req, res) => {
   return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Signature' });
 });
 
-const razorpayCreateOrder = catchAsync(async (req, res) => {
-  const { labTestOrderID, sessionID } = req.body;
-
-  const currency = 'INR';
-  const response = await razorpayPaymentServices.createRazorpayOrder(currency, labTestOrderID, sessionID);
-  res.status(httpStatus.OK).json({
-    id: response.id,
-    currency: response.currency,
-    amount: response.amount,
-  });
-});
-const razorpayAppointment = catchAsync(async (req, res) => {
+const createAppointmentOrder = catchAsync(async (req, res) => {
+  // razorpayAppointment -> createAppointmentOrder
   const { orderId, appointmentId } = req.body;
   const currency = 'INR';
   const response = await razorpayPaymentServices.createAppointmentOrder(currency, appointmentId, orderId);
   res.send(response);
 });
-const razorpayAppointmentVerification = catchAsync(async (req, res) => {
+
+const verifyAppointmentOrder = catchAsync(async (req, res) => {
+  // razorpayAppointmentVerification -> verifyAppointmentOrder
   const calculatedSHADigest = await razorpayPaymentServices.calculateSHADigestAppointment(
     req.body.orderCreationId,
     req.body.razorpayOrderId,
@@ -50,9 +58,34 @@ const razorpayAppointmentVerification = catchAsync(async (req, res) => {
   }
   return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Signature' });
 });
+
+const createWalletOrder = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const { walletId, amount } = req.body;
+  const currency = 'INR';
+  const response = await razorpayPaymentServices.createWalletOrder(AuthData, walletId, amount, currency);
+  res.send(response);
+});
+
+const verifyWalletOrder = catchAsync(async (req, res) => {
+  const razorpayOrderStatus = await razorpayPaymentServices.fetchRazorpayOrderStatus(req.body.razorpayOrderId);
+  if (razorpayOrderStatus === 'paid') {
+    return res.status(httpStatus.OK).json({ message: 'OK' });
+  }
+  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Invalid Signature' });
+});
+
+const fetchRazorpayOrderStatus = catchAsync(async (req, res) => {
+  const response = await razorpayPaymentServices.fetchRazorpayOrderStatus(req.body.razorpayOrderId);
+  res.send(response);
+});
+
 module.exports = {
-  razorpayVerification,
-  razorpayCreateOrder,
-  razorpayAppointment,
-  razorpayAppointmentVerification,
+  verifyLabtestOrder,
+  createLabtestOrder,
+  createAppointmentOrder,
+  verifyAppointmentOrder,
+  createWalletOrder,
+  verifyWalletOrder,
+  fetchRazorpayOrderStatus,
 };

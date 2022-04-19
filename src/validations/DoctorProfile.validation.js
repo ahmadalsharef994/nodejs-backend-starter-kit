@@ -225,6 +225,11 @@ const notifications = {
     offersAndDiscounts: Joi.boolean().required(),
   }),
 };
+const timings = {
+  body: Joi.object().keys({
+    timing: Joi.array().required(),
+  }),
+};
 
 const ClinicDoctorDetails = {
   body: Joi.object().keys({
@@ -233,7 +238,7 @@ const ClinicDoctorDetails = {
     AddressSecondline: Joi.string().required(),
     clinicTelephone: Joi.number().required(),
     pincode: Joi.number().required(),
-    timing: Joi.array().required(),
+    timing: Joi.array(),
   }),
 };
 
@@ -246,6 +251,37 @@ const PayoutsDoctorDetails = {
     PanCardNo: Joi.string().required(),
   }),
 };
+const updateDetails = {
+  body: Joi.object().keys({
+    about: Joi.string().required().max(150),
+    address: Joi.string().required(),
+    city: Joi.string().required(),
+    state: Joi.string().required(),
+    pincode: Joi.number().required(),
+    country: Joi.string().required(),
+    experience: Joi.number().required(),
+  }),
+};
+const EducationExperience = {
+  body: Joi.object().keys({
+    education: Joi.object().keys({
+      registrationNo: Joi.number().required(),
+      yearofRegistration: Joi.number().required(),
+      stateMedicalCouncil: Joi.string().required(),
+    }),
+    experience: Joi.object().keys({
+      mainstream: Joi.string().required(),
+      specialization: Joi.array().required(),
+      skills: Joi.array().required(),
+      experience: Joi.number().required(),
+    }),
+  }),
+};
+const updateAppointmentPrice = {
+  body: Joi.object().keys({
+    appointmentPrice: Joi.number().required(),
+  }),
+};
 
 module.exports = {
   BasicDoctorDetails,
@@ -255,4 +291,8 @@ module.exports = {
   PayoutsDoctorDetails,
   addConsultationfee,
   notifications,
+  timings,
+  updateDetails,
+  EducationExperience,
+  updateAppointmentPrice,
 };

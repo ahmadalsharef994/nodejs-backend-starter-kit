@@ -126,7 +126,49 @@ const notificationSettings = async (notifications, auth) => {
   }
   return false;
 };
+const updteClinicDetails = async (Auth, timings) => {
+  const result = await DoctorClinic.find({ auth: Auth });
+  if (typeof result[0] === 'object') {
+    await DoctorClinic.updateOne({ auth: Auth }, { $set: { timing: timings } });
+    return true;
+  }
+  return false;
+};
+const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
+  const Auth = { auth };
+  const About = { about, address, pincode, experience, country, state, city };
+  try {
+    await DoctorBasic.findOneAndUpdate(Auth, About);
+    await DoctorExperience.updateOne({ auth }, { $set: { experience } });
+    return true;
+  } catch (error) {
+    return error;
+  }
+};
 
+const doctorExpEducation = async (auth, experience, education) => {
+  // eslint-disable-next-line no-param-reassign
+  education.auth = auth;
+  // eslint-disable-next-line no-param-reassign
+  experience.auth = auth;
+  const edu = await DoctorEducation.findOne({ auth });
+  const exp = await DoctorExperience.findOne({ auth });
+  if (edu || exp) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'these details were already submitted ');
+  } else {
+    const Education = await DoctorEducation.create(education);
+    const Experience = await DoctorExperience.create(experience);
+    return { Education, Experience };
+  }
+};
+const updateappointmentPrice = async (appointmentPrice, auth) => {
+  await DoctorBasic.updateOne({ auth }, { $set: { appointmentPrice } });
+  const result = await DoctorBasic.findOne({ appointmentPrice });
+  if (result.appointmentPrice === appointmentPrice) {
+    return true;
+  }
+  return false;
+};
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -142,4 +184,8 @@ module.exports = {
   submitpayoutsdetails,
   addConsultationfee,
   notificationSettings,
+  updteClinicDetails,
+  updateDetails,
+  doctorExpEducation,
+  updateappointmentPrice,
 };

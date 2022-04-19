@@ -10,6 +10,7 @@ const {
   doctorprofileService,
   documentService,
   internalTeamService,
+  appointmentPreferenceService,
 } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
@@ -52,6 +53,11 @@ const getOnboardingChallenge = async (AuthData) => {
       challenge = 'ONBOARDING_SUCCESS';
     }
     optionalChallenge = 'CLINIC_DETAILS';
+  } else if (!appointmentPreferenceService.checkforDoctorPreference(AuthData)) {
+    if (IsDoctorVerified) {
+      challenge = 'ONBOARDING_SUCCESS';
+    }
+    optionalChallenge = 'APPOINTMENT_PREFERENCES';
   } else if (IsDoctorVerified) {
     challenge = 'ONBOARDING_SUCCESS';
     optionalChallenge = 'ONBOARDING_SUCCESS';
@@ -172,13 +178,13 @@ const resetPassword = catchAsync(async (req, res) => {
 const sendVerificationEmail = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const OTP = generateOTP();
-  try {
-    await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
-  } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `email service: ${err}`);
+  const response = await emailService.sendVerificationEmail(AuthData.email, AuthData.fullname, OTP);
+  if (response === true) {
+    await otpServices.sendEmailVerifyOtp(OTP, AuthData);
+    res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent', challenge: 'AUTH_EMAILVERIFY' });
+  } else {
+    res.status(httpStatus.BAD_GATEWAY).json({ message: 'Email Verification Not Sent ', response });
   }
-  await otpServices.sendEmailVerifyOtp(OTP, AuthData);
-  res.status(httpStatus.OK).json({ message: 'Email Verification Code Sent', challenge: 'AUTH_EMAILVERIFY' });
 });
 
 const changeEmail = catchAsync(async (req, res) => {

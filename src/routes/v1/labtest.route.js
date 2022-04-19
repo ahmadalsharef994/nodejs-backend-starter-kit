@@ -37,9 +37,7 @@ router
 router
   .route('/thyrocare/verify-order')
   .post(/* authUserDoctor(), */ validate(labTestValidator.verifyOrder), labTestController.verifyOrder);
-router
-  .route('/thyrocare/cart-value')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.cartValue), labTestController.cartValue);
+router.route('/thyrocare/cart-value').post(validate(labTestValidator.cartValue), labTestController.cartValue);
 router
   .route('/thyrocare/bookPrepaidOrder')
   .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);

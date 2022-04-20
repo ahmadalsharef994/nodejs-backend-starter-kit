@@ -130,6 +130,7 @@ router
     validate(DoctorProfileValidator.updateAppointmentPrice),
     DoctorProfileController.updateAppointmentPrice
   );
+router.route('/get-doctor-clinictimings').get(authdoctornonverified(), DoctorProfileController.getDoctorClinicDetails);
 router.route('/').get(authdoctorverified(), DoctorProfileController.fetchprofiledetails);
 
 module.exports = router;

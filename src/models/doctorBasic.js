@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 const Auth = require('./auth.model');
+const Wallet = require('./wallet.model');
 
 const DoctorBasicSchema = mongoose.Schema(
   {
@@ -59,6 +60,10 @@ const DoctorBasicSchema = mongoose.Schema(
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
+    },
+    walletId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Wallet,
     },
   },
   {

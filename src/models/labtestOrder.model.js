@@ -1,7 +1,9 @@
+// filename: labtestOrder.model.js
+
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
 
-const RazorpayPaymentSchema = mongoose.Schema(
+const labtestOrderSchema = mongoose.Schema(
   {
     razorpayOrderID: {
       type: String,
@@ -27,6 +29,7 @@ const RazorpayPaymentSchema = mongoose.Schema(
       required: true,
     },
     sessionID: {
+      // labtestId
       type: String,
       required: true,
     },
@@ -37,12 +40,14 @@ const RazorpayPaymentSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-RazorpayPaymentSchema.plugin(toJSON);
-RazorpayPaymentSchema.plugin(paginate);
+labtestOrderSchema.plugin(toJSON);
+labtestOrderSchema.plugin(paginate);
 
 /**
- * @typedef RazorpayPayment
+ * @typedef LabtestOrder
  */
 
-const RazorpayPayment = mongoose.model('RazorpayPayment', RazorpayPaymentSchema);
-module.exports = RazorpayPayment;
+const LabtestOrder = mongoose.model('LabtestOrder', labtestOrderSchema);
+module.exports = LabtestOrder;
+// labtestOrderSchema -> LabtestOrderSchema
+// labtestOrder -> LabtestOrder

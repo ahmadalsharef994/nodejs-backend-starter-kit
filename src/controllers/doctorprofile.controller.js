@@ -257,6 +257,14 @@ const updateAppointmentPrice = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
   }
 });
+const getDoctorClinicDetails = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
+  if (result !== null) {
+    res.status(httpStatus.OK).json({ message: 'success', result });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
+  }
+});
 module.exports = {
   fetchstastics,
   submitbasicdetails,
@@ -278,4 +286,5 @@ module.exports = {
   updateDetails,
   doctorExpandEducation,
   updateAppointmentPrice,
+  getDoctorClinicDetails,
 };

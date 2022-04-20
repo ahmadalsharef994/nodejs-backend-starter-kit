@@ -169,6 +169,13 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
   }
   return false;
 };
+const doctorClinicTimings = async (auth) => {
+  const { timing } = await DoctorClinic.findOne({ auth });
+  if (timing) {
+    return timing;
+  }
+  return null;
+};
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -188,4 +195,5 @@ module.exports = {
   updateDetails,
   doctorExpEducation,
   updateappointmentPrice,
+  doctorClinicTimings,
 };

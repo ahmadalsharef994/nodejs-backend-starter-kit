@@ -9,6 +9,11 @@ const PrescriptionSchema = mongoose.Schema(
       ref: Appointment,
       required: true,
     },
+    doctorAuth: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Appointment,
+      required: true,
+    },
     PrescriptionNo: {
       type: Number,
       required: true,

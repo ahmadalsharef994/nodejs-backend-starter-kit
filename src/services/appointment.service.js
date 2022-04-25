@@ -283,7 +283,7 @@ const getUpcomingAppointments = async (doctorId, limit, options) => {
 
 const getAppointmentsByType = async (doctorId, filter, options) => {
   if (filter.Type === 'FOLLOWUP') {
-    const result = await Followup.paginate({ docid: doctorId }, options);
+    const result = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
     return result;
   }
   if (filter.Type === 'ALL') {

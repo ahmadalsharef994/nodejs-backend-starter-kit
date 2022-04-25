@@ -24,6 +24,22 @@ const UserBasicSchema = mongoose.Schema(
       type: String,
       default: null,
     },
+    userid: {
+      type: String,
+      default: null,
+    },
+    maritalstatus: {
+      type: String,
+      default: null,
+    },
+    height: {
+      type: String,
+      default: null,
+    },
+    weight: {
+      type: String,
+      default: null,
+    },
     auth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,

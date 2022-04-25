@@ -6,6 +6,9 @@ const BasicUserDetails = {
     gender: Joi.string().required().valid('male', 'female', 'other'),
     dob: Joi.date().required(),
     city: Joi.string(),
+    maritalstatus: Joi.string(),
+    height: Joi.string().required(),
+    weight: Joi.string().required(),
     languages: Joi.array().items(
       Joi.string().valid(
         'Assamese',
@@ -41,6 +44,9 @@ const updateBasicDetails = {
     gender: Joi.string().required().valid('male', 'female', 'other'),
     dob: Joi.date(),
     city: Joi.string(),
+    maritalstatus: Joi.string(),
+    height: Joi.string().required(),
+    weight: Joi.string().required(),
     languages: Joi.array().items(
       Joi.string().valid(
         'Assamese',

@@ -127,7 +127,8 @@ const getappointmentDoctor = catchAsync(async (req, res) => {
 
 const createPrescription = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const Prescription = await appointmentService.createPrescriptionDoc(req.body, AuthData);
+
+  const Prescription = await appointmentService.createPrescriptionDoc(req.body, req.params.appointmentId, AuthData);
   if (Prescription !== false) {
     res.status(httpStatus.CREATED).json({ message: 'Prescription Generated Sucessfully', Prescription });
   } else {
@@ -152,7 +153,8 @@ const getPatientDetails = catchAsync(async (req, res) => {
       'Patient Name': patientData[0],
       'Patient Basic Details': patientData[1],
       'Patient Contact Details': patientData[2],
-      /* Appointments: patientData[3], */
+      'Patient Recent Appointment': patientData[3],
+      'Prescription ': patientData[4],
     });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Error in fetching Patient data' });

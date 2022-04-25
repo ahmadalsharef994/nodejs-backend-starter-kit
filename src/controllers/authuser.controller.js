@@ -42,7 +42,7 @@ const register = catchAsync(async (req, res) => {
       mobile: verifiedUser.mobile,
       isMobileVerified: verifiedUser.isMobileVerified,
     });
-    const basicDetails = await userProfile.submitBasicDetails({ dob, gender, pincode }, AuthData);
+    const basicDetails = await userProfile.submitBasicDetails({ dob, gender, pincode, userid: null }, AuthData);
     const authtoken = tokenService.generateUserToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;
@@ -50,8 +50,9 @@ const register = catchAsync(async (req, res) => {
     await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
     await otpServices.initiateOTPData(AuthData);
     res.status(httpStatus.CREATED).json({ AuthData, basicDetails, authtoken });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Verify Your Mobile Number' });
   }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'Verify Your Mobile Number' });
 });
 
 const login = catchAsync(async (req, res) => {

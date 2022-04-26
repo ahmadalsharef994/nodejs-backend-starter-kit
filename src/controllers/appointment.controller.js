@@ -233,7 +233,14 @@ const bookingConfirmation = catchAsync(async (req, res) => {
     res.status(httpStatus.CONFLICT).json({ reason: 'orderId not matched ', Message, status });
   }
 });
-
+const cancelfollowup = catchAsync(async (req, res) => {
+  const result = await appointmentService.cancelFollowup(req.body.followupId);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'followup cancelled !' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'cant cancel followup check appointment id and try again !' });
+  }
+});
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -256,4 +263,5 @@ module.exports = {
   cancelBooking,
   rescheduleBooking,
   bookingConfirmation,
+  cancelfollowup,
 };

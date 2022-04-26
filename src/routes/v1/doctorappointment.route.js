@@ -78,6 +78,9 @@ router
 router
   .route('/:appointmentId/assign-followup')
   .post(authdoctorverified(), validate(appointmentValidator.assignfollowupDetails), appointmentController.assignFollowup);
+router
+  .route('/cancel-followup')
+  .post(authdoctorverified(), validate(appointmentValidator.cancelFollowup), appointmentController.cancelfollowup);
 router.post(
   '/:appointmentId/prescription',
   authdoctorverified(),

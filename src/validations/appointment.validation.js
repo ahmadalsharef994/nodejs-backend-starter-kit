@@ -144,6 +144,12 @@ const cancelAppointment = {
     .max(1),
 };
 
+const cancelFollowup = {
+  body: Joi.object().keys({
+    followupId: Joi.string().custom(objectId),
+  }),
+};
+
 const rescheduleAppointment = {
   body: Joi.object()
     .keys({
@@ -185,4 +191,5 @@ module.exports = {
   rescheduleAppointment,
   getDoctorsByCategories,
   bookingConfirmation,
+  cancelFollowup,
 };

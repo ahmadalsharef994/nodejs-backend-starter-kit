@@ -213,9 +213,9 @@ const notifications = catchAsync(async (req, res) => {
 });
 
 const updateClinicDetails = catchAsync(async (req, res) => {
-  const result = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing);
-  if (result === true) {
-    res.status(httpStatus.OK).json({ message: 'Clinic Timings Updated' });
+  const response = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing, req.body.clinicId);
+  if (response) {
+    res.status(httpStatus.OK).json({ message: `Clinic Timings Updated for ${response.clinicName} (id :${response.id})` });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
   }

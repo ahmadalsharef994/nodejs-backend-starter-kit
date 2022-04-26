@@ -261,7 +261,9 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
     Status: status,
     Date: appointmentDate,
     Gender: AppointmentData.Gender,
+    Healthissue: AppointmentData.HealthIssue,
     orderId: AppointmentData.orderId,
+    AuthUser: AppointmentData.AuthUser,
   });
   return assignedFollowup;
 };
@@ -385,12 +387,11 @@ const fetchPrescriptionDoc = async (prescriptionid) => {
   return false;
 };
 
-const createPrescriptionDoc = async (prescriptionDoc, appointmentID) => {
-  const alreadyExist = await fetchPrescriptionDoc(appointmentID);
-  if (!alreadyExist) {
-    // eslint-disable-next-line no-param-reassign
-    prescriptionDoc.Appointment = appointmentID;
-    const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
+const createPrescriptionDoc = async (prescriptionDoc, appointmentId, appointmentID) => {
+  prescriptionDoc.Appointment = appointmentId;
+  prescriptionDoc.doctorAuth = appointmentID;
+  const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
+  if (DoctorPrescriptionDocument) {
     return DoctorPrescriptionDocument;
   }
   return false;
@@ -403,8 +404,19 @@ const fetchPatientDetails = async (patientid, doctorid) => {
   const PatientAuth = await authService.getAuthById(patientid);
   const PatientName = PatientAuth.fullname;
   const PatientContact = { mobile: PatientAuth.mobile, email: PatientAuth.email };
-  // return [PatientName, PatientBasicDetails, PatientContact, PatientAppointments];
-  return [PatientName, PatientBasicDetails, PatientContact];
+  const currentdate = new Date();
+  const appointments = await Appointment.find({
+    AuthUser: patientid,
+    StartTime: { $lt: `${currentdate}` },
+    paymentStatus: 'PAID',
+    AuthDoctor: doctorid,
+  }).sort({
+    StartTime: -1,
+  });
+  const RecentAppointment = appointments[0];
+  const prescription = await Prescription.find({ Appointment: `${RecentAppointment.id}` }).sort({ createdAt: -1 });
+  const LatestPrescription = prescription[0];
+  return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
 const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
@@ -418,7 +430,6 @@ const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
       },
     },
   ]);
-
   const allPatientsData = [];
   let singlePatientData = {};
   for (let k = 0; k < patientIds[0].data.length; k += 1) {
@@ -429,6 +440,8 @@ const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
       'Patient Name': singlePatientData[0],
       'Patient Basic Details': singlePatientData[1],
       'Patient Contact Details': singlePatientData[2],
+      'Patient Recent Appointment': singlePatientData[3],
+      'Prescription ': singlePatientData[4],
     });
   }
 

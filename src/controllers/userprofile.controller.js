@@ -122,7 +122,12 @@ const notifications = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification settings' });
   }
 });
-
+const updateprofilepic = catchAsync(async (req, res) => {
+  const AuthData = req.SubjectId;
+  const profilePhoto = req.files.avatar[0].location;
+  const result = await userprofileService.updateProfilePic(profilePhoto, AuthData);
+  res.status(httpStatus.OK).json({ message: 'Profile pic updated successfully', result });
+});
 module.exports = {
   showUserProfile,
   submitBasicDetails,
@@ -136,4 +141,5 @@ module.exports = {
   deleteExistingMember,
   getAllMembers,
   notifications,
+  updateprofilepic,
 };

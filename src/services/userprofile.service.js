@@ -5,15 +5,21 @@ const fetchBasicDetails = async (AuthData) => {
   const userBasicDetails = await UserBasic.findOne({ auth: AuthData });
   return userBasicDetails;
 };
-
+const userIdgenerator = () => {
+  const number = Math.round((Date.now() * Math.random() + (Math.random() + 1000)) / 100);
+  return number;
+};
 const submitBasicDetails = async (BasicDetailBody, AuthData) => {
   const alreadyExist = await fetchBasicDetails(AuthData);
   if (!alreadyExist) {
     // eslint-disable-next-line no-param-reassign
     BasicDetailBody.auth = AuthData;
+    // eslint-disable-next-line no-param-reassign
+    BasicDetailBody.userid = `PT${userIdgenerator()}`;
     const basicDetailDoc = await UserBasic.create(BasicDetailBody);
     return basicDetailDoc;
   }
+
   return false;
 };
 
@@ -136,7 +142,11 @@ const notificationSettings = async (notifications, auth) => {
   }
   return false;
 };
-
+const updateProfilePic = async (Avatar, auth) => {
+  await UserBasic.updateOne({ auth }, { $set: { avatar: Avatar } });
+  const { avatar } = await UserBasic.findOne({ auth });
+  return avatar;
+};
 module.exports = {
   submitBasicDetails,
   fetchBasicDetails,
@@ -150,4 +160,5 @@ module.exports = {
   fetchAllMembers,
   getUserProfile,
   notificationSettings,
+  updateProfilePic,
 };

@@ -3,6 +3,7 @@ const validate = require('../../middlewares/validate');
 const authuser = require('../../middlewares/authUser');
 const UserProfileValidator = require('../../validations/userProfile.validation');
 const UserProfileController = require('../../controllers/userprofile.controller');
+const { profilePhotoUpload } = require('../../Microservices');
 
 const router = express.Router();
 
@@ -32,6 +33,13 @@ router
 router
   .route('/delete-member/:memberId')
   .delete(authuser(), validate(UserProfileValidator.deleteMember), UserProfileController.deleteExistingMember);
+router
+  .route('/update-profilepicture')
+  .put(
+    profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+    authuser(),
+    UserProfileController.updateprofilepic
+  );
 router.post('/notifications', authuser(), validate(UserProfileValidator.notifications), UserProfileController.notifications);
 
 module.exports = router;

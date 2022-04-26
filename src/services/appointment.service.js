@@ -261,7 +261,7 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
     Status: status,
     Date: appointmentDate,
     Gender: AppointmentData.Gender,
-    Healthissue: AppointmentData.HealthIssue,
+    HealthIssue: AppointmentData.HealthIssue,
     orderId: AppointmentData.orderId,
     AuthUser: AppointmentData.AuthUser,
   });
@@ -582,6 +582,21 @@ const verifyAppointment = async (orderId, appointmentId) => {
   }
   return { status: 'failed', Message: 'Order not confirmed !' };
 };
+const cancelFollowup = async (followupid) => {
+  const followup = await Followup.findById(followupid);
+  if (followup.Status === 'cancelled') {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `cant cancel followup ,id :${followup.id} because this id was already cancelled`
+    );
+  }
+  await Followup.updateOne({ _id: followupid }, { $set: { Status: 'cancelled' } });
+  const { Status } = await Followup.findById(followupid);
+  if (Status === 'cancelled') {
+    return true;
+  }
+  return false;
+};
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -604,4 +619,5 @@ module.exports = {
   rescheduleAppointment,
   getDoctorsByCategories,
   verifyAppointment,
+  cancelFollowup,
 };

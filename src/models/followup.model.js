@@ -41,7 +41,7 @@ const FollowupSchema = mongoose.Schema(
       required: true,
       default: 'Not Mentioned',
     },
-    Healthissue: {
+    HealthIssue: {
       type: String,
       required: true,
     },

@@ -545,10 +545,27 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, star
   if (startTime === null || endTime === null) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Error in creating timestamps!');
   }
-
+  const appointmentDate = new Date(date).toDateString();
+  const todayDate = new Date().toDateString();
+  if (`${todayDate}` === `${appointmentDate}`) {
+    const result = await Appointment.findOneAndUpdate(
+      { _id: appointmentId },
+      {
+        StartTime: startTime,
+        EndTime: endTime,
+        Status: 'booked',
+        Date: appointmentDate,
+        Type: 'TODAY',
+        isRescheduled: true,
+        slotId,
+      },
+      { new: true }
+    );
+    return result;
+  }
   const result = await Appointment.findOneAndUpdate(
     { _id: appointmentId },
-    { StartTime: startTime, EndTime: endTime, Status: 'booked', isRescheduled: true, slotId },
+    { StartTime: startTime, EndTime: endTime, Status: 'booked', Date: appointmentDate, isRescheduled: true, slotId },
     { new: true }
   );
 
@@ -597,6 +614,49 @@ const cancelFollowup = async (followupid) => {
   }
   return false;
 };
+const rescheduleFollowup = async (followupid, slotId, date) => {
+  let startTime = null;
+  let endTime = null;
+  const AppointmentData = await Followup.findById(followupid).exec();
+  if (!AppointmentData) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Cannot find Appointment to assign Followup');
+  }
+  const doctorId = AppointmentData.docid;
+  await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
+    const day = slotId.split('-')[1];
+    const type = slotId.split('-')[0];
+    const slots = pref[`${day}_${type}`];
+    const slot = slots.filter((e) => e.slotId === slotId);
+    if (slot.length === 0) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
+    }
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+    const currentTime = new Date();
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Followups can be booked only for future dates');
+    }
+    const correctDay = startTime.getDay();
+    const requestedDay = slotId.split('-')[1];
+    if (weekday[correctDay] !== requestedDay) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+    }
+  });
+  const followupExist = await Followup.findOne({ Appointment: AppointmentData.id, StartTime: startTime }).exec();
+  if (followupExist || startTime === null || endTime === null) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Followup Already Booked');
+  }
+  const newDate = new Date(date).toDateString();
+  await Followup.updateOne(
+    { _id: followupid },
+    { $set: { slotId, StartTime: startTime, EndTime: endTime, Date: newDate, isRescheduled: true } }
+  );
+  const result = await Followup.findOne({ _id: followupid });
+  if (result.slotId === slotId) {
+    return result;
+  }
+  return false;
+};
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -620,4 +680,5 @@ module.exports = {
   getDoctorsByCategories,
   verifyAppointment,
   cancelFollowup,
+  rescheduleFollowup,
 };

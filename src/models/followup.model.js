@@ -10,6 +10,10 @@ const FollowupSchema = mongoose.Schema(
       required: true,
       index: true,
     },
+    isRescheduled: {
+      type: Boolean,
+      default: false,
+    },
     patientName: {
       type: String,
       required: true,

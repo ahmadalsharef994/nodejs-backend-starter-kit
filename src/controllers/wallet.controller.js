@@ -153,7 +153,7 @@ const withdrawFromWallet = catchAsync(async (req, res) => {
     account_number: req.body.accountNumber,
     currency: 'INR',
   });
-  await walletService.postWithdrawRequest(AuthData, {
+  const withdrawRequest = await walletService.postWithdrawRequest(AuthData, {
     amount: req.body.amount,
     name: req.body.name,
     email: req.body.email,
@@ -163,8 +163,8 @@ const withdrawFromWallet = catchAsync(async (req, res) => {
   });
 
   res.status(httpStatus.SERVICE_UNAVAILABLE).json({
-    message:
-      'Failed to pay to bank account or withdraw from wallet. Transaction Details are logged for future manual processing of withdrawal ',
+    message: `Failed to pay to bank account or withdraw from wallet. Transaction Details are logged for future manual processing of withdrawal`,
+    json: withdrawRequest,
   });
 
   // const result = razorpayPaymentServices.withdrawFromWallet(options);

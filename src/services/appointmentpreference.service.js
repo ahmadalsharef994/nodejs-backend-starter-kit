@@ -65,19 +65,14 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
     // eslint-disable-next-line no-await-in-loop
     durations.push(await calculateDuration(body[days[i]]));
   }
-
   const validDurations = durations.every((durationArr) => {
     return durationArr.every((dur) => {
-      return !(dur % 40) && dur >= 120;
+      return dur === 120;
     });
   });
-
   if (!validDurations) {
     return Promise.reject(
-      new ApiError(
-        httpStatus.FORBIDDEN,
-        'Difference between "Start Time" and "End Time" should be atleast 120 mins and divisible by 40'
-      )
+      new ApiError(httpStatus.FORBIDDEN, 'Difference between "Start Time" and "End Time" should be 120 mins')
     );
   }
 
@@ -125,7 +120,6 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
     }
     finalSlots.push([ASlots, FSlots]);
   }
-
   const Adays = days.map((day) => day.concat('_A'));
   const Fdays = days.map((day) => day.concat('_F'));
 
@@ -176,7 +170,16 @@ const getappointments = async (doctorId) => {
   );
   return promise;
 };
-
+const checkappointmentPreference = async (docid, doctorauth) => {
+  try {
+    const { doctorAuthId } = await AppointmentPreference.findOne({ docid });
+    if (`${doctorauth}` === `${doctorAuthId}`) {
+      return true;
+    }
+  } catch (err) {
+    return false;
+  }
+};
 module.exports = {
   checkForAppointmentPrice,
   createPreference,
@@ -185,4 +188,5 @@ module.exports = {
   getappointments,
   slotOverlap,
   checkforDoctorPreference,
+  checkappointmentPreference,
 };

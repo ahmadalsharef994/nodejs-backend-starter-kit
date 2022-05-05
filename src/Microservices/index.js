@@ -5,3 +5,4 @@ module.exports.profilePhotoUpload = require('./profilePhotoUpload');
 module.exports.thyrocareServices = require('./thyrocareServices');
 module.exports.razorpayPaymentServices = require('./razorpay.service');
 // module.exports.prescriptionUpload = require('./generatePrescription.service');
+module.exports.elasticSearchService = require('./elasticSearch.service');

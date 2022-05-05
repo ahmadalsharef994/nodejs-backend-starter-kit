@@ -4,7 +4,8 @@ const authService = require('../services/auth.service');
 const walletService = require('../services/wallet.service');
 const appointmentService = require('../services/appointment.service');
 // const razorpayPaymentServices = require('../Microservices/razorpay.service');
-const LabtestOrder = require('../models/labtestOrder.model');
+// const labTestService = require('../services/labTest.service');
+// const LabtestOrder = require('../models/labtestOrder.model');
 
 const getBalanceInWallet = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -16,14 +17,13 @@ const getBalanceInWallet = catchAsync(async (req, res) => {
   }
 });
 
-const refundToWallet = catchAsync(async (req, res) => {
+const refundToWalletUser = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
 
   const refundCondition = req.body.refundCondition;
   let amount = req.body.amount;
   let cashbackAmount = req.body.cashbackAmount;
   let refundSatisfied = false;
-  let razorPayOrder = {};
 
   if (refundCondition === 'Cancelled Appointment') {
     const appointmentId = req.body.appointmentId;
@@ -34,15 +34,17 @@ const refundToWallet = catchAsync(async (req, res) => {
       cashbackAmount = 0;
     }
   }
-  // if (refundCondition === 'Add Balance') {
-  //   const razorpayOrderID = req.body.razorpayOrderID;
-  //   razorPayOrder = await LabtestOrder.findOne({ razorpayOrderID });
-  //   if (razorPayOrder.isPaid) {
+
+  // if (refundCondition === 'Cancelled Labtest') {
+  //   const labTestOrderId = req.body.labTestOrderId;
+  //   const labTestOrder = await labTestService.getappointmentDoctor(labTestOrderId);
+  //   if (labTestOrder.Status === 'CANCELLED' && labTestOrder.isPaid) {
   //     refundSatisfied = true;
-  //     amount = razorPayOrder.amount;
+  //     amount = labTestOrder.amount;
   //     cashbackAmount = 0;
   //   }
   // }
+
   if (refundCondition === 'Cashback') {
     cashbackAmount = req.body.cashbackAmount;
     amount = 0;
@@ -50,12 +52,13 @@ const refundToWallet = catchAsync(async (req, res) => {
       refundSatisfied = true;
     }
   }
+
   if (refundCondition === 'Doctor Earning') {
-    const razorpayOrderID = req.body.razorpayOrderID;
-    razorPayOrder = await LabtestOrder.findOne({ razorpayOrderID });
-    if (razorPayOrder.isPaid) {
+    const appointmentId = req.body.appointmentId;
+    const appointment = await appointmentService.getappointmentDoctor(appointmentId);
+    if (appointment.Status !== 'CANCELLED' && appointment.paymentStatus === 'PAID') {
       refundSatisfied = true;
-      amount = razorPayOrder.amount * process.env.DOCTORE_PERCENTAGE;
+      amount = appointment.price * process.env.DOCTORE_PERCENTAGE;
       cashbackAmount = 0;
     }
   }
@@ -70,8 +73,50 @@ const refundToWallet = catchAsync(async (req, res) => {
         amount,
         cashbackAmount,
         appointmentId: req.body.appointmentId,
-        razorpayOrderID: req.body.razorpayOrderID,
-        razorPayOrder,
+      });
+    } else {
+      res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to refund' });
+    }
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Refund Condition is not satisfied' });
+  }
+});
+
+const refundToWalletDoctor = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+
+  const refundCondition = req.body.refundCondition;
+  let amount = req.body.amount;
+  let cashbackAmount = req.body.cashbackAmount;
+  let refundSatisfied = false;
+  if (refundCondition === 'Cashback') {
+    cashbackAmount = req.body.cashbackAmount;
+    amount = 0;
+    if (cashbackAmount) {
+      refundSatisfied = true;
+    }
+  }
+
+  if (refundCondition === 'Doctor Earning') {
+    const appointmentId = req.body.appointmentId;
+    const appointment = await appointmentService.getappointmentDoctor(appointmentId);
+    if (appointment.Status !== 'CANCELLED' && appointment.paymentStatus === 'PAID') {
+      refundSatisfied = true;
+      amount = appointment.price * process.env.DOCTORE_PERCENTAGE;
+      cashbackAmount = 0;
+    }
+  }
+
+  if (refundSatisfied) {
+    const resultData = await walletService.refundToWallet(AuthData, amount, cashbackAmount);
+    if (resultData) {
+      res.status(httpStatus.OK).json({ message: 'Success: refunded ' });
+      await walletService.logTransaction(AuthData, {
+        transactionType: 'REFUND',
+        refundCondition,
+        amount,
+        cashbackAmount,
+        appointmentId: req.body.appointmentId,
       });
     } else {
       res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to refund' });
@@ -153,7 +198,7 @@ const withdrawFromWallet = catchAsync(async (req, res) => {
     account_number: req.body.accountNumber,
     currency: 'INR',
   });
-  await walletService.postWithdrawRequest(AuthData, {
+  const withdrawRequest = await walletService.postWithdrawRequest(AuthData, {
     amount: req.body.amount,
     name: req.body.name,
     email: req.body.email,
@@ -163,8 +208,8 @@ const withdrawFromWallet = catchAsync(async (req, res) => {
   });
 
   res.status(httpStatus.SERVICE_UNAVAILABLE).json({
-    message:
-      'Failed to pay to bank account or withdraw from wallet. Transaction Details are logged for future manual processing of withdrawal ',
+    message: `Failed to pay to bank account or withdraw from wallet. Transaction Details are logged for future manual processing of withdrawal`,
+    json: withdrawRequest,
   });
 
   // const result = razorpayPaymentServices.withdrawFromWallet(options);
@@ -203,7 +248,8 @@ const fulfillWithdrawRequest = catchAsync(async (req, res) => {
 
 module.exports = {
   getBalanceInWallet,
-  refundToWallet,
+  refundToWalletUser,
+  refundToWalletDoctor,
   discountFromWallet,
   payFromWallet,
   withdrawFromWallet,

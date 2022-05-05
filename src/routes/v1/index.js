@@ -11,6 +11,7 @@ const document = require('./document.route');
 const razorpayRoute = require('./razorpay.route');
 const couponRoute = require('./coupon.route');
 const walletRoute = require('./wallet.route');
+const elasticSearchRoute = require('./elasticSearch.route');
 
 const router = express.Router();
 
@@ -63,6 +64,10 @@ const defaultRoutes = [
     path: '/wallet',
     route: walletRoute,
   }, // Wallet Route (NEW)
+  {
+    path: '/elasticsearch',
+    route: elasticSearchRoute,
+  },
 ];
 
 defaultRoutes.forEach((route) => {

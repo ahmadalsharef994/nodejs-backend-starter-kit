@@ -131,7 +131,7 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
       auth,
       razorpayOrderID,
       walletId,
-      orderAmount,
+      amount: orderAmount,
       currency,
       isPaid: false,
     });

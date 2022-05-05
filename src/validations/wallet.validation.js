@@ -4,11 +4,21 @@ const getBalanceInWallet = {
   query: Joi.object().keys({}),
 };
 
-const refundToWallet = {
+const refundToWalletUser = {
   body: Joi.object().keys({
     amount: Joi.number().precision(2).min(0).max(50000).required(),
     cashbackAmount: Joi.number().precision(2).min(0).max(50000).required(),
-    refundCondition: Joi.required().valid('Cashback', 'Cancelled Appointment', 'Doctor Earning', 'Add Balance'),
+    refundCondition: Joi.required().valid('Cashback', 'Cancelled Appointment', 'Cancelled Labtest'),
+    appointmentId: Joi.objectId(),
+    razorpayOrderID: Joi.string(),
+  }),
+};
+
+const refundToWalletDoctor = {
+  body: Joi.object().keys({
+    amount: Joi.number().precision(2).min(0).max(50000).required(),
+    cashbackAmount: Joi.number().precision(2).min(0).max(50000).required(),
+    refundCondition: Joi.required().valid('Cashback', 'Doctor Earning'),
     appointmentId: Joi.objectId(),
     razorpayOrderID: Joi.string(),
   }),
@@ -49,7 +59,8 @@ const fullfillWithdrawRequest = {
 };
 module.exports = {
   getBalanceInWallet,
-  refundToWallet,
+  refundToWalletUser,
+  refundToWalletDoctor,
   discountFromWallet,
   payFromWallet,
   withdrawFromWallet,

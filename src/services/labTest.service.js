@@ -323,6 +323,11 @@ const resetGuestOtp = async (orderId) => {
   }
 };
 
+const getLabTestOrder = async (labTestOrderID) => {
+  const labTestOrder = await LabtestOrder.findOne({ labTestOrderID });
+  return labTestOrder;
+};
+
 module.exports = {
   initiateGuestBooking,
   verifyGuestOrder,
@@ -333,6 +338,7 @@ module.exports = {
   getPincodeDetails,
   resetGuestOtp,
   getLabTestDetails,
+  getLabTestOrder,
 };
 
 /*

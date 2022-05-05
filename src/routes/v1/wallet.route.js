@@ -9,8 +9,12 @@ const walletController = require('../../controllers/wallet.controller');
 const router = express.Router();
 
 router
-  .route('/get-balance-in-wallet')
+  .route('/get-balance-in-wallet-user')
   .get(authUser(), validate(walletValidation.getBalanceInWallet), walletController.getBalanceInWallet);
+
+router
+  .route('/get-balance-in-wallet-doctor')
+  .get(authUserDoctor(), validate(walletValidation.getBalanceInWallet), walletController.getBalanceInWallet);
 
 router
   .route('/refund-to-wallet-user')

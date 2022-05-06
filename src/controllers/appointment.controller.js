@@ -80,7 +80,7 @@ const showFollowUpsById = catchAsync(async (req, res) => {
 });
 
 const showAvailableFollowUps = catchAsync(async (req, res) => {
-  await appointmentService.getAvailableFollowUpSlots(req.Docid).then((result) => {
+  await appointmentService.getAvailableFollowUpSlots(req.Docid, req.body.date).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
     }

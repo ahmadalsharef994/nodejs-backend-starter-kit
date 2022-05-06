@@ -44,7 +44,7 @@ router
     appointmentController.showAppointmentsByType
   );
 // get followup slots available for booking
-router.route('/get-available-followups').get(authdoctorverified(), appointmentController.showAvailableFollowUps);
+router.route('/get-available-followups').post(authdoctorverified(), appointmentController.showAvailableFollowUps);
 
 //  get appointment slots available for booking (public)
 router

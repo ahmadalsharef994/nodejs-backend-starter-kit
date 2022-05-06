@@ -360,7 +360,13 @@ const getAvailableAppointmentSlots = async (doctorId, date) => {
   return res;
 };
 
-const getAvailableFollowUpSlots = async (doctorId) => {
+const getAvailableFollowUpSlots = async (doctorId, date) => {
+  const getDayOfWeek = (requiredDate) => {
+    const dayOfWeek = new Date(requiredDate).getDay();
+    // eslint-disable-next-line no-restricted-globals
+    return isNaN(dayOfWeek) ? null : ['SUN_F', 'MON_F', 'TUE_F', 'WED_F', 'THU_F', 'FRI_F', 'SAT_F'][dayOfWeek];
+  };
+
   const AllFollwUpSlots = await appointmentPreferenceService.getfollowups(doctorId);
   const assignedFollowUpSlots = await Followup.find({ docid: doctorId, Status: 'ASSIGNED' });
   const assignedSlotIds = assignedFollowUpSlots.map((item) => item.slotId);
@@ -368,7 +374,15 @@ const getAvailableFollowUpSlots = async (doctorId) => {
   for (let i = 0; i < 7; i += 1) {
     result[`${weekday[i]}_F`] = AllFollwUpSlots[`${weekday[i]}_F`].filter((item) => !assignedSlotIds.includes(item.slotId));
   }
-  return result;
+  const Day = getDayOfWeek(date);
+  let allslots = [];
+  // eslint-disable-next-line array-callback-return
+  Object.keys(result).map((k) => {
+    if (k === Day) {
+      allslots = result[k];
+    }
+  });
+  return allslots;
 };
 
 const getappointmentDoctor = async (appointmentID) => {

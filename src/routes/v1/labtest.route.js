@@ -12,6 +12,8 @@ const router = express.Router();
 
 // all endpoints are public
 router.route('/thyrocare/labtests').get(labTestController.thyrocareLabTests);
+
+router.route('/thyrocare/labtest-packages').get(labTestController.getLabtestPackages);
 // admin endpoint
 router.route('/thyrocare/auto-update').get(authAdmin(), labTestController.startAutoUpdateCreds);
 router

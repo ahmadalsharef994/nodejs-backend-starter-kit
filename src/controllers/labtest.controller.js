@@ -37,7 +37,14 @@ const updateThyrocareLabTests = catchAsync(async (req, res) => {
   }
   return res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
 });
-
+const updateLabTestPackages = catchAsync(async (req, res) => {
+  const result = await thyrocareServices.updateLabtestPackages();
+  if (result) {
+    res.status(httpStatus.OK).json({ message: 'labtest packages updated ', data: result });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
+  }
+});
 const checkPincodeAvailability = catchAsync(async (req, res) => {
   const isAvailable = await thyrocareServices.checkPincodeAvailability(req.body.pincode);
   return res.status(httpStatus.OK).json({ message: 'Success', data: isAvailable });
@@ -144,6 +151,14 @@ const bookPrepaidOrder = catchAsync(async (req, res) => {
   return res.status(httpStatus.BAD_REQUEST).json({ message: 'Order Request Failed' });
 });
 
+const getLabtestPackages = catchAsync(async (req, res) => {
+  const result = await thyrocareServices.getLabtestPackages();
+  if (result) {
+    res.status(httpStatus.OK).json({ meassage: 'Success', data: result });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ meassage: 'Error', data: result });
+  }
+});
 // not supported by thyrocare
 /*
 const fixTimeSlot = catchAsync(async (req, res) => {
@@ -181,6 +196,8 @@ module.exports = {
   showGuestOrder,
   resendGuestOtp,
   showTestDetails,
+  getLabtestPackages,
+  updateLabTestPackages,
   // fixTimeSlot,
   // cancelOrder,
   // rescheduleOrder,

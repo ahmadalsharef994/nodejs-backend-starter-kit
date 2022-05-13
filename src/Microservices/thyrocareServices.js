@@ -77,10 +77,55 @@ const updateTestProducts = async () => {
   logger.info('Thyrocare Labtest Dataset updated');
   return res.data.master.tests;
 };
+// For updating labtestPackages
+const updateLabtestPackages = async () => {
+  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const res = await axios.post(
+    `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/productsmaster/Products`,
+    {
+      ApiKey: `${credentials.thyroApiKey}`,
+      ProductType: 'OFFER',
+    },
+    {
+      headers: { Authorization: `Bearer ${credentials.thyroAccessToken}` },
+    }
+  );
+  try {
+    const labtestpackages = res.data.master.offer.map((element) => {
+      // eslint-disable-next-line no-param-reassign
+      element.packageName = element.name;
+      // eslint-disable-next-line no-param-reassign
+      return element;
+    });
+    const LabTestPackages = JSON.stringify(labtestpackages);
+    fs.writeFileSync('./src/assets/labTestPackages.json', LabTestPackages, (err) => {
+      if (err) {
+        throw new ApiError(httpStatus.BAD_GATEWAY, 'Error writing labtest packages into file');
+      }
+    });
+    return labtestpackages;
+  } catch (error) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Error writing thyrocarePackages file');
+  }
+};
+const getLabtestPackages = async () => {
+  const labtestpackageBuffer = fs.readFileSync('./src/assets/labTestPackages.json');
+  const labpackages = JSON.parse(labtestpackageBuffer);
+  return labpackages;
+};
 
 // creating jobs for auto update
 agenda.define('updateTestDatasetx1', async (job, done) => {
   await updateTestProducts();
+  await job.repeatEvery('3 hours', {
+    skipImmediate: true,
+  });
+  await job.priority('high');
+  await job.save();
+  done();
+});
+agenda.define('updateLabtestPackagesx1', async (job, done) => {
+  await updateLabtestPackages();
   await job.repeatEvery('3 hours', {
     skipImmediate: true,
   });
@@ -104,6 +149,7 @@ const autoUpdateThyrocareCreds = async () => {
   try {
     await agenda.start();
     await agenda.every('4 minutes', 'updateTestDataset');
+    await agenda.every('5 minutes', 'updateLabtestPackages');
     await agenda.every('2 minutes', 'updateApiKeys');
     logger.info('Agenda Jobs Started');
     return true;
@@ -333,6 +379,8 @@ module.exports = {
   postThyrocareOrder,
   orderSummary,
   getReport,
+  getLabtestPackages,
+  updateLabtestPackages,
   // fixAppointmentSlot,
   // rescheduleThyrocareOrder,
   // cancelThyrocareOrder,

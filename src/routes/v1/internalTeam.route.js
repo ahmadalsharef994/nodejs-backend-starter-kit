@@ -10,6 +10,8 @@ const router = express.Router();
 
 router.route('/restricted/thyrocare-login').get(authAdmin(), labTestController.thyrocareLogin);
 router.route('/restricted/update-thyrocare-tests').get(authAdmin(), labTestController.updateThyrocareLabTests);
+// for manually updating labtest packages
+router.route('/restricted/update-thyrocare-labtest-packages').get(authAdmin(), labTestController.updateLabTestPackages);
 router
   .route('/verifydoctor')
   .post(authAdmin(), validate(InternalTeamValidator.verifydoctor), InternalTeamController.verifydoctor);

@@ -27,11 +27,11 @@ router.post(
 
 router
   .route('/reschedule-appointment')
-  .post(authdoctorverified(), validate(appointmentValidator.rescheduleAppointment), appointmentController.rescheduleBooking);
+  .post(authdoctorverified(), validate(appointmentValidator.rescheduleAppointment), appointmentController.rescheduleBooking); // rescheduleAppointment
 
 router
   .route('/cancel-booking')
-  .post(authdoctorverified(), validate(appointmentValidator.cancelAppointment), appointmentController.cancelBooking);
+  .post(authdoctorverified(), validate(appointmentValidator.cancelAppointment), appointmentController.cancelBooking); // cancelAppointment
 
 router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.showUpcomingAppointments);
 
@@ -51,7 +51,7 @@ router
   .route('/get-available-appointments')
   .post(validate(appointmentValidator.getAvailableAppointmentSlots), appointmentController.showAvailableAppointments);
 
-router.get('/getpatients', authdoctorverified(), appointmentController.getAllPatientDetails);
+router.get('/getpatients', authdoctorverified(), appointmentController.getAllPatientDetails); // getPatients
 router.get(
   '/patients/:patientId',
   authdoctorverified(),

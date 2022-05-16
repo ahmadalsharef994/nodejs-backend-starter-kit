@@ -13,3 +13,4 @@ module.exports.razorpayController = require('./razorpay.controller');
 module.exports.couponController = require('./coupon.controller');
 module.exports.walletController = require('./wallet.controller');
 module.exports.elasticSearchController = require('./elasticSearch.controller');
+module.exports.autoReplyController = require('./autoReply.controller');

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 
-const thyroTokenSchema = mongoose.Schema(
+const thyrocareTokenSchema = mongoose.Schema(
   {
     thyroAccessToken: {
       type: String,
@@ -22,11 +22,11 @@ const thyroTokenSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-thyroTokenSchema.plugin(toJSON);
+thyrocareTokenSchema.plugin(toJSON);
 
 /**
  * @typedef Token
  */
-const ThyroToken = mongoose.model('ThyroToken', thyroTokenSchema);
+const ThyrocareToken = mongoose.model('ThyrocareToken', thyrocareTokenSchema);
 
-module.exports = ThyroToken;
+module.exports = ThyrocareToken;

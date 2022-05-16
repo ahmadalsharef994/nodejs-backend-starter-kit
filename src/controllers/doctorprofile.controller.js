@@ -9,7 +9,7 @@ const authDoctorController = require('./authdoctor.controller');
 const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
 const { authService, documentService } = require('../services');
 
-const fetchstastics = catchAsync(async (req, res) => {
+const getStatistics = catchAsync(async (req, res) => {
   const PERCENT = 2.6;
   const TOTAL_USER = 53;
   const CHART_DATA = [{ data: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26] }];
@@ -270,7 +270,7 @@ const getDoctorClinicDetails = catchAsync(async (req, res) => {
   }
 });
 module.exports = {
-  fetchstastics,
+  getStatistics,
   submitbasicdetails,
   fetchbasicdetails,
   submiteducationdetails,

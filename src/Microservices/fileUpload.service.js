@@ -6,15 +6,12 @@ const path = require('path');
 const uuid = require('uuid');
 
 dotenv.config();
-const ID = process.env.AWSID;
-const SECRET = process.env.AWSKEY;
-const BUCKET_NAME = process.env.BUCKET;
 
 const AwsS3 = new AWS.S3({
-  accessKeyId: ID,
+  accessKeyId: process.env.AWSID,
   region: 'us-east-2',
-  secretAccessKey: SECRET,
-  bucket: BUCKET_NAME,
+  secretAccessKey: process.env.AWSKEY,
+  bucket: process.env.BUCKET,
   signatureVersion: 'v4',
 });
 
@@ -34,7 +31,7 @@ const fileFilter = (req, file, cb) => {
 const upload = multer({
   storage: multerS3({
     s3: AwsS3,
-    bucket: BUCKET_NAME,
+    bucket: process.env.BUCKET,
     metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldname });
     },
@@ -51,9 +48,9 @@ const upload = multer({
   limits: { fileSize: 100000000 },
 });
 
-const getSingedUrl = async (file) => {
+const getSignedUrl = async (file) => {
   const params = {
-    Bucket: BUCKET_NAME,
+    Bucket: process.env.BUCKET,
     Key: file,
     Expires: 60 * 5,
     ResponseContentDisposition: 'inline',
@@ -74,5 +71,5 @@ const getSingedUrl = async (file) => {
 
 module.exports = {
   upload,
-  getSingedUrl,
+  getSignedUrl,
 };

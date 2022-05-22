@@ -72,12 +72,12 @@ const getCartValue = async (cart, couponCode) => {
           for (let index = 0; index < cartDetails.length; index++) {
             totalAmount += cartDetails[index].rate;
             let displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
+
             if (displayPrice > 1000) {
               displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
             }
             if (displayPrice < 1000 && displayPrice > 500) {
-              displayPrice =
-                cartDetails[index].rate - 55 / 100 - (cartDetails[index].ratecartDetails * 55) / 100 - cartDetails;
+              displayPrice = cartDetails[index].rate - (55 / 100) * cartDetails[index].rate;
             }
             if (displayPrice < 500) {
               displayPrice = cartDetails[index].rate - (50 / 100) * cartDetails[index].rate;
@@ -93,7 +93,7 @@ const getCartValue = async (cart, couponCode) => {
         Cart.forEach((item) => {
           totalCartAmount += item.rate;
         });
-        homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+        homeCollectionFee = totalCartAmount < 500 ? 200 : 0;
         totalCartAmount += homeCollectionFee;
         if (coupon.discountFlat) {
           discount = Number(coupon.discountFlat);
@@ -118,7 +118,7 @@ const getCartValue = async (cart, couponCode) => {
   }
   // No coupons passed
   totalCartAmount /= 2;
-  homeCollectionFee = totalCartAmount < 300 ? 200 : 0;
+  homeCollectionFee = totalCartAmount < 500 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
   const cartdetails = cartDetails.map((element) => {
     return element.rate / 2;
@@ -137,8 +137,9 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   } else if (differenceInDays < 1) {
     throw new ApiError(httpStatus.BAD_REQUEST, "You're providing a past date for booking");
   }
-  const orderId = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
+  const orderId = `MDZGX${short.generate().toUpperCase().slice(8, 25)}`;
   const OTP = generateOTP();
+
   try {
     const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
     const { homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(cart, couponCode);
@@ -155,10 +156,9 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       moneySaved,
       couponStatus,
     });
-
-    return { sessionId: guestOrder.sessionId, orderId: guestOrder.orderId };
-  } catch (e) {
-    return false;
+    return { orderId: guestOrder.orderId, sessionId: guestOrder.sessionId };
+  } catch (err) {
+    return err;
   }
 };
 

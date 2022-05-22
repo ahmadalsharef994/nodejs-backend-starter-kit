@@ -2,7 +2,8 @@ const httpStatus = require('http-status');
 const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
-const { doctorProfileService } = require('./doctorprofile.service');
+// eslint-disable-next-line import/no-useless-path-segments
+const { doctorprofileService } = require('../services');
 
 const slotOverlap = (timeSlots) => {
   // input slots should be in ascending order
@@ -28,9 +29,15 @@ const slotOverlap = (timeSlots) => {
   }
   return false;
 };
-
+const checkforDoctorPreference = async (AuthData) => {
+  const preference = await AppointmentPreference.find({ doctorAuthId: AuthData._id });
+  if (typeof preference[0] === 'object') {
+    return preference;
+  }
+  return null;
+};
 const checkForAppointmentPrice = async (AuthData) => {
-  const basicDetails = await doctorProfileService.fetchbasicdetails(AuthData);
+  const basicDetails = await doctorprofileService.fetchbasicdetails(AuthData);
   if (!basicDetails || !basicDetails.appointmentPrice) {
     return false;
   }
@@ -177,4 +184,5 @@ module.exports = {
   getfollowups,
   getappointments,
   slotOverlap,
+  checkforDoctorPreference,
 };

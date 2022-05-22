@@ -93,21 +93,17 @@ const showReport = catchAsync(async (req, res) => {
 
 const postOrderData = catchAsync(async (req, res) => {
   const { customerDetails, testDetails, paymentDetails, cart, couponCode } = await req.body;
-  try {
-    const orderData = await labTestService.initiateGuestBooking(
-      customerDetails,
-      testDetails,
-      paymentDetails,
-      cart,
-      couponCode
-    );
-    if (orderData) {
-      return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
-    }
-  } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `LabTest service: ${err}`);
+  const orderData = await labTestService.initiateGuestBooking(
+    customerDetails,
+    testDetails,
+    paymentDetails,
+    cart,
+    couponCode
+  );
+  if (orderData.orderId) {
+    return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
   }
-  return res.status(httpStatus.OK).json({ message: 'Failed', data: [] });
+  return res.status(httpStatus.OK).json({ message: 'Failed', data: orderData });
 });
 
 const verifyOrder = catchAsync(async (req, res) => {

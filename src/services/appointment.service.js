@@ -159,7 +159,7 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
   const Doctordetails = await doctordetails.findOne({ doctorId });
-  const doctorname = Doctordetails.name;
+  const doctorname = Doctordetails.doctorname;
   const appointmentPrice = Doctordetails.appointmentPrice;
 
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
@@ -188,7 +188,6 @@ const submitAppointmentDetails = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
-
   try {
     const bookedAppointment = await Appointment.create({
       AuthDoctor: doctorauth,
@@ -252,6 +251,7 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
   const appointmentDate = new Date(date).toDateString();
   const assignedFollowup = await Followup.create({
     Appointment: AppointmentData,
+    patientName: AppointmentData.patientName,
     docid: doctorId,
     slotId,
     StartTime: startTime,
@@ -261,23 +261,29 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
     Status: status,
     Date: appointmentDate,
     Gender: AppointmentData.Gender,
+    orderId: AppointmentData.orderId,
   });
   return assignedFollowup;
 };
 
-const getUpcomingAppointments = async (doctorId, limit) => {
-  const res = await Appointment.find({
-    docid: doctorId,
-    paymentStatus: 'PAID',
-    Status: { $nin: 'cancelled' },
-    StartTime: { $gte: new Date() },
-  })
-    .sort([['StartTime', 1]])
-    .limit(parseInt(limit, 10));
+const getUpcomingAppointments = async (doctorId, limit, options) => {
+  const res = await Appointment.paginate(
+    {
+      docid: doctorId,
+      paymentStatus: 'PAID',
+      Status: { $nin: 'cancelled' },
+      StartTime: { $gte: new Date() },
+    },
+    options
+  );
   return res;
 };
 
 const getAppointmentsByType = async (doctorId, filter, options) => {
+  if (filter.Type === 'FOLLOWUP') {
+    const result = await Followup.paginate({ docid: doctorId }, filter, options);
+    return result;
+  }
   if (filter.Type === 'ALL') {
     const result = await Appointment.paginate({ paymentStatus: 'PAID' }, filter, options);
     return result;

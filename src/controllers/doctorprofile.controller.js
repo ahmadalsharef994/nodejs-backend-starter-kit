@@ -210,6 +210,55 @@ const notifications = catchAsync(async (req, res) => {
   }
 });
 
+const updateClinicDetails = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'Clinic Timings Updated' });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
+  }
+});
+const doctorExpandEducation = catchAsync(async (req, res) => {
+  const { Education, Experience } = await doctorprofileService.doctorExpEducation(
+    req.SubjectId,
+    req.body.experience,
+    req.body.education
+  );
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
+  if (Education || Experience) {
+    res.status(httpStatus.CREATED).json({
+      message: 'Experience and Education Details Submitted!',
+      challenge: challenge.challenge,
+      optionalchallenge: challenge.optionalChallenge,
+    });
+  }
+});
+const updateDetails = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updateDetails(
+    req.body.about,
+    req.body.address,
+    req.body.pincode,
+    req.body.experience,
+    req.body.country,
+    req.body.state,
+    req.body.city,
+    req.SubjectId
+  );
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'Details Updated successfully' });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'something went wrong please contact our support team' });
+  }
+});
+const updateAppointmentPrice = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'appointmentPrice updated' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
+  }
+});
 module.exports = {
   fetchstastics,
   submitbasicdetails,
@@ -227,4 +276,8 @@ module.exports = {
   fetchprofiledetails,
   addConsultationfee,
   notifications,
+  updateClinicDetails,
+  updateDetails,
+  doctorExpandEducation,
+  updateAppointmentPrice,
 };

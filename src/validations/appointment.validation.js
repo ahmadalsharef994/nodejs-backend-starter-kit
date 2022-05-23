@@ -144,6 +144,12 @@ const cancelAppointment = {
     .max(1),
 };
 
+const cancelFollowup = {
+  body: Joi.object().keys({
+    followupId: Joi.string().custom(objectId),
+  }),
+};
+
 const rescheduleAppointment = {
   body: Joi.object()
     .keys({
@@ -167,6 +173,13 @@ const bookingConfirmation = {
     appointmentId: Joi.string().required(),
   }),
 };
+const rescheduleFollowup = {
+  body: Joi.object().keys({
+    followupId: Joi.string().custom(objectId).required(),
+    date: Joi.string().required(),
+    slotId: Joi.string().required(),
+  }),
+};
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
@@ -185,4 +198,6 @@ module.exports = {
   rescheduleAppointment,
   getDoctorsByCategories,
   bookingConfirmation,
+  cancelFollowup,
+  rescheduleFollowup,
 };

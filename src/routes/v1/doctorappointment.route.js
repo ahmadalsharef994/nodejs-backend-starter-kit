@@ -44,9 +44,9 @@ router
     appointmentController.showAppointmentsByType
   );
 // get followup slots available for booking
-router.route('/get-available-followups').get(authdoctorverified(), appointmentController.showAvailableFollowUps);
+router.route('/get-available-followups').post(authdoctorverified(), appointmentController.showAvailableFollowUps);
 
-// get appointment slots available for booking (public)
+//  get appointment slots available for booking (public)
 router
   .route('/get-available-appointments')
   .post(validate(appointmentValidator.getAvailableAppointmentSlots), appointmentController.showAvailableAppointments);
@@ -78,6 +78,12 @@ router
 router
   .route('/:appointmentId/assign-followup')
   .post(authdoctorverified(), validate(appointmentValidator.assignfollowupDetails), appointmentController.assignFollowup);
+router
+  .route('/cancel-followup')
+  .post(authdoctorverified(), validate(appointmentValidator.cancelFollowup), appointmentController.cancelfollowup);
+router
+  .route('/reschedule-followup')
+  .post(authdoctorverified(), validate(appointmentValidator.rescheduleFollowup), appointmentController.rescheduleFollowup);
 router.post(
   '/:appointmentId/prescription',
   authdoctorverified(),

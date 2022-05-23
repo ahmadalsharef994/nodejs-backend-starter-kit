@@ -45,8 +45,8 @@ const getCartValue = async (cart, couponCode) => {
   const cartDetails = [];
   let totalCartAmount = 0;
   await cart.forEach((item) => {
-    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * item.quantity * 2;
-    const eachItemPrice = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * 2;
+    totalCartAmount += parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10) * item.quantity;
+    const eachItemPrice = parseInt(labTests.tests.find((test) => test.code === item.productCode).rate, 10);
     cartDetails.push({
       rate: eachItemPrice,
       code: item.productCode,
@@ -71,21 +71,28 @@ const getCartValue = async (cart, couponCode) => {
           // eslint-disable-next-line no-plusplus
           for (let index = 0; index < cartDetails.length; index++) {
             totalAmount += cartDetails[index].rate;
-            let displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
+            let displayPrice = Math.round(
+              cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate
+            );
 
-            if (displayPrice > 1000) {
-              displayPrice = cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate;
+            if (coupon.discountPercent >= 50) {
+              if (displayPrice > 1000) {
+                displayPrice = Math.round(
+                  cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate
+                );
+              } else if (displayPrice < 1000 && displayPrice > 500) {
+                displayPrice = Math.round(cartDetails[index].rate - (55 / 100) * cartDetails[index].rate);
+              } else if (displayPrice < 500) {
+                displayPrice = Math.round(cartDetails[index].rate - (50 / 100) * cartDetails[index].rate);
+              }
             }
-            if (displayPrice < 1000 && displayPrice > 500) {
-              displayPrice = cartDetails[index].rate - (55 / 100) * cartDetails[index].rate;
-            }
-            if (displayPrice < 500) {
-              displayPrice = cartDetails[index].rate - (50 / 100) * cartDetails[index].rate;
+            if (coupon.discountPercent < 50) {
+              displayPrice = Math.round(cartDetails[index].rate - (coupon.discountPercent / 100) * cartDetails[index].rate);
             }
             Cart.push({
               code: cartDetails[index].code,
               quantity: cartDetails[index].quantity,
-              rate: displayPrice / 2,
+              rate: displayPrice,
             });
             discount += cartDetails[index].rate - displayPrice;
           }
@@ -103,9 +110,9 @@ const getCartValue = async (cart, couponCode) => {
           Cart,
           homeCollectionFee,
           totalCartAmount,
-          moneySaved: discount / 2,
+          moneySaved: discount,
           couponStatus: 'Coupon Applied',
-          Actualtotal: totalAmount / 2,
+          Actualtotal: totalAmount,
         };
       }
       // coupon expired
@@ -117,12 +124,9 @@ const getCartValue = async (cart, couponCode) => {
     // return { cartDetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'Coupon Not Found' };
   }
   // No coupons passed
-  totalCartAmount /= 2;
   homeCollectionFee = totalCartAmount < 500 ? 200 : 0;
   totalCartAmount += homeCollectionFee;
-  const cartdetails = cartDetails.map((element) => {
-    return element.rate / 2;
-  });
+  const cartdetails = cartDetails;
   const Actualtotal = totalCartAmount;
   return { cartdetails, homeCollectionFee, totalCartAmount, moneySaved: 0, couponStatus: 'No Coupon', Actualtotal };
 };
@@ -323,6 +327,11 @@ const resetGuestOtp = async (orderId) => {
   }
 };
 
+const getLabTestOrder = async (labTestOrderID) => {
+  const labTestOrder = await LabtestOrder.findOne({ labTestOrderID });
+  return labTestOrder;
+};
+
 module.exports = {
   initiateGuestBooking,
   verifyGuestOrder,
@@ -333,6 +342,7 @@ module.exports = {
   getPincodeDetails,
   resetGuestOtp,
   getLabTestDetails,
+  getLabTestOrder,
 };
 
 /*

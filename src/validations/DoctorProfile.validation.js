@@ -1,4 +1,5 @@
 const Joi = require('joi');
+const { objectId } = require('./custom.validation');
 
 const BasicDoctorDetails = {
   body: Joi.object().keys({
@@ -228,6 +229,7 @@ const notifications = {
 const timings = {
   body: Joi.object().keys({
     timing: Joi.array().required(),
+    clinicId: Joi.string().custom(objectId),
   }),
 };
 

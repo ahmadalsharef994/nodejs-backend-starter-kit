@@ -80,7 +80,7 @@ const showFollowUpsById = catchAsync(async (req, res) => {
 });
 
 const showAvailableFollowUps = catchAsync(async (req, res) => {
-  await appointmentService.getAvailableFollowUpSlots(req.Docid).then((result) => {
+  await appointmentService.getAvailableFollowUpSlots(req.Docid, req.body.date).then((result) => {
     if (result.length === 0) {
       return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
     }
@@ -127,7 +127,8 @@ const getappointmentDoctor = catchAsync(async (req, res) => {
 
 const createPrescription = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const Prescription = await appointmentService.createPrescriptionDoc(req.body, AuthData);
+
+  const Prescription = await appointmentService.createPrescriptionDoc(req.body, req.params.appointmentId, AuthData);
   if (Prescription !== false) {
     res.status(httpStatus.CREATED).json({ message: 'Prescription Generated Sucessfully', Prescription });
   } else {
@@ -152,7 +153,8 @@ const getPatientDetails = catchAsync(async (req, res) => {
       'Patient Name': patientData[0],
       'Patient Basic Details': patientData[1],
       'Patient Contact Details': patientData[2],
-      /* Appointments: patientData[3], */
+      'Patient Recent Appointment': patientData[3],
+      'Prescription ': patientData[4],
     });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Error in fetching Patient data' });
@@ -231,7 +233,22 @@ const bookingConfirmation = catchAsync(async (req, res) => {
     res.status(httpStatus.CONFLICT).json({ reason: 'orderId not matched ', Message, status });
   }
 });
-
+const cancelfollowup = catchAsync(async (req, res) => {
+  const result = await appointmentService.cancelFollowup(req.body.followupId);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'followup cancelled !' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'cant cancel followup check appointment id and try again !' });
+  }
+});
+const rescheduleFollowup = catchAsync(async (req, res) => {
+  const result = await appointmentService.rescheduleFollowup(req.body.followupId, req.body.slotId, req.body.date);
+  if (result) {
+    res.status(httpStatus.OK).json({ message: 'followup rescheduled', result });
+  } else {
+    res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant reschedule followup' });
+  }
+});
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -254,4 +271,6 @@ module.exports = {
   cancelBooking,
   rescheduleBooking,
   bookingConfirmation,
+  cancelfollowup,
+  rescheduleFollowup,
 };

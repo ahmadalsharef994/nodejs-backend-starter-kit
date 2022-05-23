@@ -10,6 +10,10 @@ const FollowupSchema = mongoose.Schema(
       required: true,
       index: true,
     },
+    isRescheduled: {
+      type: Boolean,
+      default: false,
+    },
     patientName: {
       type: String,
       required: true,
@@ -41,6 +45,10 @@ const FollowupSchema = mongoose.Schema(
       required: true,
       default: 'Not Mentioned',
     },
+    HealthIssue: {
+      type: String,
+      required: true,
+    },
     Date: {
       type: String,
       required: true,
@@ -55,6 +63,11 @@ const FollowupSchema = mongoose.Schema(
     },
     Status: {
       type: String,
+      required: true,
+    },
+    AuthUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Appointment,
       required: true,
     },
   },

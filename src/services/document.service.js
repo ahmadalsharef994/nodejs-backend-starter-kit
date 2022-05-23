@@ -62,25 +62,25 @@ const signedUrl = async (Authdata, document) => {
   let docUrl = '';
   switch (document) {
     case 'resume':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.resume);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.resume);
       break;
     case 'esign':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.esign);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.esign);
       break;
     case 'medicalDegree':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.medicalDegree);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.medicalDegree);
       break;
     case 'medicalRegistration':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.medicalRegistration);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.medicalRegistration);
       break;
     case 'aadharCardDoc':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.aadharCardDoc);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.aadharCardDoc);
       break;
     case 'pancardDoc':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.pancardDoc);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.pancardDoc);
       break;
     case 'ifsc':
-      docUrl = await fileUpload.getSingedUrl(DocDataExist.ifsc);
+      docUrl = await fileUpload.getSignedUrl(DocDataExist.ifsc);
       break;
     default:
       docUrl = 'Document not Found';

@@ -2,10 +2,12 @@ const express = require('express');
 const validate = require('../../middlewares/validate');
 const authDoctorValidation = require('../../validations/authDoctor.validation');
 const authDoctorController = require('../../controllers/authdoctor.controller');
-const OnboardingAuth = require('../../middlewares/OnboardingAuth');
+const OnboardingAuth = require('../../middlewares/authDoctor');
 const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
+
+// REPLACE OnboardingAuth
 
 // router.get('/onboarding-status', OnboardingAuth(), authDoctorController.onboardingstatus); Not in use
 

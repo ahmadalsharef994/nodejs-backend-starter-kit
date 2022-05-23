@@ -1,7 +1,7 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
 const authDoctorValidation = require('../../validations/authDoctor.validation');
-const authDoctorController = require('../../controllers/authDoctor.controller');
+const authDoctorController = require('../../controllers/authdoctor.controller');
 const OnboardingAuth = require('../../middlewares/authDoctor');
 const deviceauth = require('../../middlewares/deviceauth');
 

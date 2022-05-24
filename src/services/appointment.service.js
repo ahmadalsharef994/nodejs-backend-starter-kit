@@ -325,7 +325,7 @@ const getFollowupsById = async (limit) => {
   return result;
 };
 
-const getAvailableAppointmentSlots = async (doctorId, date) => {
+const getAvailableAppointments = async (doctorId, date) => {
   const getDayOfWeek = (requiredDate) => {
     const dayOfWeek = new Date(requiredDate).getDay();
     // eslint-disable-next-line no-restricted-globals
@@ -433,7 +433,7 @@ const fetchPatientDetails = async (patientid, doctorid) => {
   return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
-const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
+const getPatients = async (doctorid, page, limit, sortBy) => {
   const patientIds = await Appointment.aggregate([
     { $sort: { StartTime: parseInt(sortBy, 10) } },
     { $group: { _id: { AuthUser: '$AuthUser' } } },
@@ -679,14 +679,14 @@ module.exports = {
   submitFollowupDetails,
   getUpcomingAppointments,
   getAppointmentsByType,
-  getAvailableAppointmentSlots,
+  getAvailableAppointments,
   getFollowupsById,
   getAvailableFollowUpSlots,
   getappointmentDoctor,
   createPrescriptionDoc,
   fetchPrescriptionDoc,
   fetchPatientDetails,
-  fetchAllPatientDetails,
+  getPatients,
   userFeedback,
   doctorFeedback,
   cancelAppointment,

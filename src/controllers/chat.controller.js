@@ -4,11 +4,11 @@ const pick = require('../utils/pick');
 const { chatService, authService } = require('../services');
 const ApiError = require('../utils/ApiError');
 
-const showChat = catchAsync(async (req, res) => {
+const getMessages = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const filter = { appointment: req.params.appointmentId };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  await chatService.getChat(req.params.appointmentId, AuthData, filter, options).then((result, err) => {
+  await chatService.getMessages(req.params.appointmentId, AuthData, filter, options).then((result, err) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Not Authorized to Access this Chat');
     } else if (result.length === 0) {
@@ -33,6 +33,6 @@ const sendMessage = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  showChat,
+  getMessages,
   sendMessage,
 };

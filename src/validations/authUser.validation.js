@@ -35,10 +35,7 @@ const registeruser = {
 
 const login = {
   body: Joi.object().keys({
-    username: Joi.alternatives().try(
-      Joi.string().email().required(),
-      Joi.number().min(1000000000).max(9999999999).required()
-    ),
+    username: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
 };

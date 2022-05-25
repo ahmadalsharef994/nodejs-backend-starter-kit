@@ -6,3 +6,5 @@ module.exports.appointmentValidation = require('./appointment.validation');
 module.exports.chatValidation = require('./chat.validation');
 module.exports.labTestValidation = require('./labTest.validation');
 module.exports.razorpayValidation = require('./razorpay.validation');
+module.exports.walletValidation = require('./wallet.validation'); // export wallet Validation (NEW)
+module.exports.elasticSearchValidation = require('./elasticSearch.validation'); // export elasticSearch Validation (NEW)

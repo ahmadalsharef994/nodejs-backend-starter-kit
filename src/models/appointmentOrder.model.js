@@ -1,7 +1,8 @@
+// filename: appointmentOrder.model.js
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
 
-const RazorpayPaymentSchema = mongoose.Schema(
+const appointmentOrderSchema = mongoose.Schema(
   {
     razorpayOrderID: {
       type: String,
@@ -37,12 +38,13 @@ const RazorpayPaymentSchema = mongoose.Schema(
 );
 
 // add plugin that converts mongoose to json
-RazorpayPaymentSchema.plugin(toJSON);
-RazorpayPaymentSchema.plugin(paginate);
+appointmentOrderSchema.plugin(toJSON);
+appointmentOrderSchema.plugin(paginate);
 
 /**
- * @typedef RazorpayPayment
+ * @typedef AppointmentOrder
  */
 
-const RazorpayConsultation = mongoose.model('RazorpayConsultation', RazorpayPaymentSchema);
-module.exports = RazorpayConsultation;
+const AppointmentOrder = mongoose.model('AppointmentOrder', appointmentOrderSchema);
+module.exports = AppointmentOrder;
+// appointmentOrder -> AppointmentOrder

@@ -294,7 +294,7 @@ const postThyrocareOrder = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Thyrocare Order Save Failed');
   }
 };
-
+// fetches labtest order details form orderId
 const orderSummary = async (orderId) => {
   const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(

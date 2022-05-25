@@ -8,9 +8,10 @@ const { emailService } = require('../Microservices');
 const startAutoUpdateCreds = catchAsync(async (req, res) => {
   const result = await thyrocareServices.autoUpdateThyrocareCreds();
   if (result) {
-    return res.status(httpStatus.OK).json({ message: 'Success' });
+    res.status(httpStatus.OK).json({ message: 'Success' });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed' });
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed' });
 });
 
 const thyrocareLogin = catchAsync(async (req, res) => {
@@ -25,9 +26,10 @@ const thyrocareLogin = catchAsync(async (req, res) => {
 const thyrocareLabTests = catchAsync(async (req, res) => {
   const tests = await thyrocareServices.getSavedTestProducts();
   if (tests) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: tests });
+    res.status(httpStatus.OK).json({ message: 'Success', data: tests });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
 });
 
 const updateThyrocareLabTests = catchAsync(async (req, res) => {
@@ -53,17 +55,19 @@ const checkPincodeAvailability = catchAsync(async (req, res) => {
 const showPincodeDetails = catchAsync(async (req, res) => {
   const pincodeDetails = await labTestService.getPincodeDetails(req.body.pincode);
   if (pincodeDetails) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: pincodeDetails });
+    res.status(httpStatus.OK).json({ message: 'Success', data: pincodeDetails });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
 });
 
 const showTestDetails = catchAsync(async (req, res) => {
   const testDetails = await labTestService.getLabTestDetails(req.body.testCode);
   if (testDetails) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: testDetails });
+    res.status(httpStatus.OK).json({ message: 'Success', data: testDetails });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
 });
 
 const getAvailableTimeSlots = catchAsync(async (req, res) => {
@@ -91,9 +95,10 @@ const postOrderData = catchAsync(async (req, res) => {
     couponCode
   );
   if (orderData.orderId) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+    res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'Failed', data: orderData });
   }
-  return res.status(httpStatus.OK).json({ message: 'Failed', data: orderData });
 });
 
 const verifyOrder = catchAsync(async (req, res) => {
@@ -104,9 +109,10 @@ const verifyOrder = catchAsync(async (req, res) => {
       const details = `OrderId: ${orderData.orderId} ------------------------- Product: ${orderData.product} ------------------------- Date: ${orderData.date} ------------------------- Time: ${orderData.time} ------------------------- Payment Mode: ${orderData.paymentMode} ------------------------- Amount: ${orderData.totalCartAmount}`;
       await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
     }
-    return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
+    res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Incorrect Order Details' });
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Incorrect Order Details' });
 });
 
 const cartValue = catchAsync(async (req, res) => {
@@ -133,9 +139,10 @@ const showGuestOrder = catchAsync(async (req, res) => {
 const resendGuestOtp = catchAsync(async (req, res) => {
   const orderData = await labTestService.resetGuestOtp(req.body.orderId);
   if (orderData) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+    res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed', data: [] });
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed', data: [] });
 });
 
 const bookPrepaidOrder = catchAsync(async (req, res) => {
@@ -146,9 +153,10 @@ const bookPrepaidOrder = catchAsync(async (req, res) => {
       const details = `OrderId: ${orderData.orderId} ------------------------- Product: ${orderData.product} ------------------------- Date: ${orderData.date} ------------------------- Time: ${orderData.time} ------------------------- Payment Mode: ${orderData.paymentMode} ------------------------- Amount: ${orderData.totalCartAmount}`;
       await emailService.sendLabTestOrderDetails(orderData.customerDetails.email, orderData.customerDetails.name, details);
     }
-    return res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
+    res.status(httpStatus.OK).json({ message: 'Success', isOrderPlaced, orderData });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Order Request Failed' });
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Order Request Failed' });
 });
 
 const getLabtestPackages = catchAsync(async (req, res) => {

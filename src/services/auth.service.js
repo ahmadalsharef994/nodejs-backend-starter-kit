@@ -148,6 +148,25 @@ const loginAuthWithEmailAndPassworDoctor = async (email, password) => {
   }
   return doctor;
 };
+// login admin
+const loginAuthWithEmailAndPasswordAdmin = async (username, password) => {
+  let user = await getAuthByEmail(username);
+  if (!user) {
+    user = await getAuthByPhone(username);
+    if (`${user.role[0]}` !== 'admin') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+    }
+  }
+  if (user) {
+    if (`${user.role[0]}` !== 'admin') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+    }
+  }
+  if (!user || !(await user.isPasswordMatch(password))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+  }
+  return user;
+};
 // login for user
 const loginAuthWithEmailAndPassword = async (username, password) => {
   let user = await getAuthByEmail(username);
@@ -205,6 +224,7 @@ module.exports = {
   updateAuthPassByID,
   loginAuthWithEmailAndPassword,
   loginAuthWithEmailAndPassworDoctor,
+  loginAuthWithEmailAndPasswordAdmin,
   resetPassword,
   changeAuthPassword,
 };

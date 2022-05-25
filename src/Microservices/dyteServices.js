@@ -2,6 +2,7 @@ const axios = require('axios');
 const ApiError = require('../utils/ApiError');
 const AppointmentSession = require('../models/appointmentSession.model');
 
+// to initiate a meeting
 const InitiateMeetingRoom = async (appointmentID) => {
   const InitMeeting = JSON.stringify({
     title: appointmentID,
@@ -92,7 +93,7 @@ const addUserParticipantToMeeting = async (meetingID, patientId) => {
 
   return UserParticipantresult;
 };
-
+// creating tokens for dyte meeting
 const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);

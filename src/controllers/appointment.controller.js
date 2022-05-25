@@ -73,18 +73,20 @@ const assignFollowup = catchAsync(async (req, res) => {
 const showFollowUpsById = catchAsync(async (req, res) => {
   await appointmentService.getFollowupsById(req.query.limit).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
+      res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
+    } else {
+      res.status(httpStatus.OK).json({ message: 'Success', data: result });
     }
-    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
   });
 });
 
 const showAvailableFollowUps = catchAsync(async (req, res) => {
   await appointmentService.getAvailableFollowUpSlots(req.Docid, req.body.date).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
+      res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
+    } else {
+      res.status(httpStatus.OK).json({ message: 'Success', data: result });
     }
-    return res.status(httpStatus.OK).json({ message: 'Success', data: result });
   });
 });
 
@@ -97,9 +99,10 @@ const showUpcomingAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   await appointmentService.getUpcomingAppointments(req.Docid, req.query.limit, options).then((result) => {
     if (result.length === 0) {
-      return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
+      res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
+    } else {
+      res.status(httpStatus.OK).json(result);
     }
-    return res.status(httpStatus.OK).json(result);
   });
 });
 
@@ -216,9 +219,10 @@ const rescheduleBooking = catchAsync(async (req, res) => {
     .rescheduleAppointment(req.Docid, appointmentId, slotId, date, startDateTime, endDateTime)
     .then((result) => {
       if (result) {
-        return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+        res.status(httpStatus.OK).json({ message: 'Success', data: result });
+      } else {
+        res.status(httpStatus.BAD_REQUEST).json({ message: "Appointment doesn't exist", data: [] });
       }
-      return res.status(httpStatus.BAD_REQUEST).json({ message: "Appointment doesn't exist", data: [] });
     });
 });
 

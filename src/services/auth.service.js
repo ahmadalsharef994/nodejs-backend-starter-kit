@@ -9,6 +9,7 @@ const otpServices = require('./otp.service');
  * @param {Object} AuthBody
  * @returns {Promise<Auth>}
  */
+// create user auth data
 const createAuthData = async (authBody) => {
   if (await Auth.isEmailTaken(authBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
@@ -63,6 +64,7 @@ const getAuthById = async (id) => {
  * @param {string} email
  * @returns {Promise<Auth>}
  */
+// to find if email already exists
 const getAuthByEmail = async (email) => {
   return Auth.findOne({ email });
 };
@@ -72,6 +74,7 @@ const getAuthByEmail = async (email) => {
  * @param {string} phone
  * @returns {Promise<Auth>}
  */
+// to find if phone number already exists
 const getAuthByPhone = async (phone) => {
   return Auth.findOne({ mobile: phone });
 };
@@ -126,17 +129,45 @@ const deleteAuthById = async (authId) => {
  * @param {string} password
  * @returns {Promise<Auth>}
  */
+// login for doctor
+const loginAuthWithEmailAndPassworDoctor = async (email, password) => {
+  let doctor = await getAuthByEmail(email);
+  if (!doctor) {
+    doctor = await getAuthByPhone(email);
+    if (`${doctor.role[0]}` !== 'doctor') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Doctor not found');
+    }
+  }
+  if (doctor) {
+    if (`${doctor.role[0]}` !== 'doctor') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'Doctor not found');
+    }
+  }
+  if (!doctor || !(await doctor.isPasswordMatch(password))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+  }
+  return doctor;
+};
+// login for user
 const loginAuthWithEmailAndPassword = async (username, password) => {
   let user = await getAuthByEmail(username);
   if (!user) {
     user = await getAuthByPhone(username);
+    if (`${user.role[0]}` !== 'user') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+    }
+  }
+  if (user) {
+    if (`${user.role[0]}` !== 'user') {
+      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+    }
   }
   if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
   return user;
 };
-
+// change password
 const changeAuthPassword = async (oldPassword, newPassword, token, SubjectId) => {
   const userdocs = await getAuthById(SubjectId);
   if (!userdocs || !(await userdocs.isPasswordMatch(oldPassword))) {
@@ -173,6 +204,7 @@ module.exports = {
   deleteAuthById,
   updateAuthPassByID,
   loginAuthWithEmailAndPassword,
+  loginAuthWithEmailAndPassworDoctor,
   resetPassword,
   changeAuthPassword,
 };

@@ -64,7 +64,6 @@ const getOnboardingChallenge = async (AuthData) => {
   }
   return { challenge, optionalChallenge };
 };
-
 const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
@@ -81,7 +80,7 @@ const register = catchAsync(async (req, res) => {
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
+  const AuthData = await authService.loginAuthWithEmailAndPassworDoctor(email, password);
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   let authtoken = '';
   if (verifiedcheckData) {

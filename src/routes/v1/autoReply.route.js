@@ -15,5 +15,3 @@ router
 module.exports = router;
 
 // Log Session Chat
-// 1 sefice in db
-// at least 2 code refactoring

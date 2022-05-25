@@ -73,7 +73,7 @@ const updateAddressDetails = catchAsync(async (req, res) => {
   }
 });
 
-const addNewMember = catchAsync(async (req, res) => {
+const addMember = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const memberDetails = await userprofileService.addMember(req.body, AuthData);
   if (memberDetails) {
@@ -83,7 +83,7 @@ const addNewMember = catchAsync(async (req, res) => {
   }
 });
 
-const updateExistingMember = catchAsync(async (req, res) => {
+const updateMember = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const updatedMemberDetails = await userprofileService.updateMember(req.body, AuthData);
   if (updatedMemberDetails) {
@@ -93,7 +93,7 @@ const updateExistingMember = catchAsync(async (req, res) => {
   }
 });
 
-const deleteExistingMember = catchAsync(async (req, res) => {
+const deleteMember = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const deletedMember = await userprofileService.deleteMember(req.params.memberId, AuthData);
   if (deletedMember) {
@@ -136,9 +136,9 @@ module.exports = {
   updateAddressDetails,
   fetchAddressDetails,
   updateBasicDetails,
-  addNewMember,
-  updateExistingMember,
-  deleteExistingMember,
+  addMember,
+  updateMember,
+  deleteMember,
   getAllMembers,
   notifications,
   updateprofilepic,

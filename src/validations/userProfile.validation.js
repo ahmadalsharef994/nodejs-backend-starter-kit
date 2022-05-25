@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
-const BasicUserDetails = {
+const submitBasicDetails = {
   body: Joi.object().keys({
     gender: Joi.string().required().valid('male', 'female', 'other'),
     dob: Joi.date().required(),
@@ -77,7 +77,7 @@ const updateBasicDetails = {
   }),
 };
 
-const UserAddress = {
+const addAddress = {
   body: Joi.object().keys({
     addressFristLine: Joi.string().required(),
     addressSecondLine: Joi.string().required(),
@@ -86,7 +86,7 @@ const UserAddress = {
   }),
 };
 
-const updateUserAddress = {
+const updateAddress = {
   body: Joi.object().keys({
     addressFristLine: Joi.string(),
     addressSecondLine: Joi.string(),
@@ -133,9 +133,9 @@ const notifications = {
 };
 
 module.exports = {
-  BasicUserDetails,
-  UserAddress,
-  updateUserAddress,
+  submitBasicDetails,
+  addAddress,
+  updateAddress,
   addMember,
   updateMember,
   updateBasicDetails,

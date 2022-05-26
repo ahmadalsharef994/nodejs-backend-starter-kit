@@ -39,9 +39,30 @@ const getGuestOrder = async (orderID) => {
     totalAmount: totalCartAmount,
   };
 };
-
+// checks if a product exists in labtestCollection
+const checkproductCodes = async (cart) => {
+  const labTests = await thyrocareServices.getSavedTestProducts();
+  let response = true;
+  let Item = '';
+  await cart.forEach((item) => {
+    const res = labTests.tests.find((test) => test.code === item.productCode);
+    if (res === undefined) {
+      response = false;
+      Item = item;
+    }
+  });
+  return { response, Item };
+};
+// caluclates cart value
 const getCartValue = async (cart, couponCode) => {
   const labTests = await thyrocareServices.getSavedTestProducts();
+  const isproductexist = await checkproductCodes(cart);
+  if (isproductexist.response === false) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      `invalid product code : ${isproductexist.Item.productCode}.Product doesn't exist`
+    );
+  }
   const cartDetails = [];
   let totalCartAmount = 0;
   await cart.forEach((item) => {
@@ -145,8 +166,8 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
   const OTP = generateOTP();
 
   try {
+    const cartdetails = await getCartValue(cart, couponCode);
     const res = await smsService.sendPhoneOtp2F(customerDetails.mobile, OTP, 'Booking Confirmation');
-    const { homeCollectionFee, totalCartAmount, moneySaved, couponStatus } = await getCartValue(cart, couponCode);
     const guestOrder = await GuestOrder.create({
       customerDetails,
       testDetails,
@@ -155,14 +176,14 @@ const initiateGuestBooking = async (customerDetails, testDetails, paymentDetails
       orderId,
       cart,
       couponCode,
-      homeCollectionFee,
-      totalCartAmount,
-      moneySaved,
-      couponStatus,
+      homeCollectionFee: cartdetails.homeCollectionFee,
+      totalCartAmount: cartdetails.totalCartAmount,
+      moneySaved: cartdetails.moneySaved,
+      couponStatus: cartdetails.couponStatus,
     });
     return { orderId: guestOrder.orderId, sessionId: guestOrder.sessionId };
   } catch (err) {
-    return err;
+    return { message: 'There is something wrong with this order.Please check the order detials and try again', err };
   }
 };
 
@@ -284,7 +305,7 @@ const verifyGuestOrder = async (sessionId, otp, orderId) => {
   }
   return { isOrderPlaced: false, orderData: null };
 };
-
+// fetches pincode details of valid pincodes
 const getPincodeDetails = async (pincode) => {
   try {
     const pincodeBuffer = fs.readFileSync('src/assets/pincode.json');

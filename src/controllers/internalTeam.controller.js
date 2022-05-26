@@ -49,7 +49,7 @@ const loginadmin = catchAsync(async (req, res) => {
     );
   } else {
     const { email, password } = req.body;
-    const AuthData = await authService.loginAuthWithEmailAndPassword(email, password);
+    const AuthData = await authService.loginAuthWithEmailAndPasswordAdmin(email, password);
     const authtoken = await tokenService.generateAdminToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;

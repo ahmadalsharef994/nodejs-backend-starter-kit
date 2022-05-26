@@ -12,6 +12,8 @@ const router = express.Router();
 
 // all endpoints are public
 router.route('/thyrocare/labtests').get(labTestController.thyrocareLabTests);
+
+router.route('/thyrocare/labtest-packages').get(labTestController.getLabtestPackages);
 // admin endpoint
 router.route('/thyrocare/auto-update').get(authAdmin(), labTestController.startAutoUpdateCreds);
 router
@@ -38,6 +40,7 @@ router
   .route('/thyrocare/verify-order')
   .post(/* authUserDoctor(), */ validate(labTestValidator.verifyGuestOrder), labTestController.verifyGuestOrder);
 router.route('/thyrocare/cart-value').post(validate(labTestValidator.cartValue), labTestController.cartValue);
+// booking order
 router
   .route('/thyrocare/bookPrepaidOrder')
   .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);

@@ -15,7 +15,6 @@ const startAutoUpdateCreds = catchAsync(async (req, res) => {
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `Thyrocare service: ${err}`);
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed' });
 });
 
 const thyrocareLogin = catchAsync(async (req, res) => {
@@ -40,7 +39,6 @@ const thyrocareLabTests = catchAsync(async (req, res) => {
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `Thyrocare service: ${err}`);
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
 });
 
 const updateThyrocareLabTests = catchAsync(async (req, res) => {
@@ -54,7 +52,14 @@ const updateThyrocareLabTests = catchAsync(async (req, res) => {
   }
   return res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
 });
-
+const updateLabTestPackages = catchAsync(async (req, res) => {
+  const result = await thyrocareServices.updateLabtestPackages();
+  if (result) {
+    res.status(httpStatus.OK).json({ message: 'labtest packages updated ', data: result });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: [] });
+  }
+});
 const checkPincodeAvailability = catchAsync(async (req, res) => {
   const isAvailable = await thyrocareServices.checkPincodeAvailability(req.body.pincode);
   return res.status(httpStatus.OK).json({ message: 'Success', data: isAvailable });
@@ -63,17 +68,19 @@ const checkPincodeAvailability = catchAsync(async (req, res) => {
 const showPincodeDetails = catchAsync(async (req, res) => {
   const pincodeDetails = await labTestService.getPincodeDetails(req.body.pincode);
   if (pincodeDetails) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: pincodeDetails });
+    res.status(httpStatus.OK).json({ message: 'Success', data: pincodeDetails });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
 });
 
 const showTestDetails = catchAsync(async (req, res) => {
   const testDetails = await labTestService.getLabTestDetails(req.body.testCode);
   if (testDetails) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: testDetails });
+    res.status(httpStatus.OK).json({ message: 'Success', data: testDetails });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'Failed', error: 'No record found' });
 });
 
 const getAvailableTimeSlots = catchAsync(async (req, res) => {
@@ -101,9 +108,10 @@ const postGuestOrder = catchAsync(async (req, res) => {
     couponCode
   );
   if (orderData.orderId) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+    res.status(httpStatus.OK).json({ message: 'Success', data: orderData });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'Failed', data: orderData });
   }
-  return res.status(httpStatus.OK).json({ message: 'Failed', data: orderData });
 });
 
 const verifyGuestOrder = catchAsync(async (req, res) => {
@@ -120,7 +128,6 @@ const verifyGuestOrder = catchAsync(async (req, res) => {
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `labTest service: ${err}`);
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Incorrect Order Details' });
 });
 
 const cartValue = catchAsync(async (req, res) => {
@@ -161,7 +168,6 @@ const resendGuestOtp = catchAsync(async (req, res) => {
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `labTest service: ${err}`);
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed', data: [] });
 });
 
 const bookPrepaidOrder = catchAsync(async (req, res) => {
@@ -178,9 +184,16 @@ const bookPrepaidOrder = catchAsync(async (req, res) => {
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `labTest service: ${err}`);
   }
-  return res.status(httpStatus.BAD_REQUEST).json({ message: 'Order Request Failed' });
 });
 
+const getLabtestPackages = catchAsync(async (req, res) => {
+  const result = await thyrocareServices.getLabtestPackages();
+  if (result) {
+    res.status(httpStatus.OK).json({ meassage: 'Success', data: result });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ meassage: 'Error', data: result });
+  }
+});
 // not supported by thyrocare
 /*
 const fixTimeSlot = catchAsync(async (req, res) => {
@@ -218,6 +231,8 @@ module.exports = {
   getGuestOrder,
   resendGuestOtp,
   showTestDetails,
+  getLabtestPackages,
+  updateLabTestPackages,
   // fixTimeSlot,
   // cancelOrder,
   // rescheduleOrder,

@@ -5,9 +5,10 @@ const { couponService } = require('../services');
 const showCoupons = catchAsync(async (req, res) => {
   const coupons = await couponService.getAllCoupons();
   if (coupons.length) {
-    return res.status(httpStatus.OK).json({ message: 'Success', data: coupons });
+    res.status(httpStatus.OK).json({ message: 'Success', data: coupons });
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ message: 'No Coupons found' });
   }
-  return res.status(httpStatus.NOT_FOUND).json({ message: 'No Coupons found' });
 });
 
 module.exports = {

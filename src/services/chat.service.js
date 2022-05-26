@@ -15,7 +15,7 @@ const pusher = new Pusher({
 });
 
 // implement pagination
-const getChat = async (appointmentId, Auth, filter, options) => {
+const getMessages = async (appointmentId, Auth, filter, options) => {
   const AppointmentData = await Appointment.findOne({ _id: appointmentId });
   if (!AppointmentData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID doesnot gives you Access');
@@ -47,6 +47,6 @@ const createMessage = async (appointmentId, senderAuth, text, attachment) => {
 };
 
 module.exports = {
-  getChat,
+  getMessages,
   createMessage,
 };

@@ -5,7 +5,7 @@ const _ = require('underscore');
 const httpStatus = require('http-status');
 const config = require('../config/config');
 const ApiError = require('../utils/ApiError');
-const { ThyroToken, ThyrocareOrder } = require('../models');
+const { ThyrocareToken, ThyrocareOrder } = require('../models');
 const logger = require('../config/logger');
 
 const dbURL = config.mongoose.url;
@@ -32,7 +32,7 @@ const thyroLogin = async () => {
     }
   );
 
-  const doc = await ThyroToken.findOneAndUpdate(
+  const doc = await ThyrocareToken.findOneAndUpdate(
     { identifier: 'medzgo-thyrocare' },
     { thyroAccessToken: res.data.accessToken, thyroApiKey: res.data.apiKey },
     { upsert: true, new: true }
@@ -42,7 +42,7 @@ const thyroLogin = async () => {
 };
 
 const updateTestProducts = async () => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/productsmaster/Products`,
     {
@@ -157,7 +157,7 @@ const getSavedTestProducts = async () => {
 };
 
 const checkPincodeAvailability = async (pincode) => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/TechsoApi/PincodeAvailability`,
     {
@@ -173,7 +173,7 @@ const checkPincodeAvailability = async (pincode) => {
 };
 
 const checkSlotsAvailability = async (pincode, date) => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/TechsoApi/GetAppointmentSlots`,
     {
@@ -206,7 +206,7 @@ const postThyrocareOrder = async (
   hardCopyReport,
   paymentType
 ) => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
 
   const res = await axios.post(
     `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/BookingMaster/DSABooking`,
@@ -250,7 +250,7 @@ const postThyrocareOrder = async (
 };
 
 const orderSummary = async (orderId) => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/OrderSummary/OrderSummary`,
     {
@@ -265,8 +265,8 @@ const orderSummary = async (orderId) => {
   return res.data;
 };
 
-const getReport = async (leadId, userMobileNo) => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+const getMyReport = async (leadId, userMobileNo) => {
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
   // [xml|pdf]
   const res = await axios.get(
     `https://b2capi.thyrocare.com/order.svc/${credentials.thyroApiKey}/GETREPORTS/${leadId}/xml/${userMobileNo}/Myreport`
@@ -332,7 +332,7 @@ module.exports = {
   checkSlotsAvailability,
   postThyrocareOrder,
   orderSummary,
-  getReport,
+  getMyReport,
   // fixAppointmentSlot,
   // rescheduleThyrocareOrder,
   // cancelThyrocareOrder,

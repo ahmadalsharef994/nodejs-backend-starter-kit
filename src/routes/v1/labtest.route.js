@@ -27,23 +27,23 @@ router
   .post(/* authUserDoctor(), */ validate(labTestValidator.orderSummary), labTestController.showOrderSummary);
 router
   .route('/thyrocare/my-report')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.getMyReport), labTestController.showReport);
+  .post(/* authUserDoctor(), */ validate(labTestValidator.getMyReport), labTestController.getMyReport);
 router
   .route('/thyrocare/guest-order')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.guestOrder), labTestController.postOrderData);
+  .post(/* authUserDoctor(), */ validate(labTestValidator.guestOrder), labTestController.postGuestOrder);
 router
   .route('/thyrocare/resend-guestotp')
   .post(/* authUserDoctor(), */ validate(labTestValidator.resendGuestOtp), labTestController.resendGuestOtp);
 router
   .route('/thyrocare/verify-order')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.verifyOrder), labTestController.verifyOrder);
+  .post(/* authUserDoctor(), */ validate(labTestValidator.verifyGuestOrder), labTestController.verifyGuestOrder);
 router.route('/thyrocare/cart-value').post(validate(labTestValidator.cartValue), labTestController.cartValue);
 router
   .route('/thyrocare/bookPrepaidOrder')
   .post(validate(labTestValidator.bookPrepaidOrder), labTestController.bookPrepaidOrder);
 router
   .route('/thyrocare/:orderId')
-  .post(/* authUserDoctor(), */ validate(labTestValidator.getGuestOrder), labTestController.showGuestOrder);
+  .post(/* authUserDoctor(), */ validate(labTestValidator.getGuestOrder), labTestController.getGuestOrder);
 
 /* currently not supported by thyrocare */
 // router

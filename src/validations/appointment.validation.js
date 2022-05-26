@@ -15,7 +15,7 @@ const joinAppointmentUser = {
   }),
 };
 
-const bookAppointmentDetails = {
+const bookAppointment = {
   body: Joi.object()
     .keys({
       docId: Joi.number().required(),
@@ -41,7 +41,7 @@ const bookAppointmentDetails = {
     .max(15),
 };
 
-const assignfollowupDetails = {
+const assignFollowup = {
   params: Joi.object()
     .keys({
       appointmentId: Joi.string().custom(objectId),
@@ -81,13 +81,13 @@ const getAppointmentsByType = {
     .max(4),
 };
 
-const getappointment = {
+const getAppointmentDetails = {
   params: Joi.object().keys({
     appointmentId: Joi.string().custom(objectId),
   }),
 };
 
-const createprescription = {
+const createPrescription = {
   body: Joi.object().keys({
     Medicines: Joi.array().required(),
     LabTest: Joi.string().required(),
@@ -95,14 +95,14 @@ const createprescription = {
   }),
 };
 
-const getprescription = {
+const getPrescription = {
   params: Joi.object().keys({
     appointmentId: Joi.string().custom(objectId),
     prescriptionId: Joi.string().custom(objectId),
   }),
 };
 
-const getDetailsPatient = {
+const getPatientDetails = {
   params: Joi.object().keys({
     patientId: Joi.string().custom(objectId),
   }),
@@ -128,7 +128,7 @@ const doctorFeedback = {
   }),
 };
 
-const getAvailableAppointmentSlots = {
+const getAvailableAppointments = {
   body: Joi.object().keys({
     docId: Joi.number().integer().required().min(10000000).max(99999999),
     date: Joi.date().required(),
@@ -183,15 +183,15 @@ const rescheduleFollowup = {
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
-  bookAppointmentDetails,
-  assignfollowupDetails,
+  bookAppointment,
+  assignFollowup,
   getFollowups,
   getAppointmentsByType,
-  getAvailableAppointmentSlots,
-  getappointment,
-  createprescription,
-  getprescription,
-  getDetailsPatient,
+  getAvailableAppointments,
+  getAppointmentDetails,
+  createPrescription,
+  getPrescription,
+  getPatientDetails,
   userFeedback,
   doctorFeedback,
   cancelAppointment,

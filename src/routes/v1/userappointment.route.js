@@ -8,18 +8,18 @@ const router = express.Router();
 
 router
   .route('/book-appointment')
-  .post(authuser(), validate(appointmentValidation.bookAppointmentDetails), appointmentController.bookAppointment);
+  .post(authuser(), validate(appointmentValidation.bookAppointment), appointmentController.bookAppointment);
 
 router
   .route('/patient-join')
-  .post(authuser(), validate(appointmentValidation.joinAppointmentUser), appointmentController.joinAppointmentPatient);
+  .post(authuser(), validate(appointmentValidation.joinAppointmentUser), appointmentController.joinAppointmentUser);
 
 router.route('/upcoming-appointments').get(authuser(), userAppointmentController.upcomingAppointments);
 router.route('/prescriptions').get(authuser(), userAppointmentController.showPrescriptions);
 router.route('/labtest-orders').get(authuser(), userAppointmentController.showLabTestOrders);
 router
   .route('/appointments')
-  .get(authuser(), validate(appointmentValidation.getAppointmentsByType), userAppointmentController.showAppointmentsByType);
+  .get(authuser(), validate(appointmentValidation.getAppointmentsByType), userAppointmentController.getAppointmentsByType);
 
 router
   .route('/:appointmentId/patient-feedback')

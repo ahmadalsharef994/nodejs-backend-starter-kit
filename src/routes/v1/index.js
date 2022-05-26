@@ -12,6 +12,7 @@ const razorpayRoute = require('./razorpay.route');
 const couponRoute = require('./coupon.route');
 const walletRoute = require('./wallet.route');
 const elasticSearchRoute = require('./elasticSearch.route');
+const autoReplyRoute = require('./autoReply.route');
 
 const router = express.Router();
 
@@ -67,6 +68,10 @@ const defaultRoutes = [
   {
     path: '/elasticsearch',
     route: elasticSearchRoute,
+  },
+  {
+    path: '/autoreply',
+    route: autoReplyRoute,
   },
 ];
 

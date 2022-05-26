@@ -93,12 +93,12 @@ const showOrderSummary = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json({ message: 'Success', data: summary });
 });
 
-const showReport = catchAsync(async (req, res) => {
-  const report = await thyrocareServices.getReport(req.body.leadId, req.body.userMobileNo);
+const getMyReport = catchAsync(async (req, res) => {
+  const report = await thyrocareServices.getMyReport(req.body.leadId, req.body.userMobileNo);
   return res.status(httpStatus.OK).json({ message: 'Success', data: report });
 });
 
-const postOrderData = catchAsync(async (req, res) => {
+const postGuestOrder = catchAsync(async (req, res) => {
   const { customerDetails, testDetails, paymentDetails, cart, couponCode } = await req.body;
   const orderData = await labTestService.initiateGuestBooking(
     customerDetails,
@@ -114,7 +114,7 @@ const postOrderData = catchAsync(async (req, res) => {
   }
 });
 
-const verifyOrder = catchAsync(async (req, res) => {
+const verifyGuestOrder = catchAsync(async (req, res) => {
   const { sessionId, otp, orderId } = await req.body;
   try {
     const { isOrderPlaced, orderData } = await labTestService.verifyGuestOrder(sessionId, otp, orderId);
@@ -149,7 +149,7 @@ const cartValue = catchAsync(async (req, res) => {
   }
 });
 
-const showGuestOrder = catchAsync(async (req, res) => {
+const getGuestOrder = catchAsync(async (req, res) => {
   const orderId = await req.params.orderId;
   try {
     const orderDetails = await labTestService.getGuestOrder(orderId);
@@ -219,16 +219,16 @@ module.exports = {
   thyrocareLogin,
   updateThyrocareLabTests,
   thyrocareLabTests,
-  postOrderData,
-  verifyOrder,
+  postGuestOrder,
+  verifyGuestOrder,
   checkPincodeAvailability,
   showPincodeDetails,
   getAvailableTimeSlots,
   showOrderSummary,
-  showReport,
+  getMyReport,
   cartValue,
   bookPrepaidOrder,
-  showGuestOrder,
+  getGuestOrder,
   resendGuestOtp,
   showTestDetails,
   getLabtestPackages,

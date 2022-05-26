@@ -58,7 +58,7 @@ const getMyReport = {
   }),
 };
 
-const verifyOrder = {
+const verifyGuestOrder = {
   body: Joi.object().keys({
     sessionId: Joi.string().required(),
     otp: Joi.number().required().min(100000).max(999999),
@@ -163,7 +163,7 @@ module.exports = {
   orderSummary,
   getMyReport,
   guestOrder,
-  verifyOrder,
+  verifyGuestOrder,
   cartValue,
   bookPrepaidOrder,
   getGuestOrder,

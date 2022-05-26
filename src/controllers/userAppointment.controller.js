@@ -12,7 +12,7 @@ const upcomingAppointments = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json(result);
 });
 
-const showAppointmentsByType = catchAsync(async (req, res) => {
+const getAppointmentsByType = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const filter = { AuthUser: AuthData.id, Type: req.query.type };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -61,7 +61,7 @@ const getDoctorsByCategories = catchAsync(async (req, res) => {
 });
 module.exports = {
   upcomingAppointments,
-  showAppointmentsByType,
+  getAppointmentsByType,
   showPrescriptions,
   showLabTestOrders,
   fetchallHealthPackages,

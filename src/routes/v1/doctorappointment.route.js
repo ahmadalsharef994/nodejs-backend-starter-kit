@@ -27,13 +27,17 @@ router.post(
 
 router
   .route('/reschedule-appointment')
-  .post(authdoctorverified(), validate(appointmentValidator.rescheduleAppointment), appointmentController.rescheduleBooking);
+  .post(
+    authdoctorverified(),
+    validate(appointmentValidator.rescheduleAppointment),
+    appointmentController.rescheduleAppointment
+  ); // rescheduleAppointment
 
 router
   .route('/cancel-booking')
-  .post(authdoctorverified(), validate(appointmentValidator.cancelAppointment), appointmentController.cancelBooking);
+  .post(authdoctorverified(), validate(appointmentValidator.cancelAppointment), appointmentController.cancelAppointment); // cancelAppointment
 
-router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.showUpcomingAppointments);
+router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.getUpcomingAppointments);
 
 // get appointments by type/all
 router
@@ -41,29 +45,29 @@ router
   .get(
     authdoctorverified(),
     validate(appointmentValidator.getAppointmentsByType),
-    appointmentController.showAppointmentsByType
+    appointmentController.getAppointmentsByType
   );
 // get followup slots available for booking
-router.route('/get-available-followups').post(authdoctorverified(), appointmentController.showAvailableFollowUps);
+router.route('/get-available-followups').post(authdoctorverified(), appointmentController.getAvailableFollowUps);
 
 //  get appointment slots available for booking (public)
 router
   .route('/get-available-appointments')
-  .post(validate(appointmentValidator.getAvailableAppointmentSlots), appointmentController.showAvailableAppointments);
+  .post(validate(appointmentValidator.getAvailableAppointments), appointmentController.getAvailableAppointments); // getAvailableAppointments
 
-router.get('/getpatients', authdoctorverified(), appointmentController.getAllPatientDetails);
+router.get('/getpatients', authdoctorverified(), appointmentController.getPatients); // getPatients
 router.get(
   '/patients/:patientId',
   authdoctorverified(),
-  validate(appointmentValidator.getDetailsPatient),
+  validate(appointmentValidator.getPatientDetails),
   appointmentController.getPatientDetails
 );
 
 router.get(
   '/:appointmentId/appoinment-details',
   authdoctorverified(),
-  validate(appointmentValidator.getappointment),
-  appointmentController.getappointmentDetails
+  validate(appointmentValidator.getAppointmentDetails),
+  appointmentController.getAppointmentDetails
 );
 router.get(
   '/:appointmentId',
@@ -74,26 +78,26 @@ router.get(
 
 router
   .route('/:appointmentId/follow-ups')
-  .get(authdoctorverified(), validate(appointmentValidator.getFollowups), appointmentController.showFollowUpsById);
+  .get(authdoctorverified(), validate(appointmentValidator.getFollowups), appointmentController.getFollowupsById);
 router
   .route('/:appointmentId/assign-followup')
-  .post(authdoctorverified(), validate(appointmentValidator.assignfollowupDetails), appointmentController.assignFollowup);
+  .post(authdoctorverified(), validate(appointmentValidator.assignFollowup), appointmentController.assignFollowup);
 router
   .route('/cancel-followup')
-  .post(authdoctorverified(), validate(appointmentValidator.cancelFollowup), appointmentController.cancelfollowup);
+  .post(authdoctorverified(), validate(appointmentValidator.cancelFollowup), appointmentController.cancelFollowup);
 router
   .route('/reschedule-followup')
   .post(authdoctorverified(), validate(appointmentValidator.rescheduleFollowup), appointmentController.rescheduleFollowup);
 router.post(
   '/:appointmentId/prescription',
   authdoctorverified(),
-  validate(appointmentValidator.createprescription),
+  validate(appointmentValidator.createPrescription),
   appointmentController.createPrescription
 );
 router.get(
   '/:appointmentId/prescription/:prescriptionId',
   authdoctorverified(),
-  validate(appointmentValidator.getprescription),
+  validate(appointmentValidator.getPrescription),
   appointmentController.getPrescription
 );
 router.post(
@@ -103,7 +107,9 @@ router.post(
   appointmentController.doctorFeedback
 );
 // Chat API's
-router.route('/:appointmentId/get-messages').get(authUserDoctor(), validate(chatValidator.getChat), chatController.showChat);
+router
+  .route('/:appointmentId/get-messages')
+  .get(authUserDoctor(), validate(chatValidator.getMessages), chatController.getMessages);
 router
   .route('/:appointmentId/send-message')
   .post(chatAuth(), validate(chatValidator.sendMessage), chatController.sendMessage);

@@ -325,7 +325,7 @@ const getFollowupsById = async (limit) => {
   return result;
 };
 
-const getAvailableAppointmentSlots = async (doctorId, date) => {
+const getAvailableAppointments = async (doctorId, date) => {
   const getDayOfWeek = (requiredDate) => {
     const dayOfWeek = new Date(requiredDate).getDay();
     // eslint-disable-next-line no-restricted-globals
@@ -412,7 +412,7 @@ const createPrescriptionDoc = async (prescriptionDoc, appointmentId, appointment
 };
 
 // eslint-disable-next-line no-unused-vars
-const fetchPatientDetails = async (patientid, doctorid) => {
+const getPatientDetails = async (patientid, doctorid) => {
   // const PatientAppointments = await Appointment.find({ AuthUser: patientid, AuthDoctor: doctorid });
   const PatientBasicDetails = await UserBasic.findOne({ auth: patientid }, { auth: 0 });
   const PatientAuth = await authService.getAuthById(patientid);
@@ -433,7 +433,7 @@ const fetchPatientDetails = async (patientid, doctorid) => {
   return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
-const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
+const getPatients = async (doctorid, page, limit, sortBy) => {
   const patientIds = await Appointment.aggregate([
     { $sort: { StartTime: parseInt(sortBy, 10) } },
     { $group: { _id: { AuthUser: '$AuthUser' } } },
@@ -448,7 +448,7 @@ const fetchAllPatientDetails = async (doctorid, page, limit, sortBy) => {
   let singlePatientData = {};
   for (let k = 0; k < patientIds[0].data.length; k += 1) {
     // eslint-disable-next-line no-await-in-loop
-    singlePatientData = await fetchPatientDetails(patientIds[0].data[k]._id.AuthUser, doctorid);
+    singlePatientData = await getPatientDetails(patientIds[0].data[k]._id.AuthUser, doctorid);
     allPatientsData.push({
       'No.': k,
       'Patient Name': singlePatientData[0],
@@ -606,7 +606,7 @@ const getDoctorsByCategories = async (category) => {
   throw new ApiError(httpStatus.NOT_FOUND, 'No doctors in this category');
 };
 
-const verifyAppointment = async (orderId, appointmentId) => {
+const bookingConfirmation = async (orderId, appointmentId) => {
   const BookingDetails = await Appointment.findOne({ orderId });
   if (appointmentId === `${BookingDetails._id}`) {
     return { status: 'success', Message: 'Order confirmed', bookingDetails: BookingDetails, appointmentId };
@@ -679,20 +679,20 @@ module.exports = {
   submitFollowupDetails,
   getUpcomingAppointments,
   getAppointmentsByType,
-  getAvailableAppointmentSlots,
+  getAvailableAppointments,
   getFollowupsById,
   getAvailableFollowUpSlots,
   getappointmentDoctor,
   createPrescriptionDoc,
   fetchPrescriptionDoc,
-  fetchPatientDetails,
-  fetchAllPatientDetails,
+  getPatientDetails,
+  getPatients,
   userFeedback,
   doctorFeedback,
   cancelAppointment,
   rescheduleAppointment,
   getDoctorsByCategories,
-  verifyAppointment,
+  bookingConfirmation,
   cancelFollowup,
   rescheduleFollowup,
 };

@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const { objectId } = require('./custom.validation');
 
-const getChat = {
+const getMessages = {
   params: Joi.object().keys({
     appointmentId: Joi.string().custom(objectId).required(),
   }),
@@ -18,6 +18,6 @@ const sendMessage = {
 };
 
 module.exports = {
-  getChat,
+  getMessages,
   sendMessage,
 };

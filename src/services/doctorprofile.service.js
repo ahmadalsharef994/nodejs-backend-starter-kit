@@ -17,14 +17,10 @@ const fetchbasicdetails = async (AuthData) => {
 };
 
 const submitbasicdetails = async (BasicDetailBody, AuthData) => {
-  const alreadyExist = await fetchbasicdetails(AuthData);
-  if (!alreadyExist) {
-    // eslint-disable-next-line no-param-reassign
-    BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
-    const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
-    return basicDetailDoc;
-  }
-  return false;
+  // eslint-disable-next-line no-param-reassign
+  BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
+  const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
+  return basicDetailDoc;
 };
 
 const submitprofilepicture = async (ProfilePhoto, AuthData) => {

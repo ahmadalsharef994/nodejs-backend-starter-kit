@@ -28,8 +28,8 @@ const logout = {
 const changepassword = {
   body: Joi.object().keys({
     oldPassword: Joi.string().required(),
-    newPassword: Joi.string().required(),
-    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
+    newPassword: Joi.string().min(8, 'utf8').required(),
+    confirmNewPassword: Joi.string().min(8, 'utf8').required().valid(Joi.ref('newPassword')),
   }),
 };
 

@@ -108,6 +108,9 @@ const logout = catchAsync(async (req, res) => {
 
 const changePassword = catchAsync(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
+  if (newPassword.length < 8) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'New Password must contain 8 charcters or more');
+  }
   const token = checkHeader(req); // Used for Blacklisting Current Token
   await authService.changeAuthPassword(oldPassword, newPassword, token, req.SubjectId);
   // const challenge = await getOnboardingChallenge(AuthData);

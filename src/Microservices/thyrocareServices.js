@@ -79,7 +79,7 @@ const updateTestProducts = async () => {
 };
 // For updating labtestPackages
 const updateLabtestPackages = async () => {
-  const credentials = await ThyroToken.findOne({ identifier: 'medzgo-thyrocare' });
+  const credentials = await ThyrocareToken.findOne({ identifier: 'medzgo-thyrocare' });
   const res = await axios.post(
     `https://${process.env.THYROCARE_API}.thyrocare.cloud/api/productsmaster/Products`,
     {
@@ -378,7 +378,7 @@ module.exports = {
   checkSlotsAvailability,
   postThyrocareOrder,
   orderSummary,
-  getReport,
+  getMyReport,
   getLabtestPackages,
   updateLabtestPackages,
   // fixAppointmentSlot,

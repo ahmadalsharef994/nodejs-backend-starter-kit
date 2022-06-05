@@ -38,7 +38,7 @@ const submitbasicdetails = catchAsync(async (req, res) => {
     });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({
-      message: 'Data already Submitted',
+      message: 'Unknown Data  Submission Error',
       challenge: challenge.challenge,
       optionalchallenge: challenge.optionalChallenge,
     });

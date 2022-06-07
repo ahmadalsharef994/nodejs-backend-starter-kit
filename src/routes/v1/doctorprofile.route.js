@@ -1,12 +1,12 @@
 const express = require('express');
 const validate = require('../../middlewares/validate');
-const { profilePhotoUpload } = require('../../Microservices');
 const doctorProfileValidator = require('../../validations/DoctorProfile.validation');
 const doctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
 const appointmentPreferenceValidator = require('../../validations/appointmentpreference.validation');
+const profilePhotoUpload = require('../../Microservices/profilePicture.service');
 
 const router = express.Router();
 
@@ -23,7 +23,7 @@ router.route('/basic-details').post(
 router
   .route('/basic-details/profile-picture')
   .post(
-    profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+    profilePhotoUpload.uploadPhoto.fields([{ name: 'avatar', maxCount: 1 }]),
     authdoctornonverified(),
     function (req, res) {
       doctorProfileController.submitprofilepicture(req);
@@ -32,16 +32,16 @@ router
     }
   );
 
-router
-  .route('/basic-details/update-profile-picture')
-  .post(
-    profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
-    authdoctornonverified(),
-    function (req, res) {
-      doctorProfileController.submitprofilepicture(req);
-      res.status(201).json('Profile picture Updated!');
-    }
-  );
+// router
+//   .route('/basic-details/update-profile-picture')
+//   .post(
+//     profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+//     authdoctornonverified(),
+//     function (req, res) {
+//       doctorProfileController.submitprofilepicture(req);
+//       res.status(201).json('Profile picture Updated!');
+//     }
+//   );
 
 router.route('/education-details').get(authdoctornonverified(), doctorProfileController.fetcheducationdetails);
 router

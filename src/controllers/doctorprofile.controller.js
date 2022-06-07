@@ -22,8 +22,8 @@ const getStatistics = catchAsync(async (req, res) => {
   const TOTALIncome = 8000;
   const CHARTIncome = [{ data: [32, 12, 13, 23, 34, 21, 76, 35, 24, 76] }];
   const Income = { PERCENTIncome, TOTALIncome, CHARTIncome };
-  // const AuthData = await authService.getAuthById(req.SubjectId);
-  res.status(httpStatus.OK).send({ AveragePatientsPerDay, Revenue, Income });
+  const Rating = 4.0; // Rating is float between 0.0 and 5.0, with only 1 digit after comma
+  res.status(httpStatus.OK).send({ AveragePatientsPerDay, Revenue, Income, Rating });
 });
 
 const submitbasicdetails = catchAsync(async (req, res) => {
@@ -138,6 +138,7 @@ const submitclinicdetails = catchAsync(async (req, res) => {
       message: 'Clinic details Submitted',
       challenge: challenge.challenge,
       optionalchallenge: challenge.optionalChallenge,
+      data: resultData,
     });
   }
 });
@@ -154,9 +155,10 @@ const fetchclinicdetails = catchAsync(async (req, res) => {
 
 const submitpayoutsdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  await doctorprofileService.submitpayoutsdetails(req.body, AuthData);
+  const payOutDetails = await doctorprofileService.submitpayoutsdetails(req.body, AuthData);
   res.status(httpStatus.CREATED).json({
     message: 'Payouts Details Submitted!',
+    data: payOutDetails,
   });
 });
 

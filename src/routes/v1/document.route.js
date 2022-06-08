@@ -31,7 +31,7 @@ router.get('/view/:doctype', validate(documentValidation.documentUrl), authdocto
 router.post(
   '/update-esign',
   authdoctorVerified(),
-  profilePhotoUpload.publicupload.fields([{ name: 'esign', maxCount: 1 }]),
+  profilePhotoUpload.uploadPhoto.fields([{ name: 'esign', maxCount: 1 }]),
   documentController.updateEsign
 );
 module.exports = router;

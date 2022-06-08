@@ -6,7 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const doctorprofileService = require('../services/doctorprofile.service');
 const appointmentPreferenceService = require('../services/appointmentpreference.service');
 const authDoctorController = require('./authdoctor.controller');
-const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
+// const profilePhotoUpload = require('../Microservices/profilePicture.service');
 const { authService, documentService } = require('../services');
 
 const getStatistics = catchAsync(async (req, res) => {
@@ -56,20 +56,20 @@ const submitprofilepicture = catchAsync(async (req) => {
   await doctorprofileService.submitprofilepicture(profilePhoto, AuthData);
 });
 
-const updateprofilepicture = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
-  try {
-    const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
-    if ((returndata !== false) & (returnThumbnail !== false)) {
-      res.status(httpStatus.OK).json({ message: 'profile picture updated' });
-    } else {
-      res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
-    }
-  } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `profilePhotoUpload service: ${err}`);
-  }
-});
+// const updateprofilepicture = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
+//   try {
+//     const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
+//     if ((returndata !== false) & (returnThumbnail !== false)) {
+//       res.status(httpStatus.OK).json({ message: 'profile picture updated' });
+//     } else {
+//       res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
+//     }
+//   } catch (err) {
+//     throw new ApiError(httpStatus.NOT_FOUND, `profilePhotoUpload service: ${err}`);
+//   }
+// });
 
 const fetchbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -283,7 +283,7 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
-  updateprofilepicture,
+  // updateprofilepicture,
   fetchpayoutsdetails,
   fetchprofiledetails,
   addConsultationfee,

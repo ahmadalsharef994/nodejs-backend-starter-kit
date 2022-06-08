@@ -256,6 +256,16 @@ const rescheduleFollowup = catchAsync(async (req, res) => {
   }
 });
 
+const allAppointments = catchAsync(async (req, res) => {
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const data = await appointmentService.allAppointments(req.Docid, options);
+  if (data) {
+    res.status(httpStatus.OK).json({ data });
+  } else {
+    res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant fetch appointments' });
+  }
+});
+
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -280,4 +290,5 @@ module.exports = {
   bookingConfirmation,
   cancelFollowup,
   rescheduleFollowup,
+  allAppointments,
 };

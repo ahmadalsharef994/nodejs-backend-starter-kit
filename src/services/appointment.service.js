@@ -316,7 +316,46 @@ const getAppointmentsByType = async (doctorId, filter, options) => {
     return result;
   }
 };
-
+const allAppointments = async (doctorId, options) => {
+  try {
+    const followup = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
+    const cancelled = await Appointment.paginate({ Status: 'cancelled', docid: doctorId }, options);
+    const past = await Appointment.paginate(
+      {
+        StartTime: { $lt: new Date() },
+        paymentStatus: 'PAID',
+        docid: doctorId,
+        Status: { $nin: 'cancelled' },
+      },
+      options
+    );
+    const today = await Appointment.paginate(
+      {
+        Date: new Date().toDateString(),
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+      },
+      options
+    );
+    const referred = await Appointment.paginate(
+      { Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      options
+    );
+    const upcoming = await Appointment.paginate(
+      {
+        docid: doctorId,
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: new Date() },
+      },
+      options
+    );
+    const data = { followup, today, cancelled, past, referred, upcoming };
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
 const getFollowupsById = async (limit) => {
   const count = parseInt(limit, 10);
   const result = await Followup.find()
@@ -695,4 +734,5 @@ module.exports = {
   bookingConfirmation,
   cancelFollowup,
   rescheduleFollowup,
+  allAppointments,
 };

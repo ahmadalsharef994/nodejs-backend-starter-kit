@@ -9,7 +9,7 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
   if (!isPriceSet) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'General Appointment Price Not Set');
   }
-  const AppointmentPreferenceExists = await appointmentPreferenceService.checkappointmentPreference(
+  const AppointmentPreferenceExists = await appointmentPreferenceService.checkAppointmentPreference(
     req.Docid,
     req.SubjectId
   );

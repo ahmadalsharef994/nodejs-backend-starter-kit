@@ -203,8 +203,8 @@ const updatePreference = async (body, doctorId) => {
   Object.keys(body).map((day) => {
     // eslint-disable-next-line array-callback-return
     body[day].map((range) => {
-      if (range.ToHour * 60 + range.ToMinutes - (range.FromHour * 60 + range.FromMinutes) !== duration) {
-        throw new ApiError(httpStatus.BAD_REQUEST, `duration must be ${duration} minutes`);
+      if (range.ToHour * 60 + range.ToMinutes - (range.FromHour * 60 + range.FromMinutes) !== duration + gap) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `range must be ${duration + gap} minutes`);
       }
       if (range.ToMinutes < gap) {
         range.ToMinutes = 60 - gap + range.ToMinutes;

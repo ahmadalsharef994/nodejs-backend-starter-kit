@@ -204,7 +204,7 @@ const updatePreference = async (body, doctorId) => {
     // eslint-disable-next-line array-callback-return
     body[day].map((range) => {
       if (range.ToHour * 60 + range.ToMinutes - (range.FromHour * 60 + range.FromMinutes) !== duration) {
-        throw new ApiError(httpStatus.BAD_REQUEST, { message: `duration must be ${duration}` });
+        throw new ApiError(httpStatus.BAD_REQUEST, `duration must be ${duration} minutes`);
       }
       if (range.ToMinutes < gap) {
         range.ToMinutes = 60 - gap + range.ToMinutes;
@@ -224,7 +224,7 @@ const updatePreference = async (body, doctorId) => {
               ...existingSlots[`${day}_A`].slice(resultCheck.index),
             ]);
       } else {
-        throw new ApiError(httpStatus.BAD_REQUEST, { message: `slots are overlapping` });
+        throw new ApiError(httpStatus.BAD_REQUEST, `slots are overlapping`);
       }
     });
   });

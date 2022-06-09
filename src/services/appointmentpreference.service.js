@@ -148,7 +148,7 @@ const createpreference = async (body, doctorID, AuthData, update = false) => {
   return result;
 };
 
-function judge(currentSlots, range) {
+const checkOverlap = (currentSlots, range) => {
   let postCheckFlag = -1;
 
   for (let i = 0; i < currentSlots.length; i += jump) {
@@ -174,9 +174,9 @@ function judge(currentSlots, range) {
   }
   // index = -1 indicates push at the end
   return postCheckFlag === 1 || currentSlots.length === 0 ? { isAllowed: true, index: -1 } : { isAllowed: false };
-}
+};
 
-function generateSolts(fhr, fmin) {
+const generateSlots = (fhr, fmin) => {
   const slots = [];
   let startMin = fmin;
   let startHr = fhr;
@@ -196,7 +196,7 @@ function generateSolts(fhr, fmin) {
     startMin = endMin;
   }
   return slots;
-}
+};
 
 const updatePreference = async (body, doctorId) => {
   const existingSlots = await AppointmentPreference.findOne({ docid: doctorId });
@@ -212,15 +212,15 @@ const updatePreference = async (body, doctorId) => {
       } else {
         range.ToMinutes -= gap;
       }
-      const resultCheck = judge(existingSlots[`${day}_A`], Object.values(range));
+      const resultCheck = checkOverlap(existingSlots[`${day}_A`], Object.values(range));
 
       if (resultCheck.isAllowed) {
         // eslint-disable-next-line no-unused-expressions
         resultCheck.index === -1
-          ? existingSlots[`${day}_A`].push(...generateSolts(...Object.values(range).slice(0, 2)))
+          ? existingSlots[`${day}_A`].push(...generateSlots(...Object.values(range).slice(0, 2)))
           : (existingSlots[`${day}_A`] = [
               ...existingSlots[`${day}_A`].slice(0, resultCheck.index),
-              ...generateSolts(...Object.values(range).slice(0, 2)),
+              ...generateSlots(...Object.values(range).slice(0, 2)),
               ...existingSlots[`${day}_A`].slice(resultCheck.index),
             ]);
       } else {

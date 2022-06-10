@@ -8,6 +8,11 @@ const joinAppointmentDoctor = {
     socketID: Joi.string().required(),
   }),
 };
+const deleteSlot = {
+  body: Joi.object().keys({
+    slotId: Joi.string().required(),
+  }),
+};
 const joinAppointmentUser = {
   body: Joi.object().keys({
     appointmentInit: Joi.objectId().required(),
@@ -200,4 +205,5 @@ module.exports = {
   bookingConfirmation,
   cancelFollowup,
   rescheduleFollowup,
+  deleteSlot,
 };

@@ -265,7 +265,14 @@ const allAppointments = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant fetch appointments' });
   }
 });
-
+const deleteSlot = catchAsync(async (req, res) => {
+  const updatedslots = await appointmentService.deleteSlot(req.SubjectId, req.body.slotId);
+  if (updatedslots) {
+    res.status(httpStatus.OK).json({ message: 'success', updatedslots });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
+  }
+});
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -291,4 +298,5 @@ module.exports = {
   cancelFollowup,
   rescheduleFollowup,
   allAppointments,
+  deleteSlot,
 };

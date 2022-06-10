@@ -38,7 +38,9 @@ router
   .post(authdoctorverified(), validate(appointmentValidator.cancelAppointment), appointmentController.cancelAppointment); // cancelAppointment
 
 router.route('/upcoming-appointments').get(authdoctorverified(), appointmentController.getUpcomingAppointments);
-
+router
+  .route('/delete-slot')
+  .post(authdoctorverified(), validate(appointmentValidator.deleteSlot), appointmentController.deleteSlot);
 // get appointments by type/all
 router
   .route('/appointments-type')

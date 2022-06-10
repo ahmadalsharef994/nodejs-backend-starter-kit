@@ -13,7 +13,6 @@ const gap = parseInt(process.env.GAP, 10);
 const slotTime = parseInt(process.env.SLOT_TIME, 10);
 const duration = parseInt(process.env.DURATION, 10);
 const jump = parseInt(duration / slotTime, 10);
-
 const checkforDoctorPreference = async (AuthData) => {
   const preference = await AppointmentPreference.find({ doctorAuthId: AuthData._id });
   if (typeof preference[0] === 'object') {
@@ -28,7 +27,6 @@ const checkForAppointmentPrice = async (AuthData) => {
   }
   return true;
 };
-
 const slotOverlap = (timeSlots) => {
   // input slots should be in ascending order
   const days = Object.keys(timeSlots);
@@ -53,7 +51,6 @@ const slotOverlap = (timeSlots) => {
   }
   return false;
 };
-
 const createpreference = async (body, doctorID, AuthData, update = false) => {
   const alreadyExist = await AppointmentPreference.findOne({ docid: doctorID, doctorAuthId: AuthData });
   if (alreadyExist && !update) {
@@ -66,10 +63,8 @@ const createpreference = async (body, doctorID, AuthData, update = false) => {
   if (overlapping) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Overlapped time slots not allowed! maintain 30 mins gap');
   }
-
   const result = {};
   const days = Object.keys(body);
-
   const durations = [];
   for (let i = 0; i < days.length; i += 1) {
     // eslint-disable-next-line no-await-in-loop
@@ -85,22 +80,18 @@ const createpreference = async (body, doctorID, AuthData, update = false) => {
       new ApiError(httpStatus.FORBIDDEN, 'Difference between "Start Time" and "End Time" should be 120 mins')
     );
   }
-
   const daysAndDurations = {};
   days.forEach((day, i) => {
     daysAndDurations[day] = durations[i];
   });
-
   const slots = [];
   // console.log(daysAndDurations);
   // creating slots for each day
-
   for (let i = 0; i < days.length; i += 1) {
     /* converting 12hr to 24hr if input is in 12hr format
     const startHr = body[days[i]].FromMeridian === 1 ? (body[days[i]].FromHour + 12) % 24 : body[days[i]].FromHour;
     const startMin = body[days[i]].FromMinutes;
     */
-
     for (let j = 0; j < body[days[i]].length; j += 1) {
       const startHr = body[days[i]][j].FromHour;
       const startMin = body[days[i]][j].FromMinutes;
@@ -114,12 +105,10 @@ const createpreference = async (body, doctorID, AuthData, update = false) => {
       slots.push(element);
     }
   }
-
   const finalSlots = [];
   let ASlots = [];
   let FSlots = [];
   let k = 0;
-
   for (let i = 0; i < days.length; i += 1) {
     ASlots = [];
     FSlots = [];
@@ -132,15 +121,12 @@ const createpreference = async (body, doctorID, AuthData, update = false) => {
   }
   const Adays = days.map((day) => day.concat('_A'));
   const Fdays = days.map((day) => day.concat('_F'));
-
   Adays.forEach((day, i) => {
     result[day] = finalSlots[i][0];
   });
-
   Fdays.forEach((day, i) => {
     result[day] = finalSlots[i][1];
   });
-
   if (!update) {
     result.docid = doctorID;
     result.doctorAuthId = AuthData;
@@ -148,35 +134,28 @@ const createpreference = async (body, doctorID, AuthData, update = false) => {
   }
   return result;
 };
-
 const checkOverlap = (currentSlots, range) => {
   let postCheckFlag = -1;
-
   for (let i = 0; i < currentSlots.length; i += jump) {
     const currentStart = currentSlots[i];
     const currentEnd = currentSlots[i + jump - 1];
-
     const preCheck =
       (currentStart.FromMinutes - 1 === 0
         ? (currentStart.FromHour - 1) * 60 + 60
         : currentStart.FromHour * 60 + currentStart.FromMinutes - 1) -
-      (range[3] === 0 ? (range[2] - 1) * 60 + 60 : range[2] * 60 + range[3]);
-
+      (range.ToMinutes === 0 ? (range.ToHour - 1) * 60 + 60 : range.ToHour * 60 + range.ToMinutes);
     const postCheck =
-      (range[1] === 0 ? (range[0] - 1) * 60 + 60 : range[0] * 60 + range[1]) -
+      (range.FromMinutes === 0 ? (range.FromHour - 1) * 60 + 60 : range.FromHour * 60 + range.FromMinutes) -
       (currentEnd.ToMinutes === 0 ? (currentEnd.ToHour - 1) * 60 + 60 : currentEnd.ToHour * 60 + currentEnd.FromMinutes);
-
     if (preCheck >= gap) {
       if (postCheckFlag === 1 || i === 0) return { isAllowed: true, index: i };
     }
-
     // eslint-disable-next-line no-unused-expressions
     postCheck >= gap ? (postCheckFlag = 1) : (postCheckFlag = -1);
   }
   // index = -1 indicates push at the end
   return postCheckFlag === 1 || currentSlots.length === 0 ? { isAllowed: true, index: -1 } : { isAllowed: false };
 };
-
 const generateSlots = (fhr, fmin, day, docId) => {
   const slots = [];
   let startMin = fmin;
@@ -185,7 +164,6 @@ const generateSlots = (fhr, fmin, day, docId) => {
     let flag = false;
     let endMin = startMin + slotTime;
     let endHr = startHr;
-
     if (endMin >= 60) {
       endMin -= 60;
       flag = true;
@@ -205,12 +183,14 @@ const generateSlots = (fhr, fmin, day, docId) => {
   }
   return slots;
 };
-
 const updatePreference = async (body, doctorId) => {
   const existingSlots = await AppointmentPreference.findOne({ docid: doctorId });
   Object.keys(body).map((day) => {
     // eslint-disable-next-line array-callback-return
     body[day].map((range) => {
+      if (range.ToHour < range.FromHour) {
+        throw new ApiError(httpStatus.BAD_REQUEST, `range must be in the same day`);
+      }
       if (range.ToHour * 60 + range.ToMinutes - (range.FromHour * 60 + range.FromMinutes) !== duration + gap) {
         throw new ApiError(httpStatus.BAD_REQUEST, `range must be ${duration + gap} minutes`);
       }
@@ -220,15 +200,14 @@ const updatePreference = async (body, doctorId) => {
       } else {
         range.ToMinutes -= gap;
       }
-      const resultCheck = checkOverlap(existingSlots[`${day}_A`], Object.values(range));
-
+      const resultCheck = checkOverlap(existingSlots[`${day}_A`], range);
       if (resultCheck.isAllowed) {
         // eslint-disable-next-line no-unused-expressions
         resultCheck.index === -1
-          ? existingSlots[`${day}_A`].push(...generateSlots(...Object.values(range).slice(0, 2), day, doctorId))
+          ? existingSlots[`${day}_A`].push(...generateSlots(range.FromHour, range.FromMinutes, day, doctorId))
           : (existingSlots[`${day}_A`] = [
               ...existingSlots[`${day}_A`].slice(0, resultCheck.index),
-              ...generateSlots(...Object.values(range).slice(0, 2), day, doctorId),
+              ...generateSlots(range.FromHour, range.FromMinutes, day, doctorId),
               ...existingSlots[`${day}_A`].slice(resultCheck.index),
             ]);
       } else {
@@ -241,7 +220,6 @@ const updatePreference = async (body, doctorId) => {
   await existingSlots.save();
   return existingSlots;
 };
-
 const getfollowups = async (doctorId) => {
   const promise = await AppointmentPreference.findOne(
     { docid: doctorId },
@@ -249,7 +227,6 @@ const getfollowups = async (doctorId) => {
   );
   return promise;
 };
-
 const getappointments = async (doctorId) => {
   const promise = await AppointmentPreference.findOne(
     { docid: doctorId },
@@ -257,7 +234,6 @@ const getappointments = async (doctorId) => {
   );
   return promise;
 };
-
 const checkAppointmentPreference = async (docid, doctorauth) => {
   try {
     const { doctorAuthId } = await AppointmentPreference.findOne({ docid });
@@ -268,7 +244,6 @@ const checkAppointmentPreference = async (docid, doctorauth) => {
     return false;
   }
 };
-
 module.exports = {
   checkForAppointmentPrice,
   createpreference,

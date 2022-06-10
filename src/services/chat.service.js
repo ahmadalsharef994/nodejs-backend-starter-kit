@@ -33,16 +33,24 @@ const createMessage = async (appointmentId, senderAuth, text, attachment) => {
     sender: senderAuth,
     text,
     attachment,
-  }).then((message, err) => {
+  }).then(async (message, err) => {
     if (err) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'send message error');
     }
+
     pusher.trigger(`private-${message.appointment}`, 'inserted', {
       id: message._id,
       text: message.text,
       username: message.sender,
       attachment: message.attachment,
     });
+    const appointment = await Appointment.findById(appointmentId);
+    if (appointment.chatHistory === undefined) {
+      appointment.chatHistory = [];
+    }
+    // eslint-disable-next-line no-shadow
+    appointment.chatHistory.push((({ sender, text, createdAt }) => ({ sender, text, createdAt }))(message));
+    appointment.save();
   });
 };
 

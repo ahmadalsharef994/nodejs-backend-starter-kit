@@ -10,16 +10,16 @@ const authDoctorController = require('./authdoctor.controller');
 const { authService, documentService } = require('../services');
 
 const getStatistics = catchAsync(async (req, res) => {
-  const PERCENT = 2.6;
-  const TOTAL_USER = 53;
-  const CHART_DATA = [{ data: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26] }];
+  const PERCENT = 2.6; // appointments - past - feedbackmodel
+  const TOTAL_USER = 53; // totalPatients
+  const CHART_DATA = [{ data: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26] }]; // what is chart data?
   const AveragePatientsPerDay = { PERCENT, TOTAL_USER, CHART_DATA };
-  const PERCENTRevenue = 3.1;
-  const TOTALRevenue = 12000;
+  const PERCENTRevenue = 3.1; // what is
+  const TOTALRevenue = 12000; // appointment - past - prices
   const CHARTRevenue = [{ data: [2, 32, 62, 3, 4, 12, 25, 23, 40, 43] }];
   const Revenue = { PERCENTRevenue, TOTALRevenue, CHARTRevenue };
-  const PERCENTIncome = 12;
-  const TOTALIncome = 8000;
+  const PERCENTIncome = 12; // what
+  const TOTALIncome = 8000; // what
   const CHARTIncome = [{ data: [32, 12, 13, 23, 34, 21, 76, 35, 24, 76] }];
   const Income = { PERCENTIncome, TOTALIncome, CHARTIncome };
   const Rating = 4.0; // Rating is float between 0.0 and 5.0, with only 1 digit after comma

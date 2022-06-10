@@ -2,6 +2,7 @@
 /* eslint-disable array-callback-return */
 /* eslint-disable no-plusplus */
 const httpStatus = require('http-status');
+const randomstring = require('randomstring');
 const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
@@ -176,7 +177,7 @@ const checkOverlap = (currentSlots, range) => {
   return postCheckFlag === 1 || currentSlots.length === 0 ? { isAllowed: true, index: -1 } : { isAllowed: false };
 };
 
-const generateSlots = (fhr, fmin) => {
+const generateSlots = (fhr, fmin, day, docId) => {
   const slots = [];
   let startMin = fmin;
   let startHr = fhr;
@@ -190,7 +191,14 @@ const generateSlots = (fhr, fmin) => {
       flag = true;
     }
     if (flag) endHr++;
-    const obj = { FromHour: startHr, FromMinutes: startMin + 1, ToHour: endHr, ToMinutes: endMin };
+    const typeAF = 'A';
+    const slotId = [
+      typeAF,
+      day,
+      docId,
+      i + 1 + randomstring.generate({ length: 6, charset: 'alphabetic' }).toUpperCase(),
+    ].join('-');
+    const obj = { slotId, FromHour: startHr, FromMinutes: startMin + 1, ToHour: endHr, ToMinutes: endMin };
     slots.push(obj);
     startHr = endHr;
     startMin = endMin;
@@ -217,13 +225,14 @@ const updatePreference = async (body, doctorId) => {
       if (resultCheck.isAllowed) {
         // eslint-disable-next-line no-unused-expressions
         resultCheck.index === -1
-          ? existingSlots[`${day}_A`].push(...generateSlots(...Object.values(range).slice(0, 2)))
+          ? existingSlots[`${day}_A`].push(...generateSlots(...Object.values(range).slice(0, 2), day, doctorId))
           : (existingSlots[`${day}_A`] = [
               ...existingSlots[`${day}_A`].slice(0, resultCheck.index),
-              ...generateSlots(...Object.values(range).slice(0, 2)),
+              ...generateSlots(...Object.values(range).slice(0, 2), day, doctorId),
               ...existingSlots[`${day}_A`].slice(resultCheck.index),
             ]);
       } else {
+        // V2: specify where the overlapping occurs in ApiError
         throw new ApiError(httpStatus.BAD_REQUEST, `slots are overlapping`);
       }
     });

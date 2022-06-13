@@ -706,7 +706,39 @@ const rescheduleFollowup = async (followupid, slotId, date) => {
   }
   return false;
 };
-
+const deleteSlot = async (doctorAuthId, slotId) => {
+  const slots = await AppointmentPreference.findOne({ doctorAuthId });
+  const Weekdays = {
+    MON: 'MON_A',
+    TUE: 'TUE_A',
+    WED: 'WED_A',
+    THU: 'THU_A',
+    FRI: 'FRI_A',
+    SAT: 'SAT_A',
+    SUN: 'SUN_A',
+  };
+  try {
+    const day = `${slotId.split('-')[1]}`;
+    const requiredDay = `${Weekdays[day]}`;
+    if (!requiredDay) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Looks like this is not a valid slotId ,please enter a valid slotId');
+    }
+    const allSlots = slots[requiredDay];
+    // eslint-disable-next-line array-callback-return
+    const modifiedslot = allSlots.filter((slot) => {
+      if (slot) {
+        if (!slotId || slot.slotId !== slotId) {
+          return slot;
+        }
+      }
+    });
+    await AppointmentPreference.findOneAndUpdate({ doctorAuthId }, { $set: { [requiredDay]: modifiedslot } });
+    const slotsAfterDeletion = await AppointmentPreference.findOne({ doctorAuthId }, { [requiredDay]: 1 });
+    return slotsAfterDeletion;
+  } catch (err) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Looks like this is not a valid slotId ,please enter a valid slotId');
+  }
+};
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -732,4 +764,5 @@ module.exports = {
   cancelFollowup,
   rescheduleFollowup,
   allAppointments,
+  deleteSlot,
 };

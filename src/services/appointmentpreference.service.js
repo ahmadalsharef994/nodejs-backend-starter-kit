@@ -227,12 +227,9 @@ const getfollowups = async (doctorId) => {
   );
   return promise;
 };
-const getappointments = async (doctorId) => {
-  const promise = await AppointmentPreference.findOne(
-    { docid: doctorId },
-    { MON_A: 1, TUE_A: 1, WED_A: 1, THU_A: 1, FRI_A: 1, SAT_A: 1, SUN_A: 1, docid: 1, auth: 1 }
-  );
-  return promise;
+const getAppointmentPreferences = async (doctorId) => {
+  const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId: doctorId });
+  return appointmentPreference;
 };
 const checkAppointmentPreference = async (docid, doctorauth) => {
   try {
@@ -249,7 +246,7 @@ module.exports = {
   createpreference,
   updatePreference,
   getfollowups,
-  getappointments,
+  getAppointmentPreferences,
   slotOverlap,
   checkforDoctorPreference,
   checkAppointmentPreference,

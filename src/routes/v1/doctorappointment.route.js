@@ -51,9 +51,7 @@ router
 router.route('/get-available-followups').post(authdoctorverified(), appointmentController.getAvailableFollowUps);
 
 //  get appointment slots available for booking (public)
-router
-  .route('/get-available-appointments')
-  .post(validate(appointmentValidator.getAvailableAppointments), appointmentController.getAvailableAppointments); // getAvailableAppointments
+router.route('/get-available-appointments').get(authdoctorverified(), appointmentController.getAvailableAppointments); // getAvailableAppointments
 router.route('/doctor-all-appointments').get(authdoctorverified(), appointmentController.allAppointments);
 router.get('/getpatients', authdoctorverified(), appointmentController.getPatients); // getPatients
 router.get(

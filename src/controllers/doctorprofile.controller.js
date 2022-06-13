@@ -9,8 +9,8 @@ const authDoctorController = require('./authdoctor.controller');
 // const profilePhotoUpload = require('../Microservices/profilePicture.service');
 const { authService, documentService } = require('../services');
 
-const getStatistics = catchAsync(async (req, res) => {
-  const PERCENT = 2.6; // appointments - past - feedbackmodel
+const getStats = catchAsync(async (req, res) => {
+  const PERCENT = 2.6;
   const TOTAL_USER = 53; // totalPatients
   const CHART_DATA = [{ data: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26] }]; // what is chart data?
   const AveragePatientsPerDay = { PERCENT, TOTAL_USER, CHART_DATA };
@@ -22,7 +22,7 @@ const getStatistics = catchAsync(async (req, res) => {
   const TOTALIncome = 8000; // what
   const CHARTIncome = [{ data: [32, 12, 13, 23, 34, 21, 76, 35, 24, 76] }];
   const Income = { PERCENTIncome, TOTALIncome, CHARTIncome };
-  const Rating = 4.0; // Rating is float between 0.0 and 5.0, with only 1 digit after comma
+  const Rating = 4.0; // appointments - past - feedbackmodel // Rating is float between 0.0 and 5.0, with only 1 digit after comma
   res.status(httpStatus.OK).send({ AveragePatientsPerDay, Revenue, Income, Rating });
 });
 
@@ -178,7 +178,7 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
   const doctorEducationData = await doctorprofileService.fetcheducationdetails(AuthData);
   const clinicData = await doctorprofileService.fetchClinicdetails(AuthData);
   const experienceData = await doctorprofileService.fetchexperiencedetails(AuthData);
-  const appointmentPreference = await appointmentPreferenceService.getappointments(req.Docid, AuthData);
+  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(req.Docid, AuthData);
   const doctorDocumentData = await documentService.fetchDocumentdata(AuthData);
   if (!doctorBasicData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'first create your account');
@@ -222,6 +222,7 @@ const updateClinicDetails = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
   }
 });
+
 const doctorExpandEducation = catchAsync(async (req, res) => {
   const { Education, Experience } = await doctorprofileService.doctorExpEducation(
     req.SubjectId,
@@ -238,6 +239,7 @@ const doctorExpandEducation = catchAsync(async (req, res) => {
     });
   }
 });
+
 const updateDetails = catchAsync(async (req, res) => {
   const result = await doctorprofileService.updateDetails(
     req.body.about,
@@ -255,6 +257,7 @@ const updateDetails = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'something went wrong please contact our support team' });
   }
 });
+
 const updateAppointmentPrice = catchAsync(async (req, res) => {
   const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
   if (result === true) {
@@ -263,7 +266,8 @@ const updateAppointmentPrice = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
   }
 });
-const getDoctorClinicDetails = catchAsync(async (req, res) => {
+
+const getDoctorClinicTimings = catchAsync(async (req, res) => {
   const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
   if (result !== null) {
     res.status(httpStatus.OK).json({ message: 'success', result });
@@ -271,8 +275,9 @@ const getDoctorClinicDetails = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
   }
 });
+
 module.exports = {
-  getStatistics,
+  getStats,
   submitbasicdetails,
   fetchbasicdetails,
   submiteducationdetails,
@@ -292,5 +297,5 @@ module.exports = {
   updateDetails,
   doctorExpandEducation,
   updateAppointmentPrice,
-  getDoctorClinicDetails,
+  getDoctorClinicTimings,
 };

@@ -91,7 +91,8 @@ const getAvailableFollowUps = catchAsync(async (req, res) => {
 });
 
 const getAvailableAppointments = catchAsync(async (req, res) => {
-  const result = await appointmentService.getAvailableAppointments(req.body.docId, req.body.date);
+  const AuthData = await authService.getAuthById(req.SubjectId); // AuthDoctor: AuthData._id
+  const result = await appointmentService.getAvailableAppointments(AuthData);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
 
@@ -120,6 +121,7 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
 });
 
 const getappointmentDoctor = catchAsync(async (req, res) => {
+  // getAppointment by ID
   const DoctorSession = await appointmentService.getappointmentDoctor(req.params.appointmentId);
   if (DoctorSession !== false) {
     res.status(httpStatus.CREATED).json({ DoctorSession });

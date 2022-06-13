@@ -123,6 +123,10 @@ const AppointmentSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    chatHistory: {
+      type: Array,
+      default: [],
+    },
   },
   {
     timestamps: true,

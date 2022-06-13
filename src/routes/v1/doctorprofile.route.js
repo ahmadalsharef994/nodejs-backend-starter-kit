@@ -10,7 +10,7 @@ const profilePhotoUpload = require('../../Microservices/profilePicture.service')
 
 const router = express.Router();
 
-router.route('/stats').get(authdoctorverified(), doctorProfileController.getStatistics); // doctorProfileController, getStatistics
+router.route('/stats').get(authdoctorverified(), doctorProfileController.getStats); // doctorProfileController, getStats
 router.route('/basic-details').get(authdoctornonverified(), doctorProfileController.fetchbasicdetails); // getBasicDetails
 
 router.route('/basic-details').post(
@@ -126,7 +126,7 @@ router
     validate(doctorProfileValidator.updateAppointmentPrice),
     doctorProfileController.updateAppointmentPrice
   );
-router.route('/get-doctor-clinictimings').get(authdoctornonverified(), doctorProfileController.getDoctorClinicDetails);
+router.route('/get-doctor-clinictimings').get(authdoctornonverified(), doctorProfileController.getDoctorClinicTimings);
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails);
 
 module.exports = router;

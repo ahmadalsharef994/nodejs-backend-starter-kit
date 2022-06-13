@@ -45,7 +45,7 @@ const upload = multer({
   },
   fileFilter,
   // 100*1024*1024 ~ 100 mb
-  limits: { fileSize: 100000000 },
+  // limits: { fieldNameSize: 100, fileSize: 100000000, fieldSize: 100000000 },
 });
 
 const getSignedUrl = async (file) => {

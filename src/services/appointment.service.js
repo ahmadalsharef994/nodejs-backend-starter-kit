@@ -375,7 +375,7 @@ const getAvailableAppointments = async (AuthData) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
   const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: AuthData._id, paymentStatus: 'PAID' });
-
+  // console.log(bookedAppointmentSlots)
   if (bookedAppointmentSlots === []) {
     const availableAppointmentSlots = AllAppointmentSlots;
     return availableAppointmentSlots;

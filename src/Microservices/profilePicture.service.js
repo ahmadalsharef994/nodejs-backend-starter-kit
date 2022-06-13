@@ -43,7 +43,7 @@ const uploadPhoto = multer({
     },
   }),
   fileFilter,
-  limits: { fileSize: 100000000 },
+  // limits: { fieldNameSize: 100, fileSize: 100000000, fieldSize: 100000000 },
 });
 
 const thumbnail = (filepath) => {

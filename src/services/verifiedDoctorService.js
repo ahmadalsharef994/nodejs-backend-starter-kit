@@ -46,7 +46,7 @@ const createVerifiedDoctor = async (doctorauthid, AuthData) => {
   // const { AddressSecondline } = await DoctorClinic.findOne({ auth: doctorauthid });
   // const { experience, skills, mainstream } = await DoctorExperience.findOne({ auth: doctorauthid });
   doctordetails.create({
-    name: fullname,
+    doctorname: fullname,
     specializations: ['N/A'],
     doctorauthId: doctorauthid,
     Experience: 0,

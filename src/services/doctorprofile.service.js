@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-const profilePhotoUpload = require('../Microservices/profilePhotoUpload');
+// const profilePhotoUpload = require('../Microservices/profilePicture.service');
 const {
   DoctorBasic,
   DoctorEducation,
@@ -17,14 +17,10 @@ const fetchbasicdetails = async (AuthData) => {
 };
 
 const submitbasicdetails = async (BasicDetailBody, AuthData) => {
-  const alreadyExist = await fetchbasicdetails(AuthData);
-  if (!alreadyExist) {
-    // eslint-disable-next-line no-param-reassign
-    BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
-    const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
-    return basicDetailDoc;
-  }
-  return false;
+  // eslint-disable-next-line no-param-reassign
+  BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
+  const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
+  return basicDetailDoc;
 };
 
 const submitprofilepicture = async (ProfilePhoto, AuthData) => {
@@ -36,16 +32,16 @@ const submitprofilepicture = async (ProfilePhoto, AuthData) => {
   return false;
 };
 
-const updateprofilepicture = async (ProfilePhoto, AuthData, returnThumbnail) => {
-  const alreadyExist = await fetchbasicdetails(AuthData);
-  if (alreadyExist) {
-    const resultData = await DoctorBasic.findOne({ _id: alreadyExist._id });
-    // need to rethink once s3 is working properly
-    await profilePhotoUpload.deleteAvatar(resultData.avatar, resultData.thumbnail);
-    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail: returnThumbnail } });
-    return 'profile Picture updated';
-  }
-};
+// const updateprofilepicture = async (ProfilePhoto, AuthData, thumbnail) => {
+//   const alreadyExist = await fetchbasicdetails(AuthData);
+//   if (alreadyExist) {
+//     const resultData = await DoctorBasic.findOne({ _id: alreadyExist._id });
+//     // need to rethink once s3 is working properly
+//     await profilePhotoUpload.deleteAvatar(resultData.avatar, resultData.thumbnail);
+//     await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail } });
+//     return 'profile Picture updated';
+//   }
+// };
 
 const fetcheducationdetails = async (AuthData) => {
   const DoctorEducationExist = await DoctorEducation.findOne({ auth: AuthData });
@@ -188,7 +184,7 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
-  updateprofilepicture,
+  // updateprofilepicture,
   fetchpayoutsdetails,
   submitpayoutsdetails,
   addConsultationfee,

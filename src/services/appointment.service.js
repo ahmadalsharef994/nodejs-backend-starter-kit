@@ -317,6 +317,47 @@ const getAppointmentsByType = async (doctorId, filter, options) => {
   }
 };
 
+const allAppointments = async (doctorId, options) => {
+  try {
+    const followup = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
+    const cancelled = await Appointment.paginate({ Status: 'cancelled', docid: doctorId }, options);
+    const past = await Appointment.paginate(
+      {
+        StartTime: { $lt: new Date() },
+        paymentStatus: 'PAID',
+        docid: doctorId,
+        Status: { $nin: 'cancelled' },
+      },
+      options
+    );
+    const today = await Appointment.paginate(
+      {
+        Date: new Date().toDateString(),
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+      },
+      options
+    );
+    const referred = await Appointment.paginate(
+      { Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      options
+    );
+    const upcoming = await Appointment.paginate(
+      {
+        docid: doctorId,
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: new Date() },
+      },
+      options
+    );
+    const data = { followup, today, cancelled, past, referred, upcoming };
+    return data;
+  } catch (error) {
+    return error;
+  }
+};
+
 const getFollowupsById = async (limit) => {
   const count = parseInt(limit, 10);
   const result = await Followup.find()
@@ -325,39 +366,30 @@ const getFollowupsById = async (limit) => {
   return result;
 };
 
-const getAvailableAppointments = async (doctorId, date) => {
-  const getDayOfWeek = (requiredDate) => {
-    const dayOfWeek = new Date(requiredDate).getDay();
-    // eslint-disable-next-line no-restricted-globals
-    return isNaN(dayOfWeek) ? null : ['SUN_A', 'MON_A', 'TUE_A', 'WED_A', 'THU_A', 'FRI_A', 'SAT_A'][dayOfWeek];
-  };
+const getAvailableAppointments = async (AuthData) => {
+  const doctorId = AuthData._id;
 
-  const AllAppointmentSlots = await appointmentPreferenceService.getappointments(doctorId);
+  const AllAppointmentSlots = await appointmentPreferenceService.getAppointmentPreferences(doctorId);
+
   if (!AllAppointmentSlots) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
-  const appointmentDate = new Date(date).toDateString();
-  const bookedAppointmentSlots = await Appointment.find({ docid: doctorId, paymentStatus: 'PAID', Date: appointmentDate });
+  const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: AuthData._id, paymentStatus: 'PAID' });
+
+  if (bookedAppointmentSlots === []) {
+    const availableAppointmentSlots = AllAppointmentSlots;
+    return availableAppointmentSlots;
+  }
   const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
-  const result = {};
+
+  const availableAppointmentSlots = {};
   for (let i = 0; i < 7; i += 1) {
-    result[`${weekday[i]}_A`] = AllAppointmentSlots[`${weekday[i]}_A`].filter(
+    availableAppointmentSlots[`${weekday[i]}_A`] = AllAppointmentSlots[`${weekday[i]}_A`].filter(
       (item) => !bookedSlotIds.includes(item.slotId)
     );
   }
-  const Day = getDayOfWeek(date);
-  let allslots = [];
-  // eslint-disable-next-line array-callback-return
-  Object.keys(result).map((k) => {
-    if (k === Day) {
-      allslots = result[k];
-    }
-  });
-  const res = allslots.filter(function (slots) {
-    return !bookedSlotIds.includes(slots);
-  });
 
-  return res;
+  return availableAppointmentSlots;
 };
 
 const getAvailableFollowUpSlots = async (doctorId, date) => {
@@ -585,6 +617,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, star
 
   return result;
 };
+
 const getDoctorsByCategories = async (category) => {
   const Doctordetails = await doctordetails.find({ specializations: { $in: [category] } });
   const isVerified = async (doctorid) => {
@@ -613,6 +646,7 @@ const bookingConfirmation = async (orderId, appointmentId) => {
   }
   return { status: 'failed', Message: 'Order not confirmed !' };
 };
+
 const cancelFollowup = async (followupid) => {
   const followup = await Followup.findById(followupid);
   if (followup.Status === 'cancelled') {
@@ -628,6 +662,7 @@ const cancelFollowup = async (followupid) => {
   }
   return false;
 };
+
 const rescheduleFollowup = async (followupid, slotId, date) => {
   let startTime = null;
   let endTime = null;
@@ -671,6 +706,7 @@ const rescheduleFollowup = async (followupid, slotId, date) => {
   }
   return false;
 };
+
 module.exports = {
   initiateappointmentSession,
   JoinappointmentSessionbyDoctor,
@@ -695,4 +731,5 @@ module.exports = {
   bookingConfirmation,
   cancelFollowup,
   rescheduleFollowup,
+  allAppointments,
 };

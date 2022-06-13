@@ -3,7 +3,7 @@ const validate = require('../../middlewares/validate');
 const authuser = require('../../middlewares/authUser');
 const UserProfileValidator = require('../../validations/userProfile.validation');
 const UserProfileController = require('../../controllers/userprofile.controller');
-const { profilePhotoUpload } = require('../../Microservices');
+const profilePhotoUpload = require('../../Microservices/profilePicture.service');
 
 const router = express.Router();
 
@@ -36,7 +36,7 @@ router
 router
   .route('/update-profilepicture')
   .put(
-    profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+    profilePhotoUpload.uploadPhoto.fields([{ name: 'avatar', maxCount: 1 }]),
     authuser(),
     UserProfileController.updateprofilepic
   );

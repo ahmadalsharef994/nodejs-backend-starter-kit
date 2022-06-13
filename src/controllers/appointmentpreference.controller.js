@@ -9,7 +9,7 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
   if (!isPriceSet) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'General Appointment Price Not Set');
   }
-  const AppointmentPreferenceExists = await appointmentPreferenceService.checkappointmentPreference(
+  const AppointmentPreferenceExists = await appointmentPreferenceService.checkAppointmentPreference(
     req.Docid,
     req.SubjectId
   );
@@ -44,7 +44,7 @@ const showfollowups = catchAsync(async (req, res) => {
 
 const showappointments = catchAsync(async (req, res) => {
   appointmentPreferenceService
-    .getappointments(req.Docid)
+    .getAppointmentPreferences(req.Docid)
     .then((result) => {
       if (result === null) {
         return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });

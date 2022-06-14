@@ -75,7 +75,7 @@ router.get(
   '/:appointmentId',
   authdoctorverified(),
   validate(appointmentValidator.getappointment),
-  appointmentController.getappointmentDoctor
+  appointmentController.getAppointmentById
 );
 
 router
@@ -105,8 +105,8 @@ router.get(
 router.post(
   '/:appointmentId/doctor-feedback',
   authdoctorverified(),
-  validate(appointmentValidator.doctorFeedback),
-  appointmentController.doctorFeedback
+  validate(appointmentValidator.getDoctorFeedback),
+  appointmentController.getDoctorFeedback
 );
 // Chat API's
 router

@@ -176,7 +176,7 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
   const doctorEducationData = await doctorprofileService.fetcheducationdetails(AuthData);
   const clinicData = await doctorprofileService.fetchClinicdetails(AuthData);
   const experienceData = await doctorprofileService.fetchexperiencedetails(AuthData);
-  const appointmentPreference = await appointmentPreferenceService.getappointments(req.Docid, AuthData);
+  const appointmentPreference = await appointmentPreferenceService.getAppointments(req.Docid, AuthData);
   const doctorDocumentData = await documentService.fetchDocumentdata(AuthData);
   if (!doctorBasicData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'first create your account');

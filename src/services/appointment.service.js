@@ -28,14 +28,14 @@ const agenda = new Agenda({
   useUnifiedTopology: true,
 });
 
-const initiateappointmentSession = async (appointmentID) => {
-  const AppointmentData = await Appointment.findById({ _id: appointmentID });
+const initiateAppointmentSession = async (appointmentId) => {
+  const AppointmentData = await Appointment.findById({ _id: appointmentId });
   if (!AppointmentData) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
   }
   // Dyte Service
   const DyteSessionToken = await DyteService.createDyteMeeting(
-    appointmentID,
+    appointmentId,
     AppointmentData.AuthDoctor,
     AppointmentData.AuthUser
   );
@@ -45,10 +45,10 @@ const initiateappointmentSession = async (appointmentID) => {
   return DyteSessionToken;
 };
 
-const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID) => {
+const joinAppointmentSessionbyDoctor = async (appointmentId, AuthData, socketID) => {
   // Join Appointment Doctor called while Doctor requests to Join an Appointment
   const AppointmentSessionData = await AppointmentSession.findOne({
-    appointmentid: appointmentID,
+    appointmentid: appointmentId,
     AuthDoctor: AuthData._id,
   });
   if (!AppointmentSessionData) {
@@ -56,7 +56,7 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
   }
   let DoctorChatAuthToken = '';
   await pusherService
-    .PusherSession(`private-${appointmentID}`, socketID)
+    .PusherSession(`private-${appointmentId}`, socketID)
     .then((result) => {
       DoctorChatAuthToken = result.auth;
     })
@@ -74,9 +74,9 @@ const JoinappointmentSessionbyDoctor = async (appointmentID, AuthData, socketID)
   return { DoctorVideoToken, DoctorRoomName, DoctorChatAuthToken, ChatExchangeToken };
 };
 
-const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID) => {
+const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID) => {
   // Join Appointment User called while Doctor requests to Join an Appointment
-  const AppointmentSessionData = await AppointmentSession.findOne({ appointmentid: appointmentID, AuthUser: AuthData._id });
+  const AppointmentSessionData = await AppointmentSession.findOne({ appointmentid: appointmentId, AuthUser: AuthData._id });
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
@@ -84,7 +84,7 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
   const UserRoomName = AppointmentSessionData.dyteroomname;
   let UserChatAuthToken = '';
   await pusherService
-    .PusherSession(`private-${appointmentID}`, socketID)
+    .PusherSession(`private-${appointmentId}`, socketID)
     .then((result) => {
       UserChatAuthToken = result.auth;
     })
@@ -100,13 +100,13 @@ const JoinappointmentSessionbyPatient = async (appointmentID, AuthData, socketID
   return { UserVideoToken, UserRoomName, UserChatAuthToken, ChatExchangeToken };
 };
 
-const ScheduleSessionJob = async (appointmentID, startTime) => {
+const ScheduleSessionJob = async (appointmentId, startTime) => {
   const datetime = startTime.getTime() - 300000; // Scheduling Job 5mins before Appointment
   agenda.define('createSessions', async (job) => {
     const { appointment } = job.attrs.data;
-    await initiateappointmentSession(appointment);
+    await initiateAppointmentSession(appointment);
   });
-  await agenda.schedule(datetime, 'createSessions', { appointment: appointmentID }); // Scheduling a Job in Agenda
+  await agenda.schedule(datetime, 'createSessions', { appointment: appointmentId }); // Scheduling a Job in Agenda
 };
 
 const weekday = new Array(7);
@@ -371,7 +371,7 @@ const getAvailableAppointments = async (doctorId, date) => {
     return isNaN(dayOfWeek) ? null : ['SUN_A', 'MON_A', 'TUE_A', 'WED_A', 'THU_A', 'FRI_A', 'SAT_A'][dayOfWeek];
   };
 
-  const AllAppointmentSlots = await appointmentPreferenceService.getappointments(doctorId);
+  const AllAppointmentSlots = await appointmentPreferenceService.getAppointments(doctorId);
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Not Found');
   }
@@ -399,14 +399,14 @@ const getAvailableAppointments = async (doctorId, date) => {
   return res;
 };
 
-const getAvailableFollowUpSlots = async (doctorId, date) => {
+const getAvailableFollowUps = async (doctorId, date) => {
   const getDayOfWeek = (requiredDate) => {
     const dayOfWeek = new Date(requiredDate).getDay();
     // eslint-disable-next-line no-restricted-globals
     return isNaN(dayOfWeek) ? null : ['SUN_F', 'MON_F', 'TUE_F', 'WED_F', 'THU_F', 'FRI_F', 'SAT_F'][dayOfWeek];
   };
 
-  const AllFollwUpSlots = await appointmentPreferenceService.getfollowups(doctorId);
+  const AllFollwUpSlots = await appointmentPreferenceService.getFollowups(doctorId);
   const assignedFollowUpSlots = await Followup.find({ docid: doctorId, Status: 'ASSIGNED' });
   const assignedSlotIds = assignedFollowUpSlots.map((item) => item.slotId);
   const result = {};
@@ -424,15 +424,15 @@ const getAvailableFollowUpSlots = async (doctorId, date) => {
   return allslots;
 };
 
-const getappointmentDoctor = async (appointmentID) => {
-  const DoctorAppointmentExist = await Appointment.findOne({ _id: appointmentID });
+const getAppointmentById = async (appointmentId) => {
+  const DoctorAppointmentExist = await Appointment.findOne({ _id: appointmentId });
   if (DoctorAppointmentExist) {
     return DoctorAppointmentExist;
   }
   return false;
 };
 
-const fetchPrescriptionDoc = async (prescriptionid) => {
+const getPrescription = async (prescriptionid) => {
   const DoctorPrescriptionDocument = await Prescription.findOne({ _id: prescriptionid });
   if (DoctorPrescriptionDocument) {
     return DoctorPrescriptionDocument;
@@ -440,9 +440,9 @@ const fetchPrescriptionDoc = async (prescriptionid) => {
   return false;
 };
 
-const createPrescriptionDoc = async (prescriptionDoc, appointmentId, appointmentID) => {
+const createPrescriptionDoc = async (prescriptionDoc, appointmentId, Authdata) => {
   prescriptionDoc.Appointment = appointmentId;
-  prescriptionDoc.doctorAuth = appointmentID;
+  prescriptionDoc.doctorAuth = Authdata;
   const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
   if (DoctorPrescriptionDocument) {
     return DoctorPrescriptionDocument;
@@ -507,7 +507,7 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
   return false;
 };
 
-const doctorFeedback = async (feedbackDoc, appointmentId) => {
+const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
@@ -525,7 +525,7 @@ const doctorFeedback = async (feedbackDoc, appointmentId) => {
   return false;
 };
 
-const userFeedback = async (feedbackDoc, appointmentId) => {
+const getUserFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
@@ -744,23 +744,23 @@ const deleteSlot = async (doctorAuthId, slotId) => {
   }
 };
 module.exports = {
-  initiateappointmentSession,
-  JoinappointmentSessionbyDoctor,
-  JoinappointmentSessionbyPatient,
+  initiateAppointmentSession,
+  joinAppointmentSessionbyDoctor,
+  joinAppointmentSessionbyPatient,
   submitAppointmentDetails,
   submitFollowupDetails,
   getUpcomingAppointments,
   getAppointmentsByType,
   getAvailableAppointments,
   getFollowupsById,
-  getAvailableFollowUpSlots,
-  getappointmentDoctor,
+  getAvailableFollowUps,
+  getAppointmentById,
   createPrescriptionDoc,
-  fetchPrescriptionDoc,
+  getPrescription,
   getPatientDetails,
   getPatients,
-  userFeedback,
-  doctorFeedback,
+  getUserFeedback,
+  getDoctorFeedback,
   cancelAppointment,
   rescheduleAppointment,
   getDoctorsByCategories,

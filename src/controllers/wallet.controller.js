@@ -27,7 +27,7 @@ const refundToWalletUser = catchAsync(async (req, res) => {
 
   if (refundCondition === 'Cancelled Appointment') {
     const appointmentId = req.body.appointmentId;
-    const appointment = await appointmentService.getappointmentDoctor(appointmentId);
+    const appointment = await appointmentService.getAppointmentById(appointmentId);
     if (appointment.Status === 'CANCELLED' && appointment.paymentStatus === 'PAID') {
       refundSatisfied = true;
       amount = appointment.price;
@@ -37,7 +37,7 @@ const refundToWalletUser = catchAsync(async (req, res) => {
 
   // if (refundCondition === 'Cancelled Labtest') {
   //   const labTestOrderId = req.body.labTestOrderId;
-  //   const labTestOrder = await labTestService.getappointmentDoctor(labTestOrderId);
+  //   const labTestOrder = await labTestService.getAppointmentById(labTestOrderId);
   //   if (labTestOrder.Status === 'CANCELLED' && labTestOrder.isPaid) {
   //     refundSatisfied = true;
   //     amount = labTestOrder.amount;
@@ -55,7 +55,7 @@ const refundToWalletUser = catchAsync(async (req, res) => {
 
   if (refundCondition === 'Doctor Earning') {
     const appointmentId = req.body.appointmentId;
-    const appointment = await appointmentService.getappointmentDoctor(appointmentId);
+    const appointment = await appointmentService.getAppointmentById(appointmentId);
     if (appointment.Status !== 'CANCELLED' && appointment.paymentStatus === 'PAID') {
       refundSatisfied = true;
       amount = appointment.price * process.env.DOCTORE_PERCENTAGE;
@@ -99,7 +99,7 @@ const refundToWalletDoctor = catchAsync(async (req, res) => {
 
   if (refundCondition === 'Doctor Earning') {
     const appointmentId = req.body.appointmentId;
-    const appointment = await appointmentService.getappointmentDoctor(appointmentId);
+    const appointment = await appointmentService.getAppointmentById(appointmentId);
     if (appointment.Status !== 'CANCELLED' && appointment.paymentStatus === 'PAID') {
       refundSatisfied = true;
       amount = appointment.price * process.env.DOCTORE_PERCENTAGE;

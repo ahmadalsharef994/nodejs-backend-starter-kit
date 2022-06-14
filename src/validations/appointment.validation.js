@@ -113,7 +113,7 @@ const getPatientDetails = {
   }),
 };
 
-const userFeedback = {
+const getUserFeedback = {
   params: Joi.object().keys({
     appointmentId: Joi.string().custom(objectId),
   }),
@@ -123,7 +123,7 @@ const userFeedback = {
   }),
 };
 
-const doctorFeedback = {
+const getDoctorFeedback = {
   params: Joi.object().keys({
     appointmentId: Joi.string().custom(objectId),
   }),
@@ -197,8 +197,8 @@ module.exports = {
   createPrescription,
   getPrescription,
   getPatientDetails,
-  userFeedback,
-  doctorFeedback,
+  getUserFeedback,
+  getDoctorFeedback,
   cancelAppointment,
   rescheduleAppointment,
   getDoctorsByCategories,

@@ -139,7 +139,7 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
   return result;
 };
 
-const updatePreference = async (body, doctorId, AuthData) => {
+const updateAppointmentPreference = async (body, doctorId, AuthData) => {
   const result = await createPreference(body, doctorId, AuthData, true);
   const promise = await AppointmentPreference.findOneAndUpdate(
     { docid: doctorId, doctorAuthId: AuthData },
@@ -155,7 +155,7 @@ const updatePreference = async (body, doctorId, AuthData) => {
   return promise;
 };
 
-const getfollowups = async (doctorId) => {
+const getFollowups = async (doctorId) => {
   const promise = await AppointmentPreference.findOne(
     { docid: doctorId },
     { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1, auth: 1 }
@@ -163,14 +163,14 @@ const getfollowups = async (doctorId) => {
   return promise;
 };
 
-const getappointments = async (doctorId) => {
+const getAppointments = async (doctorId) => {
   const promise = await AppointmentPreference.findOne(
     { docid: doctorId },
     { MON_A: 1, TUE_A: 1, WED_A: 1, THU_A: 1, FRI_A: 1, SAT_A: 1, SUN_A: 1, docid: 1, auth: 1 }
   );
   return promise;
 };
-const checkappointmentPreference = async (docid, doctorauth) => {
+const checkAppointmentPreference = async (docid, doctorauth) => {
   try {
     const { doctorAuthId } = await AppointmentPreference.findOne({ docid });
     if (`${doctorauth}` === `${doctorAuthId}`) {
@@ -183,10 +183,10 @@ const checkappointmentPreference = async (docid, doctorauth) => {
 module.exports = {
   checkForAppointmentPrice,
   createPreference,
-  updatePreference,
-  getfollowups,
-  getappointments,
+  updateAppointmentPreference,
+  getFollowups,
+  getAppointments,
   slotOverlap,
   checkforDoctorPreference,
-  checkappointmentPreference,
+  checkAppointmentPreference,
 };

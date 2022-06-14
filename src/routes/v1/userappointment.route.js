@@ -23,7 +23,7 @@ router
 
 router
   .route('/:appointmentId/patient-feedback')
-  .post(authuser(), validate(appointmentValidation.userFeedback), appointmentController.userFeedback);
+  .post(authuser(), validate(appointmentValidation.getUserFeedback), appointmentController.getUserFeedback);
 router
   .route('/fetchdoctors-by-categories')
   .post(
@@ -34,6 +34,6 @@ router
 router
   .route('/bookingConfirmation')
   .post(validate(appointmentValidation.bookingConfirmation), appointmentController.bookingConfirmation);
-router.route('/fetchHealthPackages').get(authuser(), userAppointmentController.fetchallHealthPackages);
+router.route('/fetchHealthPackages').get(authuser(), userAppointmentController.fetchHealthPackages);
 
 module.exports = router;

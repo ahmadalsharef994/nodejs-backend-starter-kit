@@ -44,7 +44,7 @@ const showLabTestOrders = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json(result);
 });
 
-const fetchallHealthPackages = catchAsync(async (req, res) => {
+const fetchHealthPackages = catchAsync(async (req, res) => {
   const healthpackage = await userAppointmentService.fetchHealthPackages();
   if (healthpackage) {
     res.status(httpStatus.OK).json(healthpackage);
@@ -64,6 +64,6 @@ module.exports = {
   getAppointmentsByType,
   showPrescriptions,
   showLabTestOrders,
-  fetchallHealthPackages,
+  fetchHealthPackages,
   getDoctorsByCategories,
 };

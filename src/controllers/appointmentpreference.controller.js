@@ -14,7 +14,7 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
     req.SubjectId
   );
   if (AppointmentPreferenceExists === true) {
-    const result = await appointmentPreferenceService.updatePreference(req.body, req.Docid, AuthData);
+    const result = await appointmentPreferenceService.updateAppointmentPreference(req.body, req.Docid, AuthData);
     if (result === null) {
       res.status(httpStatus.NOT_FOUND).json({ message: "Slots doesn't exist. Create slots inorder to update them!" });
     } else {
@@ -28,9 +28,9 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
     res.status(httpStatus.CREATED).json({ message: 'slots created', result });
   }
 });
-const showfollowups = catchAsync(async (req, res) => {
+const showFollowups = catchAsync(async (req, res) => {
   appointmentPreferenceService
-    .getfollowups(req.Docid)
+    .getFollowups(req.Docid)
     .then((result) => {
       if (result === null) {
         return res.status(httpStatus.NOT_FOUND).json({ message: "Follow up slots doesn't exist." });
@@ -42,7 +42,7 @@ const showfollowups = catchAsync(async (req, res) => {
     });
 });
 
-const showappointments = catchAsync(async (req, res) => {
+const showAppointments = catchAsync(async (req, res) => {
   appointmentPreferenceService
     .getAppointmentPreferences(req.Docid)
     .then((result) => {
@@ -58,6 +58,6 @@ const showappointments = catchAsync(async (req, res) => {
 
 module.exports = {
   updateAppointmentPreference,
-  showfollowups,
-  showappointments,
+  showFollowups,
+  showAppointments,
 };

@@ -5,13 +5,13 @@ const pick = require('../utils/pick');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
 const initAppointmentDoctor = catchAsync(async (req, res) => {
-  const InitSession = await appointmentService.initiateappointmentSession(req.body.appointmentInit);
+  const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
   res.status(httpStatus.CREATED).json(InitSession);
 });
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.JoinappointmentSessionbyDoctor(
+  const DoctorSession = await appointmentService.joinAppointmentSessionbyDoctor(
     req.body.appointmentInit,
     AuthData,
     req.body.socketID
@@ -21,7 +21,7 @@ const joinAppointmentDoctor = catchAsync(async (req, res) => {
 
 const joinAppointmentUser = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const UserSession = await appointmentService.JoinappointmentSessionbyPatient(
+  const UserSession = await appointmentService.joinAppointmentSessionbyPatient(
     req.body.appointmentInit,
     AuthData,
     req.body.socketID
@@ -46,7 +46,7 @@ const bookAppointment = catchAsync(async (req, res) => {
 });
 
 const getAppointmentDetails = catchAsync(async (req, res) => {
-  const AppointmentSession = await appointmentService.getappointmentDoctor(req.params.appointmentId);
+  const AppointmentSession = await appointmentService.getAppointmentById(req.params.appointmentId);
   const PatientBasic = await userProfile.fetchBasicDetails(AppointmentSession.AuthUser);
   if (AppointmentSession !== false) {
     res.status(httpStatus.CREATED).json({ PatientBasic, AppointmentSession });
@@ -81,7 +81,7 @@ const getFollowupsById = catchAsync(async (req, res) => {
 });
 
 const getAvailableFollowUps = catchAsync(async (req, res) => {
-  await appointmentService.getAvailableFollowUpSlots(req.Docid, req.body.date).then((result) => {
+  await appointmentService.getAvailableFollowUps(req.Docid, req.body.date).then((result) => {
     if (result.length === 0) {
       res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
     } else {
@@ -120,9 +120,8 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
     });
 });
 
-const getappointmentDoctor = catchAsync(async (req, res) => {
-  // getAppointment by ID
-  const DoctorSession = await appointmentService.getappointmentDoctor(req.params.appointmentId);
+const getAppointmentById = catchAsync(async (req, res) => {
+  const DoctorSession = await appointmentService.getAppointmentById(req.params.appointmentId);
   if (DoctorSession !== false) {
     res.status(httpStatus.CREATED).json({ DoctorSession });
   } else {
@@ -142,7 +141,7 @@ const createPrescription = catchAsync(async (req, res) => {
 });
 
 const getPrescription = catchAsync(async (req, res) => {
-  const prescriptionData = await appointmentService.fetchPrescriptionDoc(req.params.prescriptionId);
+  const prescriptionData = await appointmentService.getPrescription(req.params.prescriptionId);
   if (prescriptionData !== false) {
     res.status(httpStatus.CREATED).json({ prescriptionData });
   } else {
@@ -183,8 +182,8 @@ const getPatients = catchAsync(async (req, res) => {
   }
 });
 
-const doctorFeedback = catchAsync(async (req, res) => {
-  const feedbackData = await appointmentService.doctorFeedback(req.body, req.params.appointmentId);
+const getDoctorFeedback = catchAsync(async (req, res) => {
+  const feedbackData = await appointmentService.getDoctorFeedback(req.body, req.params.appointmentId);
   if (feedbackData !== false) {
     res.status(httpStatus.CREATED).json({ feedbackData });
   } else {
@@ -192,8 +191,8 @@ const doctorFeedback = catchAsync(async (req, res) => {
   }
 });
 
-const userFeedback = catchAsync(async (req, res) => {
-  const feedbackData = await appointmentService.userFeedback(req.body, req.params.appointmentId);
+const getUserFeedback = catchAsync(async (req, res) => {
+  const feedbackData = await appointmentService.getUserFeedback(req.body, req.params.appointmentId);
   if (feedbackData !== false) {
     res.status(httpStatus.CREATED).json({ feedbackData });
   } else {
@@ -286,13 +285,13 @@ module.exports = {
   getAvailableAppointments,
   getUpcomingAppointments,
   getAppointmentsByType,
-  getappointmentDoctor,
+  getAppointmentById,
   createPrescription,
   getPrescription,
   getPatientDetails,
   getPatients,
-  doctorFeedback,
-  userFeedback,
+  getDoctorFeedback,
+  getUserFeedback,
   getAppointmentDetails,
   cancelAppointment,
   rescheduleAppointment,

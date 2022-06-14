@@ -81,10 +81,10 @@ router
 /* router.route('/createPref').post(authdoctorverified(),validate(preferenceValidator.preferenceDetails),appointmentPreferenceController.submitAppointmentPreference); */
 
 // get all appointment preference slots
-router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.showappointments);
+router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.showAppointments);
 
 // get all followup preference slots
-router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showfollowups);
+router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);
 
 router.route('/payout-details').get(authdoctornonverified(), doctorProfileController.fetchpayoutsdetails);
 router

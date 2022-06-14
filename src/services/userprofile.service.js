@@ -10,17 +10,12 @@ const userIdgenerator = () => {
   return number;
 };
 const submitBasicDetails = async (BasicDetailBody, AuthData) => {
-  const alreadyExist = await fetchBasicDetails(AuthData);
-  if (!alreadyExist) {
-    // eslint-disable-next-line no-param-reassign
-    BasicDetailBody.auth = AuthData;
-    // eslint-disable-next-line no-param-reassign
-    BasicDetailBody.userid = `PT${userIdgenerator()}`;
-    const basicDetailDoc = await UserBasic.create(BasicDetailBody);
-    return basicDetailDoc;
-  }
-
-  return false;
+  // eslint-disable-next-line no-param-reassign
+  BasicDetailBody.auth = AuthData;
+  // eslint-disable-next-line no-param-reassign
+  BasicDetailBody.userid = `PT${userIdgenerator()}`;
+  const basicDetailDoc = await UserBasic.create(BasicDetailBody);
+  return basicDetailDoc;
 };
 
 const updateBasicDetails = async (basicDetailsBody, AuthData) => {

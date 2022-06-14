@@ -8,15 +8,15 @@ const uuid = require('uuid');
 const Sharp = require('sharp');
 
 dotenv.config();
-const ID = process.env.AWSID;
-const SECRET = process.env.AWSKEY;
-const PUBLICBUCKET_NAME = process.env.PUBLICBUCKET;
+const accessKeyId = process.env.AWSID;
+const secretAccessKey = process.env.AWSKEY;
+const bucket = process.env.PUBLICBUCKET;
 
-const awsS3 = new AWS.S3({
-  accessKeyId: ID,
+const S3Instance = new AWS.S3({
+  accessKeyId,
   region: 'ap-south-1',
-  secretAccessKey: SECRET,
-  bucket: PUBLICBUCKET_NAME,
+  secretAccessKey,
+  bucket,
   signatureVersion: 'v4',
 });
 
@@ -24,15 +24,15 @@ const fileFilter = (req, file, cb) => {
   if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpeg') {
     cb(null, true);
   } else {
-    cb(new Error('Invalid file or data, only JPEG ,PNG and pdf is allowed!'), false);
+    cb(new Error('Invalid file or data, only JPEG ,PNG and JPG is allowed!'), false);
   }
 };
 
-const publicupload = multer({
+const uploadPhoto = multer({
   storage: multerS3({
-    s3: awsS3,
+    s3: S3Instance,
     acl: 'public-read',
-    bucket: PUBLICBUCKET_NAME,
+    bucket,
     contentType: multerS3.AUTO_CONTENT_TYPE,
     metadata: (req, file, cb) => {
       cb(null, { fieldName: file.fieldname });
@@ -43,7 +43,7 @@ const publicupload = multer({
     },
   }),
   fileFilter,
-  limits: { fileSize: 100000000 },
+  // limits: { fieldNameSize: 100, fileSize: 100000000, fieldSize: 100000000 },
 });
 
 const thumbnail = (filepath) => {
@@ -64,11 +64,11 @@ const thumbnail = (filepath) => {
 
 const deleteAvatar = (key) => {
   const params = {
-    Bucket: PUBLICBUCKET_NAME,
+    Bucket: bucket,
     Key: key,
   };
 
-  awsS3.deleteObject(params, function (err, data) {
+  S3Instance.deleteObject(params, function (err, data) {
     if (err) {
       // eslint-disable-next-line no-sequences
       return err, err.stack;
@@ -78,7 +78,7 @@ const deleteAvatar = (key) => {
 };
 
 module.exports = {
-  publicupload,
+  uploadPhoto,
   deleteAvatar,
   thumbnail,
 };

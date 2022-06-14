@@ -9,10 +9,11 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 const { getClientIp } = require('@supercharge/request-ip');
 // const Agenda = require('agenda');
+const bodyParser = require('body-parser');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const { jwtStrategy } = require('./config/passport');
-const { authLimiter, otpratelimiter } = require('./middlewares/rateLimiter');
+const { authLimiter, otpLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
@@ -28,6 +29,10 @@ if (config.env !== 'test') {
 app.use(helmet());
 // parse json request body
 app.use(express.json());
+
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));
 // sanitize request data
@@ -49,10 +54,10 @@ app.use((req, res, next) => {
 if (config.env === 'production') {
   app.use('/v1/auth', authLimiter);
 }
-app.use('/v1/auth/doctor/request-otp', otpratelimiter);
-app.use('/v1/auth/doctor/resend-otp', otpratelimiter);
-app.use('/v1/auth/doctor/forgot-password', otpratelimiter);
-app.use('/v1/auth/user/forgot-password', otpratelimiter);
+app.use('/v1/auth/doctor/request-otp', otpLimiter);
+app.use('/v1/auth/doctor/resend-otp', otpLimiter);
+app.use('/v1/auth/doctor/forgot-password', otpLimiter);
+app.use('/v1/auth/user/forgot-password', otpLimiter);
 // v1 api routes
 app.use('/v1', routes);
 

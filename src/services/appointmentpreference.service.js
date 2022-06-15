@@ -55,7 +55,7 @@ const checkForAppointmentPrice = async (AuthData) => {
 //   return false;
 // };
 
-const createpreference = async (body, doctorID, AuthData, update = false) => {
+const createPreference = async (body, doctorID, AuthData, update = false) => {
   const appointmentPreferences = await AppointmentPreference.findOne({ docid: doctorID, doctorAuthId: AuthData });
   if (appointmentPreferences && !update) {
     return Promise.reject(
@@ -265,7 +265,7 @@ const checkAppointmentPreference = async (docid, doctorauth) => {
 
 module.exports = {
   checkForAppointmentPrice,
-  createpreference,
+  createPreference,
   updateAppointmentPreference,
   getfollowups,
   getAppointmentPreferences,

@@ -8,24 +8,27 @@ const randomstring = require('randomstring');
  * @returns {Object} : // appointment and followup slots
  */
 
-const createSlots = async (startTime, day, docId, duration) => {
-  let typeAF = 'A';
+const createSlots = (startTime, day, docId, duration) => {
+  // let typeAF = 'A';
   // 3:1 ratio
-  let noOfA = Math.round(duration / 20);
-  const totalSlots = noOfA + Math.round(duration / 40);
-  const slotA = [];
-  const slotF = [];
+  // let noOfA = Math.round(duration / 20);
+  // let gap = Math.round(duration / 40)
+  // const totalSlots = noOfA + gap;
+  const totalSlots = Math.round(duration / 15);
+  // const slotA = [];
+  // const slotF = [];
+  const slots = [];
   let FromHr = startTime.FromHour;
   let FromMins = startTime.FromMinute;
   let ToHr = startTime.FromHour;
   let ToMins = startTime.FromMinute;
-  let incrementer = 15;
+  const incrementer = 15;
 
   for (let i = 0; i < totalSlots; i += 1) {
-    if (!noOfA) {
-      typeAF = 'F';
-      incrementer = 10;
-    }
+    // if (!noOfA) {
+    //   typeAF = 'F';
+    //   incrementer = 10;
+    // }
     ToMins = (FromMins + incrementer) % 60 ? FromMins + incrementer : 0;
     ToHr = ToMins === 0 ? ToHr + 1 : ToHr;
     if (ToMins > 60) {
@@ -35,7 +38,7 @@ const createSlots = async (startTime, day, docId, duration) => {
     ToHr %= 24;
     const slot = {};
     slot.slotId = [
-      typeAF,
+      // typeAF,
       day,
       docId,
       i + 1 + randomstring.generate({ length: 6, charset: 'alphabetic' }).toUpperCase(),
@@ -45,12 +48,14 @@ const createSlots = async (startTime, day, docId, duration) => {
     slot.ToHour = ToHr;
     slot.ToMinutes = ToMins;
     // eslint-disable-next-line no-unused-expressions
-    typeAF === 'A' ? slotA.push(slot) : slotF.push(slot);
+    // typeAF === 'A' ? slotA.push(slot) : slotF.push(slot);
+    slots.push(slot);
     FromHr = ToHr;
     FromMins = ToMins;
-    noOfA -= 1;
+    // noOfA -= 1;
   }
-  return [slotA, slotF];
+  // return [slotA, slotF];
+  return slots;
 };
 
 /**

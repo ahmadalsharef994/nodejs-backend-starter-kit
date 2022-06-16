@@ -5900,10 +5900,7 @@ pusher@^5.0.0:
     tweetnacl "^1.0.0"
     tweetnacl-util "^0.15.0"
 
-<<<<<<< HEAD
-qs@6.7.0, qs@^6.5.1:
-=======
-qs@6.10.3, qs@^6.10.1, qs@^6.5.1:
+qs@6.10.3, qs@^6.5.1:
   version "6.10.3"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.3.tgz#d6cde1b2ffca87b5aa57889816c5f81535e22e8e"
   integrity sha512-wr7M2E0OFRfIfJZjKGieI8lBKb7fRCH4Fv5KNPEs7gJ8jadvotdsS08PzOKR7opXhZ/Xkjtt3WF9g38drmyRqQ==
@@ -5911,7 +5908,6 @@ qs@6.10.3, qs@^6.10.1, qs@^6.5.1:
     side-channel "^1.0.4"
 
 qs@6.7.0:
->>>>>>> develop
   version "6.7.0"
   resolved "https://registry.npmjs.org/qs/-/qs-6.7.0.tgz"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
@@ -5921,7 +5917,6 @@ qs@6.9.3:
   resolved "https://registry.npmjs.org/qs/-/qs-6.9.3.tgz"
   integrity sha512-EbZYNarm6138UKKq46tdx08Yo/q9ZhFoAXAI1meAFd2GtbRDhbZY2WQSICskT0c5q99aFzLG1D4nvTk9tqfXIw==
 
-<<<<<<< HEAD
 qs@^6.10.3:
   version "6.10.5"
   resolved "https://registry.npmjs.org/qs/-/qs-6.10.5.tgz"
@@ -5929,8 +5924,6 @@ qs@^6.10.3:
   dependencies:
     side-channel "^1.0.4"
 
-=======
->>>>>>> develop
 qs@~6.5.2:
   version "6.5.2"
   resolved "https://registry.npmjs.org/qs/-/qs-6.5.2.tgz"

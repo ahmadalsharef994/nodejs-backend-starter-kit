@@ -4,7 +4,7 @@ const Auth = require('./auth.model');
 
 const AppointmentPrefSchema = mongoose.Schema(
   {
-    MON_A: {
+    /*     MON_A: {
       type: Array,
       default: null,
     },
@@ -57,6 +57,34 @@ const AppointmentPrefSchema = mongoose.Schema(
       default: null,
     },
     SUN_F: {
+      type: Array,
+      default: null,
+    }, */
+    MON: {
+      type: Array,
+      default: null,
+    },
+    TUE: {
+      type: Array,
+      default: null,
+    },
+    WED: {
+      type: Array,
+      default: null,
+    },
+    THU: {
+      type: Array,
+      default: null,
+    },
+    FRI: {
+      type: Array,
+      default: null,
+    },
+    SAT: {
+      type: Array,
+      default: null,
+    },
+    SUN: {
       type: Array,
       default: null,
     },

@@ -53,7 +53,7 @@ const getOnboardingChallenge = async (AuthData) => {
       challenge = 'ONBOARDING_SUCCESS';
     }
     optionalChallenge = 'CLINIC_DETAILS';
-  } else if (!appointmentPreferenceService.checkforDoctorPreference(AuthData)) {
+  } else if (!appointmentPreferenceService.getDoctorPreferences(AuthData)) {
     if (IsDoctorVerified) {
       challenge = 'ONBOARDING_SUCCESS';
     }

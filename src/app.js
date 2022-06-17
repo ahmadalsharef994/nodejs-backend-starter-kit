@@ -9,7 +9,7 @@ const passport = require('passport');
 const httpStatus = require('http-status');
 const { getClientIp } = require('@supercharge/request-ip');
 // const Agenda = require('agenda');
-const bodyParser = require('body-parser');
+// const bodyParser = require('body-parser');
 const config = require('./config/config');
 const morgan = require('./config/morgan');
 const { jwtStrategy } = require('./config/passport');
@@ -30,8 +30,8 @@ app.use(helmet());
 // parse json request body
 app.use(express.json());
 
-app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+// app.use(bodyParser.json({ limit: '50mb' }));
+// app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 // parse urlencoded request body
 app.use(express.urlencoded({ extended: true }));

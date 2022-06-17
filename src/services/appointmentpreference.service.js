@@ -259,7 +259,7 @@ const getfollowups = async (doctorId) => {
 };
 
 const getAppointmentPreferences = async (doctorId) => {
-  const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId: doctorId });
+  const appointmentPreference = await AppointmentPreference.findOne({ docid: doctorId });
   return appointmentPreference;
 };
 

@@ -228,7 +228,7 @@ const getfollowups = async (doctorId) => {
   return promise;
 };
 const getAppointmentPreferences = async (doctorId) => {
-  const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId: doctorId });
+  const appointmentPreference = await AppointmentPreference.findOne({ docid: doctorId });
   return appointmentPreference;
 };
 const checkAppointmentPreference = async (docid, doctorauth) => {

@@ -1,4 +1,5 @@
 const httpStatus = require('http-status');
+const { emailService } = require('../Microservices');
 // const profilePhotoUpload = require('../Microservices/profilePicture.service');
 const {
   DoctorBasic,
@@ -9,6 +10,7 @@ const {
   ConsultationFee,
   Notification,
 } = require('../models');
+const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
 
 const fetchbasicdetails = async (AuthData) => {
@@ -174,6 +176,22 @@ const doctorClinicTimings = async (auth) => {
   }
   return null;
 };
+const sendDoctorQuries = async (AuthDoctor, email, message, name) => {
+  try {
+    const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
+    const ticketdetails = await DoctorQueries.create({ AuthDoctor, name, email, issue: message, ticketNumber });
+    const ticket = `name: ${ticketdetails.name}, \n email: ${ticketdetails.email},\nissue: ${ticketdetails.issue},\nticketnumber: ${ticketdetails.ticketNumber}`;
+    if (ticketdetails.ticketStatus === 'open') {
+      await emailService.sendEmailQueries(ticket, ticketNumber);
+      await emailService.sendEmailQueriesUser(email, message, ticketNumber);
+    } else {
+      throw new ApiError(httpStatus.BAD_GATEWAY, 'failed to send the email');
+    }
+    return ticketdetails;
+  } catch (error) {
+    return null;
+  }
+};
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -194,4 +212,5 @@ module.exports = {
   doctorExpEducation,
   updateappointmentPrice,
   doctorClinicTimings,
+  sendDoctorQuries,
 };

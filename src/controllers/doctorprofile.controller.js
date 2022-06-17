@@ -7,23 +7,55 @@ const doctorprofileService = require('../services/doctorprofile.service');
 const appointmentPreferenceService = require('../services/appointmentpreference.service');
 const authDoctorController = require('./authdoctor.controller');
 // const profilePhotoUpload = require('../Microservices/profilePicture.service');
-const { authService, documentService } = require('../services');
+const { authService, documentService, appointmentService } = require('../services');
+const pick = require('../utils/pick');
 
 const getStats = catchAsync(async (req, res) => {
-  const PERCENT = 2.6;
-  const TOTAL_USER = 53; // totalPatients
-  const CHART_DATA = [{ data: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26] }]; // what is chart data?
-  const AveragePatientsPerDay = { PERCENT, TOTAL_USER, CHART_DATA };
-  const PERCENTRevenue = 3.1; // what is
-  const TOTALRevenue = 12000; // appointment - past - prices
-  const CHARTRevenue = [{ data: [2, 32, 62, 3, 4, 12, 25, 23, 40, 43] }];
-  const Revenue = { PERCENTRevenue, TOTALRevenue, CHARTRevenue };
-  const PERCENTIncome = 12; // what
-  const TOTALIncome = 8000; // what
-  const CHARTIncome = [{ data: [32, 12, 13, 23, 34, 21, 76, 35, 24, 76] }];
-  const Income = { PERCENTIncome, TOTALIncome, CHARTIncome };
-  const Rating = 4.0; // appointments - past - feedbackmodel // Rating is float between 0.0 and 5.0, with only 1 digit after comma
-  res.status(httpStatus.OK).send({ AveragePatientsPerDay, Revenue, Income, Rating });
+  const AuthData = await authService.getAuthById(req.SubjectId);
+
+  const TOTAL_PATIENTS = await appointmentService.getPatientsCount(AuthData._id); // DONE
+  const PATIENTS_CHART = [20, 41, 63, 33, 28, 35, 50, 46, 11, 26];
+  const PERCENT = 2.6; // amount by which number of patients went up
+  /*
+  today = appointments.today.paid.mergebyname.count
+  newtotal = total + today
+  const PERCENT = newtotal - total \ total
+  */
+  const PATIENTS = { PERCENT, TOTAL_PATIENTS, PATIENTS_CHART };
+
+  const filter = { Type: 'PAST' };
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  let appointments = await appointmentService.getAppointmentsByType(req.Docid, filter, options);
+  appointments = appointments.results;
+  appointments.sort(function (a, b) {
+    return new Date(b.StartTime) - new Date(a.StartTime);
+  });
+
+  let lastAppointments = [];
+  if (appointments.length > 10) {
+    lastAppointments = appointments.slice(0, 10);
+  } else {
+    lastAppointments = appointments;
+  }
+
+  const PERCENT_REVENUE = 3.1; // how much went up (from yesterday to today): today.revenue - chart[yesterday] / chart[yesterday];
+  const TOTAL_REVENUE = await appointmentService.getTotalRevenue(AuthData._id); // DONE (incrome + medzgo charges)
+  const REVENUE_CHART = lastAppointments.map((appointment) => appointment.price);
+  const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
+
+  const PERCENT_INCOME = 12; // today.income - average(chart) / average(chart)
+  const TOTAL_INCOME = TOTAL_REVENUE * process.env.DOCTORE_PERCENTAGE; // what
+  const INCOME_CHART = REVENUE_CHART.map((revenue) => revenue * process.env.DOCTORE_PERCENTAGE, 1);
+
+  const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
+  const feedbacks = await appointmentService.getDoctorFeedbacks(AuthData._id);
+  const RATING =
+    feedbacks.reduce((userRatingsSum, feedback) => {
+      return userRatingsSum + feedback.userRating;
+    }, 0) / feedbacks.length;
+
+  // eslint-disable-next-line no-var
+  res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME, RATING });
 });
 
 const submitbasicdetails = catchAsync(async (req, res) => {

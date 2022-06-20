@@ -235,6 +235,17 @@ const updateAppointmentPreference = async (body, doctorId) => {
       // }
     });
   });
+  Object.keys(existingSlots.toJSON()).forEach((day) => {
+    if (['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].includes(day)) {
+      existingSlots[day] = existingSlots[day].sort((a, b) => {
+        if (a.FromHour === b.FromHour) {
+          return a.FromMinutes - b.FromMinutes;
+        }
+        return a.FromHour - b.FromHour;
+      });
+    }
+  });
+
   await existingSlots.save();
   return existingSlots;
 };

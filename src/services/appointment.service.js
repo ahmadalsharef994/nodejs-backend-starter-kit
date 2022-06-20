@@ -388,7 +388,16 @@ const getAvailableAppointments = async (AuthData) => {
       (item) => !bookedSlotIds.includes(item.slotId)
     );
   }
-
+  // Object.keys(availableAppointmentSlots).forEach((day) => {
+  //   if (['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].includes(day)) {
+  //     availableAppointmentSlots[day] = availableAppointmentSlots[day].sort((a, b) => {
+  //       if (a.FromHour === b.FromHour) {
+  //         return a.FromMinutes - b.FromMinutes;
+  //       }
+  //       return a.FromHour - b.FromHour;
+  //     });
+  //   }
+  // });
   return availableAppointmentSlots;
 };
 
@@ -465,6 +474,39 @@ const getPatientDetails = async (patientid, doctorid) => {
   return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
+const getTotalRevenue = async (doctorid) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorid, paymentStatus: 'PAID', Type: 'PAST' });
+  if (!appointments) return 0;
+  const appoinmentPrices = appointments.map((appointment) => appointment.price);
+  const totalRevenue = appoinmentPrices.reduce((sum, x) => sum + x);
+  return totalRevenue;
+};
+
+const getPatientsCount = async (doctorid) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorid });
+  const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
+  // convert objectId to String because objectIds aren't coparable (Set will consider duplicates as uniques)
+  return new Set(patientIds).size;
+};
+
+// const paidUniqeAppointments = async (doctorid) => {
+//   const appointments = await Appointment.find({ AuthDoctor: doctorid });
+//   // const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
+//   const uniqueUserIds = [];
+//   const paidUniqeAppointments = appointments.filter((appointment) => {
+//     const isDuplicate = uniqueUserIds.includes(appointment.AuthUser);
+//     const isPaid = appointment.paymentStatus === 'PAID';
+//     if (!isDuplicate && isPaid) {
+//       uniqueUserIds.push(appointment.AuthUser);
+//       return true;
+//     }
+//     return false;
+//   });
+
+//   // convert objectId to String because objectIds aren't coparable (Set will consider duplicates as uniques)
+//   return paidUniqeAppointments;
+// };
+
 const getPatients = async (doctorid, page, limit, sortBy) => {
   const patientIds = await Appointment.aggregate([
     { $sort: { StartTime: parseInt(sortBy, 10) } },
@@ -500,12 +542,30 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
   return false;
 };
 
+const getAppointmentFeedback = async (appointmentId) => {
+  // const appointment = await Appointment.findById(appointmentId);
+  // const AuthDoctor = appointment.AuthDoctor;
+  // const AuthUser = appointment.AuthUser;
+  // await Feedback.create({ appointmentId, AuthDoctor, AuthUser, doctorRating: 4.0, userRating: 4.0 });
+  const feedbackData = await Feedback.findOne({ appointmentId });
+  return feedbackData;
+};
+
+const getDoctorFeedbacks = async (doctorId) => {
+  const feedbackData = await Feedback.find({ AuthDoctor: doctorId });
+  return feedbackData;
+};
+
 const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
+  const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
+  const AuthUser = await Appointment.findById(appointmentId).AuthUser;
+  // // eslint-disable-next-line no-console
+  // console.log(AuthDoctor, AuthUser);
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
       { appointmentId },
-      { $set: { userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
+      { $set: { AuthDoctor, AuthUser, userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
       { useFindAndModify: false }
     );
     return { message: 'feedback added sucessfully' };
@@ -520,10 +580,22 @@ const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
 
 const getUserFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
+  const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
+  const AuthUser = await Appointment.findById(appointmentId).AuthUser;
+  // eslint-disable-next-line no-console
+  console.log(AuthDoctor, AuthUser);
+
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
       { appointmentId },
-      { $set: { doctorRating: feedbackDoc.doctorRating, doctorDescription: feedbackDoc.doctorDescription } },
+      {
+        $set: {
+          AuthDoctor,
+          AuthUser,
+          doctorRating: feedbackDoc.doctorRating,
+          doctorDescription: feedbackDoc.doctorDescription,
+        },
+      },
       { useFindAndModify: false }
     );
     return { message: 'feedback added sucessfully' };
@@ -765,4 +837,8 @@ module.exports = {
   rescheduleFollowup,
   allAppointments,
   deleteSlot,
+  getPatientsCount,
+  getTotalRevenue,
+  getAppointmentFeedback,
+  getDoctorFeedbacks,
 };

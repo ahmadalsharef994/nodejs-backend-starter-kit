@@ -359,9 +359,9 @@ const getDoctorClinicTimings = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
   }
 });
-const sendDoctorQuries = catchAsync(async (req, res) => {
+const sendDoctorQueries = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const ticketDetails = await doctorprofileService.sendDoctorQuries(
+  const ticketDetails = await doctorprofileService.sendDoctorQueries(
     req.SubjectId,
     AuthData.email,
     req.body.message,
@@ -372,6 +372,10 @@ const sendDoctorQuries = catchAsync(async (req, res) => {
   } else {
     res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
   }
+});
+const getDoctorQueries = catchAsync(async (req, res) => {
+  const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
+  res.status(httpStatus.OK).json({ doctorQueries });
 });
 module.exports = {
   getStats,
@@ -395,5 +399,6 @@ module.exports = {
   doctorExpandEducation,
   updateAppointmentPrice,
   getDoctorClinicTimings,
-  sendDoctorQuries,
+  sendDoctorQueries,
+  getDoctorQueries,
 };

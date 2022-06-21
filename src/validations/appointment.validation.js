@@ -155,16 +155,11 @@ const cancelFollowup = {
 };
 
 const rescheduleAppointment = {
-  body: Joi.object()
-    .keys({
-      appointmentId: Joi.string().custom(objectId),
-      slotId: Joi.string(),
-      date: Joi.string(),
-      startDateTime: Joi.string(),
-      endDateTime: Joi.string(),
-    })
-    .min(3)
-    .max(3),
+  body: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId).required(),
+    slotId: Joi.string().required(),
+    date: Joi.string().required(),
+  }),
 };
 const getDoctorsByCategories = {
   body: Joi.object().keys({

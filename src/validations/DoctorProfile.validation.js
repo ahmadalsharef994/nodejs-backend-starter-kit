@@ -284,7 +284,7 @@ const updateAppointmentPrice = {
     appointmentPrice: Joi.number().required(),
   }),
 };
-const doctorQuries = {
+const doctorQueries = {
   body: Joi.object().keys({
     message: Joi.string().required(),
   }),
@@ -302,5 +302,5 @@ module.exports = {
   updateDetails,
   EducationExperience,
   updateAppointmentPrice,
-  doctorQuries,
+  doctorQueries,
 };

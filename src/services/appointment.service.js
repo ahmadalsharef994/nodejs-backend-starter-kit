@@ -370,12 +370,12 @@ const getAvailableAppointments = async (AuthData) => {
   const doctorId = AuthData._id;
 
   const AllAppointmentSlots = await appointmentPreferenceService.getAppointmentPreferences(doctorId);
-
+  // console.log(AllAppointmentSlots)
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
   const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: AuthData._id, paymentStatus: 'PAID' });
-  // console.log(bookedAppointmentSlots)
+
   if (bookedAppointmentSlots === []) {
     const availableAppointmentSlots = AllAppointmentSlots;
     return availableAppointmentSlots;
@@ -384,7 +384,7 @@ const getAvailableAppointments = async (AuthData) => {
 
   const availableAppointmentSlots = {};
   for (let i = 0; i < 7; i += 1) {
-    availableAppointmentSlots[`${weekday[i]}_A`] = AllAppointmentSlots[`${weekday[i]}_A`].filter(
+    availableAppointmentSlots[`${weekday[i]}`] = AllAppointmentSlots[`${weekday[i]}`].filter(
       (item) => !bookedSlotIds.includes(item.slotId)
     );
   }
@@ -506,6 +506,13 @@ const getPatientsCount = async (doctorid) => {
 //   // convert objectId to String because objectIds aren't coparable (Set will consider duplicates as uniques)
 //   return paidUniqeAppointments;
 // };
+
+const getPastPaidAppointments = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
+  appointments.filter((appointment) => appointment.paymentStatus === 'PAID' && appointment.type === 'PAST');
+  appointments.sort((a, b) => new Date(b.StartTime) - new Date(a.StartTime)); // sort by date (descending)
+  return appointments;
+};
 
 const getPatients = async (doctorid, page, limit, sortBy) => {
   const patientIds = await Appointment.aggregate([
@@ -841,4 +848,5 @@ module.exports = {
   getTotalRevenue,
   getAppointmentFeedback,
   getDoctorFeedbacks,
+  getPastPaidAppointments,
 };

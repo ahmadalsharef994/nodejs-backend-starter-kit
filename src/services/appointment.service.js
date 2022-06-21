@@ -20,6 +20,7 @@ const tokenService = require('./token.service');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
 const authService = require('./auth.service');
+const netEarnCalculator = require('../utils/netEarnCalculator');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -482,6 +483,14 @@ const getTotalRevenue = async (doctorid) => {
   return totalRevenue;
 };
 
+const getTotalIncome = async (doctorid) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorid, paymentStatus: 'PAID', Type: 'PAST' });
+  if (!appointments) return 0;
+  const appointmentIncomes = appointments.map((appointment) => netEarnCalculator(appointment.price));
+  const totalIncome = appointmentIncomes.reduce((sum, x) => sum + x);
+  return totalIncome;
+};
+
 const getPatientsCount = async (doctorid) => {
   const appointments = await Appointment.find({ AuthDoctor: doctorid });
   const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
@@ -849,4 +858,5 @@ module.exports = {
   getAppointmentFeedback,
   getDoctorFeedbacks,
   getPastPaidAppointments,
+  getTotalIncome,
 };

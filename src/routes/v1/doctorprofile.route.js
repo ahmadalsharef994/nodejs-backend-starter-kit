@@ -131,4 +131,6 @@ router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofile
 router
   .route('/send-quries')
   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQuries), doctorProfileController.sendDoctorQuries);
+router.route('/billing').get(authdoctornonverified(), doctorProfileController.getBillingDetails);
+
 module.exports = router;

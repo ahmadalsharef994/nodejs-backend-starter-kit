@@ -140,21 +140,6 @@ const submitprofilepicture = catchAsync(async (req) => {
   await doctorprofileService.submitprofilepicture(profilePhoto, AuthData);
 });
 
-// const updateprofilepicture = catchAsync(async (req, res) => {
-//   const AuthData = await authService.getAuthById(req.SubjectId);
-//   const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
-//   try {
-//     const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
-//     if ((returndata !== false) & (returnThumbnail !== false)) {
-//       res.status(httpStatus.OK).json({ message: 'profile picture updated' });
-//     } else {
-//       res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
-//     }
-//   } catch (err) {
-//     throw new ApiError(httpStatus.NOT_FOUND, `profilePhotoUpload service: ${err}`);
-//   }
-// });
-
 const fetchbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const basicdata = await doctorprofileService.fetchbasicdetails(AuthData);
@@ -373,6 +358,14 @@ const sendDoctorQuries = catchAsync(async (req, res) => {
     res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
   }
 });
+
+const getBillingDetails = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const doctorAuthId = AuthData._id;
+  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId);
+  res.status(httpStatus.OK).json({ message: 'getting billing details', data: billingDetails });
+  // TO BE IMPLEMENTED
+});
 module.exports = {
   getStats,
   submitbasicdetails,
@@ -385,7 +378,6 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
-  // updateprofilepicture,
   fetchpayoutsdetails,
   fetchprofiledetails,
   addConsultationfee,
@@ -396,4 +388,5 @@ module.exports = {
   updateAppointmentPrice,
   getDoctorClinicTimings,
   sendDoctorQuries,
+  getBillingDetails,
 };

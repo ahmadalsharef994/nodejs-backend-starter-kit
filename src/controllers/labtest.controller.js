@@ -189,9 +189,9 @@ const bookPrepaidOrder = catchAsync(async (req, res) => {
 const getLabtestPackages = catchAsync(async (req, res) => {
   const result = await thyrocareServices.getLabtestPackages();
   if (result) {
-    res.status(httpStatus.OK).json({ meassage: 'Success', data: result });
+    res.status(httpStatus.OK).json({ message: 'Success', data: result });
   } else {
-    res.status(httpStatus.NOT_FOUND).json({ meassage: 'Error', data: result });
+    res.status(httpStatus.NOT_FOUND).json({ message: 'Error', data: result });
   }
 });
 // not supported by thyrocare

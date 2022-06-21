@@ -545,51 +545,35 @@ const cancelAppointment = async (appointmentId) => {
   return null;
 };
 
-const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, startDateTime, endDateTime) => {
+const rescheduleAppointment = async (doctorId, appointmentId, slotId, date) => {
   // find appointment by id
-  const appointmentData = await Appointment.findById({ _id: appointmentId, docid: doctorId });
-  // initiate timestamps
   let startTime = null;
   let endTime = null;
-
-  // if custom date and time provided
-  if (appointmentData && startDateTime && endDateTime) {
-    startTime = new Date(`${startDateTime}:00 GMT+0530`);
-    endTime = new Date(`${endDateTime}:00 GMT+0530`);
-    const currentTime = new Date();
-    if (startTime.getTime() <= currentTime.getTime()) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Rescheduled dateTimes cannot be past time');
-    } else if (endTime.getTime() < startTime.getTime()) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Rescheduled startTime cannot be greater than endTime');
-    } else if ((endTime.getTime() - startTime.getTime()) / 1000 > 7200) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'DateTime differences cannot be greater than 2 hours');
-    }
-  } else if (appointmentData && slotId && date) {
-    // if slotId and date provided
-    await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
-      const day = slotId.split('-')[1];
-      const type = slotId.split('-')[0];
-      const slots = pref[`${day}_${type}`];
-      const slot = slots.filter((e) => e.slotId === slotId);
-      if (slot.length === 0) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
-      }
-      startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
-      endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
-      const currentTime = new Date();
-      if (startTime.getTime() <= currentTime.getTime()) {
-        throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
-      }
-      const correctDay = startTime.getDay();
-      const requestedDay = slotId.split('-')[1];
-      if (weekday[correctDay] !== requestedDay) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
-      }
-    });
+  await Appointment.findById({ _id: appointmentId, docid: doctorId });
+  const appointPreference = await AppointmentPreference.findOne({ docid: doctorId });
+  const day = slotId.split('-')[0];
+  const rescheduledDay = new Date(date).toDateString().toUpperCase().split(' ')[0];
+  if (day !== rescheduledDay) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
   }
-  // check for null timestamps
+  const slots = appointPreference[`${day}`];
+  const slot = slots.filter((e) => e.slotId === slotId);
+  startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+  endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+  const currentTime = new Date();
+  if (startTime.getTime() <= currentTime.getTime()) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
+  }
   if (startTime === null || endTime === null) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Error in creating timestamps!');
+  }
+  const appointmentTime = new Date(date).getTime();
+  const timeDifference = Math.round((appointmentTime - currentTime.getTime()) / (1000 * 3600 * 24));
+  if (timeDifference >= 6) {
+    throw new ApiError(
+      httpStatus.BAD_REQUEST,
+      'youre only allowed to reschedule your appointment within 6 days from current day'
+    );
   }
   const appointmentDate = new Date(date).toDateString();
   const todayDate = new Date().toDateString();
@@ -614,7 +598,6 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, star
     { StartTime: startTime, EndTime: endTime, Status: 'booked', Date: appointmentDate, isRescheduled: true, slotId },
     { new: true }
   );
-
   return result;
 };
 

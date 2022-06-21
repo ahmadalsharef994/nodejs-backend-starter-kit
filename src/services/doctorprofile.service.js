@@ -176,7 +176,7 @@ const doctorClinicTimings = async (auth) => {
   }
   return null;
 };
-const sendDoctorQuries = async (AuthDoctor, email, message, name) => {
+const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
   try {
     const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
     const ticketdetails = await DoctorQueries.create({ AuthDoctor, name, email, issue: message, ticketNumber });
@@ -191,6 +191,13 @@ const sendDoctorQuries = async (AuthDoctor, email, message, name) => {
   } catch (error) {
     return null;
   }
+};
+const getDoctorQueries = async (AuthDoctor) => {
+  const doctorQueries = await DoctorQueries.find({ AuthDoctor });
+  if (doctorQueries) {
+    return doctorQueries;
+  }
+  return null;
 };
 module.exports = {
   submitbasicdetails,
@@ -212,5 +219,6 @@ module.exports = {
   doctorExpEducation,
   updateappointmentPrice,
   doctorClinicTimings,
-  sendDoctorQuries,
+  sendDoctorQueries,
+  getDoctorQueries,
 };

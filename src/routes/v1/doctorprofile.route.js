@@ -129,6 +129,7 @@ router
 router.route('/get-doctor-clinictimings').get(authdoctornonverified(), doctorProfileController.getDoctorClinicTimings);
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails);
 router
-  .route('/send-quries')
-  .post(authdoctorverified(), validate(doctorProfileValidator.doctorQuries), doctorProfileController.sendDoctorQuries);
+  .route('/send-queries')
+  .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
+router.route('/get-doctor-queries').get(authdoctorverified(), doctorProfileController.getDoctorQueries);
 module.exports = router;

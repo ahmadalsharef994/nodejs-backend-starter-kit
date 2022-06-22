@@ -244,11 +244,11 @@ const fetchpayoutsdetails = catchAsync(async (req, res) => {
 
 const fetchprofiledetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const doctorBasicData = await doctorprofileService.fetchbasicdetails(AuthData, req.Docid);
+  const doctorBasicData = await doctorprofileService.fetchbasicdetails(AuthData);
   const doctorEducationData = await doctorprofileService.fetcheducationdetails(AuthData);
   const clinicData = await doctorprofileService.fetchClinicdetails(AuthData);
   const experienceData = await doctorprofileService.fetchexperiencedetails(AuthData);
-  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(req.Docid, AuthData);
+  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(AuthData);
   const doctorDocumentData = await documentService.fetchDocumentdata(AuthData);
   if (!doctorBasicData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'first create your account');

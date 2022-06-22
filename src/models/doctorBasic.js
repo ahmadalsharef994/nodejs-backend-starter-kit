@@ -65,6 +65,10 @@ const DoctorBasicSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: Wallet,
     },
+    serviceCharges: {
+      type: Number,
+      default: 0.1,
+    },
   },
   {
     timestamps: true,

@@ -8,10 +8,11 @@ const {
   DoctorPayout,
   ConsultationFee,
   Notification,
+  Appointment,
 } = require('../models');
 const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
-const appointmentService = require('./appointment.service');
+// const appointmentService = require('./appointment.service');
 const netEarnCalculator = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (AuthData) => {
@@ -188,9 +189,10 @@ const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
   }
 };
 
-const getBillingDetails = async (AuthDoctor) => {
-  const pastPaidAppointments = await appointmentService.getPastPaidAppointments(AuthDoctor);
-  const pickedProperties = pastPaidAppointments.map((appointment) => {
+const getBillingDetails = async (AuthDoctor, options) => {
+  // const pastPaidAppointments = await appointmentService.getPastPaidAppointments(AuthDoctor);
+  const pastPaidAppointments = await Appointment.paginate({ AuthDoctor, paymentStatus: 'PAID' }, options);
+  const pickedProperties = pastPaidAppointments.results.map((appointment) => {
     return {
       patientName: appointment.patientName,
       Date: appointment.Date,

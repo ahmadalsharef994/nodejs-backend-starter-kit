@@ -104,6 +104,14 @@ const rejectedDoctors = catchAsync(async (req, res) => {
   const result = await internalTeamService.RejectedDoctors();
   res.status(httpStatus.OK).json({ result });
 });
+
+const setServiceCharges = catchAsync(async (req, res) => {
+  const serviceCharges = req.body.serviceCharges; // validate: >0.1 and < 0.3
+  const doctorAuthId = req.body.docid; // validate
+  const response = await internalTeamService.setServiceCharges(doctorAuthId, serviceCharges);
+  res.status(httpStatus.OK).json({ message: 'SERVICE CHARGES PERCENTAGE IS UPDATED', data: response });
+});
+
 module.exports = {
   verifydoctor,
   rejectdoctor,
@@ -114,4 +122,5 @@ module.exports = {
   Doctorsprofile,
   verifiedDoctors,
   rejectedDoctors,
+  setServiceCharges,
 };

@@ -1,6 +1,5 @@
 const httpStatus = require('http-status');
 const { emailService } = require('../Microservices');
-// const profilePhotoUpload = require('../Microservices/profilePicture.service');
 const {
   DoctorBasic,
   DoctorEducation,
@@ -12,6 +11,8 @@ const {
 } = require('../models');
 const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
+const appointmentService = require('./appointment.service');
+const netEarnCalculator = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (AuthData) => {
   const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
@@ -33,17 +34,6 @@ const submitprofilepicture = async (ProfilePhoto, AuthData) => {
   }
   return false;
 };
-
-// const updateprofilepicture = async (ProfilePhoto, AuthData, thumbnail) => {
-//   const alreadyExist = await fetchbasicdetails(AuthData);
-//   if (alreadyExist) {
-//     const resultData = await DoctorBasic.findOne({ _id: alreadyExist._id });
-//     // need to rethink once s3 is working properly
-//     await profilePhotoUpload.deleteAvatar(resultData.avatar, resultData.thumbnail);
-//     await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail } });
-//     return 'profile Picture updated';
-//   }
-// };
 
 const fetcheducationdetails = async (AuthData) => {
   const DoctorEducationExist = await DoctorEducation.findOne({ auth: AuthData });
@@ -124,6 +114,7 @@ const notificationSettings = async (notifications, auth) => {
   }
   return false;
 };
+
 const updteClinicDetails = async (Auth, timings, clinicId) => {
   const result = await DoctorClinic.find({ _id: clinicId, auth: Auth });
   if (typeof result[0] === 'object') {
@@ -134,6 +125,7 @@ const updteClinicDetails = async (Auth, timings, clinicId) => {
   }
   return false;
 };
+
 const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
   const Auth = { auth };
   const About = { about, address, pincode, experience, country, state, city };
@@ -161,6 +153,7 @@ const doctorExpEducation = async (auth, experience, education) => {
     return { Education, Experience };
   }
 };
+
 const updateappointmentPrice = async (appointmentPrice, auth) => {
   await DoctorBasic.updateOne({ auth }, { $set: { appointmentPrice } });
   const result = await DoctorBasic.findOne({ appointmentPrice });
@@ -169,6 +162,7 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
   }
   return false;
 };
+
 const doctorClinicTimings = async (auth) => {
   const result = await DoctorClinic.find({ auth });
   if (result) {
@@ -176,6 +170,7 @@ const doctorClinicTimings = async (auth) => {
   }
   return null;
 };
+
 const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
   try {
     const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
@@ -192,6 +187,29 @@ const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
     return null;
   }
 };
+
+const getBillingDetails = async (AuthDoctor) => {
+  const pastPaidAppointments = await appointmentService.getPastPaidAppointments(AuthDoctor);
+  const pickedProperties = pastPaidAppointments.map((appointment) => {
+    return {
+      patientName: appointment.patientName,
+      Date: appointment.Date,
+      StartTime: appointment.StartTime,
+      price: appointment.price,
+      orderId: appointment.orderId,
+    };
+  });
+  // eslint-disable-next-line array-callback-return
+  pickedProperties.map((appointment) => {
+    /* eslint-disable no-param-reassign */
+    appointment.taxes = 0.05 * appointment.price;
+    appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
+    appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
+    appointment.netEarn = netEarnCalculator(appointment.price, 0.05, 0.1, 0);
+  });
+  return pickedProperties;
+};
+
 const getDoctorQueries = async (AuthDoctor) => {
   const doctorQueries = await DoctorQueries.find({ AuthDoctor });
   if (doctorQueries) {
@@ -209,7 +227,6 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
-  // updateprofilepicture,
   fetchpayoutsdetails,
   submitpayoutsdetails,
   addConsultationfee,
@@ -219,6 +236,7 @@ module.exports = {
   doctorExpEducation,
   updateappointmentPrice,
   doctorClinicTimings,
+  getBillingDetails,
   sendDoctorQueries,
   getDoctorQueries,
 };

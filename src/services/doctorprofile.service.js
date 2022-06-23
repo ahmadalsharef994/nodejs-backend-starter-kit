@@ -13,7 +13,7 @@ const {
 const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
 // const appointmentService = require('./appointment.service');
-const netEarnCalculator = require('../utils/netEarnCalculator');
+const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (AuthData) => {
   const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
@@ -207,7 +207,7 @@ const getBillingDetails = async (AuthDoctor, options) => {
     appointment.taxes = 0.05 * appointment.price;
     appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
     appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
-    appointment.netEarn = netEarnCalculator(appointment.price, 0.05, 0.1, 0);
+    appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
   });
   return pickedProperties;
 };

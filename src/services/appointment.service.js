@@ -20,7 +20,7 @@ const tokenService = require('./token.service');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
 const authService = require('./auth.service');
-const netEarnCalculator = require('../utils/netEarnCalculator');
+const netEarn = require('../utils/netEarnCalculator');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -475,52 +475,36 @@ const getPatientDetails = async (patientid, doctorid) => {
   return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
-const getTotalRevenue = async (doctorid) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorid, paymentStatus: 'PAID', Type: 'PAST' });
+const getTotalRevenue = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
   if (!appointments) return 0;
   const appoinmentPrices = appointments.map((appointment) => appointment.price);
   const totalRevenue = appoinmentPrices.reduce((sum, x) => sum + x);
   return totalRevenue;
 };
 
-const getTotalIncome = async (doctorid) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorid, paymentStatus: 'PAID', Type: 'PAST' });
+const getTotalIncome = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
   if (!appointments) return 0;
-  const appointmentIncomes = appointments.map((appointment) => netEarnCalculator(appointment.price));
+  const appointmentIncomes = appointments.map((appointment) => netEarn(appointment.price));
   const totalIncome = appointmentIncomes.reduce((sum, x) => sum + x);
   return totalIncome;
 };
 
-const getPatientsCount = async (doctorid) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorid });
+const getPatientsCount = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
   const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
   // convert objectId to String because objectIds aren't coparable (Set will consider duplicates as uniques)
   return new Set(patientIds).size;
 };
 
-// const paidUniqeAppointments = async (doctorid) => {
-//   const appointments = await Appointment.find({ AuthDoctor: doctorid });
-//   // const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
-//   const uniqueUserIds = [];
-//   const paidUniqeAppointments = appointments.filter((appointment) => {
-//     const isDuplicate = uniqueUserIds.includes(appointment.AuthUser);
-//     const isPaid = appointment.paymentStatus === 'PAID';
-//     if (!isDuplicate && isPaid) {
-//       uniqueUserIds.push(appointment.AuthUser);
-//       return true;
-//     }
-//     return false;
-//   });
-
-//   // convert objectId to String because objectIds aren't coparable (Set will consider duplicates as uniques)
-//   return paidUniqeAppointments;
-// };
-
 const getPastPaidAppointments = async (doctorAuthId) => {
   const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
-  appointments.filter((appointment) => appointment.paymentStatus === 'PAID' && appointment.type === 'PAST');
-  appointments.sort((a, b) => new Date(b.StartTime) - new Date(a.StartTime)); // sort by date (descending)
-  return appointments;
+  const pastPaidAppointments = appointments.filter(
+    (appointment) => appointment.paymentStatus === 'PAID' && appointment.Type === 'PAST'
+  );
+  pastPaidAppointments.sort((a, b) => new Date(b.StartTime) - new Date(a.StartTime)); // sort by date (descending)
+  return pastPaidAppointments;
 };
 
 const getPatients = async (doctorid, page, limit, sortBy) => {

@@ -6,108 +6,77 @@ const doctorprofileService = require('../services/doctorprofile.service');
 const appointmentPreferenceService = require('../services/appointmentpreference.service');
 const authDoctorController = require('./authdoctor.controller');
 const { authService, documentService, appointmentService } = require('../services');
-const netEarnCalculator = require('../utils/netEarnCalculator');
+const netEarn = require('../utils/netEarnCalculator');
 const pick = require('../utils/pick');
+const daysDiff = require('../utils/calculateDays');
 
 const getStats = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const doctorAuthId = AuthData._id;
 
   const pastPaidAppointments = await appointmentService.getPastPaidAppointments(doctorAuthId);
-  // const pickedProperties = (({ a, c }) => ({ a, c }))(pastPaidAppointments);
   // Date.prototype.getDateWithoutTime = () => new Date(this.toDateString());
 
   const todayDate = new Date();
-  const pastSunday = (() => {
-    const t = new Date().getDate() + (7 - new Date().getDay()) - 7;
-    const pastFriday = new Date();
-    pastFriday.setDate(t);
-    return pastFriday;
-  })();
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(todayDate.getDate() - 1);
 
-  const past7DaysAppoitments = pastPaidAppointments.filter((appointment) => {
+  const currentWeekAppointments = pastPaidAppointments.filter((appointment) => {
     const day1 = new Date(appointment.Date).getTime();
-    const day2 = todayDate.getTime();
-    const difference = day2 - day1;
-    const days = Math.ceil(difference / (1000 * 3600 * 24));
-    return days < 7 && days > 0; // 0 (today), 6 (7 days back)
-  }); // CORRECT
-
+    const day2 = yesterdayDate.getTime();
+    const days = daysDiff(day2, day1);
+    return days > 0 && days < 7; // 0 (yesterday), 6 (7 days back)
+  });
   const pastWeekAppointments = pastPaidAppointments.filter((appointment) => {
     const day1 = new Date(appointment.Date).getTime();
-    const day2 = pastSunday.getTime();
-    const difference = day2 - day1;
-    const days = Math.ceil(difference / (1000 * 3600 * 24));
-    return days < 7 && days > 0;
+    const day2 = new Date();
+    day2.setDate(yesterdayDate.getDate() - 7);
+    const days = daysDiff(day2, day1);
+    return days > 0 && days < 7;
   });
 
-  // const allPatients = await appointmentService.getPatients(doctorId);
   const TOTAL_PATIENTS = await appointmentService.getPatientsCount(doctorAuthId);
+  const PERCENT_PATIENTS = 100 - (pastWeekAppointments.length / currentWeekAppointments.length) * 100 || 0;
 
+  const TOTAL_REVENUE = pastPaidAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
+  const currentWeekRevenues = currentWeekAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
+  const pastWeekRevenues = pastWeekAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
+  const PERCENT_REVENUE = 100 - (pastWeekRevenues / currentWeekRevenues) * 100 || 0;
+
+  const TOTAL_INCOME = pastPaidAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
+  const currentWeekIncomes = currentWeekAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
+  const pastWeekIncomes = pastWeekAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
+  const PERCENT_INCOME = 100 - (pastWeekIncomes / currentWeekIncomes) * 100 || 0;
+
+  // CHARTS
   const PATIENTS_CHART = new Array(7).fill(0);
-  past7DaysAppoitments.forEach((patient) => {
-    const day1 = new Date(patient.Date).getTime(); // .getDateWithoutTime();
-    const day2 = todayDate;
-    const difference = day2 - day1;
-    const days = Math.ceil(difference / (1000 * 3600 * 24));
-    if (days > 0 && days < 7) PATIENTS_CHART[6 - days] += 1;
-  });
-
-  const PERCENT_PATIENTS = 100 - (pastWeekAppointments.length / past7DaysAppoitments.length) * 100;
-
-  const PATIENTS = { PERCENT_PATIENTS, TOTAL_PATIENTS, PATIENTS_CHART }; // Done
-
-  const TOTAL_REVENUE = await appointmentService.getTotalRevenue(AuthData._id); // DONE (incrome + medzgo charges)
-
-  const past7DaysRevenues = past7DaysAppoitments
-    .map((appointment) => appointment.price)
-    .reduce((sum, revenue) => sum + revenue, 0);
-  const pastWeekRevenues = pastWeekAppointments
-    .map((appointment) => appointment.price)
-    .reduce((sum, revenue) => sum + revenue, 0);
-
   const REVENUE_CHART = new Array(7).fill(0);
-  past7DaysAppoitments.forEach((appointment) => {
-    const day1 = new Date(appointment.Date).getTime();
-    const day2 = todayDate;
-    const difference = day2 - day1;
-    const days = Math.ceil(difference / (1000 * 3600 * 24));
-    if (days > 0 && days < 7) REVENUE_CHART[6 - days] += appointment.price;
-  });
-
-  const PERCENT_REVENUE = 100 - (pastWeekRevenues / past7DaysRevenues) * 100;
-  const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
-
-  const past7DaysIncomes = past7DaysAppoitments
-    .map((appointment) => netEarnCalculator(appointment.price))
-    .reduce((sum, income) => sum + income, 0);
-
-  const pastWeekIncomes = pastWeekAppointments
-    .map((appointment) => netEarnCalculator(appointment.price))
-    .reduce((sum, income) => sum + income, 0);
-
-  // appointmentsPast7Days.price --> appointmentsPast7Days.netEarn (- SERVICE_CHARGE, TAXES, TDS, DISCOUNT = 0)
-  // appointmentsPast7Days.save
-  const TOTAL_INCOME = await appointmentService.getTotalIncome(AuthData._id);
   const INCOME_CHART = new Array(7).fill(0);
-  past7DaysAppoitments.forEach((appointment) => {
-    const day1 = new Date(appointment.Date).getTime();
-    const day2 = todayDate;
-    const difference = day2 - day1;
-    const days = Math.ceil(difference / (1000 * 3600 * 24));
-    if (days > 0 && days < 7) INCOME_CHART[6 - days] += netEarnCalculator(appointment.price);
-  });
-  const PERCENT_INCOME = 100 - (pastWeekIncomes / past7DaysIncomes) * 100;
 
+  currentWeekAppointments.forEach((appointment) => {
+    const day1 = new Date(appointment.Date).getTime();
+    const day2 = yesterdayDate;
+    const days = daysDiff(day2, day1);
+    if (days > 0 && days < 7) {
+      PATIENTS_CHART[6 - days] += 1;
+      REVENUE_CHART[6 - days] += appointment.price;
+      INCOME_CHART[6 - days] += netEarn(appointment.price);
+    }
+  });
+
+  const AVERAGE_PATIENTS_PER_DAY = PATIENTS_CHART.reduce((sum, item) => sum + item, 0) / 7;
+  const PATIENTS = { PERCENT_PATIENTS, TOTAL_PATIENTS, PATIENTS_CHART, AVERAGE_PATIENTS_PER_DAY };
+  const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
   const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
-  const feedbacks = await appointmentService.getDoctorFeedbacks(AuthData._id);
+
+  const feedbacks = await appointmentService.getDoctorFeedbacks(doctorAuthId);
+
   const RATING = (
     feedbacks.reduce((userRatingsSum, feedback) => {
       return userRatingsSum + feedback.userRating;
     }, 0) / feedbacks.length
   ).toFixed(1);
 
-  // eslint-disable-next-line no-var
   res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME, RATING });
 });
 

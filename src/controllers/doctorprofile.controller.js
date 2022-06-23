@@ -7,6 +7,7 @@ const appointmentPreferenceService = require('../services/appointmentpreference.
 const authDoctorController = require('./authdoctor.controller');
 const { authService, documentService, appointmentService } = require('../services');
 const netEarnCalculator = require('../utils/netEarnCalculator');
+const pick = require('../utils/pick');
 
 const getStats = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -243,11 +244,11 @@ const fetchpayoutsdetails = catchAsync(async (req, res) => {
 
 const fetchprofiledetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const doctorBasicData = await doctorprofileService.fetchbasicdetails(AuthData, req.Docid);
+  const doctorBasicData = await doctorprofileService.fetchbasicdetails(AuthData);
   const doctorEducationData = await doctorprofileService.fetcheducationdetails(AuthData);
   const clinicData = await doctorprofileService.fetchClinicdetails(AuthData);
   const experienceData = await doctorprofileService.fetchexperiencedetails(AuthData);
-  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(req.Docid, AuthData);
+  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(AuthData);
   const doctorDocumentData = await documentService.fetchDocumentdata(AuthData);
   if (!doctorBasicData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'first create your account');
@@ -362,7 +363,8 @@ const sendDoctorQueries = catchAsync(async (req, res) => {
 const getBillingDetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const doctorAuthId = AuthData._id;
-  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId, options);
   res.status(httpStatus.OK).json({ message: 'getting billing details', data: billingDetails });
 });
 

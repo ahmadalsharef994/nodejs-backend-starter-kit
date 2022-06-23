@@ -151,36 +151,12 @@ const RejectedDoctors = async () => {
   return rejecedDoctors;
 };
 
-/* async function getData(registrationNo) {
-  try {
-    let data = JSON.stringify({
-      registrationNo: registrationNo,
-    }); 
-     let res = await axios({
-          url: 'https://www.nmc.org.in/MCIRest/open/getDataFromService?service=searchDoctor',
-          method: 'get',
-          timeout: 8000,
-          headers: {
-              'Content-Type': 'application/json',
-          },
-          data: data,
-      })
-      if(res.status == 200){
-          // test for status you want, etc
-          console.log(res.status)
-      }    
-      // Don't forget to return something   
-      return res.data
-  }
-  catch (err) {
-      console.error(err);
-  }
-} */
-
-/* const AutoverifyDoctorByBNMC = async (registrationNo, registrationState, yearofRegistration) => {
-  const responsestatus = await getData(registrationNo);
-  console.log(responsestatus);
-}; */
+const setServiceCharges = async (doctorAuthId, serviceCharges) => {
+  const doctorBasic = await DoctorBasic.findOne({ auth: doctorAuthId });
+  doctorBasic.serviceCharges = serviceCharges;
+  await doctorBasic.save();
+  return doctorBasic;
+};
 
 module.exports = {
   acceptDoctorVerification,
@@ -191,4 +167,5 @@ module.exports = {
   fetchDoctorProfile,
   verfieddoctors,
   RejectedDoctors,
+  setServiceCharges,
 };

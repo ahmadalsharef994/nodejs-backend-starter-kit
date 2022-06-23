@@ -7,7 +7,7 @@ const AppointmentPreference = require('../models/appointmentPreference.model');
 const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
 // eslint-disable-next-line import/no-useless-path-segments
-const { doctorprofileService } = require('../services');
+const doctorprofileService = require('../services/doctorprofile.service');
 
 // const gap = parseInt(process.env.GAP, 10);
 const slotTime = parseInt(process.env.SLOT_TIME, 10);

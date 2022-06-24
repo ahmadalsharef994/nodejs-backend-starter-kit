@@ -270,13 +270,13 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
   return assignedFollowup;
 };
 
-const getUpcomingAppointments = async (doctorId, limit, options) => {
+const getUpcomingAppointments = async (doctorId, fromDate, endDate, options) => {
   const res = await Appointment.paginate(
     {
       docid: doctorId,
       paymentStatus: 'PAID',
       Status: { $nin: 'cancelled' },
-      StartTime: { $gte: new Date() },
+      StartTime: { $gte: fromDate, $lt: endDate },
     },
     options
   );
@@ -609,10 +609,13 @@ const getUserFeedback = async (feedbackDoc, appointmentId) => {
   return false;
 };
 
-const cancelAppointment = async (appointmentId) => {
+const cancelAppointment = async (appointmentId, doctorId) => {
+  // const appointments = await Appointment.find({ AuthDoctor: doctorId });
+
   const appointmentData = await Appointment.findById({ _id: appointmentId });
   if (appointmentData.Status !== 'cancelled') {
-    const result = await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    const result = await Appointment.find({ AuthDoctor: doctorId });
     return result;
   }
   return null;
@@ -655,7 +658,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
   const appointmentDate = new Date(date).toDateString();
   const todayDate = new Date().toDateString();
   if (`${todayDate}` === `${appointmentDate}`) {
-    const result = await Appointment.findOneAndUpdate(
+    await Appointment.findOneAndUpdate(
       { _id: appointmentId },
       {
         StartTime: startTime,
@@ -669,6 +672,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
       },
       { new: true }
     );
+    const result = await Appointment.find({ docid: doctorId });
     if (appointment.patientMail && sendMailToUser === true) {
       const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
       await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);
@@ -677,7 +681,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
     }
     return { result, emailSent };
   }
-  const result = await Appointment.findOneAndUpdate(
+  await Appointment.findOneAndUpdate(
     { _id: appointmentId },
     {
       StartTime: startTime,
@@ -690,6 +694,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
     },
     { new: true }
   );
+  const result = await Appointment.find({ docid: doctorId });
   if (appointment.patientMail && sendMailToUser === true) {
     const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
     await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);

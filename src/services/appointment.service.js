@@ -21,6 +21,7 @@ const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
 const authService = require('./auth.service');
 const { emailService } = require('../Microservices');
+const netEarn = require('../utils/netEarnCalculator');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -371,12 +372,12 @@ const getAvailableAppointments = async (AuthData) => {
   const doctorId = AuthData._id;
 
   const AllAppointmentSlots = await appointmentPreferenceService.getAppointmentPreferences(doctorId);
-
+  // console.log(AllAppointmentSlots)
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
   const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: AuthData._id, paymentStatus: 'PAID' });
-  // console.log(bookedAppointmentSlots)
+
   if (bookedAppointmentSlots === []) {
     const availableAppointmentSlots = AllAppointmentSlots;
     return availableAppointmentSlots;
@@ -385,11 +386,20 @@ const getAvailableAppointments = async (AuthData) => {
 
   const availableAppointmentSlots = {};
   for (let i = 0; i < 7; i += 1) {
-    availableAppointmentSlots[`${weekday[i]}_A`] = AllAppointmentSlots[`${weekday[i]}_A`].filter(
+    availableAppointmentSlots[`${weekday[i]}`] = AllAppointmentSlots[`${weekday[i]}`].filter(
       (item) => !bookedSlotIds.includes(item.slotId)
     );
   }
-
+  // Object.keys(availableAppointmentSlots).forEach((day) => {
+  //   if (['MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT', 'SUN'].includes(day)) {
+  //     availableAppointmentSlots[day] = availableAppointmentSlots[day].sort((a, b) => {
+  //       if (a.FromHour === b.FromHour) {
+  //         return a.FromMinutes - b.FromMinutes;
+  //       }
+  //       return a.FromHour - b.FromHour;
+  //     });
+  //   }
+  // });
   return availableAppointmentSlots;
 };
 
@@ -466,6 +476,38 @@ const getPatientDetails = async (patientid, doctorid) => {
   return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
+const getTotalRevenue = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
+  if (!appointments) return 0;
+  const appoinmentPrices = appointments.map((appointment) => appointment.price);
+  const totalRevenue = appoinmentPrices.reduce((sum, x) => sum + x);
+  return totalRevenue;
+};
+
+const getTotalIncome = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
+  if (!appointments) return 0;
+  const appointmentIncomes = appointments.map((appointment) => netEarn(appointment.price));
+  const totalIncome = appointmentIncomes.reduce((sum, x) => sum + x);
+  return totalIncome;
+};
+
+const getPatientsCount = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
+  const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
+  // convert objectId to String because objectIds aren't coparable (Set will consider duplicates as uniques)
+  return new Set(patientIds).size;
+};
+
+const getPastPaidAppointments = async (doctorAuthId) => {
+  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
+  const pastPaidAppointments = appointments.filter(
+    (appointment) => appointment.paymentStatus === 'PAID' && appointment.Type === 'PAST'
+  );
+  pastPaidAppointments.sort((a, b) => new Date(b.StartTime) - new Date(a.StartTime)); // sort by date (descending)
+  return pastPaidAppointments;
+};
+
 const getPatients = async (doctorid, page, limit, sortBy) => {
   const patientIds = await Appointment.aggregate([
     { $sort: { StartTime: parseInt(sortBy, 10) } },
@@ -501,12 +543,30 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
   return false;
 };
 
+const getAppointmentFeedback = async (appointmentId) => {
+  // const appointment = await Appointment.findById(appointmentId);
+  // const AuthDoctor = appointment.AuthDoctor;
+  // const AuthUser = appointment.AuthUser;
+  // await Feedback.create({ appointmentId, AuthDoctor, AuthUser, doctorRating: 4.0, userRating: 4.0 });
+  const feedbackData = await Feedback.findOne({ appointmentId });
+  return feedbackData;
+};
+
+const getDoctorFeedbacks = async (doctorId) => {
+  const feedbackData = await Feedback.find({ AuthDoctor: doctorId });
+  return feedbackData;
+};
+
 const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
+  const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
+  const AuthUser = await Appointment.findById(appointmentId).AuthUser;
+  // // eslint-disable-next-line no-console
+  // console.log(AuthDoctor, AuthUser);
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
       { appointmentId },
-      { $set: { userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
+      { $set: { AuthDoctor, AuthUser, userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
       { useFindAndModify: false }
     );
     return { message: 'feedback added sucessfully' };
@@ -521,10 +581,22 @@ const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
 
 const getUserFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
+  const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
+  const AuthUser = await Appointment.findById(appointmentId).AuthUser;
+  // eslint-disable-next-line no-console
+  console.log(AuthDoctor, AuthUser);
+
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
       { appointmentId },
-      { $set: { doctorRating: feedbackDoc.doctorRating, doctorDescription: feedbackDoc.doctorDescription } },
+      {
+        $set: {
+          AuthDoctor,
+          AuthUser,
+          doctorRating: feedbackDoc.doctorRating,
+          doctorDescription: feedbackDoc.doctorDescription,
+        },
+      },
       { useFindAndModify: false }
     );
     return { message: 'feedback added sucessfully' };
@@ -774,4 +846,10 @@ module.exports = {
   rescheduleFollowup,
   allAppointments,
   deleteSlot,
+  getPatientsCount,
+  getTotalRevenue,
+  getAppointmentFeedback,
+  getDoctorFeedbacks,
+  getPastPaidAppointments,
+  getTotalIncome,
 };

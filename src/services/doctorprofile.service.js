@@ -216,6 +216,11 @@ const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
     appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
     appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
   });
+
+  pickedProperties.totalPages = pastPaidAppointments.totalPages;
+  pickedProperties.page = pastPaidAppointments.page;
+  pickedProperties.limit = pastPaidAppointments.limit;
+  pickedProperties.totalResults = pastPaidAppointments.totalResults;
   return pickedProperties;
 };
 

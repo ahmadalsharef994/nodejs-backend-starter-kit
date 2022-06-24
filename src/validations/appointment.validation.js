@@ -159,6 +159,8 @@ const rescheduleAppointment = {
     appointmentId: Joi.string().custom(objectId).required(),
     slotId: Joi.string().required(),
     date: Joi.string().required(),
+    message: Joi.string().required(),
+    sendMailToUser: Joi.boolean().required(),
   }),
 };
 const getDoctorsByCategories = {

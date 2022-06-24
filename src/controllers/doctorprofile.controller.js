@@ -323,7 +323,7 @@ const sendDoctorQueries = catchAsync(async (req, res) => {
     AuthData.fullname
   );
   if (ticketDetails) {
-    res.status(httpStatus.OK).json({ message: 'success', ticketDetails, emailSent: true });
+    res.status(httpStatus.OK).json({ message: 'query submitted successfully !', ticketDetails, emailSent: true });
   } else {
     res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
   }

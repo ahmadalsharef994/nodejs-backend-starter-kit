@@ -283,13 +283,19 @@ const getUpcomingAppointments = async (doctorId, fromDate, endDate, options) => 
   return res;
 };
 
-const getAppointmentsByType = async (doctorId, filter, options) => {
+const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, options) => {
   if (filter.Type === 'FOLLOWUP') {
-    const result = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
+    const result = await Followup.paginate(
+      { docid: doctorId, Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
     return result;
   }
   if (filter.Type === 'ALL') {
-    const result = await Appointment.paginate({ paymentStatus: 'PAID' }, options);
+    const result = await Appointment.paginate(
+      { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
     return result;
   }
   if (filter.Type === 'CANCELLED') {
@@ -298,34 +304,55 @@ const getAppointmentsByType = async (doctorId, filter, options) => {
   }
   if (filter.Type === 'PAST') {
     const result = await Appointment.paginate(
-      { StartTime: { $lt: new Date() }, paymentStatus: 'PAID', docid: doctorId, Status: { $nin: 'cancelled' } },
+      {
+        paymentStatus: 'PAID',
+        docid: doctorId,
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: new Date() },
+      },
       options
     );
     return result;
   }
   if (filter.Type === 'TODAY') {
     const result = await Appointment.paginate(
-      { Date: new Date().toDateString(), paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      {
+        Date: new Date().toDateString(),
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: endDate },
+      },
       options
     );
     return result;
   }
   if (filter.Type === 'REFERRED') {
     const result = await Appointment.paginate(
-      { Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      {
+        Type: 'REFERRED',
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: endDate },
+      },
       options
     );
     return result;
   }
 };
 
-const allAppointments = async (doctorId, options) => {
+const allAppointments = async (doctorId, fromDate, endDate, options) => {
   try {
-    const followup = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
-    const cancelled = await Appointment.paginate({ Status: 'cancelled', docid: doctorId }, options);
+    const followup = await Followup.paginate(
+      { docid: doctorId, Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
+    const cancelled = await Appointment.paginate(
+      { Status: 'cancelled', docid: doctorId, StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
     const past = await Appointment.paginate(
       {
-        StartTime: { $lt: new Date() },
+        StartTime: { $gte: fromDate, $lt: new Date() },
         paymentStatus: 'PAID',
         docid: doctorId,
         Status: { $nin: 'cancelled' },
@@ -334,6 +361,7 @@ const allAppointments = async (doctorId, options) => {
     );
     const today = await Appointment.paginate(
       {
+        StartTime: { $gte: fromDate, $lt: endDate },
         Date: new Date().toDateString(),
         paymentStatus: 'PAID',
         Status: { $nin: 'cancelled' },
@@ -341,7 +369,12 @@ const allAppointments = async (doctorId, options) => {
       options
     );
     const referred = await Appointment.paginate(
-      { Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      {
+        Type: 'REFERRED',
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: endDate },
+      },
       options
     );
     const upcoming = await Appointment.paginate(
@@ -349,7 +382,7 @@ const allAppointments = async (doctorId, options) => {
         docid: doctorId,
         paymentStatus: 'PAID',
         Status: { $nin: 'cancelled' },
-        StartTime: { $gte: new Date() },
+        StartTime: { $gte: new Date(), $lt: endDate },
       },
       options
     );

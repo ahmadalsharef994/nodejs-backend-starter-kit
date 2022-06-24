@@ -81,9 +81,11 @@ const getAppointmentsByType = {
       limit: Joi.number(),
       page: Joi.number(),
       sortBy: Joi.string(),
+      fromDate: Joi.string(),
+      endDate: Joi.string(),
     })
     .min(0)
-    .max(4),
+    .max(6),
 };
 
 const getAppointmentDetails = {

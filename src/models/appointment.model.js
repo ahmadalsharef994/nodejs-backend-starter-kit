@@ -43,6 +43,7 @@ const AppointmentSchema = mongoose.Schema(
     },
     patientMail: {
       type: String,
+      default: null,
     },
     slotId: {
       type: String,
@@ -99,10 +100,6 @@ const AppointmentSchema = mongoose.Schema(
       type: String,
       default: null,
     },
-    DoctorReason: {
-      type: String,
-      default: null,
-    },
     UserAction: {
       type: String,
       default: null,
@@ -114,6 +111,10 @@ const AppointmentSchema = mongoose.Schema(
     isRescheduled: {
       type: Boolean,
       default: false,
+    },
+    RescheduledReason: {
+      type: String,
+      default: null,
     },
     DoctorRescheduled: {
       type: String,

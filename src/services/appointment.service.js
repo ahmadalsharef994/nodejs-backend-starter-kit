@@ -20,6 +20,7 @@ const tokenService = require('./token.service');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
 const authService = require('./auth.service');
+const { emailService } = require('../Microservices');
 const netEarn = require('../utils/netEarnCalculator');
 
 const dbURL = config.mongoose.url;
@@ -617,11 +618,15 @@ const cancelAppointment = async (appointmentId) => {
   return null;
 };
 
-const rescheduleAppointment = async (doctorId, appointmentId, slotId, date) => {
+const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, RescheduledReason, sendMailToUser) => {
   // find appointment by id
+  let emailSent = true;
   let startTime = null;
   let endTime = null;
-  await Appointment.findById({ _id: appointmentId, docid: doctorId });
+  const appointment = await Appointment.findById({ _id: appointmentId, docid: doctorId });
+  if (!appointment) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Appointment doesn't exist");
+  }
   const appointPreference = await AppointmentPreference.findOne({ docid: doctorId });
   const day = slotId.split('-')[0];
   const rescheduledDay = new Date(date).toDateString().toUpperCase().split(' ')[0];
@@ -659,18 +664,39 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date) => {
         Date: appointmentDate,
         Type: 'TODAY',
         isRescheduled: true,
+        RescheduledReason,
         slotId,
       },
       { new: true }
     );
-    return result;
+    if (appointment.patientMail && sendMailToUser === true) {
+      const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
+      await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);
+    } else {
+      emailSent = false;
+    }
+    return { result, emailSent };
   }
   const result = await Appointment.findOneAndUpdate(
     { _id: appointmentId },
-    { StartTime: startTime, EndTime: endTime, Status: 'booked', Date: appointmentDate, isRescheduled: true, slotId },
+    {
+      StartTime: startTime,
+      EndTime: endTime,
+      Status: 'booked',
+      Date: appointmentDate,
+      isRescheduled: true,
+      slotId,
+      RescheduledReason,
+    },
     { new: true }
   );
-  return result;
+  if (appointment.patientMail && sendMailToUser === true) {
+    const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
+    await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);
+  } else {
+    emailSent = false;
+  }
+  return { result, emailSent };
 };
 
 const getDoctorsByCategories = async (category) => {

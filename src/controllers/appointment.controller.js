@@ -215,14 +215,20 @@ const cancelAppointment = catchAsync(async (req, res) => {
 });
 
 const rescheduleAppointment = catchAsync(async (req, res) => {
-  const { appointmentId, slotId, date } = await req.body;
-  await appointmentService.rescheduleAppointment(req.Docid, appointmentId, slotId, date).then((result) => {
-    if (result) {
-      res.status(httpStatus.OK).json({ message: 'Success', data: result });
-    } else {
-      res.status(httpStatus.BAD_REQUEST).json({ message: "Appointment doesn't exist", data: [] });
-    }
-  });
+  const { appointmentId, slotId, date, message, sendMailToUser } = await req.body;
+  const { result, emailSent } = await appointmentService.rescheduleAppointment(
+    req.Docid,
+    appointmentId,
+    slotId,
+    date,
+    message,
+    sendMailToUser
+  );
+  if (result) {
+    res.status(httpStatus.OK).json({ message: 'success', data: result, emailSent });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'failed', data: result, emailSent });
+  }
 });
 
 const bookingConfirmation = catchAsync(async (req, res) => {

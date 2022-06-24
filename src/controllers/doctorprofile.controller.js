@@ -1,29 +1,83 @@
 /* eslint-disable no-bitwise */
 const httpStatus = require('http-status');
-// const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const doctorprofileService = require('../services/doctorprofile.service');
 const appointmentPreferenceService = require('../services/appointmentpreference.service');
 const authDoctorController = require('./authdoctor.controller');
-// const profilePhotoUpload = require('../Microservices/profilePicture.service');
-const { authService, documentService } = require('../services');
+const { authService, documentService, appointmentService } = require('../services');
+const netEarn = require('../utils/netEarnCalculator');
+const pick = require('../utils/pick');
+const daysDiff = require('../utils/calculateDays');
 
 const getStats = catchAsync(async (req, res) => {
-  const PERCENT = 2.6;
-  const TOTAL_USER = 53; // totalPatients
-  const CHART_DATA = [{ data: [20, 41, 63, 33, 28, 35, 50, 46, 11, 26] }]; // what is chart data?
-  const AveragePatientsPerDay = { PERCENT, TOTAL_USER, CHART_DATA };
-  const PERCENTRevenue = 3.1; // what is
-  const TOTALRevenue = 12000; // appointment - past - prices
-  const CHARTRevenue = [{ data: [2, 32, 62, 3, 4, 12, 25, 23, 40, 43] }];
-  const Revenue = { PERCENTRevenue, TOTALRevenue, CHARTRevenue };
-  const PERCENTIncome = 12; // what
-  const TOTALIncome = 8000; // what
-  const CHARTIncome = [{ data: [32, 12, 13, 23, 34, 21, 76, 35, 24, 76] }];
-  const Income = { PERCENTIncome, TOTALIncome, CHARTIncome };
-  const Rating = 4.0; // appointments - past - feedbackmodel // Rating is float between 0.0 and 5.0, with only 1 digit after comma
-  res.status(httpStatus.OK).send({ AveragePatientsPerDay, Revenue, Income, Rating });
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const doctorAuthId = AuthData._id;
+
+  const pastPaidAppointments = await appointmentService.getPastPaidAppointments(doctorAuthId);
+  // Date.prototype.getDateWithoutTime = () => new Date(this.toDateString());
+
+  const todayDate = new Date();
+  const yesterdayDate = new Date();
+  yesterdayDate.setDate(todayDate.getDate() - 1);
+
+  const currentWeekAppointments = pastPaidAppointments.filter((appointment) => {
+    const day1 = new Date(appointment.Date).getTime();
+    const day2 = yesterdayDate.getTime();
+    const days = daysDiff(day2, day1);
+    return days > 0 && days < 7; // 0 (yesterday), 6 (7 days back)
+  });
+  const pastWeekAppointments = pastPaidAppointments.filter((appointment) => {
+    const day1 = new Date(appointment.Date).getTime();
+    const day2 = new Date();
+    day2.setDate(yesterdayDate.getDate() - 7);
+    const days = daysDiff(day2, day1);
+    return days > 0 && days < 7;
+  });
+
+  const TOTAL_PATIENTS = await appointmentService.getPatientsCount(doctorAuthId);
+  const PERCENT_PATIENTS = 100 - (pastWeekAppointments.length / currentWeekAppointments.length) * 100 || 0;
+
+  const TOTAL_REVENUE = pastPaidAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
+  const currentWeekRevenues = currentWeekAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
+  const pastWeekRevenues = pastWeekAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
+  const PERCENT_REVENUE = 100 - (pastWeekRevenues / currentWeekRevenues) * 100 || 0;
+
+  const TOTAL_INCOME = pastPaidAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
+  const currentWeekIncomes = currentWeekAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
+  const pastWeekIncomes = pastWeekAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
+  const PERCENT_INCOME = 100 - (pastWeekIncomes / currentWeekIncomes) * 100 || 0;
+
+  // CHARTS
+  const PATIENTS_CHART = new Array(7).fill(0);
+  const REVENUE_CHART = new Array(7).fill(0);
+  const INCOME_CHART = new Array(7).fill(0);
+
+  currentWeekAppointments.forEach((appointment) => {
+    const day1 = new Date(appointment.Date).getTime();
+    const day2 = yesterdayDate;
+    const days = daysDiff(day2, day1);
+    if (days > 0 && days < 7) {
+      PATIENTS_CHART[6 - days] += 1;
+      REVENUE_CHART[6 - days] += appointment.price;
+      INCOME_CHART[6 - days] += netEarn(appointment.price);
+    }
+  });
+
+  const AVERAGE_PATIENTS_PER_DAY = PATIENTS_CHART.reduce((sum, item) => sum + item, 0) / 7;
+  const PATIENTS = { PERCENT_PATIENTS, TOTAL_PATIENTS, PATIENTS_CHART, AVERAGE_PATIENTS_PER_DAY };
+  const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
+  const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
+
+  const feedbacks = await appointmentService.getDoctorFeedbacks(doctorAuthId);
+
+  const RATING = (
+    feedbacks.reduce((userRatingsSum, feedback) => {
+      return userRatingsSum + feedback.userRating;
+    }, 0) / feedbacks.length
+  ).toFixed(1);
+
+  res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME, RATING });
 });
 
 const submitbasicdetails = catchAsync(async (req, res) => {
@@ -55,21 +109,6 @@ const submitprofilepicture = catchAsync(async (req) => {
   }
   await doctorprofileService.submitprofilepicture(profilePhoto, AuthData);
 });
-
-// const updateprofilepicture = catchAsync(async (req, res) => {
-//   const AuthData = await authService.getAuthById(req.SubjectId);
-//   const returndata = await doctorprofileService.updateprofilepicture(req.files.avatar[0].location, AuthData);
-//   try {
-//     const returnThumbnail = await profilePhotoUpload.thumbnail(req.files.avatar[0].location);
-//     if ((returndata !== false) & (returnThumbnail !== false)) {
-//       res.status(httpStatus.OK).json({ message: 'profile picture updated' });
-//     } else {
-//       res.status(httpStatus.OK).json({ message: 'profile picture not updated kindlly check your input' });
-//     }
-//   } catch (err) {
-//     throw new ApiError(httpStatus.NOT_FOUND, `profilePhotoUpload service: ${err}`);
-//   }
-// });
 
 const fetchbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -174,11 +213,11 @@ const fetchpayoutsdetails = catchAsync(async (req, res) => {
 
 const fetchprofiledetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const doctorBasicData = await doctorprofileService.fetchbasicdetails(AuthData, req.Docid);
+  const doctorBasicData = await doctorprofileService.fetchbasicdetails(AuthData);
   const doctorEducationData = await doctorprofileService.fetcheducationdetails(AuthData);
   const clinicData = await doctorprofileService.fetchClinicdetails(AuthData);
   const experienceData = await doctorprofileService.fetchexperiencedetails(AuthData);
-  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(req.Docid, AuthData);
+  const appointmentPreference = await appointmentPreferenceService.getAppointmentPreferences(AuthData);
   const doctorDocumentData = await documentService.fetchDocumentdata(AuthData);
   if (!doctorBasicData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'first create your account');
@@ -289,10 +328,20 @@ const sendDoctorQueries = catchAsync(async (req, res) => {
     res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
   }
 });
+
+const getBillingDetails = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+  const doctorAuthId = AuthData._id;
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId, options);
+  res.status(httpStatus.OK).json({ message: 'getting billing details', data: billingDetails });
+});
+
 const getDoctorQueries = catchAsync(async (req, res) => {
   const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
   res.status(httpStatus.OK).json({ doctorQueries });
 });
+
 module.exports = {
   getStats,
   submitbasicdetails,
@@ -305,7 +354,6 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
-  // updateprofilepicture,
   fetchpayoutsdetails,
   fetchprofiledetails,
   addConsultationfee,
@@ -315,6 +363,7 @@ module.exports = {
   doctorExpandEducation,
   updateAppointmentPrice,
   getDoctorClinicTimings,
+  getBillingDetails,
   sendDoctorQueries,
   getDoctorQueries,
 };

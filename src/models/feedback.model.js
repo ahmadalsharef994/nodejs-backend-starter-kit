@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 const Appointment = require('./auth.model');
+const Auth = require('./auth.model');
 
 const FeedbackSchema = mongoose.Schema(
   {
@@ -28,6 +29,16 @@ const FeedbackSchema = mongoose.Schema(
     referedBy: {
       type: String,
       default: null,
+    },
+    AuthDoctor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Auth,
+      required: true,
+    },
+    AuthUser: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Auth,
+      required: true,
     },
   },
   {

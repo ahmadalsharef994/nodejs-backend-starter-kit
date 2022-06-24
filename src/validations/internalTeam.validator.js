@@ -7,6 +7,13 @@ const verifydoctor = {
   }),
 };
 
+const setServiceCharges = {
+  body: Joi.object().keys({
+    docid: Joi.string().required(), // what is docid
+    serviceCharges: Joi.number().min(0.1).max(0.3),
+  }),
+};
+
 const rejectdoctor = {
   body: Joi.object().keys({
     docid: Joi.string().required(),
@@ -55,4 +62,5 @@ module.exports = {
   registeradmin,
   loginadmin,
   doctordetails,
+  setServiceCharges,
 };

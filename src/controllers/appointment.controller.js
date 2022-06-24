@@ -225,9 +225,9 @@ const rescheduleAppointment = catchAsync(async (req, res) => {
     sendMailToUser
   );
   if (result) {
-    res.status(httpStatus.OK).json({ message: 'success', data: result, emailSent });
+    res.status(httpStatus.OK).json({ message: 'Appointment Rescheduled!', data: result, emailSent });
   } else {
-    res.status(httpStatus.OK).json({ message: 'failed', data: result, emailSent });
+    res.status(httpStatus.OK).json({ message: 'Failed to reschedule the Appointment', data: result, emailSent });
   }
 });
 

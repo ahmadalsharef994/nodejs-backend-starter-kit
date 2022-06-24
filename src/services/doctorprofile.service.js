@@ -189,9 +189,11 @@ const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
   }
 };
 
-const getBillingDetails = async (AuthDoctor, options) => {
-  // const pastPaidAppointments = await appointmentService.getPastPaidAppointments(AuthDoctor);
-  const pastPaidAppointments = await Appointment.paginate({ AuthDoctor, paymentStatus: 'PAID' }, options);
+const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
+  const pastPaidAppointments = await Appointment.paginate(
+    { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
+    options
+  );
   const pickedProperties = pastPaidAppointments.results.map((appointment) => {
     return {
       patientName: appointment.patientName,

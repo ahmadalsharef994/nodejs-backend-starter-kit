@@ -333,8 +333,10 @@ const getBillingDetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const doctorAuthId = AuthData._id;
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId, options);
-  res.status(httpStatus.OK).json({ message: 'getting billing details', data: billingDetails });
+  const fromDate = new Date(req.query.fromDate); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = new Date(req.query.endDate);
+  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId, fromDate, endDate, options);
+  res.status(httpStatus.OK).json({ message: `Billing details between ${fromDate} and ${endDate}`, data: billingDetails });
 });
 
 const getDoctorQueries = catchAsync(async (req, res) => {

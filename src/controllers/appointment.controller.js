@@ -278,6 +278,14 @@ const deleteSlot = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
   }
 });
+const getTodaysUpcomingAppointment = catchAsync(async (req, res) => {
+  const nextAppointment = await appointmentService.getTodaysUpcomingAppointment(req.Docid);
+  if (nextAppointment) {
+    res.status(httpStatus.OK).json({ nextAppointment });
+  } else {
+    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
+  }
+});
 module.exports = {
   initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -304,4 +312,5 @@ module.exports = {
   rescheduleFollowup,
   allAppointments,
   deleteSlot,
+  getTodaysUpcomingAppointment,
 };

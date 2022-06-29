@@ -291,14 +291,7 @@ const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, option
     return result;
   }
   if (filter.Type === 'ALL') {
-<<<<<<< HEAD
     const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
-=======
-    const result = await Appointment.paginate(
-      { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate } },
-      options
-    );
->>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
     return result;
   }
   if (filter.Type === 'CANCELLED') {
@@ -319,32 +312,14 @@ const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, option
   }
   if (filter.Type === 'TODAY') {
     const result = await Appointment.paginate(
-<<<<<<< HEAD
       { docid: doctorId, Date: new Date().toDateString(), paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
-=======
-      {
-        Date: new Date().toDateString(),
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: endDate },
-      },
->>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
       options
     );
     return result;
   }
   if (filter.Type === 'REFERRED') {
     const result = await Appointment.paginate(
-<<<<<<< HEAD
       { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
-=======
-      {
-        Type: 'REFERRED',
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: endDate },
-      },
->>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
       options
     );
     return result;
@@ -381,16 +356,7 @@ const allAppointments = async (doctorId, fromDate, endDate, options) => {
       options
     );
     const referred = await Appointment.paginate(
-<<<<<<< HEAD
       { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
-=======
-      {
-        Type: 'REFERRED',
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: endDate },
-      },
->>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
       options
     );
     const upcoming = await Appointment.paginate(
@@ -449,6 +415,29 @@ const getAvailableAppointments = async (AuthData) => {
   //     });
   //   }
   // });
+  return availableAppointmentSlots;
+};
+const getAvailableAppointmentsManually = async (docid) => {
+  const AllAppointmentSlots = await AppointmentPreference.findOne({ docid });
+  // console.log(AllAppointmentSlots)
+  if (!AllAppointmentSlots) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
+  }
+  const bookedAppointmentSlots = await Appointment.find({ docid, paymentStatus: 'PAID' });
+
+  if (bookedAppointmentSlots === []) {
+    const availableAppointmentSlots = AllAppointmentSlots;
+    return availableAppointmentSlots;
+  }
+  const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
+
+  const availableAppointmentSlots = {};
+  for (let i = 0; i < 7; i += 1) {
+    availableAppointmentSlots[`${weekday[i]}`] = AllAppointmentSlots[`${weekday[i]}`].filter(
+      (item) => !bookedSlotIds.includes(item.slotId)
+    );
+  }
+
   return availableAppointmentSlots;
 };
 
@@ -921,4 +910,5 @@ module.exports = {
   getPastPaidAppointments,
   getTotalIncome,
   getTodaysUpcomingAppointment,
+  getAvailableAppointmentsManually,
 };

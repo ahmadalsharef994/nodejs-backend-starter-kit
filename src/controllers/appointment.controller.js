@@ -95,6 +95,11 @@ const getAvailableAppointments = catchAsync(async (req, res) => {
   const result = await appointmentService.getAvailableAppointments(AuthData);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
+// to get available appointments by manully passing docId
+const getAvailableAppointmentsManually = catchAsync(async (req, res) => {
+  const result = await appointmentService.getAvailableAppointmentsManually(req.body.docid);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+});
 
 const getUpcomingAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -321,4 +326,5 @@ module.exports = {
   allAppointments,
   deleteSlot,
   getTodaysUpcomingAppointment,
+  getAvailableAppointmentsManually,
 };

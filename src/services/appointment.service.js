@@ -269,26 +269,36 @@ const submitFollowupDetails = async (appointmentId, doctorId, slotId, date, docu
   return assignedFollowup;
 };
 
-const getUpcomingAppointments = async (doctorId, limit, options) => {
+const getUpcomingAppointments = async (doctorId, fromDate, endDate, options) => {
   const res = await Appointment.paginate(
     {
       docid: doctorId,
       paymentStatus: 'PAID',
       Status: { $nin: 'cancelled' },
-      StartTime: { $gte: new Date() },
+      StartTime: { $gte: fromDate, $lt: endDate },
     },
     options
   );
   return res;
 };
 
-const getAppointmentsByType = async (doctorId, filter, options) => {
+const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, options) => {
   if (filter.Type === 'FOLLOWUP') {
-    const result = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
+    const result = await Followup.paginate(
+      { docid: doctorId, Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
     return result;
   }
   if (filter.Type === 'ALL') {
+<<<<<<< HEAD
     const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
+=======
+    const result = await Appointment.paginate(
+      { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
+>>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
     return result;
   }
   if (filter.Type === 'CANCELLED') {
@@ -297,34 +307,63 @@ const getAppointmentsByType = async (doctorId, filter, options) => {
   }
   if (filter.Type === 'PAST') {
     const result = await Appointment.paginate(
-      { StartTime: { $lt: new Date() }, paymentStatus: 'PAID', docid: doctorId, Status: { $nin: 'cancelled' } },
+      {
+        paymentStatus: 'PAID',
+        docid: doctorId,
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: new Date() },
+      },
       options
     );
     return result;
   }
   if (filter.Type === 'TODAY') {
     const result = await Appointment.paginate(
+<<<<<<< HEAD
       { docid: doctorId, Date: new Date().toDateString(), paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+=======
+      {
+        Date: new Date().toDateString(),
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: endDate },
+      },
+>>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
       options
     );
     return result;
   }
   if (filter.Type === 'REFERRED') {
     const result = await Appointment.paginate(
+<<<<<<< HEAD
       { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+=======
+      {
+        Type: 'REFERRED',
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: endDate },
+      },
+>>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
       options
     );
     return result;
   }
 };
 
-const allAppointments = async (doctorId, options) => {
+const allAppointments = async (doctorId, fromDate, endDate, options) => {
   try {
-    const followup = await Followup.paginate({ docid: doctorId, Status: { $nin: 'cancelled' } }, options);
-    const cancelled = await Appointment.paginate({ Status: 'cancelled', docid: doctorId }, options);
+    const followup = await Followup.paginate(
+      { docid: doctorId, Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
+    const cancelled = await Appointment.paginate(
+      { Status: 'cancelled', docid: doctorId, StartTime: { $gte: fromDate, $lt: endDate } },
+      options
+    );
     const past = await Appointment.paginate(
       {
-        StartTime: { $lt: new Date() },
+        StartTime: { $gte: fromDate, $lt: new Date() },
         paymentStatus: 'PAID',
         docid: doctorId,
         Status: { $nin: 'cancelled' },
@@ -333,6 +372,7 @@ const allAppointments = async (doctorId, options) => {
     );
     const today = await Appointment.paginate(
       {
+        StartTime: { $gte: fromDate, $lt: endDate },
         Date: new Date().toDateString(),
         paymentStatus: 'PAID',
         Status: { $nin: 'cancelled' },
@@ -341,7 +381,16 @@ const allAppointments = async (doctorId, options) => {
       options
     );
     const referred = await Appointment.paginate(
+<<<<<<< HEAD
       { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+=======
+      {
+        Type: 'REFERRED',
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: fromDate, $lt: endDate },
+      },
+>>>>>>> 95e2be64211c88c5bd57cad85a7bf99505d6586a
       options
     );
     const upcoming = await Appointment.paginate(
@@ -349,7 +398,7 @@ const allAppointments = async (doctorId, options) => {
         docid: doctorId,
         paymentStatus: 'PAID',
         Status: { $nin: 'cancelled' },
-        StartTime: { $gte: new Date() },
+        StartTime: { $gte: new Date(), $lt: endDate },
       },
       options
     );
@@ -609,10 +658,13 @@ const getUserFeedback = async (feedbackDoc, appointmentId) => {
   return false;
 };
 
-const cancelAppointment = async (appointmentId) => {
+const cancelAppointment = async (appointmentId, doctorId) => {
+  // const appointments = await Appointment.find({ AuthDoctor: doctorId });
+
   const appointmentData = await Appointment.findById({ _id: appointmentId });
   if (appointmentData.Status !== 'cancelled') {
-    const result = await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    const result = await Appointment.find({ AuthDoctor: doctorId });
     return result;
   }
   return null;
@@ -655,7 +707,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
   const appointmentDate = new Date(date).toDateString();
   const todayDate = new Date().toDateString();
   if (`${todayDate}` === `${appointmentDate}`) {
-    const result = await Appointment.findOneAndUpdate(
+    await Appointment.findOneAndUpdate(
       { _id: appointmentId },
       {
         StartTime: startTime,
@@ -669,6 +721,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
       },
       { new: true }
     );
+    const result = await Appointment.find({ docid: doctorId });
     if (appointment.patientMail && sendMailToUser === true) {
       const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
       await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);
@@ -677,7 +730,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
     }
     return { result, emailSent };
   }
-  const result = await Appointment.findOneAndUpdate(
+  await Appointment.findOneAndUpdate(
     { _id: appointmentId },
     {
       StartTime: startTime,
@@ -690,6 +743,7 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
     },
     { new: true }
   );
+  const result = await Appointment.find({ docid: doctorId });
   if (appointment.patientMail && sendMailToUser === true) {
     const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
     await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);

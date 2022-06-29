@@ -98,7 +98,9 @@ const getAvailableAppointments = catchAsync(async (req, res) => {
 
 const getUpcomingAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  await appointmentService.getUpcomingAppointments(req.Docid, req.query.limit, options).then((result) => {
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date(); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  await appointmentService.getUpcomingAppointments(req.Docid, fromDate, endDate, options).then((result) => {
     if (result.length === 0) {
       res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
     } else {
@@ -110,8 +112,10 @@ const getUpcomingAppointments = catchAsync(async (req, res) => {
 const getAppointmentsByType = catchAsync(async (req, res) => {
   const filter = { Type: req.query.type };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
   appointmentService
-    .getAppointmentsByType(req.Docid, filter, options)
+    .getAppointmentsByType(req.Docid, fromDate, endDate, filter, options)
     .then((result) => {
       return res.status(httpStatus.OK).send(result);
     })
@@ -201,8 +205,10 @@ const getUserFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelAppointment = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+
   await appointmentService
-    .cancelAppointment(req.body.appointmentId)
+    .cancelAppointment(req.body.appointmentId, AuthData._id)
     .then((result) => {
       if (result) {
         return res.status(httpStatus.OK).json({ message: 'Success', data: result });
@@ -263,7 +269,9 @@ const rescheduleFollowup = catchAsync(async (req, res) => {
 
 const allAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const data = await appointmentService.allAppointments(req.Docid, options);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const data = await appointmentService.allAppointments(req.Docid, fromDate, endDate, options);
   if (data) {
     res.status(httpStatus.OK).json({ data });
   } else {

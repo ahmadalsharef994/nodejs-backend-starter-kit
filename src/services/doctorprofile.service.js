@@ -189,15 +189,22 @@ const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
   }
 };
 
-const getBillingDetails = async (AuthDoctor, options) => {
-  // const pastPaidAppointments = await appointmentService.getPastPaidAppointments(AuthDoctor);
-  const pastPaidAppointments = await Appointment.paginate({ AuthDoctor, paymentStatus: 'PAID' }, options);
+const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
+  const pastPaidAppointments = await Appointment.paginate(
+    { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
+    options
+  );
+
   const pickedProperties = pastPaidAppointments.results.map((appointment) => {
+    // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
+    // console.log(avatar)
     return {
       patientName: appointment.patientName,
-      Date: appointment.Date,
+      consultationDate: appointment.Date,
       StartTime: appointment.StartTime,
       price: appointment.price,
+      avatar: 'https://docprofilephoto.s3.ap-south-1.amazonaws.com/avatar/b0f985ca-c2a4-4f6a-a97c-124a5b5192d9.png',
+      // avatar to be extracted from DB
       orderId: appointment.orderId,
     };
   });
@@ -209,6 +216,11 @@ const getBillingDetails = async (AuthDoctor, options) => {
     appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
     appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
   });
+
+  pickedProperties.totalPages = pastPaidAppointments.totalPages;
+  pickedProperties.page = pastPaidAppointments.page;
+  pickedProperties.limit = pastPaidAppointments.limit;
+  pickedProperties.totalResults = pastPaidAppointments.totalResults;
   return pickedProperties;
 };
 

@@ -8,6 +8,14 @@ const documentValidation = require('../../validations/document.validation');
 
 const router = express.Router();
 
+/**
+ * @openapi
+ * /doctor/document/upload:
+ *  post:
+ *     tags:
+ *     - doctor
+ *     - document
+ */
 router.post(
   '/upload',
   authdoctornonverified(),
@@ -25,13 +33,31 @@ router.post(
   }
 );
 
+/**
+ * @openapi
+ * /doctor/document/view/:doctype:
+ *  get:
+ *     tags:
+ *     - doctor
+ *     - document
+ */
 router.get('/view/:doctype', validate(documentValidation.documentUrl), authdoctornonverified(), function (req, res) {
   documentController.getUrl(req, res);
 });
+
+/**
+ * @openapi
+ * /doctor/document/update-esign:
+ *  post:
+ *     tags:
+ *     - doctor
+ *     - document
+ */
 router.post(
   '/update-esign',
   authdoctorVerified(),
   profilePhotoUpload.uploadPhoto.fields([{ name: 'esign', maxCount: 1 }]),
   documentController.updateEsign
 );
+
 module.exports = router;

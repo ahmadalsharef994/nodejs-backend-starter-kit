@@ -165,9 +165,8 @@ const submitAppointmentDetails = async (
   const appointmentPrice = Doctordetails.appointmentPrice;
 
   await AppointmentPreference.findOne({ docid: doctorId }).then((pref) => {
-    const day = slotId.split('-')[1];
-    const type = slotId.split('-')[0];
-    const slots = pref[`${day}_${type}`];
+    const day = slotId.split('-')[0];
+    const slots = pref[`${day}`];
     const slot = slots.filter((e) => e.slotId === slotId);
     if (slot.length === 0) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
@@ -179,7 +178,7 @@ const submitAppointmentDetails = async (
       throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
     }
     const correctDay = startTime.getDay();
-    const requestedDay = slotId.split('-')[1];
+    const requestedDay = slotId.split('-')[0];
     if (weekday[correctDay] !== requestedDay) {
       throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
     }
@@ -292,10 +291,7 @@ const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, option
     return result;
   }
   if (filter.Type === 'ALL') {
-    const result = await Appointment.paginate(
-      { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate } },
-      options
-    );
+    const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
     return result;
   }
   if (filter.Type === 'CANCELLED') {
@@ -316,24 +312,14 @@ const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, option
   }
   if (filter.Type === 'TODAY') {
     const result = await Appointment.paginate(
-      {
-        Date: new Date().toDateString(),
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: endDate },
-      },
+      { docid: doctorId, Date: new Date().toDateString(), paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
       options
     );
     return result;
   }
   if (filter.Type === 'REFERRED') {
     const result = await Appointment.paginate(
-      {
-        Type: 'REFERRED',
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: endDate },
-      },
+      { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
       options
     );
     return result;
@@ -365,16 +351,12 @@ const allAppointments = async (doctorId, fromDate, endDate, options) => {
         Date: new Date().toDateString(),
         paymentStatus: 'PAID',
         Status: { $nin: 'cancelled' },
+        docid: doctorId,
       },
       options
     );
     const referred = await Appointment.paginate(
-      {
-        Type: 'REFERRED',
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: endDate },
-      },
+      { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
       options
     );
     const upcoming = await Appointment.paginate(
@@ -433,6 +415,29 @@ const getAvailableAppointments = async (AuthData) => {
   //     });
   //   }
   // });
+  return availableAppointmentSlots;
+};
+const getAvailableAppointmentsManually = async (docid) => {
+  const AllAppointmentSlots = await AppointmentPreference.findOne({ docid });
+  // console.log(AllAppointmentSlots)
+  if (!AllAppointmentSlots) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
+  }
+  const bookedAppointmentSlots = await Appointment.find({ docid, paymentStatus: 'PAID' });
+
+  if (bookedAppointmentSlots === []) {
+    const availableAppointmentSlots = AllAppointmentSlots;
+    return availableAppointmentSlots;
+  }
+  const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
+
+  const availableAppointmentSlots = {};
+  for (let i = 0; i < 7; i += 1) {
+    availableAppointmentSlots[`${weekday[i]}`] = AllAppointmentSlots[`${weekday[i]}`].filter(
+      (item) => !bookedSlotIds.includes(item.slotId)
+    );
+  }
+
   return availableAppointmentSlots;
 };
 
@@ -858,6 +863,20 @@ const deleteSlot = async (doctorAuthId, slotId) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Looks like this is not a valid slotId ,please enter a valid slotId');
   }
 };
+const getTodaysUpcomingAppointment = async (doctorId) => {
+  try {
+    const result = await Appointment.find({
+      docid: doctorId,
+      Date: new Date().toDateString(),
+      paymentStatus: 'PAID',
+      Status: { $nin: 'cancelled' },
+      StartTime: { $gte: new Date() },
+    });
+    return result[0];
+  } catch (err) {
+    return null;
+  }
+};
 module.exports = {
   initiateAppointmentSession,
   joinAppointmentSessionbyDoctor,
@@ -890,4 +909,6 @@ module.exports = {
   getDoctorFeedbacks,
   getPastPaidAppointments,
   getTotalIncome,
+  getTodaysUpcomingAppointment,
+  getAvailableAppointmentsManually,
 };

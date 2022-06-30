@@ -741,9 +741,24 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
   }
   return { result, emailSent };
 };
-
+const doctorSlots = async (doctorid) => {
+  const res = await getAvailableAppointmentsManually(doctorid);
+  return res;
+};
 const getDoctorsByCategories = async (category) => {
   const Doctordetails = await doctordetails.find({ specializations: { $in: [category] } });
+  const res = await Promise.all(
+    Doctordetails.map(async (appointment) => {
+      // eslint-disable-next-line no-shadow
+      const result = await doctorSlots(appointment.doctorId);
+      const appObj = {
+        appointment,
+        slots: result,
+      };
+      // console.log(appObj);
+      return appObj;
+    })
+  );
   const isVerified = async (doctorid) => {
     const doctor = await VerifiedDoctors.findOne({ docid: doctorid });
     if (doctor) {
@@ -758,7 +773,7 @@ const getDoctorsByCategories = async (category) => {
     }
   });
   if (doctors) {
-    return { doctorDetails: doctors };
+    return { doctorDetails: res };
   }
   throw new ApiError(httpStatus.NOT_FOUND, 'No doctors in this category');
 };

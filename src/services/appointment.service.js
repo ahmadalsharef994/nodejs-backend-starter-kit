@@ -858,6 +858,41 @@ const deleteSlot = async (doctorAuthId, slotId) => {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Looks like this is not a valid slotId ,please enter a valid slotId');
   }
 };
+const getTodaysUpcomingAppointment = async (doctorId) => {
+  try {
+    const upcoming = await Appointment.find({
+      docid: doctorId,
+      Date: new Date().toDateString(),
+      paymentStatus: 'PAID',
+      Status: { $nin: 'cancelled' },
+      StartTime: { $gte: new Date() },
+    });
+    const ongoing = await Appointment.find({
+      docid: doctorId,
+      Date: new Date().toDateString(),
+      paymentStatus: 'PAID',
+      Status: { $nin: 'cancelled' },
+      StartTime: { $lte: new Date() },
+    });
+    const currenttime = new Date().toLocaleString().split(':')[1];
+    const ongoingApp = new Date(`${ongoing[ongoing.length - 1].StartTime}`).toLocaleString().split(':')[1];
+    if (currenttime >= ongoingApp) {
+      if (currenttime - ongoingApp <= 10) {
+        return ongoing[ongoing.length - 1];
+      }
+      return upcoming[0];
+    }
+    if (currenttime < ongoingApp) {
+      const ongoingtime = 60 - ongoingApp + currenttime;
+      if (ongoingtime >= 10) {
+        return ongoing[ongoing.length - 1];
+      }
+      return upcoming[0];
+    }
+  } catch (err) {
+    return null;
+  }
+};
 module.exports = {
   initiateAppointmentSession,
   joinAppointmentSessionbyDoctor,

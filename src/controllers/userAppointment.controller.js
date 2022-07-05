@@ -56,9 +56,8 @@ const getDoctorsByCategories = catchAsync(async (req, res) => {
   const { doctorDetails } = await appointmentService.getDoctorsByCategories(req.body.Category);
   if (doctorDetails.length > 0) {
     res.status(httpStatus.OK).json(doctorDetails);
-  } else {
-    res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
   }
+  res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
 });
 module.exports = {
   upcomingAppointments,

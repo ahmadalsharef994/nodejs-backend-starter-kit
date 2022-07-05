@@ -45,11 +45,13 @@ const createAppointmentOrder = catchAsync(async (req, res) => {
 const verifyAppointmentOrder = catchAsync(async (req, res) => {
   // razorpayAppointmentVerification -> verifyAppointmentOrder
   const calculatedSHADigest = await razorpayPaymentServices.calculateSHADigestAppointment(
-    req.body.razorpay_order_id,
-    req.body.razorpay_payment_id,
-    req.body.razorpay_signature
+    req.body.orderCreationId,
+    req.body.razorpayOrderId,
+    req.body.razorpayPaymentId,
+    req.body.razorpaySignature
   );
   // console.log('x-razorpay-signature: ', req.headers['x-razorpay-signature']);
+
   if (calculatedSHADigest === 'match') {
     // console.log('request is legit');
     return res.status(httpStatus.OK).json({ message: 'OK' });

@@ -98,17 +98,14 @@ const createAppointmentOrder = async (currency, appointmentid, orderId) => {
   }
 };
 
-const calculateSHADigestAppointment = async (razorpayOrderID, razorpayPaymentId, razorpaySignature) => {
+const calculateSHADigestAppointment = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
   const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-  shasum.update(`${razorpayOrderID}|${razorpayPaymentId}`);
+  shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
   const calculatedSHADigest = shasum.digest('hex');
   if (calculatedSHADigest === razorpaySignature) {
     // console.log('request is legit');
-    await AppointmentOrder.updateOne({ razorpayOrderID }, { $set: { isPaid: true } });
-    const paymentDetails = await AppointmentOrder.findOne({ razorpayOrderID });
-    if (paymentDetails.isPaid === true) {
-      await Appointment.updateOne({ orderId: paymentDetails.AppointmentOrderID }, { $set: { paymentStatus: 'PAID' } });
-    }
+    await AppointmentOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
+    await Appointment.findOneAndUpdate({ orderId: orderCreationId }, { $set: { paymentStatus: 'PAID' } });
     return 'match';
   }
   // console.log('calculatedSHADigest: ', digest);

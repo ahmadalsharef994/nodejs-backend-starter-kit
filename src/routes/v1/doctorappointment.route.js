@@ -15,7 +15,7 @@ router.post(
   authdoctorverified(),
   validate(appointmentValidator.joinAppointmentDoctor),
   appointmentController.initAppointmentDoctor
-);
+); // DEPRECATED
 // This is used fot Initiaing Appointment Session Manually while testing
 
 router.post(

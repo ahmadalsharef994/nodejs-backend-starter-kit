@@ -102,7 +102,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   if (isIntiated.length > 0) {
     throw new ApiError(400, 'There was Already A Session Intiated For This Appointment Use appointment id to Live Join !');
   }
-  const AppointmentSessiondata = await AppointmentSession.create({
+  const AppointmentSessionData = await AppointmentSession.create({
     appointmentid: appointmentID,
     AuthDoctor: doctorId,
     AuthUser: patientId,
@@ -111,10 +111,10 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
     dytedoctortoken: doctorparticipation.authResponse.authToken,
     dyteusertoken: userparticipation.authResponse.authToken,
   });
-  if (!AppointmentSessiondata) {
+  if (!AppointmentSessionData) {
     throw new ApiError(400, 'Error Triggered it to Developer DYTE Services down');
   }
-  return { meetingroom, doctorparticipation, userparticipation };
+  return { AppointmentSessionData, meetingroom, doctorparticipation, userparticipation };
 };
 
 module.exports = {

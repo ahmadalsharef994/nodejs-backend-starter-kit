@@ -4,7 +4,6 @@ const httpStatus = require('http-status');
 const short = require('short-uuid');
 const ApiError = require('../utils/ApiError');
 const {
-  AppointmentSession,
   Followup,
   Prescription,
   Appointment,
@@ -47,10 +46,24 @@ const initiateAppointmentSession = async (appointmentId) => {
 
 const joinAppointmentSessionbyDoctor = async (appointmentId, AuthData, socketID) => {
   // Join Appointment Doctor called while Doctor requests to Join an Appointment
-  const AppointmentSessionData = await AppointmentSession.findOne({
-    appointmentid: appointmentId,
-    AuthDoctor: AuthData._id,
-  });
+  const AppointmentData = await Appointment.findById({ _id: appointmentId });
+  if (!AppointmentData) {
+    throw new ApiError(400, 'Cannot Initiate Appointment Session');
+  }
+  // Dyte Service
+  const dyteMeetingData = await DyteService.createDyteMeeting(
+    appointmentId,
+    AppointmentData.AuthDoctor,
+    AppointmentData.AuthUser
+  );
+  if (!dyteMeetingData) {
+    throw new ApiError(400, 'Error Generating Video Session');
+  }
+  // const AppointmentSessionData = await AppointmentSession.findOne({
+  //   appointmentid: appointmentId,
+  //   AuthDoctor: AuthData._id,
+  // });
+  const AppointmentSessionData = dyteMeetingData.AppointmentSessionData;
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
@@ -76,7 +89,24 @@ const joinAppointmentSessionbyDoctor = async (appointmentId, AuthData, socketID)
 
 const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID) => {
   // Join Appointment User called while Doctor requests to Join an Appointment
-  const AppointmentSessionData = await AppointmentSession.findOne({ appointmentid: appointmentId, AuthUser: AuthData._id });
+  const AppointmentData = await Appointment.findById({ _id: appointmentId });
+  if (!AppointmentData) {
+    throw new ApiError(400, 'Cannot Initiate Appointment Session');
+  }
+  // Dyte Service
+  const dyteMeetingData = await DyteService.createDyteMeeting(
+    appointmentId,
+    AppointmentData.AuthDoctor,
+    AppointmentData.AuthUser
+  );
+  if (!dyteMeetingData) {
+    throw new ApiError(400, 'Error Generating Video Session');
+  }
+  // const AppointmentSessionData = await AppointmentSession.findOne({
+  //   appointmentid: appointmentId,
+  //   AuthDoctor: AuthData._id,
+  // });
+  const AppointmentSessionData = dyteMeetingData.AppointmentSessionData;
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }

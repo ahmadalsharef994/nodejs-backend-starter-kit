@@ -135,11 +135,11 @@ const getDoctorFeedback = {
   }),
 };
 
-const getAvailableAppointments = {
-  body: Joi.object().keys({
-    docid: Joi.required(),
-  }),
-};
+// const getAvailableAppointments = {
+//   body: Joi.object().keys({
+//     docId: Joi.required(),
+//   }),
+// };
 
 const cancelAppointment = {
   body: Joi.object()
@@ -190,7 +190,7 @@ module.exports = {
   assignFollowup,
   getFollowups,
   getAppointmentsByType,
-  getAvailableAppointments,
+  // getAvailableAppointments,
   getAppointmentDetails,
   createPrescription,
   getPrescription,

@@ -118,8 +118,7 @@ router
  *     - appointments
  */
 router.route('/get-available-followups').post(authdoctorverified(), appointmentController.getAvailableFollowUps);
-// gets appointment that is going to attend meeting with doctor
-router.route('/get-next-appointment').get(authdoctorverified(), appointmentController.getTodaysUpcomingAppointment);
+
 //  get appointment slots available for booking (public)
 /**
  * @openapi
@@ -130,7 +129,15 @@ router.route('/get-next-appointment').get(authdoctorverified(), appointmentContr
  *     - appointments
  */
 router.route('/get-available-appointments').get(authdoctorverified(), appointmentController.getAvailableAppointments); // getAvailableAppointments
-router.route('/get-available-appointments').post(appointmentController.getAvailableAppointmentsManually); // getAvailableAppointments
+
+/**
+ * @openapi
+ * /doctor/appointment/doctor-all-appointments:
+ *  get:
+ *     tags:
+ *     - doctor
+ *     - appointments
+ */
 router.route('/doctor-all-appointments').get(authdoctorverified(), appointmentController.allAppointments);
 
 /**

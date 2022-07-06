@@ -125,6 +125,15 @@ router.route('/verified-doctors').get(authAdmin(), InternalTeamController.verifi
  *     - internal team
  */
 router.route('/rejected-doctors').get(authAdmin(), InternalTeamController.rejectedDoctors);
+
+/**
+ * @openapi
+ * /admin/restricted/service-charges:
+ *  post:
+ *     tags:
+ *     - admin
+ *     - internal team
+ */
 router
   .route('/service-charges')
   .post(authAdmin(), validate(InternalTeamValidator.setServiceCharges), InternalTeamController.setServiceCharges);

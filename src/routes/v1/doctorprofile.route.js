@@ -10,34 +10,9 @@ const profilePhotoUpload = require('../../Microservices/profilePicture.service')
 
 const router = express.Router();
 
-/**
- * @openapi
- * /doctor/profile/stats:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/stats').get(authdoctorverified(), doctorProfileController.getStats); // doctorProfileController, getStats
-
-/**
- * @openapi
- * /doctor/profile/basic-details:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/basic-details').get(authdoctornonverified(), doctorProfileController.fetchbasicdetails); // getBasicDetails
 
-/**
- * @openapi
- * /doctor/profile/basic-details:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/basic-details').post(
   authdoctornonverified(),
   // doctorBasicDetails
@@ -45,14 +20,6 @@ router.route('/basic-details').post(
   doctorProfileController.submitbasicdetails
 ); // postBasicDetails
 
-/**
- * @openapi
- * /doctor/profile/basic-details/profile-picture:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/basic-details/profile-picture')
   .post(
@@ -65,24 +32,18 @@ router
     }
   );
 
-/**
- * @openapi
- * /doctor/profile/education-details:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
-router.route('/education-details').get(authdoctornonverified(), doctorProfileController.fetcheducationdetails);
+// router
+//   .route('/basic-details/update-profile-picture')
+//   .post(
+//     profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
+//     authdoctornonverified(),
+//     function (req, res) {
+//       doctorProfileController.submitprofilepicture(req);
+//       res.status(201).json('Profile picture Updated!');
+//     }
+//   );
 
-/**
- * @openapi
- * /doctor/profile/education-details:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
+router.route('/education-details').get(authdoctornonverified(), doctorProfileController.fetcheducationdetails);
 router
   .route('/education-details')
   .post(
@@ -91,24 +52,7 @@ router
     doctorProfileController.submiteducationdetails
   );
 
-/**
- * @openapi
- * /doctor/profile/experience-details:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/experience-details').get(authdoctornonverified(), doctorProfileController.fetchexperiencedetails);
-
-/**
- * @openapi
- * /doctor/profile/education-details:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/experience-details')
   .post(
@@ -117,24 +61,7 @@ router
     doctorProfileController.submitexperiencedetails
   );
 
-/**
- * @openapi
- * /doctor/profile/clinic-details:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/clinic-details').get(authdoctornonverified(), doctorProfileController.fetchclinicdetails);
-
-/**
- * @openapi
- * /doctor/profile/education-details:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/clinic-details')
   .post(
@@ -142,16 +69,6 @@ router
     validate(doctorProfileValidator.ClinicDoctorDetails),
     doctorProfileController.submitclinicdetails
   );
-
-/**
- * @openapi
- * /doctor/profile/updatePref:
- *  put:
- *     tags:
- *     - doctor
- *     - doctor profile
- *     - DEPRICATED ENDPOINT
- */
 router
   .route('/updatePref')
   .put(
@@ -164,45 +81,12 @@ router
 /* router.route('/createPref').post(authdoctorverified(),validate(preferenceValidator.preferenceDetails),appointmentPreferenceController.submitAppointmentPreference); */
 
 // get all appointment preference slots
-/**
- * @openapi
- * /doctor/profile/getappointments:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.showAppointments);
 
 // get all followup preference slots
-/**
- * @openapi
- * /doctor/profile/getfollowups:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);
 
-/**
- * @openapi
- * /doctor/profile/payout-details:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/payout-details').get(authdoctornonverified(), doctorProfileController.fetchpayoutsdetails);
-
-/**
- * @openapi
- * /doctor/profile/payout-details:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/payout-details')
   .post(
@@ -210,45 +94,18 @@ router
     validate(doctorProfileValidator.PayoutsDoctorDetails),
     doctorProfileController.submitpayoutsdetails
   );
-
-/**
- * @openapi
- * /doctor/profile/consultationfee:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.post(
   '/consultationfee',
   authdoctorverified(),
   validate(doctorProfileValidator.addConsultationfee),
   doctorProfileController.addConsultationfee
 );
-
-/**
- * @openapi
- * /doctor/profile/notifications:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.post(
   '/notifications',
   authdoctorverified(),
   validate(doctorProfileValidator.notifications),
   doctorProfileController.notifications
 );
-
-/**
- * @openapi
- * /doctor/profile/submit-education-and-experience:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/submit-education-and-experience')
   .post(
@@ -256,39 +113,12 @@ router
     validate(doctorProfileValidator.EducationExperience),
     doctorProfileController.doctorExpandEducation
   );
-
-/**
- * @openapi
- * /doctor/profile/update-clinic-timings:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/update-clinic-timings')
   .post(authdoctorverified(), validate(doctorProfileValidator.timings), doctorProfileController.updateClinicDetails);
-
-/**
- * @openapi
- * /doctor/profile/update-details:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/update-details')
   .post(authdoctornonverified(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
-
-/**
- * @openapi
- * /doctor/profile/update-appointmentPrice:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/update-appointmentPrice')
   .post(
@@ -296,15 +126,6 @@ router
     validate(doctorProfileValidator.updateAppointmentPrice),
     doctorProfileController.updateAppointmentPrice
   );
-
-/**
- * @openapi
- * /doctor/profile/update-appointmentPrice:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/get-doctor-clinictimings').get(authdoctornonverified(), doctorProfileController.getDoctorClinicTimings);
 
 /**

@@ -4,7 +4,6 @@ const { authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
-// DEPRECATED
 const initAppointmentDoctor = catchAsync(async (req, res) => {
   const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
   res.status(httpStatus.CREATED).json(InitSession);
@@ -96,10 +95,17 @@ const getAvailableAppointments = catchAsync(async (req, res) => {
   const result = await appointmentService.getAvailableAppointments(AuthData);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
+// to get available appointments by manully passing docId
+const getAvailableAppointmentsManually = catchAsync(async (req, res) => {
+  const result = await appointmentService.getAvailableAppointmentsManually(req.body.docid);
+  return res.status(httpStatus.OK).json({ message: 'Success', data: result });
+});
 
 const getUpcomingAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  await appointmentService.getUpcomingAppointments(req.Docid, req.query.limit, options).then((result) => {
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date(); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  await appointmentService.getUpcomingAppointments(req.Docid, fromDate, endDate, options).then((result) => {
     if (result.length === 0) {
       res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
     } else {
@@ -111,8 +117,10 @@ const getUpcomingAppointments = catchAsync(async (req, res) => {
 const getAppointmentsByType = catchAsync(async (req, res) => {
   const filter = { Type: req.query.type };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
   appointmentService
-    .getAppointmentsByType(req.Docid, filter, options)
+    .getAppointmentsByType(req.Docid, fromDate, endDate, filter, options)
     .then((result) => {
       return res.status(httpStatus.OK).send(result);
     })
@@ -202,8 +210,10 @@ const getUserFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelAppointment = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthById(req.SubjectId);
+
   await appointmentService
-    .cancelAppointment(req.body.appointmentId)
+    .cancelAppointment(req.body.appointmentId, AuthData._id)
     .then((result) => {
       if (result) {
         return res.status(httpStatus.OK).json({ message: 'Success', data: result });
@@ -216,16 +226,20 @@ const cancelAppointment = catchAsync(async (req, res) => {
 });
 
 const rescheduleAppointment = catchAsync(async (req, res) => {
-  const { appointmentId, slotId, date, startDateTime, endDateTime } = await req.body;
-  await appointmentService
-    .rescheduleAppointment(req.Docid, appointmentId, slotId, date, startDateTime, endDateTime)
-    .then((result) => {
-      if (result) {
-        res.status(httpStatus.OK).json({ message: 'Success', data: result });
-      } else {
-        res.status(httpStatus.BAD_REQUEST).json({ message: "Appointment doesn't exist", data: [] });
-      }
-    });
+  const { appointmentId, slotId, date, message, sendMailToUser } = await req.body;
+  const { result, emailSent } = await appointmentService.rescheduleAppointment(
+    req.Docid,
+    appointmentId,
+    slotId,
+    date,
+    message,
+    sendMailToUser
+  );
+  if (result) {
+    res.status(httpStatus.OK).json({ message: 'Appointment Rescheduled!', data: result, emailSent });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'Failed to reschedule the Appointment', data: result, emailSent });
+  }
 });
 
 const bookingConfirmation = catchAsync(async (req, res) => {
@@ -260,7 +274,9 @@ const rescheduleFollowup = catchAsync(async (req, res) => {
 
 const allAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const data = await appointmentService.allAppointments(req.Docid, options);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const data = await appointmentService.allAppointments(req.Docid, fromDate, endDate, options);
   if (data) {
     res.status(httpStatus.OK).json({ data });
   } else {
@@ -273,6 +289,14 @@ const deleteSlot = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).json({ message: 'success', updatedslots });
   } else {
     res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
+  }
+});
+const getTodaysUpcomingAppointment = catchAsync(async (req, res) => {
+  const nextAppointment = await appointmentService.getTodaysUpcomingAppointment(req.Docid);
+  if (nextAppointment) {
+    res.status(httpStatus.OK).json({ nextAppointment });
+  } else {
+    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
   }
 });
 module.exports = {
@@ -301,4 +325,6 @@ module.exports = {
   rescheduleFollowup,
   allAppointments,
   deleteSlot,
+  getTodaysUpcomingAppointment,
+  getAvailableAppointmentsManually,
 };

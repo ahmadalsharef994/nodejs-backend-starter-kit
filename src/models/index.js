@@ -32,3 +32,4 @@ module.exports.HealthPackage = require('./healthpackage.model');
 module.exports.doctordetails = require('./doctordetails.model');
 module.exports.AppointmentOrder = require('./appointmentOrder.model');
 module.exports.Wallet = require('./wallet.model');
+module.exports.DoctorQueries = require('./doctorQuries.model');

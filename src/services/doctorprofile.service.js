@@ -1,5 +1,5 @@
 const httpStatus = require('http-status');
-// const profilePhotoUpload = require('../Microservices/profilePicture.service');
+const { emailService } = require('../Microservices');
 const {
   DoctorBasic,
   DoctorEducation,
@@ -8,8 +8,12 @@ const {
   DoctorPayout,
   ConsultationFee,
   Notification,
+  Appointment,
 } = require('../models');
+const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
+// const appointmentService = require('./appointment.service');
+const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (AuthData) => {
   const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
@@ -31,17 +35,6 @@ const submitprofilepicture = async (ProfilePhoto, AuthData) => {
   }
   return false;
 };
-
-// const updateprofilepicture = async (ProfilePhoto, AuthData, thumbnail) => {
-//   const alreadyExist = await fetchbasicdetails(AuthData);
-//   if (alreadyExist) {
-//     const resultData = await DoctorBasic.findOne({ _id: alreadyExist._id });
-//     // need to rethink once s3 is working properly
-//     await profilePhotoUpload.deleteAvatar(resultData.avatar, resultData.thumbnail);
-//     await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto, thumbnail } });
-//     return 'profile Picture updated';
-//   }
-// };
 
 const fetcheducationdetails = async (AuthData) => {
   const DoctorEducationExist = await DoctorEducation.findOne({ auth: AuthData });
@@ -122,6 +115,7 @@ const notificationSettings = async (notifications, auth) => {
   }
   return false;
 };
+
 const updteClinicDetails = async (Auth, timings, clinicId) => {
   const result = await DoctorClinic.find({ _id: clinicId, auth: Auth });
   if (typeof result[0] === 'object') {
@@ -132,6 +126,7 @@ const updteClinicDetails = async (Auth, timings, clinicId) => {
   }
   return false;
 };
+
 const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
   const Auth = { auth };
   const About = { about, address, pincode, experience, country, state, city };
@@ -159,6 +154,7 @@ const doctorExpEducation = async (auth, experience, education) => {
     return { Education, Experience };
   }
 };
+
 const updateappointmentPrice = async (appointmentPrice, auth) => {
   await DoctorBasic.updateOne({ auth }, { $set: { appointmentPrice } });
   const result = await DoctorBasic.findOne({ appointmentPrice });
@@ -167,10 +163,71 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
   }
   return false;
 };
+
 const doctorClinicTimings = async (auth) => {
   const result = await DoctorClinic.find({ auth });
   if (result) {
     return result;
+  }
+  return null;
+};
+
+const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
+  try {
+    const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
+    const ticketdetails = await DoctorQueries.create({ AuthDoctor, name, email, issue: message, ticketNumber });
+    const ticket = `name: ${ticketdetails.name}, \n email: ${ticketdetails.email},\nissue: ${ticketdetails.issue},\nticketnumber: ${ticketdetails.ticketNumber}`;
+    if (ticketdetails.ticketStatus === 'open') {
+      await emailService.sendEmailQueries(ticket, ticketNumber);
+      await emailService.sendEmailQueriesUser(email, message, ticketNumber);
+    } else {
+      throw new ApiError(httpStatus.BAD_GATEWAY, 'failed to send the email');
+    }
+    return ticketdetails;
+  } catch (error) {
+    return null;
+  }
+};
+
+const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
+  const pastPaidAppointments = await Appointment.paginate(
+    { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
+    options
+  );
+
+  const pickedProperties = pastPaidAppointments.results.map((appointment) => {
+    // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
+    // console.log(avatar)
+    return {
+      patientName: appointment.patientName,
+      consultationDate: appointment.Date,
+      StartTime: appointment.StartTime,
+      price: appointment.price,
+      avatar: 'https://docprofilephoto.s3.ap-south-1.amazonaws.com/avatar/b0f985ca-c2a4-4f6a-a97c-124a5b5192d9.png',
+      // avatar to be extracted from DB
+      orderId: appointment.orderId,
+    };
+  });
+  // eslint-disable-next-line array-callback-return
+  pickedProperties.map((appointment) => {
+    /* eslint-disable no-param-reassign */
+    appointment.taxes = 0.05 * appointment.price;
+    appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
+    appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
+    appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
+  });
+
+  pickedProperties.totalPages = pastPaidAppointments.totalPages;
+  pickedProperties.page = pastPaidAppointments.page;
+  pickedProperties.limit = pastPaidAppointments.limit;
+  pickedProperties.totalResults = pastPaidAppointments.totalResults;
+  return pickedProperties;
+};
+
+const getDoctorQueries = async (AuthDoctor) => {
+  const doctorQueries = await DoctorQueries.find({ AuthDoctor });
+  if (doctorQueries) {
+    return doctorQueries;
   }
   return null;
 };
@@ -184,7 +241,6 @@ module.exports = {
   submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
-  // updateprofilepicture,
   fetchpayoutsdetails,
   submitpayoutsdetails,
   addConsultationfee,
@@ -194,4 +250,7 @@ module.exports = {
   doctorExpEducation,
   updateappointmentPrice,
   doctorClinicTimings,
+  getBillingDetails,
+  sendDoctorQueries,
+  getDoctorQueries,
 };

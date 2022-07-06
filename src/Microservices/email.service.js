@@ -1,8 +1,11 @@
+const httpStatus = require('http-status');
 const nodemailer = require('nodemailer');
 const hbs = require('nodemailer-express-handlebars');
 const path = require('path');
+const { env } = require('process');
 const config = require('../config/config');
 const logger = require('../config/logger');
+const ApiError = require('../utils/ApiError');
 
 const transport = nodemailer.createTransport(config.email.smtp);
 /* istanbul ignore next */
@@ -12,7 +15,68 @@ if (config.env !== 'test') {
     .then(() => logger.info('Connected to email server'))
     .catch(() => logger.warn('Unable to connect to email server. Make sure you have configured the SMTP options in .env'));
 }
+const mail = async (options) => {
+  return transport
+    .sendMail(options)
+    .then((res) => {
+      return res;
+    })
+    .catch((err) => {
+      throw new ApiError(httpStatus.BAD_GATEWAY, err);
+    });
+};
 
+const sendEmailQueries = async (emailbody, TicketNo) => {
+  const options = {
+    from: process.env.EMAIL_FROM,
+    to: process.env.SUPPORT_MAIL,
+    subject: TicketNo,
+    text: emailbody,
+  };
+  const result = mail(options);
+  result
+    .then((res) => {
+      return res.response.response;
+    })
+    .catch(() => {
+      return null;
+    });
+  return result;
+};
+const sendEmailQueriesUser = async (recivermail, query, TicketNo) => {
+  const options = {
+    from: process.env.EMAIL_FROM,
+    to: recivermail,
+    subject: TicketNo,
+    text: `sorry for the inconvenience\n\nwe have opened a ticket for your query"${query}".Your ticket number is ${TicketNo}\nour team will get back to you soon \n \nfor furthur details contct at ${env.SUPPORT_MAIL} `,
+  };
+  const result = mail(options);
+  result
+    .then((res) => {
+      return res.response.response;
+    })
+    .catch(() => {
+      return null;
+    });
+  return result;
+};
+const sendRescheduledEmail = async (recivermail, Appointmenttime, Reason, appointmentId) => {
+  const options = {
+    from: process.env.EMAIL_FROM,
+    to: recivermail,
+    subject: 'Rescheduled Appointment',
+    text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) is rescheduled since doctor is not available at this time \n\nReason:${Reason}\n\nNew AppointmentTiming:${Appointmenttime}\n\n\nThank you Team Medzgo`,
+  };
+  const result = mail(options);
+  result
+    .then((res) => {
+      return res.response.response;
+    })
+    .catch((err) => {
+      return err;
+    });
+  return result;
+};
 const sendEmail = async (to, name, subject, template, OTP) => {
   transport.use(
     'compile',
@@ -87,4 +151,7 @@ module.exports = {
   sendResetPasswordEmail,
   sendVerificationEmail,
   sendLabTestOrderDetails,
+  sendEmailQueries,
+  sendEmailQueriesUser,
+  sendRescheduledEmail,
 };

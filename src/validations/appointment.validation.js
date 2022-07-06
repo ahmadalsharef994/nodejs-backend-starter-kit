@@ -81,9 +81,11 @@ const getAppointmentsByType = {
       limit: Joi.number(),
       page: Joi.number(),
       sortBy: Joi.string(),
+      fromDate: Joi.string(),
+      endDate: Joi.string(),
     })
     .min(0)
-    .max(4),
+    .max(6),
 };
 
 const getAppointmentDetails = {
@@ -133,11 +135,11 @@ const getDoctorFeedback = {
   }),
 };
 
-// const getAvailableAppointments = {
-//   body: Joi.object().keys({
-//     docId: Joi.required(),
-//   }),
-// };
+const getAvailableAppointments = {
+  body: Joi.object().keys({
+    docid: Joi.required(),
+  }),
+};
 
 const cancelAppointment = {
   body: Joi.object()
@@ -155,16 +157,13 @@ const cancelFollowup = {
 };
 
 const rescheduleAppointment = {
-  body: Joi.object()
-    .keys({
-      appointmentId: Joi.string().custom(objectId),
-      slotId: Joi.string(),
-      date: Joi.string(),
-      startDateTime: Joi.string(),
-      endDateTime: Joi.string(),
-    })
-    .min(3)
-    .max(3),
+  body: Joi.object().keys({
+    appointmentId: Joi.string().custom(objectId).required(),
+    slotId: Joi.string().required(),
+    date: Joi.string().required(),
+    message: Joi.string().required(),
+    sendMailToUser: Joi.boolean().required(),
+  }),
 };
 const getDoctorsByCategories = {
   body: Joi.object().keys({
@@ -191,7 +190,7 @@ module.exports = {
   assignFollowup,
   getFollowups,
   getAppointmentsByType,
-  // getAvailableAppointments,
+  getAvailableAppointments,
   getAppointmentDetails,
   createPrescription,
   getPrescription,

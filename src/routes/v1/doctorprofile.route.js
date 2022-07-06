@@ -307,58 +307,18 @@ router
  */
 router.route('/get-doctor-clinictimings').get(authdoctornonverified(), doctorProfileController.getDoctorClinicTimings);
 
-/**
- * @openapi
- * /doctor/profile/:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails); // ISE
 
-/**
- * @openapi
- * /doctor/profile/send-quries:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/send-quries')
   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-/**
- * @openapi
- * /doctor/profile/billing:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/billing').get(authdoctornonverified(), doctorProfileController.getBillingDetails);
 
-/**
- * @openapi
- * /doctor/profile/send-queries:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/send-queries')
   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-/**
- * @openapi
- * /doctor/profile/get-doctor-queries:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/get-doctor-queries').get(authdoctorverified(), doctorProfileController.getDoctorQueries);
 
 module.exports = router;

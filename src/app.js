@@ -17,7 +17,6 @@ const { authLimiter, otpLimiter } = require('./middlewares/rateLimiter');
 const routes = require('./routes/v1');
 const { errorConverter, errorHandler } = require('./middlewares/error');
 const ApiError = require('./utils/ApiError');
-const { swaggerDocs } = require('./utils/swagger');
 
 const app = express();
 
@@ -78,8 +77,6 @@ app.get('/api-metrics', async (req, res) => {
   res.send(await register.metrics());
 });
 
-swaggerDocs(app, config.port);
-
 // send back a 404 error for any unknown api request
 app.use((req, res, next) => {
   next(new ApiError(httpStatus.NOT_FOUND, 'Not found We are Monitoring It ☠️'));
@@ -89,5 +86,4 @@ app.use((req, res, next) => {
 app.use(errorConverter);
 // handle error
 app.use(errorHandler);
-
 module.exports = app;

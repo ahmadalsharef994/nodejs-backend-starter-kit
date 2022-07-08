@@ -12,7 +12,7 @@ const createMedicinesIndex = catchAsync(async (req, res) => {
       response,
     });
   } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `couldn't create index: ${index}`);
+    throw new ApiError(httpStatus.NOT_FOUND, `couldn't create index: ${index} due to error ${err}`);
   }
 });
 
@@ -25,7 +25,7 @@ const createDoctorsIndex = catchAsync(async (req, res) => {
       response,
     });
   } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `couldn't create index: ${index}`);
+    throw new ApiError(httpStatus.NOT_FOUND, `couldn't create index: ${index} due to error ${err}`);
   }
 });
 
@@ -64,7 +64,7 @@ const searchDocument = catchAsync(async (req, res) => {
       response,
     });
   } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `couldn't search document in index ${index}`);
+    throw new ApiError(httpStatus.NOT_FOUND, `couldn't search document in index ${index} \n ${err}`);
   }
 });
 

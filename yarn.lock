@@ -331,25 +331,16 @@
     enabled "2.0.x"
     kuler "^2.0.0"
 
-"@elastic/elasticsearch@^8.2.0-patch.1":
-  version "8.2.1"
-  resolved "https://registry.npmjs.org/@elastic/elasticsearch/-/elasticsearch-8.2.1.tgz"
-  integrity sha512-Kwerd8DfNZdBGgl7fkn+20kXkw1QePB3goTv5QwW9poo2d4VbPE0EChmh6irpXWAGsVSYiKr8x6bh8dH5YdylA==
+"@elastic/elasticsearch@7.12":
+  version "7.12.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-7.12.0.tgz#dbb51a2841f644b670a56d8c15899e860928856f"
+  integrity sha512-GquUEytCijFRPEk3DKkkDdyhspB3qbucVQOwih9uNyz3iz804I+nGBUsFo2LwVvLQmQfEM0IY2+yoYfEz5wMug==
   dependencies:
-    "@elastic/transport" "^8.2.0"
-    tslib "^2.4.0"
-
-"@elastic/transport@^8.2.0":
-  version "8.2.0"
-  resolved "https://registry.npmjs.org/@elastic/transport/-/transport-8.2.0.tgz"
-  integrity sha512-H/HmefMNQfLiBSVTmNExu2lYs5EzwipUnQB53WLr17RCTDaQX0oOLHcWpDsbKQSRhDAMPPzp5YZsZMJxuxPh7A==
-  dependencies:
-    debug "^4.3.4"
-    hpagent "^1.0.0"
+    debug "^4.3.1"
+    hpagent "^0.1.1"
     ms "^2.1.3"
-    secure-json-parse "^2.4.0"
-    tslib "^2.4.0"
-    undici "^5.1.1"
+    pump "^3.0.0"
+    secure-json-parse "^2.3.1"
 
 "@eslint/eslintrc@^0.4.2":
   version "0.4.2"
@@ -3411,10 +3402,10 @@ hosted-git-info@^2.1.4:
   resolved "https://registry.npmjs.org/hosted-git-info/-/hosted-git-info-2.8.9.tgz"
   integrity sha512-mxIDAb9Lsm6DoOJ7xH+5+X4y1LU/4Hi50L9C5sIswK3JzULS4bwk1FvjdBgvYR4bzT4tuUQiC15FE2f5HbLvYw==
 
-hpagent@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.npmjs.org/hpagent/-/hpagent-1.0.0.tgz"
-  integrity sha512-SCleE2Uc1bM752ymxg8QXYGW0TWtAV4ZW3TqH1aOnyi6T6YW2xadCcclm5qeVjvMvfQ2RKNtZxO7uVb9CTPt1A==
+hpagent@^0.1.1:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/hpagent/-/hpagent-0.1.2.tgz#cab39c66d4df2d4377dbd212295d878deb9bdaa9"
+  integrity sha512-ePqFXHtSQWAFXYmj+JtOTHr84iNrII4/QRlAAPPE+zqnKy4xJo7Ie1Y4kC7AdB+LxLxSTTzBMASsEcy0q8YyvQ==
 
 html-comment-regex@^1.1.2:
   version "1.1.2"
@@ -5900,10 +5891,7 @@ pusher@^5.0.0:
     tweetnacl "^1.0.0"
     tweetnacl-util "^0.15.0"
 
-<<<<<<< HEAD
-qs@6.7.0, qs@^6.5.1:
-=======
-qs@6.10.3, qs@^6.10.1, qs@^6.5.1:
+qs@6.10.3, qs@^6.5.1:
   version "6.10.3"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.10.3.tgz#d6cde1b2ffca87b5aa57889816c5f81535e22e8e"
   integrity sha512-wr7M2E0OFRfIfJZjKGieI8lBKb7fRCH4Fv5KNPEs7gJ8jadvotdsS08PzOKR7opXhZ/Xkjtt3WF9g38drmyRqQ==
@@ -5911,7 +5899,6 @@ qs@6.10.3, qs@^6.10.1, qs@^6.5.1:
     side-channel "^1.0.4"
 
 qs@6.7.0:
->>>>>>> develop
   version "6.7.0"
   resolved "https://registry.npmjs.org/qs/-/qs-6.7.0.tgz"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
@@ -5921,7 +5908,6 @@ qs@6.9.3:
   resolved "https://registry.npmjs.org/qs/-/qs-6.9.3.tgz"
   integrity sha512-EbZYNarm6138UKKq46tdx08Yo/q9ZhFoAXAI1meAFd2GtbRDhbZY2WQSICskT0c5q99aFzLG1D4nvTk9tqfXIw==
 
-<<<<<<< HEAD
 qs@^6.10.3:
   version "6.10.5"
   resolved "https://registry.npmjs.org/qs/-/qs-6.10.5.tgz"
@@ -5929,8 +5915,6 @@ qs@^6.10.3:
   dependencies:
     side-channel "^1.0.4"
 
-=======
->>>>>>> develop
 qs@~6.5.2:
   version "6.5.2"
   resolved "https://registry.npmjs.org/qs/-/qs-6.5.2.tgz"
@@ -6298,9 +6282,9 @@ saxes@^5.0.1:
   dependencies:
     xmlchars "^2.2.0"
 
-secure-json-parse@^2.4.0:
+secure-json-parse@^2.3.1:
   version "2.4.0"
-  resolved "https://registry.npmjs.org/secure-json-parse/-/secure-json-parse-2.4.0.tgz"
+  resolved "https://registry.yarnpkg.com/secure-json-parse/-/secure-json-parse-2.4.0.tgz#5aaeaaef85c7a417f76271a4f5b0cc3315ddca85"
   integrity sha512-Q5Z/97nbON5t/L/sH6mY2EacfjVGwrCcSi5D3btRO2GZ8pf1K1UN7Z9H5J57hjVU2Qzxr1xO+FmBhOvEkzCMmg==
 
 semver-compare@^1.0.0:
@@ -7030,7 +7014,7 @@ tslib@^1.8.1, tslib@^1.9.0:
   resolved "https://registry.npmjs.org/tslib/-/tslib-1.14.1.tgz"
   integrity sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==
 
-tslib@^2.0.1, tslib@^2.4.0:
+tslib@^2.0.1:
   version "2.4.0"
   resolved "https://registry.npmjs.org/tslib/-/tslib-2.4.0.tgz"
   integrity sha512-d6xOpEDfsi2CZVlPQzGeux8XMwLT9hssAsaPYExaQMuYskwb+x1x7J371tWlbBdWHroy99KnVB6qIkUbs5X3UQ==
@@ -7147,11 +7131,6 @@ underscore@^1.13.2:
   version "1.13.2"
   resolved "https://registry.npmjs.org/underscore/-/underscore-1.13.2.tgz"
   integrity sha512-ekY1NhRzq0B08g4bGuX4wd2jZx5GnKz6mKSqFL4nqBlfyMGiG10gDFhDTMEfYmDL6Jy0FUIZp7wiRB+0BP7J2g==
-
-undici@^5.1.1:
-  version "5.5.1"
-  resolved "https://registry.npmjs.org/undici/-/undici-5.5.1.tgz"
-  integrity sha512-MEvryPLf18HvlCbLSzCW0U00IMftKGI5udnjrQbC5D4P0Hodwffhv+iGfWuJwg16Y/TK11ZFK8i+BPVW2z/eAw==
 
 unique-string@^2.0.0:
   version "2.0.0"

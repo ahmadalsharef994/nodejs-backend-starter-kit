@@ -6,22 +6,22 @@ const ApiError = require('../utils/ApiError');
 
 const client = new Client({
   node: process.env.ELASTIC_URL,
-  auth: {
-    username: process.env.ELASTIC_USERNAME,
-    password: process.env.ELASTIC_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
+  // auth: {
+  //   username: process.env.ELASTIC_USERNAME,
+  //   password: process.env.ELASTIC_PASSWORD,
+  // },
+  // tls: {
+  //   rejectUnauthorized: false,
+  // },
 });
-
 const createMedicinesIndex = async (index) => {
-  const exists = await client.indices.exists({ index });
-  if (exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (exists.body) {
     throw new ApiError(400, `index with name ${index} already exists`);
   }
-  const result = await client.indices.create({
+  const result = await client.index({
     index,
+    id: 1,
     body: {
       mappings: {
         dynamic: 'strict',
@@ -39,12 +39,13 @@ const createMedicinesIndex = async (index) => {
 };
 
 const createDoctorsIndex = async (index) => {
-  const exists = await client.indices.exists({ index });
-  if (exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (exists.body) {
     throw new ApiError(400, `index with name ${index} already exists`);
   }
-  const result = await client.indices.create({
+  const result = await client.index({
     index,
+    id: 1,
     body: {
       mappings: {
         dynamic: 'strict',
@@ -62,44 +63,47 @@ const createDoctorsIndex = async (index) => {
 };
 
 const deleteIndex = async (index) => {
-  const exists = await client.indices.exists({ index });
-  if (!exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (!exists.body) {
     throw new ApiError(400, 'Index doesnt exist');
   }
-  const response = await client.indices.delete({ index });
+  const response = await client.delete({ index, id: 1 });
   return response;
 };
 
 const createDocument = async (index, document) => {
-  const exists = await client.indices.exists({ index });
-  if (!exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (!exists.body) {
     throw new ApiError(400, 'Index doeesnt exist');
   }
-  const documentJson = JSON.parse(document);
+  const body = JSON.parse(document);
   const response = await client.index({
     index,
-    document: documentJson,
+    id: 1,
+    body,
   });
   return response; // object having _index, _id, result, etc..
 };
 
 const searchDocument = async (index, keyword, value) => {
-  const exists = await client.indices.exists({ index });
-  if (!exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (!exists.body) {
     throw new ApiError(400, 'Index doesnt exist');
   }
   const result = await client.search({
     index,
-    query: {
-      wildcard: {
-        [keyword]: {
-          value: `*${value}*`,
-          case_insensitive: true,
+    body: {
+      query: {
+        regexp: {
+          [keyword]: {
+            value: `.*${value}.*`,
+            case_insensitive: true,
+          },
         },
       },
     },
   });
-  return result.hits.hits;
+  return result;
 };
 
 const indexJsonDataset = async (index, datasetPath) => {

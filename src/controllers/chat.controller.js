@@ -17,7 +17,7 @@ const getMessages = catchAsync(async (req, res) => {
     return res.status(httpStatus.OK).json({ message: 'Success', data: result });
   });
 });
-
+// when there's a new message not every 5 seconds
 const sendMessage = catchAsync(async (req, res) => {
   if (!req.params.appointmentId === req.appointment) {
     return res.status(httpStatus.BAD_REQUEST).json({ message: 'Not Authorized to Access this Chat', data: [] });

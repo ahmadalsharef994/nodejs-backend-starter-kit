@@ -71,7 +71,7 @@ const joinAppointmentSessionbyDoctor = async (appointmentId, AuthData, socketID)
   }
   let DoctorChatAuthToken = '';
   await pusherService
-    .PusherSession(`private-${appointmentId}`, socketID)
+    .pusherAuthenticate(`private-${appointmentId}`, socketID)
     .then((result) => {
       DoctorChatAuthToken = result.auth;
     })
@@ -116,7 +116,7 @@ const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID
   const UserRoomName = AppointmentSessionData.dyteroomname;
   let UserChatAuthToken = '';
   await pusherService
-    .PusherSession(`private-${appointmentId}`, socketID)
+    .pusherAuthenticate(`private-${appointmentId}`, socketID)
     .then((result) => {
       UserChatAuthToken = result.auth;
     })

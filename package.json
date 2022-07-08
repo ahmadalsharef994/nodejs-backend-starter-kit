@@ -48,7 +48,7 @@
     "prettier"
   ],
   "dependencies": {
-    "@elastic/elasticsearch": "^8.2.0-patch.1",
+    "@elastic/elasticsearch": "7.12",
     "@joi/date": "^2.1.0",
     "@supercharge/request-ip": "^1.1.2",
     "agenda": "^4.2.1",

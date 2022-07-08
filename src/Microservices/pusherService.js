@@ -8,11 +8,11 @@ const pusher = new Pusher({
   useTLS: process.env.USE_TLS,
 });
 
-const PusherSession = async (channelName, socketID) => {
+const pusherAuthenticate = async (channelName, socketID) => {
   const socketId = socketID;
   const auth = pusher.authenticate(socketId, channelName);
   return auth;
 };
 module.exports = {
-  PusherSession,
+  pusherAuthenticate,
 };

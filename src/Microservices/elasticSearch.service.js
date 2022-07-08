@@ -14,6 +14,7 @@ const client = new Client({
   //   rejectUnauthorized: false,
   // },
 });
+
 const createMedicinesIndex = async (index) => {
   const exists = await client.exists({ index, id: 1 });
   if (exists.body) {
@@ -26,8 +27,8 @@ const createMedicinesIndex = async (index) => {
       mappings: {
         dynamic: 'strict',
         properties: {
-          generic: { type: 'keyword' },
-          brand: { type: 'keyword' },
+          generic: { type: 'text' },
+          brand: { type: 'text' },
           packing: { type: 'text', index: false }, // not available for querying
           price: { type: 'text' },
           company: { type: 'text' },
@@ -50,8 +51,8 @@ const createDoctorsIndex = async (index) => {
       mappings: {
         dynamic: 'strict',
         properties: {
-          name: { type: 'keyword' },
-          specializations: { type: 'keyword' },
+          name: { type: 'text' },
+          specializations: { type: 'text' },
           doctorClinicAddress: { type: 'text' },
           appointmentPrice: { type: 'integer' },
           Experience: { type: 'integer' },
@@ -79,8 +80,8 @@ const createDocument = async (index, document) => {
   const body = JSON.parse(document);
   const response = await client.index({
     index,
-    id: 1,
-    body,
+    id: body.brand,
+    body, // previously, having body: {documentJson} caused an error in searching
   });
   return response; // object having _index, _id, result, etc..
 };
@@ -103,13 +104,13 @@ const searchDocument = async (index, keyword, value) => {
       },
     },
   });
-  return result;
+  return result.body.hits;
 };
 
 const indexJsonDataset = async (index, datasetPath) => {
   // const datasetPath = path.join(__dirname, "medz.json")
   const datasource = fs.createReadStream(datasetPath).pipe(split());
-  const result = await client.helpers.bulk({
+  const result = await client.bulk({
     datasource,
     onDocument() {
       return {
@@ -125,14 +126,14 @@ const indexJsonDataset = async (index, datasetPath) => {
   return result;
 };
 
-const getJsonFile = (filepath) => {
-  const response = fs.readFileSync(filepath);
-  const json = response
-    .toString()
-    .split('\n')
-    .map((s) => JSON.parse(s));
-  return json;
-};
+// const getJsonFile = (filepath) => {
+//   const response = fs.readFileSync(filepath);
+//   const json = response
+//     .toString()
+//     .split('\n')
+//     .map((s) => JSON.parse(s));
+//   return json;
+// };
 
 const getClientInfo = async () => {
   const response = await client.info();
@@ -146,6 +147,6 @@ module.exports = {
   createDoctorsIndex,
   deleteIndex,
   indexJsonDataset,
-  getJsonFile,
+  // getJsonFile,
   getClientInfo,
 };

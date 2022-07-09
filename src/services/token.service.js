@@ -67,18 +67,12 @@ const logoutdevice = async (authtoken) => {
  * @param {string} [secret]
  * @returns {string}
  */
-const generateChatAppointmentSessionToken = (
-  appointmentID,
-  doctorAuth,
-  userAuth,
-  requestedby,
-  secret = config.jwt.secret
-) => {
+const generateChatAppointmentSessionToken = (appointmentID, doctorAuth, userAuth, entity, secret = config.jwt.secret) => {
   const payload = {
     appointment: appointmentID,
     doctor: doctorAuth,
     user: userAuth,
-    entity: requestedby,
+    entity,
     iat: moment().unix(),
     exp: moment().add(20, 'minutes').unix(),
   };

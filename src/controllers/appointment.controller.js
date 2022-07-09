@@ -11,7 +11,7 @@ const initAppointmentDoctor = catchAsync(async (req, res) => {
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.joinAppointmentSessionbyDoctor(
+  const DoctorSession = await appointmentService.joinAppointmentDoctor(
     req.body.appointmentInit,
     AuthData,
     req.body.socketID

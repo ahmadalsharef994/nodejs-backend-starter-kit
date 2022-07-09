@@ -49,7 +49,10 @@ const createMessage = async (appointmentId, senderAuth, text, attachment) => {
       appointment.chatHistory = [];
     }
     // eslint-disable-next-line no-shadow
-    appointment.chatHistory.push((({ sender, text, createdAt }) => ({ sender, text, createdAt }))(message));
+    appointment.chatHistory.push(
+      // eslint-disable-next-line no-shadow
+      (({ sender, text, attachment, createdAt }) => ({ sender, text, attachment, createdAt }))(message)
+    );
     appointment.save();
   });
 };

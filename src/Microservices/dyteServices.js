@@ -98,7 +98,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
-  const existingSession = await AppointmentSession.find({ appointmentid: appointmentID });
+  const existingSession = await AppointmentSession.findOne({ appointmentid: appointmentID });
   if (existingSession.length > 0) {
     existingSession.meetingroom = meetingroom;
     existingSession.doctorparticipation = doctorparticipation;

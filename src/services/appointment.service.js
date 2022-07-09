@@ -46,7 +46,7 @@ const initiateAppointmentSession = async (appointmentId) => {
   return DyteSessionToken;
 };
 
-const joinAppointmentSessionbyDoctor = async (appointmentId, AuthData, socketID) => {
+const joinAppointmentDoctor = async (appointmentId, AuthData, socketID) => {
   // Join Appointment Doctor called while Doctor requests to Join an Appointment
   const AppointmentData = await Appointment.findById({ _id: appointmentId });
   if (!AppointmentData) {
@@ -61,11 +61,7 @@ const joinAppointmentSessionbyDoctor = async (appointmentId, AuthData, socketID)
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
-  // const AppointmentSessionData = await AppointmentSession.findOne({
-  //   appointmentid: appointmentId,
-  //   AuthDoctor: AuthData._id,
-  // });
-  // const AppointmentSessionData = dyteMeetingData.AppointmentSessionData;
+
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
@@ -104,11 +100,7 @@ const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
-  // const AppointmentSessionData = await AppointmentSession.findOne({
-  //   appointmentid: appointmentId,
-  //   AuthDoctor: AuthData._id,
-  // });
-  // const AppointmentSessionData = dyteMeetingData.AppointmentSessionData;
+
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'You do not have access to this Appointment');
   }
@@ -945,7 +937,7 @@ const getTodaysUpcomingAppointment = async (doctorId) => {
 };
 module.exports = {
   initiateAppointmentSession,
-  joinAppointmentSessionbyDoctor,
+  joinAppointmentDoctor,
   joinAppointmentSessionbyPatient,
   submitAppointmentDetails,
   submitFollowupDetails,

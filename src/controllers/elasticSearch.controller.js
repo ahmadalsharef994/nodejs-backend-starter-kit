@@ -77,7 +77,10 @@ const indexJsonDataset = catchAsync(async (req, res) => {
       response,
     });
   } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `couldn't index json dataset file ${datasetpath} in ${index}`);
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      `couldn't index json dataset file ${datasetpath} in ${index} due to error: ${err}`
+    );
   }
 });
 

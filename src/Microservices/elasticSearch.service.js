@@ -6,13 +6,6 @@ const ApiError = require('../utils/ApiError');
 
 const client = new Client({
   node: process.env.ELASTIC_URL,
-  // auth: {
-  //   username: process.env.ELASTIC_USERNAME,
-  //   password: process.env.ELASTIC_PASSWORD,
-  // },
-  // tls: {
-  //   rejectUnauthorized: false,
-  // },
 });
 
 const createMedicinesIndex = async (index) => {
@@ -110,7 +103,7 @@ const searchDocument = async (index, keyword, value) => {
 const indexJsonDataset = async (index, datasetPath) => {
   // const datasetPath = path.join(__dirname, "medz.json")
   const datasource = fs.createReadStream(datasetPath).pipe(split());
-  const result = await client.bulk({
+  const result = await client.helpers.bulk({
     datasource,
     onDocument() {
       return {

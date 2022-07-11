@@ -1,18 +1,10 @@
 const { Client } = require('@elastic/elasticsearch');
 const fs = require('fs');
-const split = require('split2');
 require('dotenv').config();
 const ApiError = require('../utils/ApiError');
 
 const client = new Client({
   node: process.env.ELASTIC_URL,
-  // auth: {
-  //   username: process.env.ELASTIC_USERNAME,
-  //   password: process.env.ELASTIC_PASSWORD,
-  // },
-  // tls: {
-  //   rejectUnauthorized: false,
-  // },
 });
 
 const createMedicinesIndex = async (index) => {
@@ -94,6 +86,7 @@ const searchDocument = async (index, keyword, value) => {
   const result = await client.search({
     index,
     body: {
+      size: 20,
       query: {
         regexp: {
           [keyword]: {
@@ -104,40 +97,29 @@ const searchDocument = async (index, keyword, value) => {
       },
     },
   });
-  return result.body.hits;
+  return result.body.hits.hits;
 };
 
 const indexJsonDataset = async (index, datasetPath) => {
   // const datasetPath = path.join(__dirname, "medz.json")
-  const datasource = fs.createReadStream(datasetPath).pipe(split());
-  const result = await client.bulk({
-    datasource,
-    onDocument() {
-      return {
-        index: { _index: index },
-      };
-    },
-    onDrop() {
-      // eslint-disable-next-line no-console
-      console.log(`can't index document`);
-    },
-    refreshOnCompletion: index,
+  const datasource = JSON.parse(fs.readFileSync(datasetPath));
+  // let array = JSON.parse(jstring);
+  const result = [];
+  datasource.forEach(async (document) => {
+    const temp = await createDocument(index, JSON.stringify(document));
+    result.push(temp);
   });
   return result;
 };
 
-// const getJsonFile = (filepath) => {
-//   const response = fs.readFileSync(filepath);
-//   const json = response
-//     .toString()
-//     .split('\n')
-//     .map((s) => JSON.parse(s));
-//   return json;
-// };
-
 const getClientInfo = async () => {
   const response = await client.info();
   return response;
+};
+
+const countDocumentsInIndex = async (index) => {
+  const count = await client.count({ index });
+  return count.body.count;
 };
 
 module.exports = {
@@ -147,6 +129,6 @@ module.exports = {
   createDoctorsIndex,
   deleteIndex,
   indexJsonDataset,
-  // getJsonFile,
   getClientInfo,
+  countDocumentsInIndex,
 };

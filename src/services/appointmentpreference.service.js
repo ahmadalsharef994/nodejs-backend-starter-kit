@@ -147,29 +147,6 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
   return result;
 };
 
-// const checkOverlap = (currentSlots, range) => {
-//   let postCheckFlag = -1;
-//   for (let i = 0; i < currentSlots.length; i += jump) {
-//     const currentStart = currentSlots[i];
-//     const currentEnd = currentSlots[i + jump - 1];
-//     const preCheck =
-//       (currentStart.FromMinutes - 1 === 0
-//         ? (currentStart.FromHour - 1) * 60 + 60
-//         : currentStart.FromHour * 60 + currentStart.FromMinutes - 1) -
-//       (range.ToMinutes === 0 ? (range.ToHour - 1) * 60 + 60 : range.ToHour * 60 + range.ToMinutes);
-//     const postCheck =
-//       (range.FromMinutes === 0 ? (range.FromHour - 1) * 60 + 60 : range.FromHour * 60 + range.FromMinutes) -
-//       (currentEnd.ToMinutes === 0 ? (currentEnd.ToHour - 1) * 60 + 60 : currentEnd.ToHour * 60 + currentEnd.FromMinutes);
-//     if (preCheck >= gap) {
-//       if (postCheckFlag === 1 || i === 0) return { isAllowed: true, index: i };
-//     }
-//     // eslint-disable-next-line no-unused-expressions
-//     postCheck >= gap ? (postCheckFlag = 1) : (postCheckFlag = -1);
-//   }
-//   // index = -1 indicates push at the end
-//   return postCheckFlag === 1 || currentSlots.length === 0 ? { isAllowed: true, index: -1 } : { isAllowed: false };
-// };
-
 const generateSlots = (fhr, fmin, thr, tmin, day, docId) => {
   const slots = [];
   let startMin = fmin;
@@ -213,26 +190,13 @@ const updateAppointmentPreference = async (body, doctorId) => {
       }
       if (!existingSlots[day]) existingSlots[day] = [];
       let newSlots = generateSlots(range.FromHour, range.FromMinutes, range.ToHour, range.ToMinutes, day, doctorId);
+
       newSlots = newSlots.filter((newSlot) => {
         return existingSlots[day].every(
           (existingSlot) => existingSlot.FromHour !== newSlot.FromHour || existingSlot.FromMinutes !== newSlot.FromMinutes
         );
       });
       existingSlots[`${day}`].push(...newSlots);
-      // if (resultCheck.isAllowed) {
-      //   // eslint-disable-next-line no-unused-expressions
-      //   resultCheck.index === -1 // replace with createslots
-      //     ? existingSlots[`${day}`].push(...createSlots(range.FromHour, range.FromMinutes, day, doctorId))
-      //     : (existingSlots[`${day}`] = [
-      //         ...existingSlots[`${day}`].slice(0, resultCheck.index),
-      //         // ...generateSlots(range.FromHour, range.FromMinutes, day, doctorId),
-      //         ...createSlots(range.FromHour, range.FromMinutes, day, doctorId),
-      //         ...existingSlots[`${day}`].slice(resultCheck.index),
-      //       ]);
-      // } else {
-      //   // V2: specify where the overlapping occurs in ApiError
-      //   throw new ApiError(httpStatus.BAD_REQUEST, `slots are overlapping`);
-      // }
     });
   });
   Object.keys(existingSlots.toJSON()).forEach((day) => {

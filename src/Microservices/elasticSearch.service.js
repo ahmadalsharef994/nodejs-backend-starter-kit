@@ -101,9 +101,7 @@ const searchDocument = async (index, keyword, value) => {
 };
 
 const indexJsonDataset = async (index, datasetPath) => {
-  // const datasetPath = path.join(__dirname, "medz.json")
   const datasource = JSON.parse(fs.readFileSync(datasetPath));
-  // let array = JSON.parse(jstring);
   const result = [];
   datasource.forEach(async (document) => {
     const temp = await createDocument(index, JSON.stringify(document));

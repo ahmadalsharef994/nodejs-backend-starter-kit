@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Agenda = require('agenda');
+const { Server } = require('socket.io');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
@@ -17,6 +18,19 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   server = app.listen(config.port, () => {
     logger.info(`Listening to port ${config.port}`);
   });
+  // socket.io
+  const io = new Server(server, {
+    cors: {
+      origin: '*',
+      methods: ['GET', 'POST'],
+    },
+  });
+  io.on('connection', (socket) => {
+    logger.info(`User Connected to io: ${socket.id}`);
+    socket.on('join_appointment', (appointmentId) => socket.join(appointmentId));
+    socket.on('send_message', (data) => socket.to(data.appointmentId).emit('receive_message', data));
+  });
+  app.set('socket.io', io);
 });
 
 const exitHandler = () => {

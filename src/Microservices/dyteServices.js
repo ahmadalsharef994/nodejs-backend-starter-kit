@@ -99,7 +99,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
   const existingSession = await AppointmentSession.findOne({ appointmentid: appointmentID });
-  if (existingSession.length > 0) {
+  if (existingSession) {
     existingSession.meetingroom = meetingroom;
     existingSession.doctorparticipation = doctorparticipation;
     existingSession.userparticipation = userparticipation;

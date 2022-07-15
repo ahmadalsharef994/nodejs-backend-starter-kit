@@ -30,7 +30,7 @@ const agenda = new Agenda({
 });
 
 const initiateAppointmentSession = async (appointmentId) => {
-  const AppointmentData = await Appointment.findById({ _id: appointmentId });
+  const AppointmentData = await Appointment.findOne({ _id: appointmentId });
   if (!AppointmentData) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
   }
@@ -48,7 +48,7 @@ const initiateAppointmentSession = async (appointmentId) => {
 
 const joinAppointmentDoctor = async (appointmentId, AuthData, socketID) => {
   // Join Appointment Doctor called while Doctor requests to Join an Appointment
-  const AppointmentData = await Appointment.findById({ _id: appointmentId });
+  const AppointmentData = await Appointment.findOne({ _id: appointmentId });
   if (!AppointmentData) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
   }

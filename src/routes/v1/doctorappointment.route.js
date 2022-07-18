@@ -3,7 +3,7 @@ const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const validate = require('../../middlewares/validate');
 const appointmentValidator = require('../../validations/appointment.validation');
 const appointmentController = require('../../controllers/appointment.controller');
-const chatAuth = require('../../middlewares/chatAuth');
+// const chatAuth = require('../../middlewares/chatAuth');
 const authUserDoctor = require('../../middlewares/authUserDoctor');
 const chatController = require('../../controllers/chat.controller');
 const chatValidator = require('../../validations/chat.validation');
@@ -55,14 +55,6 @@ router.route('/get-available-followups').post(authdoctorverified(), appointmentC
 //  get appointment slots available for booking (public)
 router.route('/get-available-appointments').get(authdoctorverified(), appointmentController.getAvailableAppointments); // getAvailableAppointments
 
-/**
- * @openapi
- * /doctor/appointment/doctor-all-appointments:
- *  get:
- *     tags:
- *     - doctor
- *     - appointments
- */
 router.route('/doctor-all-appointments').get(authdoctorverified(), appointmentController.allAppointments);
 router.get('/getpatients', authdoctorverified(), appointmentController.getPatients); // getPatients
 router.get(
@@ -119,8 +111,9 @@ router.post(
 router
   .route('/:appointmentId/get-messages')
   .get(authUserDoctor(), validate(chatValidator.getMessages), chatController.getMessages);
-router
-  .route('/:appointmentId/send-message')
-  .post(chatAuth(), validate(chatValidator.sendMessage), chatController.sendMessage);
+
+// router
+//   .route('/:appointmentId/send-message')
+//   .post(chatAuth(), validate(chatValidator.sendMessage), chatController.sendMessage);
 
 module.exports = router;

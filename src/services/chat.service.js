@@ -1,60 +1,92 @@
-const Pusher = require('pusher');
 const dotenv = require('dotenv');
 const httpStatus = require('http-status');
-const { Message, Appointment } = require('../models');
+const uuid = require('uuid');
+const AWS = require('aws-sdk');
+const { Appointment, DoctorBasic, UserBasic } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 dotenv.config();
 
-const pusher = new Pusher({
-  appId: process.env.APP_ID,
-  key: process.env.APP_KEY,
-  secret: process.env.APP_SECRET,
-  cluster: process.env.APP_CLUSTER,
-  useTLS: process.env.USE_TLS,
+const AwsS3 = new AWS.S3({
+  accessKeyId: process.env.AWSID,
+  region: 'us-east-2',
+  secretAccessKey: process.env.AWSKEY,
+  bucket: process.env.BUCKET,
+  signatureVersion: 'v4',
 });
 
+dotenv.config();
+
+// const pusher = new Pusher({
+//   appId: process.env.APP_ID,
+//   key: process.env.APP_KEY,
+//   secret: process.env.APP_SECRET,
+//   cluster: process.env.APP_CLUSTER,
+//   useTLS: process.env.USE_TLS,
+// });
+
 // implement pagination
-const getMessages = async (appointmentId, Auth, filter, options) => {
-  const AppointmentData = await Appointment.findOne({ _id: appointmentId });
-  if (!AppointmentData) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID doesnot gives you Access');
+const getMessages = async (appointmentId, Auth) => {
+  const appointment = await Appointment.findOne({ _id: appointmentId });
+  if (!appointment) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID does not gives you Access');
   }
-  if (AppointmentData.AuthDoctor.equals(Auth._id) || AppointmentData.AuthUser.equals(Auth._id)) {
-    const result = await Message.paginate(filter, options);
+  if (appointment.AuthDoctor.equals(Auth._id) || appointment.AuthUser.equals(Auth._id)) {
+    const result = appointment.chatHistory;
     return result;
   }
   throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");
 };
 
-const createMessage = async (appointmentId, senderAuth, text, attachment) => {
-  await Message.create({
-    appointment: appointmentId,
-    sender: senderAuth,
-    text,
-    attachment,
-  }).then(async (message, err) => {
-    if (err) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'send message error');
-    }
+const createMessage = async (data) => {
+  // this part is asynchronous
+  const appointmentId = data.appointmentId;
+  const appointment = await Appointment.findById(appointmentId);
 
-    pusher.trigger(`private-${message.appointment}`, 'inserted', {
-      id: message._id,
-      text: message.text,
-      username: message.sender,
-      attachment: message.attachment,
-    });
-    const appointment = await Appointment.findById(appointmentId);
-    if (appointment.chatHistory === undefined) {
-      appointment.chatHistory = [];
-    }
-    // eslint-disable-next-line no-shadow
-    appointment.chatHistory.push(
+  // if chatHistory null
+  if (!appointment.chatHistory) {
+    appointment.chatHistory = {};
+    appointment.chatHistory.messages = [];
+    appointment.chatHistory.appointmentId = appointmentId;
+    const doctorBasic = await DoctorBasic.findOne({ auth: appointment.AuthDoctor });
+    const doctorProfilePic = doctorBasic.avatar;
+    const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
+    const userProfilePic = userBasic.avatar;
+    appointment.chatHistory.particpants = [
+      { name: appointment.doctorName, profilePic: doctorProfilePic },
+      { name: appointment.patientName, profilePic: userProfilePic },
+    ];
+  }
+  const attachmentsURLs = [];
+  if (data.attachments) {
+    data.attachments.forEach((attachment, index) => {
+      const params = {
+        Bucket: process.env.BUCKET,
+        Key: `${index}`,
+        Body: attachment,
+      };
       // eslint-disable-next-line no-shadow
-      (({ sender, text, attachment, createdAt }) => ({ sender, text, attachment, createdAt }))(message)
-    );
-    appointment.save();
+      AwsS3.upload(params, function (err, data) {
+        if (err) {
+          throw new ApiError(`Error in uploading file ${err}`);
+        }
+        attachmentsURLs.push(data.Location);
+      });
+    });
+  }
+  // const filename = 'src/Microservices/labtestdata.json';
+  // const fileContent = fs.readFileSync(filename);
+  // console.log(fileContent); // <Buffer 5b 0a 20 20 20 20 7b 0a 20 20 20 20 20 20 20 20 22 69 64 22 3a 20 31 2c 0a 20 20 20 20 20 20 20 20 22 4c 61 62 20 74 65 73 74 73 22 3a 20 22 48 49 61 ... 15994 more bytes>
+
+  appointment.chatHistory.messages.push({
+    messageId: uuid(), // unique id of msg
+    body: data.body,
+    contentType: 'text',
+    attachments: attachmentsURLs, // data.location
+    createdAt: Date.now(),
+    senderId: data.senderId,
   });
+  await Appointment.findByIdAndUpdate(appointmentId, appointment);
 };
 
 module.exports = {

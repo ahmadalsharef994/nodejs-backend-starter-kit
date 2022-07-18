@@ -125,8 +125,8 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     chatHistory: {
-      type: Array,
-      default: [],
+      type: Object,
+      default: null,
     },
   },
   {

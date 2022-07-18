@@ -803,6 +803,7 @@ const getDoctorsByCategories = async (category) => {
 const bookingConfirmation = async (orderId, appointmentId) => {
   const BookingDetails = await Appointment.findOne({ orderId });
   if (appointmentId === `${BookingDetails._id}`) {
+    // EMAIL BOTH PATIENT AND DOCTOR ABOUT ORDER CONFIRMATION
     return { status: 'success', Message: 'Order confirmed', bookingDetails: BookingDetails, appointmentId };
   }
   return { status: 'failed', Message: 'Order not confirmed !' };

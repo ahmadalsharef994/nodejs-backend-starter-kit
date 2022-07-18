@@ -41,7 +41,7 @@ const getMessages = async (appointmentId, Auth) => {
 const createMessage = async (data) => {
   // this part is asynchronous
   const appointmentId = data.appointmentId;
-  const appointment = await Appointment.findById(appointmentId);
+  const appointment = await Appointment.findOne({ _id: appointmentId });
 
   // if chatHistory null
   if (!appointment.chatHistory) {
@@ -57,20 +57,19 @@ const createMessage = async (data) => {
       { name: appointment.patientName, profilePic: userProfilePic },
     ];
   }
-  const attachmentsURLs = [];
   if (data.attachments) {
-    data.attachments.forEach((attachment, index) => {
+    // eslint-disable-next-line no-param-reassign
+    data.attachments = await data.attachments.map(async (attachment) => {
       const params = {
         Bucket: process.env.BUCKET,
-        Key: `${index}`,
+        Key: `${appointmentId}-${uuid()}`,
         Body: attachment,
       };
       // eslint-disable-next-line no-shadow
-      AwsS3.upload(params, function (err, data) {
-        if (err) {
-          throw new ApiError(`Error in uploading file ${err}`);
-        }
-        attachmentsURLs.push(data.Location);
+      await AwsS3.upload(params);
+      return AwsS3.getSignedUrl('getObject', {
+        Bucket: process.env.BUCKET,
+        Key: `${uuid()}`,
       });
     });
   }
@@ -82,10 +81,11 @@ const createMessage = async (data) => {
     messageId: uuid(), // unique id of msg
     body: data.body,
     contentType: 'text',
-    attachments: attachmentsURLs, // data.location
+    attachments: data.attachments, // data.location
     createdAt: Date.now(),
     senderId: data.senderId,
   });
+  // console.log(JSON.stringify(appointment));
   await Appointment.findByIdAndUpdate(appointmentId, appointment);
 };
 

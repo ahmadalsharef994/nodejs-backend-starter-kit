@@ -25,7 +25,6 @@ dotenv.config();
 //   useTLS: process.env.USE_TLS,
 // });
 
-// implement pagination
 const getMessages = async (appointmentId, Auth) => {
   const appointment = await Appointment.findOne({ _id: appointmentId });
   if (!appointment) {
@@ -59,23 +58,20 @@ const createMessage = async (data) => {
   }
   if (data.attachments) {
     // eslint-disable-next-line no-param-reassign
-    data.attachments = await data.attachments.map(async (attachment) => {
+    data.attachments = data.attachments.map((attachment) => {
+      const attachmentKey = `${uuid()}`;
       const params = {
         Bucket: process.env.BUCKET,
-        Key: `${appointmentId}-${uuid()}`,
+        Key: attachmentKey,
         Body: attachment,
       };
       // eslint-disable-next-line no-shadow
-      await AwsS3.upload(params);
-      return AwsS3.getSignedUrl('getObject', {
-        Bucket: process.env.BUCKET,
-        Key: `${uuid()}`,
-      });
+      AwsS3.upload(params);
+
+      const url = `https://${params.Bucket}.s3.${'us-east-2'}.amazonaws.com/${params.Key}`;
+      return url;
     });
   }
-  // const filename = 'src/Microservices/labtestdata.json';
-  // const fileContent = fs.readFileSync(filename);
-  // console.log(fileContent); // <Buffer 5b 0a 20 20 20 20 7b 0a 20 20 20 20 20 20 20 20 22 69 64 22 3a 20 31 2c 0a 20 20 20 20 20 20 20 20 22 4c 61 62 20 74 65 73 74 73 22 3a 20 22 48 49 61 ... 15994 more bytes>
 
   appointment.chatHistory.messages.push({
     messageId: uuid(), // unique id of msg
@@ -85,7 +81,6 @@ const createMessage = async (data) => {
     createdAt: Date.now(),
     senderId: data.senderId,
   });
-  // console.log(JSON.stringify(appointment));
   await Appointment.findByIdAndUpdate(appointmentId, appointment);
 };
 

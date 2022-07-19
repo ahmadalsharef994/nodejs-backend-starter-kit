@@ -25,7 +25,6 @@ dotenv.config();
 //   useTLS: process.env.USE_TLS,
 // });
 
-// implement pagination
 const getMessages = async (appointmentId, Auth) => {
   const appointment = await Appointment.findOne({ _id: appointmentId });
   if (!appointment) {
@@ -41,7 +40,7 @@ const getMessages = async (appointmentId, Auth) => {
 const createMessage = async (data) => {
   // this part is asynchronous
   const appointmentId = data.appointmentId;
-  const appointment = await Appointment.findById(appointmentId);
+  const appointment = await Appointment.findOne({ _id: appointmentId });
 
   // if chatHistory null
   if (!appointment.chatHistory) {
@@ -57,32 +56,28 @@ const createMessage = async (data) => {
       { name: appointment.patientName, profilePic: userProfilePic },
     ];
   }
-  const attachmentsURLs = [];
   if (data.attachments) {
-    data.attachments.forEach((attachment, index) => {
+    // eslint-disable-next-line no-param-reassign
+    data.attachments = data.attachments.map((attachment) => {
+      const attachmentKey = `${uuid()}`;
       const params = {
         Bucket: process.env.BUCKET,
-        Key: `${index}`,
+        Key: attachmentKey,
         Body: attachment,
       };
       // eslint-disable-next-line no-shadow
-      AwsS3.upload(params, function (err, data) {
-        if (err) {
-          throw new ApiError(`Error in uploading file ${err}`);
-        }
-        attachmentsURLs.push(data.Location);
-      });
+      AwsS3.upload(params);
+
+      const url = `https://${params.Bucket}.s3.${'us-east-2'}.amazonaws.com/${params.Key}`;
+      return url;
     });
   }
-  // const filename = 'src/Microservices/labtestdata.json';
-  // const fileContent = fs.readFileSync(filename);
-  // console.log(fileContent); // <Buffer 5b 0a 20 20 20 20 7b 0a 20 20 20 20 20 20 20 20 22 69 64 22 3a 20 31 2c 0a 20 20 20 20 20 20 20 20 22 4c 61 62 20 74 65 73 74 73 22 3a 20 22 48 49 61 ... 15994 more bytes>
 
   appointment.chatHistory.messages.push({
     messageId: uuid(), // unique id of msg
     body: data.body,
     contentType: 'text',
-    attachments: attachmentsURLs, // data.location
+    attachments: data.attachments, // data.location
     createdAt: Date.now(),
     senderId: data.senderId,
   });

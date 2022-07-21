@@ -34,7 +34,22 @@ const getMessages = async (appointmentId, Auth) => {
   }
   throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");
 };
-
+const getBase64FileType = (base64) => {
+  switch (base64.charAt(0)) {
+    case '/':
+      return 'image/jpg';
+    case 'i':
+      return 'image/png';
+    case 'R':
+      return 'image/gif';
+    case 'U':
+      return 'image/webp';
+    case 'J':
+      return 'application/pdf';
+    default:
+      return 'unknown';
+  }
+};
 const saveMessage = async (data) => {
   // this part is asynchronous
   const appointmentId = data.appointmentId;
@@ -71,14 +86,17 @@ const uploadAttachment = (attachments) => {
   attachments = attachments.map((attachment) => {
     const attachmentKey = `${uuid()}`;
     // eslint-disable-next-line security/detect-new-buffer
-    const base64data = attachment.toString('base64');
+    const base64String = attachment.toString('base64');
+    const base64Data = Buffer.from(base64String.replace(/^data:image\/\w+;base64,/, ''), 'base64');
+    // const type = base64data.split(';')[0].split('/')[1];
+    const type = getBase64FileType(base64String);
 
     const params = {
       Bucket: process.env.PUBLICBUCKET,
       Key: attachmentKey,
-      Body: base64data,
+      Body: base64Data,
       ContentEncoding: 'base64',
-      ContentType: 'image/jpeg',
+      ContentType: `${type}`,
       ACL: 'public-read',
     };
     // eslint-disable-next-line no-shadow

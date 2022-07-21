@@ -30,20 +30,22 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
   io.on('connection', (socket) => {
     logger.info(`User Connected to io: ${socket.id}`);
     socket.on('join_appointment', (appointmentId) => socket.join(appointmentId));
-    socket.on('send_message', (data) => {
-      // if attachements --> upload to S3 --> get  URL
+    // eslint-disable-next-line no-return-await
+    socket.on('send_message', async (data) => {
+      if (data.attachments) {
+        // eslint-disable-next-line no-param-reassign
+        data.attachments = await chatService.uploadAttachment(data.attachments);
+      }
       socket.to(data.appointmentId).emit('receive_message', {
         messageId: uuid(),
         body: data.body,
         contentType: 'text',
-        attachments: data.attachments, // data.attachments: array of buffers
+        attachments: data.attachments, // data.attachments: array of URLs
         createdAt: Date.now(),
         senderId: data.authId,
       });
-      // on FrontEnd socket.on(receive_message)
-      chatService.createMessage(data); // this is synchronous ... we don't want to wait until the message is saved in DB
+      chatService.saveMessage(data); // this is synchronous ... we won't wait until the message is saved in DB
     });
-
     app.set('socket.io', io);
   });
 });

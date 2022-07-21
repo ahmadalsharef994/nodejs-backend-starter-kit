@@ -11,11 +11,9 @@ const AwsS3 = new AWS.S3({
   accessKeyId: process.env.AWSID,
   region: 'us-east-2',
   secretAccessKey: process.env.AWSKEY,
-  bucket: process.env.BUCKET,
+  bucket: process.env.PUBLICBUCKET,
   signatureVersion: 'v4',
 });
-
-dotenv.config();
 
 // const pusher = new Pusher({
 //   appId: process.env.APP_ID,
@@ -37,7 +35,7 @@ const getMessages = async (appointmentId, Auth) => {
   throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");
 };
 
-const createMessage = async (data) => {
+const saveMessage = async (data) => {
   // this part is asynchronous
   const appointmentId = data.appointmentId;
   const appointment = await Appointment.findOne({ _id: appointmentId });
@@ -56,22 +54,6 @@ const createMessage = async (data) => {
       { name: appointment.patientName, profilePic: userProfilePic },
     ];
   }
-  if (data.attachments) {
-    // eslint-disable-next-line no-param-reassign
-    data.attachments = data.attachments.map((attachment) => {
-      const attachmentKey = `${uuid()}`;
-      const params = {
-        Bucket: process.env.BUCKET,
-        Key: attachmentKey,
-        Body: attachment,
-      };
-      // eslint-disable-next-line no-shadow
-      AwsS3.upload(params);
-
-      const url = `https://${params.Bucket}.s3.${'us-east-2'}.amazonaws.com/${params.Key}`;
-      return url;
-    });
-  }
 
   appointment.chatHistory.messages.push({
     messageId: uuid(), // unique id of msg
@@ -83,8 +65,36 @@ const createMessage = async (data) => {
   });
   await Appointment.findByIdAndUpdate(appointmentId, appointment);
 };
+// uploads attachment to S3 and returns corresponding URL
+const uploadAttachment = (attachments) => {
+  // eslint-disable-next-line no-param-reassign
+  attachments = attachments.map((attachment) => {
+    const attachmentKey = `${uuid()}`;
+    // eslint-disable-next-line security/detect-new-buffer
+    const base64data = attachment.toString('base64');
+
+    const params = {
+      Bucket: process.env.PUBLICBUCKET,
+      Key: attachmentKey,
+      Body: base64data,
+      ContentEncoding: 'base64',
+      ContentType: 'image/jpeg',
+      ACL: 'public-read',
+    };
+    // eslint-disable-next-line no-shadow
+    AwsS3.upload(params, (err, data) => {
+      if (err) throw new ApiError(httpStatus.BAD_REQUEST, 'Failed to upload file to S3');
+      return data;
+    });
+
+    const url = `https://${params.Bucket}.s3.amazonaws.com/${params.Key}`;
+    return url;
+  });
+  return attachments;
+};
 
 module.exports = {
   getMessages,
-  createMessage,
+  saveMessage,
+  uploadAttachment,
 };

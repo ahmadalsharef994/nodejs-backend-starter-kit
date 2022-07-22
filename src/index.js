@@ -42,7 +42,7 @@ mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {
         contentType: 'text',
         attachments: data.attachments, // data.attachments: array of URLs
         createdAt: Date.now(),
-        senderId: data.authId,
+        senderId: data.senderId,
       });
       chatService.saveMessage(data); // this is synchronous ... we won't wait until the message is saved in DB
     });

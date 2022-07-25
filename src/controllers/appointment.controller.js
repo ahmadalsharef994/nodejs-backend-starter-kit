@@ -4,10 +4,10 @@ const { authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
-const initAppointmentDoctor = catchAsync(async (req, res) => {
-  const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
-  res.status(httpStatus.CREATED).json(InitSession);
-});
+// const initAppointmentDoctor = catchAsync(async (req, res) => {
+//   const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
+//   res.status(httpStatus.CREATED).json(InitSession);
+// });
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -295,7 +295,7 @@ const getTodaysUpcomingAppointment = catchAsync(async (req, res) => {
   }
 });
 module.exports = {
-  initAppointmentDoctor,
+  // initAppointmentDoctor,
   joinAppointmentDoctor,
   joinAppointmentUser,
   bookAppointment,

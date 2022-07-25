@@ -11,6 +11,7 @@ const {
   AppointmentPreference,
   Feedback,
   UserBasic,
+  DoctorBasic,
   doctordetails,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
@@ -48,15 +49,31 @@ const initiateAppointmentSession = async (appointmentId) => {
 
 const joinAppointmentDoctor = async (appointmentId, AuthData, socketID) => {
   // Join Appointment Doctor called while Doctor requests to Join an Appointment
-  const AppointmentData = await Appointment.findOne({ _id: appointmentId });
-  if (!AppointmentData) {
+  // get participants data and store in Appointment
+  const appointment = await Appointment.findOne({ _id: appointmentId });
+  if (!appointment) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
+  }
+  // if chatHistory null
+  if (!appointment.chatHistory) {
+    appointment.chatHistory = {};
+    appointment.chatHistory.messages = [];
+    appointment.chatHistory.appointmentId = appointmentId;
+    const doctorBasic = await DoctorBasic.findOne({ auth: appointment.AuthDoctor });
+    const doctorProfilePic = doctorBasic.avatar;
+    const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
+    const userProfilePic = userBasic.avatar;
+    appointment.chatHistory.particpants = [
+      { name: appointment.doctorName, profilePic: doctorProfilePic },
+      { name: appointment.patientName, profilePic: userProfilePic },
+    ];
+    await appointment.save();
   }
   // Dyte Service
   const AppointmentSessionData = await DyteService.createDyteMeeting(
     appointmentId,
-    AppointmentData.AuthDoctor,
-    AppointmentData.AuthUser
+    appointment.AuthDoctor,
+    appointment.AuthUser
   );
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'Error Generating Video Session');
@@ -87,15 +104,30 @@ const joinAppointmentDoctor = async (appointmentId, AuthData, socketID) => {
 
 const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID) => {
   // Join Appointment User called while Doctor requests to Join an Appointment
-  const AppointmentData = await Appointment.findById({ _id: appointmentId });
-  if (!AppointmentData) {
+  const appointment = await Appointment.findById({ _id: appointmentId });
+  if (!appointment) {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
+  }
+  // if chatHistory null
+  if (!appointment.chatHistory) {
+    appointment.chatHistory = {};
+    appointment.chatHistory.messages = [];
+    appointment.chatHistory.appointmentId = appointmentId;
+    const doctorBasic = await DoctorBasic.findOne({ auth: appointment.AuthDoctor });
+    const doctorProfilePic = doctorBasic.avatar;
+    const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
+    const userProfilePic = userBasic.avatar;
+    appointment.chatHistory.particpants = [
+      { name: appointment.doctorName, profilePic: doctorProfilePic },
+      { name: appointment.patientName, profilePic: userProfilePic },
+    ];
+    await appointment.save();
   }
   // Dyte Service
   const AppointmentSessionData = await DyteService.createDyteMeeting(
     appointmentId,
-    AppointmentData.AuthDoctor,
-    AppointmentData.AuthUser
+    appointment.AuthDoctor,
+    appointment.AuthUser
   );
   if (!AppointmentSessionData) {
     throw new ApiError(400, 'Error Generating Video Session');

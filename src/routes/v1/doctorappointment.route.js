@@ -82,15 +82,15 @@ router.get(
 router
   .route('/:appointmentId/follow-ups')
   .get(authdoctorverified(), validate(appointmentValidator.getFollowups), appointmentController.getFollowupsById);
-router
-  .route('/:appointmentId/assign-followup')
-  .post(authdoctorverified(), validate(appointmentValidator.assignFollowup), appointmentController.assignFollowup);
+// router
+//   .route('/:appointmentId/assign-followup')
+//   .post(authdoctorverified(), validate(appointmentValidator.assignFollowup), appointmentController.assignFollowup);
 router
   .route('/cancel-followup')
   .post(authdoctorverified(), validate(appointmentValidator.cancelFollowup), appointmentController.cancelFollowup);
-router
-  .route('/reschedule-followup')
-  .post(authdoctorverified(), validate(appointmentValidator.rescheduleFollowup), appointmentController.rescheduleFollowup);
+// router
+//   .route('/reschedule-followup')
+//   .post(authdoctorverified(), validate(appointmentValidator.rescheduleFollowup), appointmentController.rescheduleFollowup);
 router.post(
   '/:appointmentId/prescription',
   authdoctorverified(),

@@ -46,23 +46,23 @@ const bookAppointment = {
     .max(15),
 };
 
-const assignFollowup = {
-  params: Joi.object()
-    .keys({
-      appointmentId: Joi.string().custom(objectId),
-    })
-    .min(1)
-    .max(1),
-  body: Joi.object()
-    .keys({
-      slotId: Joi.string().required(),
-      date: Joi.string().required(),
-      documents: Joi.string().required(),
-      status: Joi.string().required(),
-    })
-    .min(4)
-    .max(4),
-};
+// const assignFollowup = {
+//   params: Joi.object()
+//     .keys({
+//       appointmentId: Joi.string().custom(objectId),
+//     })
+//     .min(1)
+//     .max(1),
+//   body: Joi.object()
+//     .keys({
+//       slotId: Joi.string().required(),
+//       date: Joi.string().required(),
+//       documents: Joi.string().required(),
+//       status: Joi.string().required(),
+//     })
+//     .min(4)
+//     .max(4),
+// };
 
 const getFollowups = {
   params: Joi.object()
@@ -176,18 +176,19 @@ const bookingConfirmation = {
     appointmentId: Joi.string().required(),
   }),
 };
-const rescheduleFollowup = {
-  body: Joi.object().keys({
-    followupId: Joi.string().custom(objectId).required(),
-    date: Joi.string().required(),
-    slotId: Joi.string().required(),
-  }),
-};
+// const rescheduleFollowup = {
+//   body: Joi.object().keys({
+//     followupId: Joi.string().custom(objectId).required(),
+//     date: Joi.string().required(),
+//     slotId: Joi.string().required(),
+//   }),
+// };
+
 module.exports = {
   joinAppointmentDoctor,
   joinAppointmentUser,
   bookAppointment,
-  assignFollowup,
+  // assignFollowup,
   getFollowups,
   getAppointmentsByType,
   // getAvailableAppointments,
@@ -202,6 +203,6 @@ module.exports = {
   getDoctorsByCategories,
   bookingConfirmation,
   cancelFollowup,
-  rescheduleFollowup,
+  // rescheduleFollowup,
   deleteSlot,
 };

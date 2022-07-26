@@ -128,6 +128,15 @@ const updateprofilepic = catchAsync(async (req, res) => {
   const result = await userprofileService.updateProfilePic(profilePhoto, AuthData);
   res.status(httpStatus.OK).json({ message: 'Profile pic updated successfully', result });
 });
+
+const getStats = catchAsync(async (req, res) => {
+  res.status(httpStatus.OK).json({ message: `TO BE IMPLEMENTED after Discussion` });
+});
+
+const getUpcomingEvents = catchAsync(async (req, res) => {
+  res.status(httpStatus.OK).json({ message: `TO BE IMPLEMENTED after Discussion` });
+});
+
 module.exports = {
   showUserProfile,
   submitBasicDetails,
@@ -142,4 +151,6 @@ module.exports = {
   getAllMembers,
   notifications,
   updateprofilepic,
+  getStats,
+  getUpcomingEvents,
 };

@@ -42,4 +42,8 @@ router
   );
 router.post('/notifications', authuser(), validate(UserProfileValidator.notifications), UserProfileController.notifications);
 
+router.route('/stats').get(authuser(), UserProfileController.getStats);
+
+router.route('/upcoming-events').get(authuser(), UserProfileController.getUpcomingEvents);
+
 module.exports = router;

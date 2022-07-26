@@ -9,10 +9,7 @@ const ApiError = require('../utils/ApiError');
 // eslint-disable-next-line import/no-useless-path-segments
 const doctorprofileService = require('../services/doctorprofile.service');
 
-// const gap = parseInt(process.env.GAP, 10);
 const slotTime = parseInt(process.env.SLOT_TIME, 10);
-// const duration = parseInt(process.env.DURATION, 10);
-// const jump = parseInt(duration / slotTime, 10);
 
 const getDoctorPreferences = async (AuthData) => {
   const preference = await AppointmentPreference.find({ doctorAuthId: AuthData._id });
@@ -30,31 +27,6 @@ const checkForAppointmentPrice = async (AuthData) => {
   return true;
 };
 
-// const slotOverlap = (timeSlots) => {
-//   // input slots should be in ascending order
-//   const days = Object.keys(timeSlots);
-//   for (let i = 0; i < days.length; i += 1) {
-//     if (timeSlots[days[i]].length === 1) {
-//       // eslint-disable-next-line no-continue
-//       continue;
-//     }
-//     for (let j = 0; j < timeSlots[days[i]].length - 1; j += 1) {
-//       // enforce minimum 30 mins break betwwen two slots range
-//       if (
-//         timeSlots[days[i]][j + 1].FromHour === timeSlots[days[i]][j].ToHour &&
-//         timeSlots[days[i]][j + 1].FromMinutes >= timeSlots[days[i]][j].ToMinutes + 30
-//       ) {
-//         break;
-//       }
-//       // if overlapping exist return true
-//       if (timeSlots[days[i]][j + 1].FromHour < timeSlots[days[i]][j].ToHour + 1) {
-//         return true;
-//       }
-//     }
-//   }
-//   return false;
-// };
-
 const createPreference = async (body, doctorID, AuthData, update = false) => {
   const appointmentPreferences = await AppointmentPreference.findOne({ docid: doctorID, doctorAuthId: AuthData });
   if (appointmentPreferences && !update) {
@@ -62,12 +34,6 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
       new ApiError(httpStatus.FORBIDDEN, 'Appointment preference already exist!. Please update them instead!')
     );
   }
-
-  // check for time overlap
-  // const overlapping = slotOverlap(body);
-  // if (overlapping) {
-  //   throw new ApiError(httpStatus.FORBIDDEN, 'Overlapped time slots not allowed! maintain 30 mins gap');
-  // }
 
   const result = {};
   const days = Object.keys(body);
@@ -110,30 +76,7 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
     }
   }
 
-  // const finalSlots = [];
-  // let ASlots = [];
-  // let FSlots = [];
-  // let k = 0;
-  // for (let i = 0; i < days.length; i += 1) {
-  //   ASlots = [];
-  //   FSlots = [];
-  //   for (let j = 0; j < body[days[i]].length; j += 1) {
-  //     ASlots.push(...slots[k][0]);
-  //     FSlots.push(...slots[k][1]);
-  //     k += 1;
-  //   }
-  //   finalSlots.push([ASlots, FSlots]);
-  // }
   const finalSlots = slots;
-
-  // const Adays = days.map((day) => day.concat('_A'));
-  // const Fdays = days.map((day) => day.concat('_F'));
-  // Adays.forEach((day, i) => {
-  //   result[day] = finalSlots[i][0];
-  // });
-  // Fdays.forEach((day, i) => {
-  //   result[day] = finalSlots[i][1];
-  // });
 
   days.forEach((day, i) => {
     result[day] = finalSlots[i];
@@ -214,13 +157,13 @@ const updateAppointmentPreference = async (body, doctorId) => {
   return existingSlots;
 };
 
-const getfollowups = async (doctorId) => {
-  const promise = await AppointmentPreference.findOne(
-    { docid: doctorId },
-    { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1, auth: 1 }
-  );
-  return promise;
-};
+// const getfollowups = async (doctorId) => {
+//   const promise = await AppointmentPreference.findOne(
+//     { docid: doctorId },
+//     { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1, auth: 1 }
+//   );
+//   return promise;
+// };
 
 const getAppointmentPreferences = async (doctorId) => {
   const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId: doctorId });
@@ -242,7 +185,7 @@ module.exports = {
   checkForAppointmentPrice,
   createPreference,
   updateAppointmentPreference,
-  getfollowups,
+  // getfollowups,
   getAppointmentPreferences,
   // slotOverlap,
   getDoctorPreferences,

@@ -168,19 +168,6 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
   }
 };
 
-// const calculateSHADigestWallet = async (orderCreationId, razorpayOrderID, razorpayPaymentId, razorpaySignature) => {
-//   const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-//   shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
-//   const calculatedSHADigest = shasum.digest('hex');
-//   if (calculatedSHADigest === razorpaySignature) {
-//     // console.log('request is legit');
-//     await walletOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
-//     return 'match';
-//   }
-//   // console.log('calculatedSHADigest: ', digest);
-//   return 'no_match';
-// };
-
 /* const withdrawFromWallet = async (options) => {
   let body = {
     name: options.name,

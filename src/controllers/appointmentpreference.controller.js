@@ -28,23 +28,24 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
     res.status(httpStatus.CREATED).json({ message: 'slots created', result });
   }
 });
-const showFollowups = catchAsync(async (req, res) => {
-  appointmentPreferenceService
-    .getFollowups(req.Docid)
-    .then((result) => {
-      if (result === null) {
-        return res.status(httpStatus.NOT_FOUND).json({ message: "Follow up slots doesn't exist." });
-      }
-      return res.status(httpStatus.OK).json(result);
-    })
-    .catch(() => {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with getFollwups service');
-    });
-});
+// const showFollowups = catchAsync(async (req, res) => {
+//   appointmentPreferenceService
+//     .getFollowups(req.Docid)
+//     .then((result) => {
+//       if (result === null) {
+//         return res.status(httpStatus.NOT_FOUND).json({ message: "Follow up slots doesn't exist." });
+//       }
+//       return res.status(httpStatus.OK).json(result);
+//     })
+//     .catch(() => {
+//       throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with getFollwups service');
+//     });
+// });
 
-const showAppointments = catchAsync(async (req, res) => {
+const getAppointmentPreferences = catchAsync(async (req, res) => {
+  const doctorId = await authService.getAuthById(req.SubjectId);
   appointmentPreferenceService
-    .getAppointmentPreferences(req.Docid)
+    .getAppointmentPreferences(doctorId)
     .then((result) => {
       if (result === null) {
         return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });
@@ -58,6 +59,6 @@ const showAppointments = catchAsync(async (req, res) => {
 
 module.exports = {
   updateAppointmentPreference,
-  showFollowups,
-  showAppointments,
+  // showFollowups,
+  getAppointmentPreferences,
 };

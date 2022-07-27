@@ -70,10 +70,10 @@ router
 /* router.route('/createPref').post(authdoctorverified(),validate(preferenceValidator.preferenceDetails),appointmentPreferenceController.submitAppointmentPreference); */
 
 // get all appointment preference slots
-router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.showAppointments);
+router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.getAppointmentPreferences);
 
 // get all followup preference slots
-router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);
+// router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);
 
 router.route('/payout-details').get(authdoctornonverified(), doctorProfileController.fetchpayoutsdetails);
 router

@@ -1,9 +1,9 @@
 const Joi = require('joi');
-const { objectId } = require('./custom.validation');
+// const { objectId } = require('./custom.validation');
 
 const getMessages = {
   params: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId).required(),
+    appointmentId: Joi.string().required(),
   }),
 };
 

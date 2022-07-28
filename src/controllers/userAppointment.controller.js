@@ -4,8 +4,8 @@ const { authService, userAppointmentService, appointmentService } = require('../
 const pick = require('../utils/pick');
 
 const upcomingAppointments = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const result = await userAppointmentService.getNextAppointment(AuthData, req.query.limit);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const result = await userAppointmentService.getUpcomingAppointment(req.SubjectId, options);
   if (result.length === 0) {
     return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
   }
@@ -13,10 +13,9 @@ const upcomingAppointments = catchAsync(async (req, res) => {
 });
 
 const getAppointmentsByType = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const filter = { AuthUser: AuthData.id, Type: req.query.type };
+  const filter = req.query.type;
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userAppointmentService.getAppointmentsByType(filter, options);
+  const result = await userAppointmentService.getAppointmentsByType(req.SubjectId, filter, options);
   if (result.length === 0) {
     return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
   }
@@ -60,6 +59,14 @@ const getDoctorsByCategories = catchAsync(async (req, res) => {
     res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
   }
 });
+const getNextAppointment = catchAsync(async (req, res) => {
+  const nextAppointment = await userAppointmentService.getNextAppointment(req.SubjectId);
+  if (nextAppointment) {
+    res.status(httpStatus.OK).json({ nextAppointment });
+  } else {
+    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
+  }
+});
 module.exports = {
   upcomingAppointments,
   getAppointmentsByType,
@@ -67,4 +74,5 @@ module.exports = {
   showLabTestOrders,
   fetchHealthPackages,
   getDoctorsByCategories,
+  getNextAppointment,
 };

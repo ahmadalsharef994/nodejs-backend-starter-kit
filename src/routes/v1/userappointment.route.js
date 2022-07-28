@@ -15,6 +15,7 @@ router
   .post(authuser(), validate(appointmentValidation.joinAppointmentUser), appointmentController.joinAppointmentUser);
 
 router.route('/upcoming-appointments').get(authuser(), userAppointmentController.upcomingAppointments);
+router.route('/next-appointment').get(authuser(), userAppointmentController.getNextAppointment);
 router.route('/prescriptions').get(authuser(), userAppointmentController.showPrescriptions);
 router.route('/labtest-orders').get(authuser(), userAppointmentController.showLabTestOrders);
 router

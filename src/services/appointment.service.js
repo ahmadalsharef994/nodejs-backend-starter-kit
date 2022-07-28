@@ -63,9 +63,9 @@ const joinAppointmentDoctor = async (appointmentId, AuthData, socketID) => {
     const doctorProfilePic = doctorBasic.avatar;
     const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
     const userProfilePic = userBasic.avatar;
-    appointment.chatHistory.particpants = [
-      { name: appointment.doctorName, profilePic: doctorProfilePic },
-      { name: appointment.patientName, profilePic: userProfilePic },
+    appointment.chatHistory.participants = [
+      { id: appointment.AuthDoctor, name: appointment.doctorName, profilePic: doctorProfilePic },
+      { id: appointment.AuthUser, name: appointment.patientName, profilePic: userProfilePic },
     ];
     await appointment.save();
   }
@@ -117,9 +117,9 @@ const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID
     const doctorProfilePic = doctorBasic.avatar;
     const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
     const userProfilePic = userBasic.avatar;
-    appointment.chatHistory.particpants = [
-      { name: appointment.doctorName, profilePic: doctorProfilePic },
-      { name: appointment.patientName, profilePic: userProfilePic },
+    appointment.chatHistory.participants = [
+      { id: appointment.AuthDoctor, name: appointment.doctorName, profilePic: doctorProfilePic },
+      { id: appointment.AuthUser, name: appointment.patientName, profilePic: userProfilePic },
     ];
     await appointment.save();
   }

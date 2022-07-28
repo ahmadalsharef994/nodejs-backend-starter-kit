@@ -117,7 +117,7 @@ const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID
     const doctorProfilePic = doctorBasic.avatar;
     const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
     const userProfilePic = userBasic.avatar;
-    appointment.chatHistory.particpants = [
+    appointment.chatHistory.participants = [
       { id: appointment.AuthDoctor, name: appointment.doctorName, profilePic: doctorProfilePic },
       { id: appointment.AuthUser, name: appointment.patientName, profilePic: userProfilePic },
     ];

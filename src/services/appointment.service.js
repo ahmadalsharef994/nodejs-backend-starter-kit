@@ -949,6 +949,9 @@ const getTodaysUpcomingAppointment = async (doctorId) => {
       Status: { $nin: 'cancelled' },
       StartTime: { $lte: new Date() },
     });
+    if (ongoing.length === 0) {
+      return upcoming[0];
+    }
     const currenttime = new Date().toLocaleString().split(':')[1];
     const ongoingApp = new Date(`${ongoing[ongoing.length - 1].StartTime}`).toLocaleString().split(':')[1];
     if (currenttime >= ongoingApp) {

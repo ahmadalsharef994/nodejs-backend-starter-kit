@@ -9,3 +9,4 @@ module.exports.razorpayValidation = require('./razorpay.validation');
 module.exports.walletValidation = require('./wallet.validation'); // export wallet Validation (NEW)
 module.exports.elasticSearchValidation = require('./elasticSearch.validation'); // export elasticSearch Validation (NEW)
 module.exports.autoReplyValidation = require('./autoReply.validation'); // export autoreply Validation (NEW)
+module.exports.eventValidation = require('./event.validation'); // export event Validation (NEW)

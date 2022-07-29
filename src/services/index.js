@@ -13,4 +13,5 @@ module.exports.chatService = require('./chat.service');
 module.exports.userProfile = require('./userprofile.service');
 module.exports.verifiedUserService = require('./verifiedUser.service');
 module.exports.couponService = require('./coupon.service');
-module.exports.walletService = require('./wallet.service'); // export Wallet Service NEW
+module.exports.walletService = require('./wallet.service');
+module.exports.eventService = require('./event.service.js');

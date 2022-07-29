@@ -106,16 +106,16 @@ const joinAppointmentSessionbyPatient = async (appointmentId, AuthData, socketID
   }
   const UserVideoToken = AppointmentSessionData.dyteusertoken;
   const UserRoomName = AppointmentSessionData.dyteroomname;
-  let UserChatAuthToken = '';
+  let ChatExchangeToken = '';
   await pusherService
     .pusherAuthenticate(`private-${appointmentId}`, socketID)
     .then((result) => {
-      UserChatAuthToken = result.auth;
+      ChatExchangeToken = result.auth;
     })
     .catch(() => {
       throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
     });
-  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+  const UserChatAuthToken = tokenService.generateChatAppointmentSessionToken(
     AppointmentSessionData.appointmentid,
     AppointmentSessionData.AuthDoctor,
     AppointmentSessionData.AuthUser,
@@ -505,13 +505,19 @@ const getPrescription = async (prescriptionid) => {
 };
 
 const createPrescriptionDoc = async (prescriptionDoc, appointmentId, Authdata) => {
-  prescriptionDoc.Appointment = appointmentId;
-  prescriptionDoc.doctorAuth = Authdata;
-  const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
-  if (DoctorPrescriptionDocument) {
-    return DoctorPrescriptionDocument;
+  try {
+    const appointment = await Appointment.find({ _id: appointmentId });
+    prescriptionDoc.Appointment = appointmentId;
+    prescriptionDoc.patientName = appointment[0].patientName;
+    prescriptionDoc.userAuth = appointment[0].AuthUser;
+    prescriptionDoc.doctorAuth = Authdata;
+    const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
+    if (DoctorPrescriptionDocument) {
+      return DoctorPrescriptionDocument;
+    }
+  } catch (e) {
+    return false;
   }
-  return false;
 };
 
 // eslint-disable-next-line no-unused-vars

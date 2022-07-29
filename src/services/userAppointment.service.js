@@ -1,4 +1,4 @@
-const { Prescription, Appointment, ThyrocareOrder, HealthPackage } = require('../models');
+const { Prescription, Appointment, ThyrocareOrder, HealthPackage, Followup } = require('../models');
 
 const getUpcomingAppointment = async (auth, options) => {
   const result = await Appointment.paginate(
@@ -9,15 +9,47 @@ const getUpcomingAppointment = async (auth, options) => {
 };
 
 const getAppointmentsByType = async (AuthUser, filter, options) => {
-  if (filter === 'ALL') {
-    // eslint-disable-next-line no-param-reassign
-    delete filter.Type;
-    const result = await Appointment.paginate({ paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, AuthUser }, options);
-    return result;
+  try {
+    if (filter === 'ALL') {
+      // eslint-disable-next-line no-param-reassign
+      delete filter.Type;
+      const result = await Appointment.paginate({ paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, AuthUser }, options);
+      return result;
+    }
+    if (filter === 'PAST') {
+      // eslint-disable-next-line no-param-reassign
+      delete filter.Type;
+      const result = await Appointment.paginate(
+        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $lte: new Date() }, AuthUser },
+        options
+      );
+      return result;
+    }
+    if (filter === 'FOLLOWUP') {
+      // eslint-disable-next-line no-param-reassign
+      delete filter.Type;
+      const result = await Followup.paginate({ AuthUser }, options);
+      return result;
+    }
+    if (filter === 'CANCELLED') {
+      // eslint-disable-next-line no-param-reassign
+      delete filter.Type;
+      const result = await Appointment.paginate({ paymentStatus: 'PAID', Status: { $in: 'cancelled' }, AuthUser }, options);
+      return result;
+    }
+    if (filter === 'TODAY') {
+      // eslint-disable-next-line no-param-reassign
+      delete filter.Type;
+      const date = new Date().toDateString();
+      const result = await Appointment.paginate(
+        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, AuthUser, Date: date },
+        options
+      );
+      return result;
+    }
+  } catch (err) {
+    return null;
   }
-
-  const result = await Appointment.paginate({ paymentStatus: 'PAID', AuthUser }, options);
-  return result;
 };
 
 const getAllPrescriptions = async (auth, options) => {

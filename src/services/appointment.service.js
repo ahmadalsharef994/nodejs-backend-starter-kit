@@ -162,6 +162,13 @@ const submitAppointmentDetails = async (
       throw new ApiError(httpStatus.BAD_REQUEST, "Your'e booking for a future Date .Choose 'PREBOOKING' insted of 'LIVE' ");
     }
   }
+  if (bookingType === 'PREBOOKING') {
+    const currentdate = new Date().toDateString();
+    const bookingdate = new Date(date).toDateString();
+    if (currentdate === bookingdate) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Your'e booking for a current Date .Choose 'LIVE' insted of 'PREBOOKING' ");
+    }
+  }
   let Gender = '';
   let age = 0;
   if (users) {

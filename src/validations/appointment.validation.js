@@ -27,10 +27,10 @@ const bookAppointment = {
       slotId: Joi.string().required(),
       date: Joi.string().required(),
       status: Joi.string(), // valid options needed
-      bookingType: Joi.string().required().valid('TODAY', 'REFERRED', 'CANCELLED', 'SCHEDULED'),
+      bookingType: Joi.string().required().valid('PREBOOKING', 'LIVE'),
       documents: Joi.array(),
       description: Joi.string(),
-      issue: Joi.string().required(),
+      issue: Joi.array().max(3),
       doctorAction: Joi.string(),
       doctorReason: Joi.string(),
       userAction: Joi.string(),

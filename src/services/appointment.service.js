@@ -155,11 +155,11 @@ const submitAppointmentDetails = async (
 ) => {
   const users = await UserBasic.find({ auth: `${userAuth._id}` }, { auth: 1, dob: 1, gender: 1 });
   const appointmentDate = new Date(date).toDateString();
-  if (bookingType === 'TODAY') {
+  if (bookingType === 'LIVE') {
     const currentdate = new Date().toDateString();
     const bookingdate = new Date(date).toDateString();
     if (currentdate !== bookingdate) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Your booking date is not todays date');
+      throw new ApiError(httpStatus.BAD_REQUEST, "Your'e booking for a future Date .Choose 'PREBOOKING' insted of 'LIVE' ");
     }
   }
   let Gender = '';
@@ -196,13 +196,13 @@ const submitAppointmentDetails = async (
     startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
     endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
     const currentTime = new Date();
-    if (startTime.getTime() <= currentTime.getTime()) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
-    }
     const correctDay = startTime.getDay();
     const requestedDay = slotId.split('-')[0];
     if (weekday[correctDay] !== requestedDay) {
       throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
+    }
+    if (startTime.getTime() <= currentTime.getTime()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
     }
   });
 

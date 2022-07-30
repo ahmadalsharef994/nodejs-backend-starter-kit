@@ -89,7 +89,7 @@ const AppointmentSchema = mongoose.Schema(
       type: String,
     },
     HealthIssue: {
-      type: String,
+      type: Array,
       required: true,
     },
     LabTest: {

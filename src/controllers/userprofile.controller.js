@@ -1,7 +1,22 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const userprofileService = require('../services/userprofile.service');
-const { authService } = require('../services');
+const { authService, appointmentService } = require('../services');
+
+const getStats = catchAsync(async (req, res) => {
+  const feedbacks = await appointmentService.getUserFeedbacks(req.query.id);
+
+  const RATING = (
+    feedbacks.reduce((doctorRatingsSum, feedback) => {
+      return doctorRatingsSum + feedback.doctorRating;
+    }, 0) / feedbacks.length
+  ).toFixed(1);
+
+  res.status(httpStatus.OK).json({
+    message: 'success',
+    data: RATING,
+  });
+});
 
 const showUserProfile = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -127,10 +142,6 @@ const updateprofilepic = catchAsync(async (req, res) => {
   const profilePhoto = req.files.avatar[0].location;
   const result = await userprofileService.updateProfilePic(profilePhoto, AuthData);
   res.status(httpStatus.OK).json({ message: 'Profile pic updated successfully', result });
-});
-
-const getStats = catchAsync(async (req, res) => {
-  res.status(httpStatus.OK).json({ message: `TO BE IMPLEMENTED after Discussion` });
 });
 
 const getUpcomingEvents = catchAsync(async (req, res) => {

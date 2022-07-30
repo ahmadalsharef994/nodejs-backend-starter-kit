@@ -655,6 +655,11 @@ const getDoctorFeedbacks = async (doctorId) => {
   return feedbackData;
 };
 
+const getUserFeedbacks = async (userId) => {
+  const feedbackData = await Feedback.find({ AuthUser: userId });
+  return feedbackData;
+};
+
 const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
   const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
@@ -1011,4 +1016,5 @@ module.exports = {
   getTotalIncome,
   getTodaysUpcomingAppointment,
   getAvailableAppointmentsManually,
+  getUserFeedbacks,
 };

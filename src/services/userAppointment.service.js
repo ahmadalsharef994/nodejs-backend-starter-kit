@@ -53,7 +53,7 @@ const getAppointmentsByType = async (AuthUser, filter, options) => {
 };
 
 const getAllPrescriptions = async (auth, options) => {
-  const result = await Prescription.paginate({ AuthUser: auth }, options);
+  const result = await Prescription.paginate({ userAuth: auth }, options);
   return result;
 };
 

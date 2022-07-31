@@ -77,7 +77,7 @@ const getFollowups = {
 const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('TODAY', 'REFERRED', 'CANCELLED', 'PAST', 'ALL', 'FOLLOWUP'),
+      type: Joi.string().valid('REFERRED', 'FOLLOWUP', 'CANCELLED', 'PAST', 'ALL', 'TODAYFOLLOWUP'),
       limit: Joi.number(),
       page: Joi.number(),
       sortBy: Joi.string(),

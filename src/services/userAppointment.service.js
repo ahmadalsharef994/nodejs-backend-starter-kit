@@ -1,26 +1,29 @@
-const { Prescription, Appointment, ThyrocareOrder, HealthPackage, Followup } = require('../models');
+const { Prescription, Appointment, ThyrocareOrder, HealthPackage, Followup, doctordetails } = require('../models');
 
-const getUpcomingAppointment = async (auth, options) => {
+const getUpcomingAppointment = async (auth, endDate, options) => {
   const result = await Appointment.paginate(
-    { AuthUser: auth, paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: new Date() } },
+    { AuthUser: auth, paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: new Date(), $lte: endDate } },
     options
   );
   return result;
 };
 
-const getAppointmentsByType = async (AuthUser, filter, options) => {
+const getAppointmentsByType = async (AuthUser, fromDate, endDate, filter, options) => {
   try {
     if (filter === 'ALL') {
       // eslint-disable-next-line no-param-reassign
       delete filter.Type;
-      const result = await Appointment.paginate({ paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, AuthUser }, options);
+      const result = await Appointment.paginate(
+        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate }, AuthUser },
+        options
+      );
       return result;
     }
     if (filter === 'PAST') {
       // eslint-disable-next-line no-param-reassign
       delete filter.Type;
       const result = await Appointment.paginate(
-        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $lte: new Date() }, AuthUser },
+        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lte: new Date() }, AuthUser },
         options
       );
       return result;
@@ -28,13 +31,23 @@ const getAppointmentsByType = async (AuthUser, filter, options) => {
     if (filter === 'FOLLOWUP') {
       // eslint-disable-next-line no-param-reassign
       delete filter.Type;
-      const result = await Followup.paginate({ AuthUser }, options);
+      const result = await Followup.paginate({ AuthUser, StartTime: { $gte: fromDate, $lt: endDate } }, options);
+      return result;
+    }
+    if (filter === 'TODAYFOLLOWUP') {
+      // eslint-disable-next-line no-param-reassign
+      delete filter.Type;
+      const date = new Date().toDateString();
+      const result = await Followup.paginate({ AuthUser, Date: date }, options);
       return result;
     }
     if (filter === 'CANCELLED') {
       // eslint-disable-next-line no-param-reassign
       delete filter.Type;
-      const result = await Appointment.paginate({ paymentStatus: 'PAID', Status: { $in: 'cancelled' }, AuthUser }, options);
+      const result = await Appointment.paginate(
+        { paymentStatus: 'PAID', Status: { $in: 'cancelled' }, AuthUser, StartTime: { $gte: fromDate, $lt: endDate } },
+        options
+      );
       return result;
     }
     if (filter === 'TODAY') {
@@ -74,6 +87,12 @@ const getNextAppointment = async (AuthUser) => {
       Status: { $nin: 'cancelled' },
       StartTime: { $gte: new Date() },
     });
+    let doctorSpeciality = '';
+    if (upcoming[0]) {
+      const res = await doctordetails.find({ doctorauthId: upcoming[0].AuthDoctor });
+      doctorSpeciality = res[0].specializations[0];
+      Object.assign(upcoming[0], { doctorSpeciality });
+    }
     const ongoing = await Appointment.find({
       AuthUser,
       Date: new Date().toDateString(),
@@ -83,6 +102,11 @@ const getNextAppointment = async (AuthUser) => {
     });
     if (ongoing.length === 0) {
       return upcoming[0];
+    }
+    if (ongoing[0]) {
+      const res = await doctordetails.find({ doctorauthId: ongoing[ongoing.length - 1].AuthDoctor });
+      doctorSpeciality = res[0].specializations[0];
+      Object.assign(ongoing[ongoing.length - 1], { doctorSpeciality });
     }
     const currenttime = new Date().toLocaleString().split(':')[1];
     const ongoingApp = new Date(`${ongoing[ongoing.length - 1].StartTime}`).toLocaleString().split(':')[1];

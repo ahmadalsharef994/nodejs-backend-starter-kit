@@ -5,7 +5,8 @@ const pick = require('../utils/pick');
 
 const upcomingAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userAppointmentService.getUpcomingAppointment(req.SubjectId, options);
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const result = await userAppointmentService.getUpcomingAppointment(req.SubjectId, endDate, options);
   if (result.length === 0) {
     return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
   }
@@ -15,7 +16,9 @@ const upcomingAppointments = catchAsync(async (req, res) => {
 const getAppointmentsByType = catchAsync(async (req, res) => {
   const filter = req.query.type;
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userAppointmentService.getAppointmentsByType(req.SubjectId, filter, options);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const result = await userAppointmentService.getAppointmentsByType(req.SubjectId, fromDate, endDate, filter, options);
   if (result.length === 0) {
     return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
   }
@@ -61,10 +64,11 @@ const getDoctorsByCategories = catchAsync(async (req, res) => {
 });
 const getNextAppointment = catchAsync(async (req, res) => {
   const nextAppointment = await userAppointmentService.getNextAppointment(req.SubjectId);
-  if (nextAppointment) {
+  // eslint-disable-next-line eqeqeq
+  if (nextAppointment != null || nextAppointment != undefined) {
     res.status(httpStatus.OK).json({ nextAppointment });
   } else {
-    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointments not found' });
   }
 });
 module.exports = {

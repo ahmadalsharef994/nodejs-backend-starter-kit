@@ -4,25 +4,35 @@ const getBalanceInWallet = {
   query: Joi.object().keys({}),
 };
 
-const refundToWalletUser = {
+const refundToWallet = {
   body: Joi.object().keys({
     amount: Joi.number().precision(2).min(0).max(50000).required(),
     cashbackAmount: Joi.number().precision(2).min(0).max(50000).required(),
-    refundCondition: Joi.required().valid('Cashback', 'Cancelled Appointment', 'Cancelled Labtest'),
+    refundCondition: Joi.required().valid('Cashback', 'Cancelled Appointment', 'Cancelled Labtest', 'Doctor Earning'),
     appointmentId: Joi.objectId(),
     razorpayOrderID: Joi.string(),
   }),
 };
 
-const refundToWalletDoctor = {
-  body: Joi.object().keys({
-    amount: Joi.number().precision(2).min(0).max(50000).required(),
-    cashbackAmount: Joi.number().precision(2).min(0).max(50000).required(),
-    refundCondition: Joi.required().valid('Cashback', 'Doctor Earning'),
-    appointmentId: Joi.objectId(),
-    razorpayOrderID: Joi.string(),
-  }),
-};
+// const refundToWalletUser = {
+//   body: Joi.object().keys({
+//     amount: Joi.number().precision(2).min(0).max(50000).required(),
+//     cashbackAmount: Joi.number().precision(2).min(0).max(50000).required(),
+//     refundCondition: Joi.required().valid('Cashback', 'Cancelled Appointment', 'Cancelled Labtest'),
+//     appointmentId: Joi.objectId(),
+//     razorpayOrderID: Joi.string(),
+//   }),
+// };
+
+// const refundToWalletDoctor = {
+//   body: Joi.object().keys({
+//     amount: Joi.number().precision(2).min(0).max(50000).required(),
+//     cashbackAmount: Joi.number().precision(2).min(0).max(50000).required(),
+//     refundCondition: Joi.required().valid('Cashback', 'Doctor Earning'),
+//     appointmentId: Joi.objectId(),
+//     razorpayOrderID: Joi.string(),
+//   }),
+// };
 
 const discountFromWallet = {
   body: Joi.object().keys({
@@ -59,8 +69,9 @@ const fullfillWithdrawRequest = {
 };
 module.exports = {
   getBalanceInWallet,
-  refundToWalletUser,
-  refundToWalletDoctor,
+  refundToWallet,
+  // refundToWalletUser,
+  // refundToWalletDoctor,
   discountFromWallet,
   payFromWallet,
   withdrawFromWallet,

@@ -14,6 +14,7 @@ const walletRoute = require('./wallet.route');
 const elasticSearchRoute = require('./elasticSearch.route');
 const autoReplyRoute = require('./autoReply.route');
 const pusherRoute = require('./pusher.route');
+const eventRoute = require('./event.route');
 
 const router = express.Router();
 
@@ -77,6 +78,10 @@ const defaultRoutes = [
   {
     path: '/pusher',
     route: pusherRoute,
+  },
+  {
+    path: '/events',
+    route: eventRoute,
   },
 ];
 

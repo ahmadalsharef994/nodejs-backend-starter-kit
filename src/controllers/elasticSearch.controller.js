@@ -9,7 +9,7 @@ const createMedicinesIndex = catchAsync(async (req, res) => {
     const response = await elasticSearchService.createMedicinesIndex(index);
     res.status(httpStatus.OK).json({
       message: `index ${index} created`,
-      response,
+      data: response,
     });
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `couldn't create index: ${index} due to error ${err}`);
@@ -22,7 +22,7 @@ const createDoctorsIndex = catchAsync(async (req, res) => {
     const response = await elasticSearchService.createDoctorsIndex(index);
     res.status(httpStatus.OK).json({
       message: `index ${index} created`,
-      response,
+      data: response,
     });
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `couldn't create index: ${index} due to error ${err}`);
@@ -35,7 +35,7 @@ const deleteIndex = catchAsync(async (req, res) => {
     const response = await elasticSearchService.deleteIndex(index);
     res.status(httpStatus.OK).json({
       message: `index ${index} deleted`,
-      response,
+      data: response,
     });
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `couldn't delete index: ${index} due to error: ${err}`);
@@ -48,7 +48,7 @@ const createDocument = catchAsync(async (req, res) => {
     const response = await elasticSearchService.createDocument(index, document);
     res.status(httpStatus.OK).json({
       message: `document ${document} created`,
-      response,
+      data: response,
     });
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `couldn't create document: ${document} in index ${index} due to error: ${err}`);
@@ -61,23 +61,25 @@ const searchDocument = catchAsync(async (req, res) => {
     const response = await elasticSearchService.searchDocument(index, keyword, value);
     res.status(httpStatus.OK).json({
       message: `searching for ${keyword}: ${value}`,
-      response,
+      data: response,
     });
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `couldn't search document in index ${index} \n ${err}`);
   }
 });
 
-// TODO
 const indexJsonDataset = catchAsync(async (req, res) => {
   const { index, datasetpath } = req.body;
   try {
     const response = await elasticSearchService.indexJsonDataset(index, datasetpath);
     res.status(httpStatus.OK).json({
-      response,
+      data: response,
     });
   } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND, `couldn't index json dataset file ${datasetpath} in ${index}`);
+    throw new ApiError(
+      httpStatus.NOT_FOUND,
+      `couldn't index json dataset file ${datasetpath} in ${index} due to error: ${err}`
+    );
   }
 });
 
@@ -85,7 +87,7 @@ const getClientInfo = catchAsync(async (req, res) => {
   try {
     const response = await elasticSearchService.getClientInfo();
     res.status(httpStatus.OK).json({
-      response,
+      data: response,
     });
   } catch (err) {
     throw new ApiError(httpStatus.NOT_FOUND, `couldn't get ES client info`);

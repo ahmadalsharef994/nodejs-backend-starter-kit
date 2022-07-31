@@ -32,14 +32,6 @@ router.route('/fetch-unverified-doctors-profile').get(authAdmin(), InternalTeamC
 router.route('/verified-doctors').get(authAdmin(), InternalTeamController.verifiedDoctors);
 router.route('/rejected-doctors').get(authAdmin(), InternalTeamController.rejectedDoctors);
 
-/**
- * @openapi
- * /admin/restricted/service-charges:
- *  post:
- *     tags:
- *     - admin
- *     - internal team
- */
 router
   .route('/service-charges')
   .post(authAdmin(), validate(InternalTeamValidator.setServiceCharges), InternalTeamController.setServiceCharges);

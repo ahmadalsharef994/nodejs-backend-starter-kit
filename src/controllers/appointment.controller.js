@@ -4,10 +4,10 @@ const { authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
 // const prescriptionUpload = require('../Microservices/generatePrescription.service');
 
-const initAppointmentDoctor = catchAsync(async (req, res) => {
-  const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
-  res.status(httpStatus.CREATED).json(InitSession);
-});
+// const initAppointmentDoctor = catchAsync(async (req, res) => {
+//   const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
+//   res.status(httpStatus.CREATED).json(InitSession);
+// });
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -55,20 +55,20 @@ const getAppointmentDetails = catchAsync(async (req, res) => {
   }
 });
 
-const assignFollowup = catchAsync(async (req, res) => {
-  await appointmentService
-    .submitFollowupDetails(
-      req.params.appointmentId,
-      req.Docid,
-      req.body.slotId,
-      req.body.date,
-      req.body.documents,
-      req.body.status
-    )
-    .then((result) => {
-      return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
-    });
-});
+// const assignFollowup = catchAsync(async (req, res) => {
+//   await appointmentService
+//     .submitFollowupDetails(
+//       req.params.appointmentId,
+//       req.Docid,
+//       req.body.slotId,
+//       req.body.date,
+//       req.body.documents,
+//       req.body.status
+//     )
+//     .then((result) => {
+//       return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
+//     });
+// });
 
 const getFollowupsById = catchAsync(async (req, res) => {
   await appointmentService.getFollowupsById(req.query.limit).then((result) => {
@@ -258,14 +258,14 @@ const cancelFollowup = catchAsync(async (req, res) => {
   }
 });
 
-const rescheduleFollowup = catchAsync(async (req, res) => {
-  const result = await appointmentService.rescheduleFollowup(req.body.followupId, req.body.slotId, req.body.date);
-  if (result) {
-    res.status(httpStatus.OK).json({ message: 'followup rescheduled', result });
-  } else {
-    res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant reschedule followup' });
-  }
-});
+// const rescheduleFollowup = catchAsync(async (req, res) => {
+//   const result = await appointmentService.rescheduleFollowup(req.body.followupId, req.body.slotId, req.body.date);
+//   if (result) {
+//     res.status(httpStatus.OK).json({ message: 'followup rescheduled', result });
+//   } else {
+//     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant reschedule followup' });
+//   }
+// });
 
 const allAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -295,11 +295,11 @@ const getTodaysUpcomingAppointment = catchAsync(async (req, res) => {
   }
 });
 module.exports = {
-  initAppointmentDoctor,
+  // initAppointmentDoctor,
   joinAppointmentDoctor,
   joinAppointmentUser,
   bookAppointment,
-  assignFollowup,
+  // assignFollowup,
   getFollowupsById,
   getAvailableFollowUps,
   getAvailableAppointments,
@@ -317,7 +317,7 @@ module.exports = {
   rescheduleAppointment,
   bookingConfirmation,
   cancelFollowup,
-  rescheduleFollowup,
+  // rescheduleFollowup,
   allAppointments,
   deleteSlot,
   getTodaysUpcomingAppointment,

@@ -3,19 +3,19 @@ const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const validate = require('../../middlewares/validate');
 const appointmentValidator = require('../../validations/appointment.validation');
 const appointmentController = require('../../controllers/appointment.controller');
-const chatAuth = require('../../middlewares/chatAuth');
+// const chatAuth = require('../../middlewares/chatAuth');
 const authUserDoctor = require('../../middlewares/authUserDoctor');
 const chatController = require('../../controllers/chat.controller');
 const chatValidator = require('../../validations/chat.validation');
 
 const router = express.Router();
 
-router.post(
-  '/init',
-  authdoctorverified(),
-  validate(appointmentValidator.joinAppointmentDoctor),
-  appointmentController.initAppointmentDoctor
-);
+// router.post(
+//   '/init',
+//   authdoctorverified(),
+//   validate(appointmentValidator.joinAppointmentDoctor),
+//   appointmentController.initAppointmentDoctor
+// );
 // This is used fot Initiaing Appointment Session Manually while testing
 
 router.post(
@@ -57,14 +57,6 @@ router.route('/get-next-appointment').get(authdoctorverified(), appointmentContr
 //  get appointment slots available for booking (public)
 router.route('/get-available-appointments').get(authdoctorverified(), appointmentController.getAvailableAppointments); // getAvailableAppointments
 
-/**
- * @openapi
- * /doctor/appointment/doctor-all-appointments:
- *  get:
- *     tags:
- *     - doctor
- *     - appointments
- */
 router.route('/doctor-all-appointments').get(authdoctorverified(), appointmentController.allAppointments);
 router.get('/getpatients', authdoctorverified(), appointmentController.getPatients); // getPatients
 router.get(
@@ -90,15 +82,15 @@ router.get(
 router
   .route('/:appointmentId/follow-ups')
   .get(authdoctorverified(), validate(appointmentValidator.getFollowups), appointmentController.getFollowupsById);
-router
-  .route('/:appointmentId/assign-followup')
-  .post(authdoctorverified(), validate(appointmentValidator.assignFollowup), appointmentController.assignFollowup);
+// router
+//   .route('/:appointmentId/assign-followup')
+//   .post(authdoctorverified(), validate(appointmentValidator.assignFollowup), appointmentController.assignFollowup);
 router
   .route('/cancel-followup')
   .post(authdoctorverified(), validate(appointmentValidator.cancelFollowup), appointmentController.cancelFollowup);
-router
-  .route('/reschedule-followup')
-  .post(authdoctorverified(), validate(appointmentValidator.rescheduleFollowup), appointmentController.rescheduleFollowup);
+// router
+//   .route('/reschedule-followup')
+//   .post(authdoctorverified(), validate(appointmentValidator.rescheduleFollowup), appointmentController.rescheduleFollowup);
 router.post(
   '/:appointmentId/prescription',
   authdoctorverified(),
@@ -121,8 +113,9 @@ router.post(
 router
   .route('/:appointmentId/get-messages')
   .get(authUserDoctor(), validate(chatValidator.getMessages), chatController.getMessages);
-router
-  .route('/:appointmentId/send-message')
-  .post(chatAuth(), validate(chatValidator.sendMessage), chatController.sendMessage);
+
+// router
+//   .route('/:appointmentId/send-message')
+//   .post(chatAuth(), validate(chatValidator.sendMessage), chatController.sendMessage);
 
 module.exports = router;

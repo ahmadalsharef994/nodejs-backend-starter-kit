@@ -16,5 +16,4 @@ const getMessages = catchAsync(async (req, res) => {
 
 module.exports = {
   getMessages,
-  // sendMessage,
 };

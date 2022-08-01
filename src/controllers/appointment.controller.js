@@ -2,36 +2,24 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
-// const prescriptionUpload = require('../Microservices/generatePrescription.service');
-
-// const initAppointmentDoctor = catchAsync(async (req, res) => {
-//   const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
-//   res.status(httpStatus.CREATED).json(InitSession);
-// });
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.joinAppointmentDoctor(
-    req.body.appointmentInit,
-    AuthData,
-    req.body.socketID
-  );
+  const appointmentId = req.body.appointmentInit;
+  // new design. only pass appointmentId
+  const DoctorSession = await appointmentService.joinAppointmentDoctor(appointmentId);
   res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentUser = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const UserSession = await appointmentService.joinAppointmentSessionbyPatient(
-    req.body.appointmentInit,
-    AuthData,
-    req.body.socketID
-  );
+  const appointmentId = req.body.appointmentInit;
+  // new design. only pass appointmentId
+  const UserSession = await appointmentService.joinAppointmentPatient(appointmentId);
   res.status(httpStatus.CREATED).json(UserSession);
 });
 
 const bookAppointment = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const { id, orderId } = await appointmentService.submitAppointmentDetails(
+  const { id, orderId } = await appointmentService.bookAppointment(
     req.body.docId,
     AuthData,
     req.body.slotId,

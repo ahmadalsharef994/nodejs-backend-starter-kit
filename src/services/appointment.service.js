@@ -497,10 +497,8 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
       'Prescription ': singlePatientData[4],
     });
   }
-
   patientIds[0].metadata[0].totalPages = Math.ceil(patientIds[0].metadata[0].total / limit);
   patientIds[0].metadata[0].limit = parseInt(limit, 10);
-
   if (allPatientsData.length) {
     return [allPatientsData, patientIds[0].metadata[0]];
   }
@@ -527,8 +525,7 @@ const getUserFeedbacks = async (userId) => {
 // for particular appointment
 const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
-  const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
-  const AuthUser = await Appointment.findById(appointmentId).AuthUser;
+  const { AuthUser, AuthDoctor } = await Appointment.findById(appointmentId);
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
       { appointmentId },
@@ -548,10 +545,7 @@ const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
 // for particular appointment
 const getUserFeedback = async (feedbackDoc, appointmentId) => {
   const feedbackData = await Feedback.findOne({ appointmentId });
-  const AuthDoctor = await Appointment.findById(appointmentId).AuthDoctor;
-  const AuthUser = await Appointment.findById(appointmentId).AuthUser;
-  // eslint-disable-next-line no-console
-  console.log(AuthDoctor, AuthUser);
+  const { AuthUser, AuthDoctor } = await Appointment.findById(appointmentId);
 
   if (feedbackData) {
     await Feedback.findOneAndUpdate(
@@ -577,33 +571,31 @@ const getUserFeedback = async (feedbackDoc, appointmentId) => {
 };
 
 const cancelAppointment = async (appointmentId, doctorId) => {
-  const appointmentData = await Appointment.findById({ _id: appointmentId });
-  if (appointmentData.Status !== 'cancelled') {
+  const appointment = await Appointment.findById({ _id: appointmentId });
+  if (appointment.Status !== 'cancelled') {
     await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
     const result = await Appointment.find({ AuthDoctor: doctorId });
     return result;
   }
-  return null;
+  return 'appintment already cancelled';
 };
 
 const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, RescheduledReason, sendMailToUser) => {
   let emailSent = true;
-  let startTime = null;
-  let endTime = null;
   const appointment = await Appointment.findById({ _id: appointmentId, docid: doctorId });
   if (!appointment) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Appointment doesn't exist");
   }
-  const appointPreference = await AppointmentPreference.findOne({ docid: doctorId });
+  const appointmentPreferences = await AppointmentPreference.findOne({ docid: doctorId });
   const day = slotId.split('-')[0];
   const rescheduledDay = new Date(date).toDateString().toUpperCase().split(' ')[0];
   if (day !== rescheduledDay) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Requested weekday doesn't matches the given date");
   }
-  const slots = appointPreference[`${day}`];
+  const slots = appointmentPreferences[`${day}`];
   const slot = slots.filter((e) => e.slotId === slotId);
-  startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
-  endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+  const startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
+  const endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
   const currentTime = new Date();
   if (startTime.getTime() <= currentTime.getTime()) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointments can be booked only for future dates');
@@ -622,42 +614,16 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
   const appointmentDate = new Date(date).toDateString();
   const todayDate = new Date().toDateString();
   if (`${todayDate}` === `${appointmentDate}`) {
-    await Appointment.findOneAndUpdate(
-      { _id: appointmentId },
-      {
-        StartTime: startTime,
-        EndTime: endTime,
-        Status: 'booked',
-        Date: appointmentDate,
-        Type: 'TODAY',
-        isRescheduled: true,
-        RescheduledReason,
-        slotId,
-      },
-      { new: true }
-    );
-    const result = await Appointment.find({ docid: doctorId });
-    if (appointment.patientMail && sendMailToUser === true) {
-      const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
-      await emailService.sendRescheduledEmail(appointment.patientMail, time, RescheduledReason, appointmentId);
-    } else {
-      emailSent = false;
-    }
-    return { result, emailSent };
+    appointment.type = 'TODAY';
   }
-  await Appointment.findOneAndUpdate(
-    { _id: appointmentId },
-    {
-      StartTime: startTime,
-      EndTime: endTime,
-      Status: 'booked',
-      Date: appointmentDate,
-      isRescheduled: true,
-      slotId,
-      RescheduledReason,
-    },
-    { new: true }
-  );
+  appointment.RescheduledReason = RescheduledReason;
+  appointment.slotId = slotId;
+  appointment.Date = appointmentDate;
+  appointment.StartTime = startTime;
+  appointment.EndTime = endTime;
+  appointment.Status = 'rescheduled';
+  await appointment.save();
+
   const result = await Appointment.find({ docid: doctorId });
   if (appointment.patientMail && sendMailToUser === true) {
     const time = ` ${date} ${slot[0].FromHour}:${slot[0].FromMinutes} to ${slot[0].ToHour}:${slot[0].ToMinutes}`;
@@ -732,34 +698,14 @@ const cancelFollowup = async (followupid) => {
 };
 
 const deleteSlot = async (doctorAuthId, slotId) => {
-  const slots = await AppointmentPreference.findOne({ doctorAuthId });
-  const Weekdays = {
-    MON: 'MON_A',
-    TUE: 'TUE_A',
-    WED: 'WED_A',
-    THU: 'THU_A',
-    FRI: 'FRI_A',
-    SAT: 'SAT_A',
-    SUN: 'SUN_A',
-  };
+  const appointmentPreferences = await AppointmentPreference.findOne({ doctorAuthId });
   try {
-    const day = `${slotId.split('-')[1]}`;
-    const requiredDay = `${Weekdays[day]}`;
-    if (!requiredDay) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Looks like this is not a valid slotId ,please enter a valid slotId');
-    }
-    const allSlots = slots[requiredDay];
-    // eslint-disable-next-line array-callback-return
-    const modifiedslot = allSlots.filter((slot) => {
-      if (slot) {
-        if (!slotId || slot.slotId !== slotId) {
-          return slot;
-        }
-      }
+    const day = `${slotId.split('-')[0]}`;
+    appointmentPreferences[day] = appointmentPreferences[day].filter((slot) => {
+      return !slotId || slot.slotId !== slotId;
     });
-    await AppointmentPreference.findOneAndUpdate({ doctorAuthId }, { $set: { [requiredDay]: modifiedslot } });
-    const slotsAfterDeletion = await AppointmentPreference.findOne({ doctorAuthId }, { [requiredDay]: 1 });
-    return slotsAfterDeletion;
+    await appointmentPreferences.save();
+    return appointmentPreferences;
   } catch (err) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Looks like this is not a valid slotId ,please enter a valid slotId');
   }

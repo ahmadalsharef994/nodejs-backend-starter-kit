@@ -15,7 +15,6 @@ const getStats = catchAsync(async (req, res) => {
   const doctorAuthId = AuthData._id;
 
   const pastPaidAppointments = await appointmentService.getPastPaidAppointments(doctorAuthId);
-  // Date.prototype.getDateWithoutTime = () => new Date(this.toDateString());
 
   const todayDate = new Date();
   const yesterdayDate = new Date();

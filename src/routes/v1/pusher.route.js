@@ -1,8 +1,5 @@
-// const express = require('express');
-// const pusherController = require('../../controllers/pusher.controller.js');
+const express = require('express');
 
-// const router = express.Router();
+const router = express.Router();
 
-// router.route('/auth').post(pusherController.pusherAuthenticate);
-
-// module.exports = router;
+module.exports = router;

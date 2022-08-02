@@ -24,5 +24,4 @@ router.route('/id').get(validate(eventValidation.getEventById), eventController.
 // route to get events by title
 router.route('/title').get(validate(eventValidation.getEventsByTitle), eventController.getEventsByTitle);
 
-// export
 module.exports = router;

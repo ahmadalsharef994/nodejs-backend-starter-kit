@@ -7,10 +7,6 @@ const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 
-// REPLACE OnboardingAuth
-
-// router.get('/onboarding-status', OnboardingAuth(), authDoctorController.onboardingstatus); Not in use
-
 router.post('/register', deviceauth(), validate(authDoctorValidation.registerdoctor), authDoctorController.register);
 router.post('/login', deviceauth(), validate(authDoctorValidation.login), authDoctorController.login);
 router.post('/logout', validate(authDoctorValidation.logout), authDoctorController.logout); // Thinking to make it GET and Validated
@@ -29,8 +25,5 @@ router.post(
 router.post('/request-otp', OnboardingAuth(), authDoctorController.requestOtp);
 router.post('/verify-phone', OnboardingAuth(), validate(authDoctorValidation.verifyPhone), authDoctorController.verifyPhone);
 router.post('/resend-otp', OnboardingAuth(), authDoctorController.resendOtp);
-
-// router.get('/checkverification', OnboardingAuth(), authDoctorController.tryverification); //Checking Verification States
-// It is breaking NMC Portal be Cautious
 
 module.exports = router;

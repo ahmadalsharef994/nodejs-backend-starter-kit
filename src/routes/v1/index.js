@@ -66,7 +66,7 @@ const defaultRoutes = [
   {
     path: '/wallet',
     route: walletRoute,
-  }, // Wallet Route (NEW)
+  },
   {
     path: '/elasticsearch',
     route: elasticSearchRoute,

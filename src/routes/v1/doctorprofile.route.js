@@ -66,9 +66,6 @@ router
     appointmentPreferenceController.updateAppointmentPreference
   );
 
-/* currently not being in use */
-/* router.route('/createPref').post(authdoctorverified(),validate(preferenceValidator.preferenceDetails),appointmentPreferenceController.submitAppointmentPreference); */
-
 // get all appointment preference slots
 router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.getAppointmentPreferences);
 

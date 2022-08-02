@@ -43,21 +43,6 @@ const getAppointmentDetails = catchAsync(async (req, res) => {
   }
 });
 
-// const assignFollowup = catchAsync(async (req, res) => {
-//   await appointmentService
-//     .submitFollowupDetails(
-//       req.params.appointmentId,
-//       req.Docid,
-//       req.body.slotId,
-//       req.body.date,
-//       req.body.documents,
-//       req.body.status
-//     )
-//     .then((result) => {
-//       return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
-//     });
-// });
-
 const getFollowupsById = catchAsync(async (req, res) => {
   await appointmentService.getFollowupsById(req.query.limit).then((result) => {
     if (result.length === 0) {

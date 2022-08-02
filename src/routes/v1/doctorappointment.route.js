@@ -114,8 +114,4 @@ router
   .route('/:appointmentId/get-messages')
   .get(authUserDoctor(), validate(chatValidator.getMessages), chatController.getMessages);
 
-// router
-//   .route('/:appointmentId/send-message')
-//   .post(chatAuth(), validate(chatValidator.sendMessage), chatController.sendMessage);
-
 module.exports = router;

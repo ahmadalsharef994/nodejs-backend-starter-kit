@@ -24,12 +24,6 @@ const payFromWallet = async (AuthData, payFromCashback, payFromBalance) => {
   return wallet;
 };
 
-// const withdrawFromWallet = async (AuthData, amount) => {
-//   const wallet = await Wallet.findOne({ auth: AuthData });
-//   const result = await Wallet.findByIdAndUpdate(wallet.walletId, { balance: wallet.balance - amount });
-//   return result;
-// };
-
 const logTransaction = async (AuthData, transactionDetails) => {
   const wallet = await Wallet.findOne({ auth: AuthData });
   wallet.transactions.push(transactionDetails);
@@ -69,11 +63,9 @@ const fulfillWithdrawRequest = async (withdrawRequestId) => {
 };
 
 module.exports = {
-  // createNewWallet,
   getBalanceInWallet,
   refundToWallet,
   payFromWallet,
-  // withdrawFromWallet,
   logTransaction,
   getWithdrawRequests,
   postWithdrawRequest,

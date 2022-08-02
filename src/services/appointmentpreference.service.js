@@ -34,7 +34,6 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
       new ApiError(httpStatus.FORBIDDEN, 'Appointment preference already exist!. Please update them instead!')
     );
   }
-
   const result = {};
   const days = Object.keys(body);
   const durations = [];
@@ -47,7 +46,6 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
       return dur % 15 === 0;
     });
   });
-
   if (!validDurations) {
     return Promise.reject(
       new ApiError(httpStatus.FORBIDDEN, 'Difference between "Start Time" and "End Time" in mins should be a multiply of 15')
@@ -75,13 +73,10 @@ const createPreference = async (body, doctorID, AuthData, update = false) => {
       slots.push(element);
     }
   }
-
   const finalSlots = slots;
-
   days.forEach((day, i) => {
     result[day] = finalSlots[i];
   });
-
   if (!update) {
     result.docid = doctorID;
     result.doctorAuthId = AuthData;
@@ -94,7 +89,6 @@ const generateSlots = (fhr, fmin, thr, tmin, day, docId) => {
   const slots = [];
   let startMin = fmin;
   let startHr = fhr;
-
   const jump = ((thr - fhr) * 60 + (tmin - fmin)) / 15;
   for (let i = 0; i < jump; i++) {
     let flag = false;
@@ -105,13 +99,7 @@ const generateSlots = (fhr, fmin, thr, tmin, day, docId) => {
       flag = true;
     }
     if (flag) endHr++;
-    // const typeAF = 'A';
-    const slotId = [
-      // typeAF,
-      day,
-      docId,
-      i + 1 + randomstring.generate({ length: 6, charset: 'alphabetic' }).toUpperCase(),
-    ].join('-');
+    const slotId = [day, docId, i + 1 + randomstring.generate({ length: 6, charset: 'alphabetic' }).toUpperCase()].join('-');
     const obj = { slotId, FromHour: startHr, FromMinutes: startMin + 1, ToHour: endHr, ToMinutes: endMin };
     slots.push(obj);
     startHr = endHr;
@@ -124,7 +112,6 @@ const generateSlots = (fhr, fmin, thr, tmin, day, docId) => {
 
 const updateAppointmentPreference = async (body, doctorId) => {
   const existingSlots = await AppointmentPreference.findOne({ docid: doctorId });
-
   Object.keys(body).map((day) => {
     // eslint-disable-next-line array-callback-return
     body[day].map((range) => {
@@ -133,7 +120,6 @@ const updateAppointmentPreference = async (body, doctorId) => {
       }
       if (!existingSlots[day]) existingSlots[day] = [];
       let newSlots = generateSlots(range.FromHour, range.FromMinutes, range.ToHour, range.ToMinutes, day, doctorId);
-
       newSlots = newSlots.filter((newSlot) => {
         return existingSlots[day].every(
           (existingSlot) => existingSlot.FromHour !== newSlot.FromHour || existingSlot.FromMinutes !== newSlot.FromMinutes
@@ -152,18 +138,9 @@ const updateAppointmentPreference = async (body, doctorId) => {
       });
     }
   });
-
   await existingSlots.save();
   return existingSlots;
 };
-
-// const getfollowups = async (doctorId) => {
-//   const promise = await AppointmentPreference.findOne(
-//     { docid: doctorId },
-//     { MON_F: 1, TUE_F: 1, WED_F: 1, THU_F: 1, FRI_F: 1, SAT_F: 1, SUN_F: 1, docid: 1, auth: 1 }
-//   );
-//   return promise;
-// };
 
 const getAppointmentPreferences = async (doctorId) => {
   const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId: doctorId });
@@ -185,9 +162,7 @@ module.exports = {
   checkForAppointmentPrice,
   createPreference,
   updateAppointmentPreference,
-  // getfollowups,
   getAppointmentPreferences,
-  // slotOverlap,
   getDoctorPreferences,
   checkAppointmentPreference,
 };

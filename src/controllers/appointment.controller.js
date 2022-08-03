@@ -64,8 +64,7 @@ const getAvailableFollowUps = catchAsync(async (req, res) => {
 });
 
 const getAvailableAppointments = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId); // AuthDoctor: AuthData._id
-  const result = await appointmentService.getAvailableAppointments(AuthData);
+  const result = await appointmentService.getAvailableAppointments(req.SubjectId);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
 
@@ -127,8 +126,9 @@ const getPrescription = catchAsync(async (req, res) => {
 });
 
 const getPatientDetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const patientData = await appointmentService.getPatientDetails(req.params.patientId, AuthData);
+  const doctorId = req.SubjectId;
+  const patientId = req.params.patientId;
+  const patientData = await appointmentService.getPatientDetails(patientId, doctorId);
   if (patientData.length) {
     res.status(httpStatus.OK).json({
       'Patient Name': patientData[0],
@@ -178,10 +178,10 @@ const getUserFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelAppointment = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-
+  const appointmentId = req.params.appointmentId;
+  const doctorId = req.SubjectId;
   await appointmentService
-    .cancelAppointment(req.body.appointmentId, AuthData._id)
+    .cancelAppointment(appointmentId, doctorId)
     .then((result) => {
       if (result) {
         return res.status(httpStatus.OK).json({ message: 'Success', data: result });

@@ -15,8 +15,8 @@ const ApiError = require('../utils/ApiError');
 // const appointmentService = require('./appointment.service');
 const netEarn = require('../utils/netEarnCalculator');
 
-const fetchbasicdetails = async (AuthData) => {
-  const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
+const fetchbasicdetails = async (doctorId) => {
+  const DoctorBasicExist = await DoctorBasic.findOne({ auth: doctorId });
   return DoctorBasicExist;
 };
 

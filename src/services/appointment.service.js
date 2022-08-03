@@ -346,13 +346,12 @@ const getFollowupsById = async (limit) => {
   return result;
 };
 
-const getAvailableAppointments = async (AuthData) => {
-  const doctorId = AuthData._id;
+const getAvailableAppointments = async (doctorId) => {
   const AllAppointmentSlots = await appointmentPreferenceService.getAppointmentPreferences(doctorId);
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
-  const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: AuthData._id, paymentStatus: 'PAID' });
+  const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: doctorId, paymentStatus: 'PAID' });
 
   if (bookedAppointmentSlots === []) {
     const availableAppointmentSlots = AllAppointmentSlots;
@@ -420,17 +419,17 @@ const createPrescriptionDoc = async (prescriptionDoc, appointmentId, Authdata) =
   }
 };
 
-const getPatientDetails = async (patientid, doctorid) => {
-  const PatientBasicDetails = await UserBasic.findOne({ auth: patientid }, { auth: 0 });
-  const PatientAuth = await authService.getAuthById(patientid);
+const getPatientDetails = async (patientId, doctorId) => {
+  const PatientBasicDetails = await UserBasic.findOne({ auth: patientId }, { auth: 0 });
+  const PatientAuth = await authService.getAuthById(patientId);
   const PatientName = PatientAuth.fullname;
   const PatientContact = { mobile: PatientAuth.mobile, email: PatientAuth.email };
   const currentdate = new Date();
   const appointments = await Appointment.find({
-    AuthUser: patientid,
+    AuthUser: patientId,
     StartTime: { $lt: `${currentdate}` },
     paymentStatus: 'PAID',
-    AuthDoctor: doctorid,
+    AuthDoctor: doctorId,
   }).sort({
     StartTime: -1,
   });

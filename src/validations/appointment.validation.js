@@ -4,8 +4,7 @@ const { objectId } = require('./custom.validation');
 
 const joinAppointmentDoctor = {
   body: Joi.object().keys({
-    appointmentInit: Joi.string().required(),
-    socketID: Joi.string().required(),
+    appointmentId: Joi.string().required(),
   }),
 };
 const deleteSlot = {
@@ -15,8 +14,7 @@ const deleteSlot = {
 };
 const joinAppointmentUser = {
   body: Joi.object().keys({
-    appointmentInit: Joi.objectId().required(),
-    socketID: Joi.string().required(),
+    appointmentId: Joi.objectId().required(),
   }),
 };
 

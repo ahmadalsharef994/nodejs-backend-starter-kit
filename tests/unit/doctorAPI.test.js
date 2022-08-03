@@ -9,48 +9,13 @@ setupTestDB();
 // afterAll(async () => {
 //   await new Promise((resolve) => setTimeout(() => resolve(), 10000)); // avoid jest open handle error
 // });
-jest.setTimeout(10000);
-// login test
+
+jest.setTimeout(20000);
+
 let doctorToken;
 
+// login test
 describe('POST /v1/auth/doctor/login', () => {
-  test('Expect to login and response with a token', async () => {
-    const loginCredentials = {
-      email: 'sadik.shaik@medzgo.com',
-      password: 'Pass@123',
-    };
-    const res = await request(app)
-      .post('/v1/auth/doctor/login')
-      .set('Accept', '*/*')
-      .set('fcmtoken', 'abcdddd')
-      .set('devicehash', 'abcd')
-      .set('devicetype', 'ios')
-      .set('Content-Type', 'application/json')
-      .set('Connection', 'keep-alive')
-      .send(loginCredentials);
-    expect(res.body.AuthData).not.toBeNull();
-    expect(res.body.authtoken).not.toBeNull();
-    doctorToken = res.body.authtoken;
-  });
-});
-
-// logout test (logout doctor)
-describe('POST /v1/auth/doctor/logout', () => {
-  test('Expect to logout and response with a token', async () => {
-    // post request with body has authToken
-
-    const res = await request(app)
-      .post('/v1/auth/doctor/logout')
-      .send({ authtoken: doctorToken })
-      .expect(httpStatus.OK)
-      .then((response) => {
-        return response.body;
-      });
-    expect(res.message).toBe('logged out successfully');
-  });
-});
-
-describe('POST login again', () => {
   test('Expect to login and response with a token', async () => {
     const loginCredentials = {
       email: 'sadik.shaik@medzgo.com',
@@ -137,26 +102,56 @@ describe('GET /v1/doctor/profile/experience-details', () => {
   });
 });
 
-// test }/v1/doctor/profile/payout-details
-describe('GET /v1/doctor/profile/payout-details', () => {
-  test('Expect to get doctor payout details', async () => {
+// test /doctor/appointment/doctor-join
+describe('POST /v1/doctor/appointment/doctor-join', () => {
+  test('Expect to join doctor to appointment', async () => {
     const res = await request(app)
-      .get('/v1/doctor/profile/payout-details')
+      .post('/v1/doctor/appointment/doctor-join')
       .set('Accept', '*/*')
       .set('Authorization', `Bearer ${doctorToken}`)
-      .expect(httpStatus.OK);
+      .send({
+        appointmentId: '62e5f81d228e790ec0115e08',
+      })
+      .expect(httpStatus.CREATED);
+    expect(res.body.videoToken).not.toBeNull();
   });
 });
 
-// test /v1/doctor/document/view/:doctype  TODO: need to fix
+// *****************************************************************************
 
-// test /v1/doctor/profile/billing?sortBy=StartDate:desc&limit=20&page=1
-describe('GET /v1/doctor/profile/billing', () => {
-  test('Expect to get doctor billing', async () => {
+let userToken;
+// login test
+describe('POST /v1/auth/user/login', () => {
+  test('Expect to login as a user (patient) and response with a token', async () => {
+    const loginCredentials = {
+      username: 'sadikshaik@gmail.com',
+      password: 'Pass@123',
+    };
     const res = await request(app)
-      .get('/v1/doctor/profile/billing')
+      .post('/v1/auth/user/login')
       .set('Accept', '*/*')
-      .set('Authorization', `Bearer ${doctorToken}`)
-      .expect(httpStatus.OK);
+      .set('fcmtoken', 'abcdddd')
+      .set('devicehash', 'abcd')
+      .set('devicetype', 'ios')
+      .set('Content-Type', 'application/json')
+      .set('Connection', 'keep-alive')
+      .send(loginCredentials);
+    expect(res.body.AuthData).not.toBeNull();
+    expect(res.body.authtoken).not.toBeNull();
+    userToken = res.body.authtoken;
+  });
+});
+
+describe('POST /v1/user/appointment/patient-join', () => {
+  test('Expect to join user (patient) to appointment', async () => {
+    const res = await request(app)
+      .post('/v1/user/appointment/patient-join')
+      .set('Accept', '*/*')
+      .set('Authorization', `Bearer ${userToken}`)
+      .send({
+        appointmentId: '62e5f81d228e790ec0115e08',
+      })
+      .expect(httpStatus.CREATED);
+    expect(res.body.videoToken).not.toBeNull();
   });
 });

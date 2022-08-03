@@ -4,14 +4,14 @@ const { authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
-  const appointmentId = req.body.appointmentInit;
+  const appointmentId = req.body.appointmentId;
   // new design. only pass appointmentId
   const DoctorSession = await appointmentService.joinAppointmentDoctor(appointmentId);
   res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentUser = catchAsync(async (req, res) => {
-  const appointmentId = req.body.appointmentInit;
+  const appointmentId = req.body.appointmentId;
   // new design. only pass appointmentId
   const UserSession = await appointmentService.joinAppointmentPatient(appointmentId);
   res.status(httpStatus.CREATED).json(UserSession);

@@ -62,15 +62,15 @@ const joinAppointmentDoctor = async (appointmentId) => {
   //   .catch(() => {
   //     throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
   //   });
-  const DoctorVideoToken = dyteSession.dytedoctortoken;
-  const DoctorRoomName = dyteSession.dyteroomname;
-  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+  const videoToken = dyteSession.dytedoctortoken;
+  const roomName = dyteSession.dyteroomname;
+  const chatExchangeToken = tokenService.generateChatAppointmentSessionToken(
     dyteSession.appointmentid,
     dyteSession.AuthDoctor,
     dyteSession.AuthUser,
     'doctor'
   );
-  return { DoctorVideoToken, DoctorRoomName, ChatExchangeToken };
+  return { videoToken, roomName, chatExchangeToken };
 };
 
 const joinAppointmentPatient = async (appointmentId) => {
@@ -85,8 +85,8 @@ const joinAppointmentPatient = async (appointmentId) => {
     throw new ApiError(400, 'Error Generating Video Session, Maybe, You do not have access to this Appointment');
   }
 
-  const UserVideoToken = dyteSession.dyteusertoken;
-  const UserRoomName = dyteSession.dyteroomname;
+  const videoToken = dyteSession.dyteusertoken;
+  const roomName = dyteSession.dyteroomname;
   // let ChatExchangeToken = '';
   // await pusherService
   //   .pusherAuthenticate(`private-${appointmentId}`, socketID)
@@ -96,13 +96,13 @@ const joinAppointmentPatient = async (appointmentId) => {
   //   .catch(() => {
   //     throw new ApiError(400, 'SocketID Error: Unable to Initiate Chat Token');
   //   });
-  const ChatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+  const chatExchangeToken = tokenService.generateChatAppointmentSessionToken(
     dyteSession.appointmentid,
     dyteSession.AuthDoctor,
     dyteSession.AuthUser,
     'user'
   );
-  return { UserVideoToken, UserRoomName, ChatExchangeToken };
+  return { videoToken, roomName, chatExchangeToken };
 };
 
 const ScheduleSessionJob = async (appointmentId, startTime) => {

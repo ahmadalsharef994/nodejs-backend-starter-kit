@@ -465,7 +465,7 @@ const getPatientsCount = async (doctorAuthId) => {
 const getPastPaidAppointments = async (doctorAuthId) => {
   const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
   const pastPaidAppointments = appointments.filter(
-    (appointment) => appointment.paymentStatus === 'PAID' && appointment.Type === 'PAST'
+    (appointment) => appointment.paymentStatus === 'PAID' && appointment.Status !== 'CANCELLED'
   );
   pastPaidAppointments.sort((a, b) => new Date(b.StartTime) - new Date(a.StartTime)); // sort by date (descending)
   return pastPaidAppointments;

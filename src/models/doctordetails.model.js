@@ -33,6 +33,7 @@ const DoctorDetailsSchema = mongoose.Schema(
       required: true,
     },
     doctorId: {
+      // to be changed to doctorVerifiedId
       type: Number,
       required: true,
     },

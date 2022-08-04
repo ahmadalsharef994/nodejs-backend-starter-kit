@@ -15,16 +15,16 @@ const ApiError = require('../utils/ApiError');
 // const appointmentService = require('./appointment.service');
 const netEarn = require('../utils/netEarnCalculator');
 
-const fetchbasicdetails = async (AuthData) => {
-  const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
-  return DoctorBasicExist;
+const fetchbasicdetails = async (doctorId) => {
+  const basicDetails = await DoctorBasic.findOne({ auth: doctorId });
+  return basicDetails;
 };
 
-const submitbasicdetails = async (BasicDetailBody, AuthData) => {
+const submitbasicdetails = async (basicDetails, AuthData) => {
   // eslint-disable-next-line no-param-reassign
-  BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
-  const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
-  return basicDetailDoc;
+  basicDetails.auth = AuthData; // Assign Reference to Req Body
+  const doctorBasic = await DoctorBasic.create(basicDetails);
+  return doctorBasic;
 };
 
 const submitprofilepicture = async (ProfilePhoto, AuthData) => {

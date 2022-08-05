@@ -13,5 +13,3 @@ router
   .post(authuser(), validate(autoReplyValidation.autoReplySymptoms), autoReplyController.autoReplySymptoms);
 
 module.exports = router;
-
-// Log Session Chat

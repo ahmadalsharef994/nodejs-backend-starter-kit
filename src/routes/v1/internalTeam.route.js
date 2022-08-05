@@ -24,9 +24,7 @@ router
 router
   .route('/restricted/adminsignin')
   .post(deviceauth(), validate(InternalTeamValidator.loginadmin), InternalTeamController.loginadmin);
-/* router
-  .route('/add-doctors-to-model')
-  .post(authAdmin(), validate(InternalTeamValidator.doctordetails), InternalTeamController.addDoctorDetails); */
+
 router.route('/fetch-unverified-doctors').get(authAdmin(), InternalTeamController.unverifiedDoctors);
 router.route('/fetch-unverified-doctors-profile').get(authAdmin(), InternalTeamController.Doctorsprofile);
 router.route('/verified-doctors').get(authAdmin(), InternalTeamController.verifiedDoctors);

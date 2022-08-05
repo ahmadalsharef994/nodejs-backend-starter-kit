@@ -2,36 +2,24 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
-// const prescriptionUpload = require('../Microservices/generatePrescription.service');
-
-// const initAppointmentDoctor = catchAsync(async (req, res) => {
-//   const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
-//   res.status(httpStatus.CREATED).json(InitSession);
-// });
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.joinAppointmentDoctor(
-    req.body.appointmentInit,
-    AuthData,
-    req.body.socketID
-  );
+  const appointmentId = req.body.appointmentId;
+  // new design. only pass appointmentId
+  const DoctorSession = await appointmentService.joinAppointmentDoctor(appointmentId);
   res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentUser = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const UserSession = await appointmentService.joinAppointmentSessionbyPatient(
-    req.body.appointmentInit,
-    AuthData,
-    req.body.socketID
-  );
+  const appointmentId = req.body.appointmentId;
+  // new design. only pass appointmentId
+  const UserSession = await appointmentService.joinAppointmentPatient(appointmentId);
   res.status(httpStatus.CREATED).json(UserSession);
 });
 
 const bookAppointment = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const { id, orderId } = await appointmentService.submitAppointmentDetails(
+  const { id, orderId } = await appointmentService.bookAppointment(
     req.body.docId,
     AuthData,
     req.body.slotId,
@@ -55,21 +43,6 @@ const getAppointmentDetails = catchAsync(async (req, res) => {
   }
 });
 
-// const assignFollowup = catchAsync(async (req, res) => {
-//   await appointmentService
-//     .submitFollowupDetails(
-//       req.params.appointmentId,
-//       req.Docid,
-//       req.body.slotId,
-//       req.body.date,
-//       req.body.documents,
-//       req.body.status
-//     )
-//     .then((result) => {
-//       return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
-//     });
-// });
-
 const getFollowupsById = catchAsync(async (req, res) => {
   await appointmentService.getFollowupsById(req.query.limit).then((result) => {
     if (result.length === 0) {
@@ -91,8 +64,7 @@ const getAvailableFollowUps = catchAsync(async (req, res) => {
 });
 
 const getAvailableAppointments = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId); // AuthDoctor: AuthData._id
-  const result = await appointmentService.getAvailableAppointments(AuthData);
+  const result = await appointmentService.getAvailableAppointments(req.SubjectId);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
 
@@ -154,8 +126,9 @@ const getPrescription = catchAsync(async (req, res) => {
 });
 
 const getPatientDetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const patientData = await appointmentService.getPatientDetails(req.params.patientId, AuthData);
+  const doctorId = req.SubjectId;
+  const patientId = req.params.patientId;
+  const patientData = await appointmentService.getPatientDetails(patientId, doctorId);
   if (patientData.length) {
     res.status(httpStatus.OK).json({
       'Patient Name': patientData[0],
@@ -205,10 +178,10 @@ const getUserFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelAppointment = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-
+  const appointmentId = req.params.appointmentId;
+  const doctorId = req.SubjectId;
   await appointmentService
-    .cancelAppointment(req.body.appointmentId, AuthData._id)
+    .cancelAppointment(appointmentId, doctorId)
     .then((result) => {
       if (result) {
         return res.status(httpStatus.OK).json({ message: 'Success', data: result });

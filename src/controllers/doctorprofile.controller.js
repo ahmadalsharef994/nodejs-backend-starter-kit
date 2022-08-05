@@ -11,11 +11,9 @@ const pick = require('../utils/pick');
 const daysDiff = require('../utils/calculateDays');
 
 const getStats = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const doctorAuthId = AuthData._id;
+  const doctorId = req.SubjectId;
 
-  const pastPaidAppointments = await appointmentService.getPastPaidAppointments(doctorAuthId);
-  // Date.prototype.getDateWithoutTime = () => new Date(this.toDateString());
+  const pastPaidAppointments = await appointmentService.getPastPaidAppointments(doctorId);
 
   const todayDate = new Date();
   const yesterdayDate = new Date();
@@ -35,7 +33,7 @@ const getStats = catchAsync(async (req, res) => {
     return days > 0 && days < 7;
   });
 
-  const TOTAL_PATIENTS = await appointmentService.getPatientsCount(doctorAuthId);
+  const TOTAL_PATIENTS = await appointmentService.getPatientsCount(doctorId);
   const PERCENT_PATIENTS = 100 - (pastWeekAppointments.length / currentWeekAppointments.length) * 100 || 0;
 
   const TOTAL_REVENUE = pastPaidAppointments.reduce((sum, appointment) => sum + appointment.price, 0);
@@ -69,7 +67,7 @@ const getStats = catchAsync(async (req, res) => {
   const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
   const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
 
-  const feedbacks = await appointmentService.getDoctorFeedbacks(doctorAuthId);
+  const feedbacks = await appointmentService.getDoctorFeedbacks(doctorId);
 
   const RATING = (
     feedbacks.reduce((userRatingsSum, feedback) => {
@@ -112,11 +110,11 @@ const submitprofilepicture = catchAsync(async (req) => {
 
 const fetchbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const basicdata = await doctorprofileService.fetchbasicdetails(AuthData);
-  if (!basicdata) {
+  const basicDetails = await doctorprofileService.fetchbasicdetails(AuthData);
+  if (!basicDetails) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
   } else {
-    res.status(httpStatus.OK).json(basicdata);
+    res.status(httpStatus.OK).json({ message: 'success', data: basicDetails });
   }
 });
 
@@ -133,11 +131,11 @@ const submiteducationdetails = catchAsync(async (req, res) => {
 
 const fetcheducationdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const educationdata = await doctorprofileService.fetcheducationdetails(AuthData);
-  if (!educationdata) {
+  const educationDetails = await doctorprofileService.fetcheducationdetails(AuthData);
+  if (!educationDetails) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
   } else {
-    res.status(httpStatus.OK).json(educationdata);
+    res.status(httpStatus.OK).json({ message: 'success', data: educationDetails });
   }
 });
 
@@ -330,12 +328,11 @@ const sendDoctorQueries = catchAsync(async (req, res) => {
 });
 
 const getBillingDetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const doctorAuthId = AuthData._id;
+  const doctorId = req.SubjectId;
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
-  const billingDetails = await doctorprofileService.getBillingDetails(doctorAuthId, fromDate, endDate, options);
+  const billingDetails = await doctorprofileService.getBillingDetails(doctorId, fromDate, endDate, options);
   res.status(httpStatus.OK).json({
     message: `Billing details between ${fromDate} and ${endDate}`,
     data: billingDetails,

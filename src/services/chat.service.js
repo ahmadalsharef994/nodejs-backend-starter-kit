@@ -15,20 +15,12 @@ const AwsS3 = new AWS.S3({
   signatureVersion: 'v4',
 });
 
-// const pusher = new Pusher({
-//   appId: process.env.APP_ID,
-//   key: process.env.APP_KEY,
-//   secret: process.env.APP_SECRET,
-//   cluster: process.env.APP_CLUSTER,
-//   useTLS: process.env.USE_TLS,
-// });
-
-const getMessages = async (appointmentId, Auth) => {
+const getMessages = async (appointmentId, authId) => {
   const appointment = await Appointment.findOne({ _id: appointmentId });
   if (!appointment) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID does not gives you Access');
   }
-  if (appointment.AuthDoctor.equals(Auth._id) || appointment.AuthUser.equals(Auth._id)) {
+  if (appointment.AuthDoctor.equals(authId) || appointment.AuthUser.equals(authId)) {
     const result = appointment.chatHistory;
     return result;
   }

@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { toJSON, paginate } = require('../plugins');
 const Auth = require('../auth.model');
 const Product = require('./product.model');
+const Package = require('./package.model');
 
 const CartSchema = new mongoose.Schema({
   authId: {
@@ -14,10 +15,16 @@ const CartSchema = new mongoose.Schema({
       ref: Product,
     },
   ],
+  packages: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Package,
+    },
+  ],
   totalCart: {
     type: Number,
     default() {
-      return this.products.reduce((product) => product.price, 0);
+      return this.products.reduce((product) => product.price, 0) + this.packages.reduce((onePackage) => onePackage.price, 0); // package is reserved keyword
     },
   },
 });

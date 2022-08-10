@@ -246,47 +246,71 @@ const getUpcomingAppointments = async (doctorId, fromDate, endDate, options) => 
 };
 
 const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, options) => {
-  if (filter.Type === 'FOLLOWUP') {
-    const result = await Appointment.paginate(
-      { docid: doctorId, Type: 'FOLLOWUP', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
-      options
-    );
-    return result;
-  }
   if (filter.Type === 'ALL') {
     const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
     return result;
   }
-  if (filter.Type === 'CANCELLED') {
-    const res = await Appointment.paginate({ Status: 'cancelled', docid: doctorId }, options);
-    return res;
+  // else
+  const result = await Appointment.paginate(
+    {
+      docid: doctorId,
+      paymentStatus: 'PAID',
+      Status: { $nin: 'cancelled' },
+      StartTime: { $gte: fromDate, $lt: endDate },
+      Type: filter.Type,
+    },
+    options
+  );
+  return result;
+};
+
+const getAppointmentsByStatus = async (doctorId, fromDate, endDate, filter, options) => {
+  if (filter.Status === 'ALL') {
+    const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
+    return result;
   }
-  if (filter.Type === 'PAST') {
+  if (filter.Status === 'TODAY') {
     const result = await Appointment.paginate(
       {
-        paymentStatus: 'PAID',
         docid: doctorId,
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: fromDate, $lt: new Date() },
+        paymentStatus: 'PAID',
+        StartTime: { $gte: fromDate, $lt: endDate },
+        Date: new Date().toDateString(),
       },
       options
     );
     return result;
   }
-  if (filter.Type === 'TODAY') {
+  if (filter.Status === 'PAST') {
     const result = await Appointment.paginate(
-      { docid: doctorId, Date: new Date().toDateString(), paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      { docid: doctorId, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: new Date() } },
       options
     );
     return result;
   }
-  if (filter.Type === 'REFERRED') {
+  if (filter.Status === 'UPCOMING') {
     const result = await Appointment.paginate(
-      { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+      {
+        docid: doctorId,
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: new Date(), $lt: endDate },
+      },
       options
     );
     return result;
   }
+  // else
+  const result = await Appointment.paginate(
+    {
+      docid: doctorId,
+      paymentStatus: 'PAID',
+      StartTime: { $gte: fromDate, $lt: endDate },
+      Status: filter.Type,
+    },
+    options
+  );
+  return result;
 };
 
 const allAppointments = async (doctorId, fromDate, endDate, options) => {
@@ -710,7 +734,7 @@ const deleteSlot = async (doctorAuthId, slotId) => {
   }
 };
 
-const getTodaysUpcomingAppointment = async (doctorId) => {
+const getNextAppointmentDoctor = async (doctorId) => {
   try {
     const upcoming = await Appointment.find({
       docid: doctorId,
@@ -778,7 +802,8 @@ module.exports = {
   getDoctorFeedbacks,
   getPastPaidAppointments,
   getTotalIncome,
-  getTodaysUpcomingAppointment,
+  getNextAppointmentDoctor,
   getAvailableAppointmentsManually,
   getUserFeedbacks,
+  getAppointmentsByStatus,
 };

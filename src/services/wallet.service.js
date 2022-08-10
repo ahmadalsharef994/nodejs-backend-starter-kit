@@ -1,8 +1,8 @@
 const Wallet = require('../models/wallet.model');
 const WalletWithdrawRequest = require('../models/withrawRequest.model');
 
-const getBalanceInWallet = async (AuthData) => {
-  const wallet = await Wallet.findOne({ auth: AuthData.id });
+const getBalanceInWallet = async (authId) => {
+  const wallet = await Wallet.findOne({ auth: authId });
   return { balance: wallet.balance, cashback: wallet.cashback }; // await equals to return Promise.resolve({xxx}) or promise.reject( new Error)
 };
 

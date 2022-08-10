@@ -6,8 +6,8 @@ const appointmentService = require('../services/appointment.service');
 // const labTestService = require('../services/labTest.service');
 
 const getBalanceInWallet = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const resultData = await walletService.getBalanceInWallet(AuthData);
+  const authId = req.SubjectId;
+  const resultData = await walletService.getBalanceInWallet(authId);
   if (resultData) {
     res.status(httpStatus.OK).json({ message: 'wallet balance', data: resultData });
   } else {
@@ -15,7 +15,7 @@ const getBalanceInWallet = catchAsync(async (req, res) => {
   }
 });
 
-const refundToWalletUser = catchAsync(async (req, res) => {
+const refundToWallet = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
 
   const refundCondition = req.body.refundCondition;
@@ -56,7 +56,7 @@ const refundToWalletUser = catchAsync(async (req, res) => {
     const appointment = await appointmentService.getAppointmentById(appointmentId);
     if (appointment.Status !== 'CANCELLED' && appointment.paymentStatus === 'PAID') {
       refundSatisfied = true;
-      amount = appointment.price * process.env.DOCTORE_PERCENTAGE;
+      amount = appointment.price;
       cashbackAmount = 0;
     }
   }
@@ -73,51 +73,6 @@ const refundToWalletUser = catchAsync(async (req, res) => {
         cashbackAmount,
         appointmentId: req.body.appointmentId || null,
         labTestOrderId: req.body.labTestOrderId || null,
-      });
-    } else {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to refund' });
-    }
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Refund Condition is not satisfied' });
-  }
-});
-
-const refundToWalletDoctor = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-
-  const refundCondition = req.body.refundCondition;
-  let amount = req.body.amount;
-  let cashbackAmount = req.body.cashbackAmount;
-  let refundSatisfied = false;
-
-  if (refundCondition === 'Cashback') {
-    cashbackAmount = req.body.cashbackAmount;
-    amount = 0;
-    if (cashbackAmount) {
-      refundSatisfied = true;
-    }
-  }
-
-  if (refundCondition === 'Doctor Earning') {
-    const appointmentId = req.body.appointmentId;
-    const appointment = await appointmentService.getAppointmentById(appointmentId);
-    if (appointment.Status !== 'CANCELLED' && appointment.paymentStatus === 'PAID') {
-      refundSatisfied = true;
-      amount = appointment.price * process.env.DOCTORE_PERCENTAGE;
-      cashbackAmount = 0;
-    }
-  }
-
-  if (refundSatisfied) {
-    const resultData = await walletService.refundToWallet(AuthData, amount, cashbackAmount);
-    if (resultData) {
-      res.status(httpStatus.OK).json({ message: 'Success: refunded', data: resultData });
-      await walletService.logTransaction(AuthData, {
-        transactionType: 'REFUND',
-        refundCondition,
-        amount,
-        cashbackAmount,
-        appointmentId: req.body.appointmentId || null,
       });
     } else {
       res.status(httpStatus.BAD_REQUEST).json({ message: 'Failed to refund' });
@@ -251,8 +206,7 @@ const fulfillWithdrawRequest = catchAsync(async (req, res) => {
 
 module.exports = {
   getBalanceInWallet,
-  refundToWalletUser,
-  refundToWalletDoctor,
+  refundToWallet,
   discountFromWallet,
   payFromWallet,
   withdrawFromWallet,

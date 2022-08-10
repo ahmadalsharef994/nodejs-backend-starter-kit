@@ -8,17 +8,11 @@ const walletController = require('../../controllers/wallet.controller');
 
 const router = express.Router();
 
-router.route('/get-balance-in-wallet-user').get(authUser(), walletController.getBalanceInWallet);
-
-router.route('/get-balance-in-wallet-doctor').get(authUserDoctor(), walletController.getBalanceInWallet);
+router.route('/get-balance-in-wallet').get(authUserDoctor(), walletController.getBalanceInWallet);
 
 router
-  .route('/refund-to-wallet-user')
-  .post(authUser(), validate(walletValidation.refundToWallet), walletController.refundToWalletUser);
-
-router
-  .route('/refund-to-wallet-doctor')
-  .post(authUserDoctor(), validate(walletValidation.refundToWallet), walletController.refundToWalletDoctor);
+  .route('/refund-to-wallet')
+  .post(authUserDoctor(), validate(walletValidation.refundToWallet), walletController.refundToWallet);
 
 router
   .route('/discount-from-wallet')

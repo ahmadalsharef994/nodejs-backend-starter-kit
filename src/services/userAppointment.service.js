@@ -1,4 +1,4 @@
-const { Prescription, Appointment, ThyrocareOrder, HealthPackage, Followup, doctordetails } = require('../models');
+const { Prescription, Appointment, ThyrocareOrder, HealthPackage, doctordetails } = require('../models');
 
 const getUpcomingAppointment = async (auth, endDate, options) => {
   const result = await Appointment.paginate(
@@ -10,59 +10,76 @@ const getUpcomingAppointment = async (auth, endDate, options) => {
 
 const getAppointmentsByType = async (AuthUser, fromDate, endDate, filter, options) => {
   try {
-    if (filter === 'ALL') {
-      // eslint-disable-next-line no-param-reassign
-      delete filter.Type;
+    if (filter.Type === 'ALL') {
       const result = await Appointment.paginate(
-        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate }, AuthUser },
+        { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, AuthUser },
         options
       );
       return result;
     }
-    if (filter === 'PAST') {
-      // eslint-disable-next-line no-param-reassign
-      delete filter.Type;
-      const result = await Appointment.paginate(
-        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lte: new Date() }, AuthUser },
-        options
-      );
-      return result;
-    }
-    if (filter === 'FOLLOWUP') {
-      // eslint-disable-next-line no-param-reassign
-      delete filter.Type;
-      const result = await Followup.paginate({ AuthUser, StartTime: { $gte: fromDate, $lt: endDate } }, options);
-      return result;
-    }
-    if (filter === 'TODAYFOLLOWUP') {
-      // eslint-disable-next-line no-param-reassign
-      delete filter.Type;
-      const date = new Date().toDateString();
-      const result = await Followup.paginate({ AuthUser, Date: date }, options);
-      return result;
-    }
-    if (filter === 'CANCELLED') {
-      // eslint-disable-next-line no-param-reassign
-      delete filter.Type;
-      const result = await Appointment.paginate(
-        { paymentStatus: 'PAID', Status: { $in: 'cancelled' }, AuthUser, StartTime: { $gte: fromDate, $lt: endDate } },
-        options
-      );
-      return result;
-    }
-    if (filter === 'TODAY') {
-      // eslint-disable-next-line no-param-reassign
-      delete filter.Type;
-      const date = new Date().toDateString();
-      const result = await Appointment.paginate(
-        { paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, AuthUser, Date: date },
-        options
-      );
-      return result;
-    }
+    // else
+    const result = await Appointment.paginate(
+      {
+        AuthUser,
+        paymentStatus: 'PAID',
+        StartTime: { $gte: fromDate, $lt: endDate },
+        Type: filter.Type,
+      },
+      options
+    );
+    return result;
   } catch (err) {
     return null;
   }
+};
+
+const getAppointmentsByStatus = async (AuthUser, fromDate, endDate, filter, options) => {
+  if (filter.Status === 'ALL') {
+    const result = await Appointment.paginate({ AuthUser, paymentStatus: 'PAID' }, options);
+    return result;
+  }
+  if (filter.Status === 'TODAY') {
+    const result = await Appointment.paginate(
+      {
+        AuthUser,
+        paymentStatus: 'PAID',
+        StartTime: { $gte: fromDate, $lt: endDate },
+        Date: new Date().toDateString(),
+      },
+      options
+    );
+    return result;
+  }
+  if (filter.Status === 'PAST') {
+    const result = await Appointment.paginate(
+      { AuthUser, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: new Date() } },
+      options
+    );
+    return result;
+  }
+  if (filter.Status === 'UPCOMING') {
+    const result = await Appointment.paginate(
+      {
+        AuthUser,
+        paymentStatus: 'PAID',
+        Status: { $nin: 'cancelled' },
+        StartTime: { $gte: new Date(), $lt: endDate },
+      },
+      options
+    );
+    return result;
+  }
+  // else
+  const result = await Appointment.paginate(
+    {
+      AuthUser,
+      paymentStatus: 'PAID',
+      StartTime: { $gte: fromDate, $lt: endDate },
+      Status: filter.Type,
+    },
+    options
+  );
+  return result;
 };
 
 const getAllPrescriptions = async (auth, options) => {
@@ -134,4 +151,5 @@ module.exports = {
   getAllPrescriptions,
   getAllLabTestOrders,
   fetchHealthPackages,
+  getAppointmentsByStatus,
 };

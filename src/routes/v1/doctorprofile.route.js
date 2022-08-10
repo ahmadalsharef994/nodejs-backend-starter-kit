@@ -102,9 +102,9 @@ router
 router
   .route('/update-clinic-timings')
   .post(authdoctorverified(), validate(doctorProfileValidator.timings), doctorProfileController.updateClinicDetails);
-router
-  .route('/update-details')
-  .post(authdoctornonverified(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
+// router
+//   .route('/update-details')
+//   .post(authdoctornonverified(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
 router
   .route('/update-appointmentPrice')
   .post(

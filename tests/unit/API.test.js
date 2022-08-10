@@ -1,3 +1,4 @@
+/* eslint-disable jest/no-disabled-tests */
 /* eslint-disable no-unused-vars */
 const request = require('supertest');
 const httpStatus = require('http-status');

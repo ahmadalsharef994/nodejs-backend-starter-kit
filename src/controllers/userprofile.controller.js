@@ -92,7 +92,7 @@ const addMember = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const memberDetails = await userprofileService.addMember(req.body, AuthData);
   if (memberDetails) {
-    res.status(httpStatus.OK).json({ message: 'New Family Member added ', data: memberDetails });
+    res.status(httpStatus.OK).json({ message: 'New Family Member added', data: memberDetails });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'You can only add 4 family Members' });
   }

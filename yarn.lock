@@ -724,6 +724,8 @@
     "ws" "^7.0.0"
 
 "@pm2/pm2-version-check@latest":
+  "integrity" "sha512-SXsM27SGH3yTWKc2fKR4SYNxsmnvuBQ9dd6QHtEWmiZ/VqaOYPAIlS8+vMcn27YLtAEBGvNRSh3TPNvtjZgfqA=="
+  "resolved" "https://registry.npmjs.org/@pm2/pm2-version-check/-/pm2-version-check-1.0.4.tgz"
   "version" "1.0.4"
   dependencies:
     "debug" "^4.3.1"
@@ -5477,6 +5479,11 @@
   dependencies:
     "mimic-fn" "^2.1.0"
 
+"openapi-types@>=7":
+  "integrity" "sha512-6Wd9k8nmGQHgCbehZCP6wwWcfXcvinhybUTBatuhjRsCxUIujuYFZc9QnGeae75CyHASewBtxs0HX/qwREReUw=="
+  "resolved" "https://registry.npmjs.org/openapi-types/-/openapi-types-12.0.0.tgz"
+  "version" "12.0.0"
+
 "optional-require@^1.0.3":
   "integrity" "sha512-RV2Zp2MY2aeYK5G+B/Sps8lW5NHAzE5QClbFP15j+PWmP+T9PxlJXBOOLoSAdgwFvS4t0aMR4vpedMkbHfh0nA=="
   "resolved" "https://registry.npmjs.org/optional-require/-/optional-require-1.0.3.tgz"
@@ -7383,6 +7390,11 @@
   "integrity" "sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c="
   "resolved" "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   "version" "0.0.6"
+
+"typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta":
+  "integrity" "sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ=="
+  "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.7.4.tgz"
+  "version" "4.7.4"
 
 "uglify-js@^3.1.4":
   "integrity" "sha512-wZbyTQ1w6Y7fHdt8sJnHfSIuWeDgk6B5rCb4E/AM6QNNPbOMIZph21PW5dRB3h7Df0GszN+t7RuUH6sWK5bF0g=="

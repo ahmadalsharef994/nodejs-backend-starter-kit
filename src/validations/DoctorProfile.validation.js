@@ -253,17 +253,17 @@ const PayoutsDoctorDetails = {
     PanCardNo: Joi.string().required(),
   }),
 };
-const updateDetails = {
-  body: Joi.object().keys({
-    about: Joi.string().required().max(150),
-    address: Joi.string().required(),
-    city: Joi.string().required(),
-    state: Joi.string().required(),
-    pincode: Joi.number().required(),
-    country: Joi.string().required(),
-    experience: Joi.number().required(),
-  }),
-};
+// const updateDetails = {
+//   body: Joi.object().keys({
+//     about: Joi.string().required().max(150),
+//     address: Joi.string().required(),
+//     city: Joi.string().required(),
+//     state: Joi.string().required(),
+//     pincode: Joi.number().required(),
+//     country: Joi.string().required(),
+//     experience: Joi.number().required(),
+//   }),
+// };
 const EducationExperience = {
   body: Joi.object().keys({
     education: Joi.object().keys({
@@ -299,7 +299,7 @@ module.exports = {
   addConsultationfee,
   notifications,
   timings,
-  updateDetails,
+  // updateDetails,
   EducationExperience,
   updateAppointmentPrice,
   doctorQueries,

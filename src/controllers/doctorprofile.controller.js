@@ -205,7 +205,7 @@ const fetchpayoutsdetails = catchAsync(async (req, res) => {
   if (!payoutData) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
   } else {
-    res.status(httpStatus.OK).json({ 'Payout Details': payoutData });
+    res.status(httpStatus.OK).json({ data: payoutData });
   }
 });
 
@@ -277,23 +277,23 @@ const doctorExpandEducation = catchAsync(async (req, res) => {
   }
 });
 
-const updateDetails = catchAsync(async (req, res) => {
-  const result = await doctorprofileService.updateDetails(
-    req.body.about,
-    req.body.address,
-    req.body.pincode,
-    req.body.experience,
-    req.body.country,
-    req.body.state,
-    req.body.city,
-    req.SubjectId
-  );
-  if (result === true) {
-    res.status(httpStatus.OK).json({ message: 'Details Updated successfully' });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'something went wrong please contact our support team' });
-  }
-});
+// const updateDetails = catchAsync(async (req, res) => {
+//   const result = await doctorprofileService.updateDetails(
+//     req.body.about,
+//     req.body.address,
+//     req.body.pincode,
+//     req.body.experience,
+//     req.body.country,
+//     req.body.state,
+//     req.body.city,
+//     req.SubjectId
+//   );
+//   if (result === true) {
+//     res.status(httpStatus.OK).json({ message: 'Details Updated successfully' });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'something went wrong please contact our support team' });
+//   }
+// });
 
 const updateAppointmentPrice = catchAsync(async (req, res) => {
   const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
@@ -345,7 +345,7 @@ const getBillingDetails = catchAsync(async (req, res) => {
 
 const getDoctorQueries = catchAsync(async (req, res) => {
   const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
-  res.status(httpStatus.OK).json({ doctorQueries });
+  res.status(httpStatus.OK).json({ message: 'success', doctorQueries });
 });
 
 module.exports = {
@@ -365,7 +365,7 @@ module.exports = {
   addConsultationfee,
   notifications,
   updateClinicDetails,
-  updateDetails,
+  // updateDetails,
   doctorExpandEducation,
   updateAppointmentPrice,
   getDoctorClinicTimings,

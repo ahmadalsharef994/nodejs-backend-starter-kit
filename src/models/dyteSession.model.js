@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 
-const AppointmentSessionSchema = mongoose.Schema(
+const DyteSessionSchema = mongoose.Schema(
   {
     appointmentid: {
       type: String,
@@ -45,9 +45,9 @@ const AppointmentSessionSchema = mongoose.Schema(
   }
 );
 // add plugin that converts mongoose to json
-AppointmentSessionSchema.plugin(toJSON);
+DyteSessionSchema.plugin(toJSON);
 /**
- * @typedef AppointmentSession
+ * @typedef DyteSession
  */
-const AppointmentSession = mongoose.model('AppointmentSession', AppointmentSessionSchema);
-module.exports = AppointmentSession;
+const DyteSession = mongoose.model('DyteSession', DyteSessionSchema);
+module.exports = DyteSession;

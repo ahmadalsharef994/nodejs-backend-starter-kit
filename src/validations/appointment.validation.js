@@ -75,7 +75,21 @@ const getFollowups = {
 const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('REFERRED', 'FOLLOWUP', 'CANCELLED', 'PAST', 'ALL', 'TODAYFOLLOWUP'),
+      type: Joi.string().valid('REFERRED', 'FOLLOWUP', 'SCHEULED', 'LIVE', 'PREBOOKING', 'ALL'),
+      limit: Joi.number(),
+      page: Joi.number(),
+      sortBy: Joi.string(),
+      fromDate: Joi.string(),
+      endDate: Joi.string(),
+    })
+    .min(0)
+    .max(6),
+};
+
+const getAppointmentsByStatus = {
+  query: Joi.object()
+    .keys({
+      type: Joi.string().valid('RESCHEDULED', 'CANCELLED', 'TODAY', 'PAST', 'UPCOMING', 'ALL'),
       limit: Joi.number(),
       page: Joi.number(),
       sortBy: Joi.string(),
@@ -203,4 +217,5 @@ module.exports = {
   cancelFollowup,
   // rescheduleFollowup,
   deleteSlot,
+  getAppointmentsByStatus,
 };

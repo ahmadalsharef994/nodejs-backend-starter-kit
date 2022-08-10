@@ -64,9 +64,11 @@ const AppointmentSchema = mongoose.Schema(
     },
     Status: {
       type: String,
+      enum: ['BOOKED', 'RESCHEDULED', 'CANCELLED'],
     },
     Type: {
       type: String,
+      enum: ['REFERRED', 'PREBOOKING', 'LIVE', 'SCHEDULED', 'FOLLOWUP'],
     },
     Date: {
       type: String,

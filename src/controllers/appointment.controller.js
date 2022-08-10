@@ -96,6 +96,21 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
     });
 });
 
+const getAppointmentsByStatus = catchAsync(async (req, res) => {
+  const filter = { Type: req.query.status };
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  appointmentService
+    .getAppointmentsByStatus(req.Docid, fromDate, endDate, filter, options)
+    .then((result) => {
+      return res.status(httpStatus.OK).send(result);
+    })
+    .catch((err) => {
+      return res.status(httpStatus.BAD_REQUEST).send(err);
+    });
+});
+
 const getAppointmentById = catchAsync(async (req, res) => {
   const DoctorSession = await appointmentService.getAppointmentById(req.params.appointmentId);
   if (DoctorSession !== false) {
@@ -251,6 +266,7 @@ const allAppointments = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant fetch appointments' });
   }
 });
+
 const deleteSlot = catchAsync(async (req, res) => {
   const updatedslots = await appointmentService.deleteSlot(req.SubjectId, req.body.slotId);
   if (updatedslots) {
@@ -259,14 +275,16 @@ const deleteSlot = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
   }
 });
-const getTodaysUpcomingAppointment = catchAsync(async (req, res) => {
-  const nextAppointment = await appointmentService.getTodaysUpcomingAppointment(req.Docid);
+
+const getNextAppointmentDoctor = catchAsync(async (req, res) => {
+  const nextAppointment = await appointmentService.getNextAppointmentDoctor(req.Docid);
   if (nextAppointment) {
     res.status(httpStatus.OK).json({ nextAppointment });
   } else {
     res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
   }
 });
+
 module.exports = {
   // initAppointmentDoctor,
   joinAppointmentDoctor,
@@ -293,5 +311,6 @@ module.exports = {
   // rescheduleFollowup,
   allAppointments,
   deleteSlot,
-  getTodaysUpcomingAppointment,
+  getNextAppointmentDoctor,
+  getAppointmentsByStatus,
 };

@@ -36,6 +36,45 @@ const OrderSchema = new mongoose.Schema(
         default: [],
       },
     ],
+    sourcePinCode: {
+      type: String,
+      required: true,
+    },
+    destinationPinCode: {
+      type: String,
+      required: true,
+    },
+    sourceAddress: {
+      type: String,
+      required: true,
+    },
+    destinationAddress: {
+      type: String,
+      required: true,
+    },
+    ETA: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'accepted', 'rejected', 'cancelled', 'delivered'],
+      default: 'pending',
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['COD', 'Online'],
+      default: 'COD',
+    },
+    currentLocation: {
+      type: String,
+      required: true,
+    },
   },
   {
     timestamps: true,

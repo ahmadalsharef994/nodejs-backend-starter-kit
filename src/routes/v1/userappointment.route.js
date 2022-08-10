@@ -19,9 +19,16 @@ router.route('/next-appointment').get(authuser(), userAppointmentController.getN
 router.route('/prescriptions').get(authuser(), userAppointmentController.showPrescriptions);
 router.route('/labtest-orders').get(authuser(), userAppointmentController.showLabTestOrders);
 router
-  .route('/appointments')
+  .route('/appointment-type')
   .get(authuser(), validate(appointmentValidation.getAppointmentsByType), userAppointmentController.getAppointmentsByType);
 
+router
+  .route('/appointment-status')
+  .get(
+    authuser(),
+    validate(appointmentValidation.getAppointmentsByStatus),
+    userAppointmentController.getAppointmentsByStatus
+  );
 router
   .route('/:appointmentId/patient-feedback')
   .post(authuser(), validate(appointmentValidation.getUserFeedback), appointmentController.getUserFeedback);

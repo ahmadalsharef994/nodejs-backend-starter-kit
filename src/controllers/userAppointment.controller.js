@@ -25,6 +25,21 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json(result);
 });
 
+const getAppointmentsByStatus = catchAsync(async (req, res) => {
+  const filter = { Type: req.query.status };
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  appointmentService
+    .getAppointmentsByStatus(req.SubjectId, fromDate, endDate, filter, options)
+    .then((result) => {
+      return res.status(httpStatus.OK).send(result);
+    })
+    .catch((err) => {
+      return res.status(httpStatus.BAD_REQUEST).send(err);
+    });
+});
+
 const showPrescriptions = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -79,4 +94,5 @@ module.exports = {
   fetchHealthPackages,
   getDoctorsByCategories,
   getNextAppointment,
+  getAppointmentsByStatus,
 };

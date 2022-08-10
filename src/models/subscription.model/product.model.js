@@ -18,8 +18,25 @@ const ProductSchema = new mongoose.Schema(
     image: {
       type: String,
     },
-    category: {
+    type: {
       type: String,
+      required: true,
+      enum: ['MEDICINE', 'LABTEST'],
+    },
+    sourcePinCode: {
+      type: String,
+      required: true,
+    },
+    destinationPinCode: {
+      type: String,
+      required: true,
+    },
+    sourceAddress: {
+      type: String,
+      required: true,
+    },
+    delevirablePinCodes: {
+      type: Array,
       required: true,
     },
   },

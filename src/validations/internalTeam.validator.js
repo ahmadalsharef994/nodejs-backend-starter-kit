@@ -51,7 +51,7 @@ const doctordetails = {
     Experience: Joi.number().required(),
     doctorDegree: Joi.string().required(),
     doctorClinicAddress: Joi.string().required(),
-    appointmentPrice: Joi.number().required(),
+    appointmentPrice: Joi.number().default(600),
     doctorId: Joi.number().required(),
   }),
 };

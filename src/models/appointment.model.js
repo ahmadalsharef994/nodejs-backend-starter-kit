@@ -64,9 +64,11 @@ const AppointmentSchema = mongoose.Schema(
     },
     Status: {
       type: String,
+      enum: ['BOOKED', 'RESCHEDULED', 'CANCELLED'],
     },
     Type: {
       type: String,
+      enum: ['REFERRED', 'PREBOOKING', 'LIVE', 'SCHEDULED', 'FOLLOWUP'],
     },
     Date: {
       type: String,
@@ -89,7 +91,7 @@ const AppointmentSchema = mongoose.Schema(
       type: String,
     },
     HealthIssue: {
-      type: String,
+      type: Array,
       required: true,
     },
     LabTest: {
@@ -125,8 +127,8 @@ const AppointmentSchema = mongoose.Schema(
       required: true,
     },
     chatHistory: {
-      type: Array,
-      default: [],
+      type: Object,
+      default: null,
     },
   },
   {

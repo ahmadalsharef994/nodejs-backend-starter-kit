@@ -311,7 +311,6 @@ const getPincodeDetails = async (pincode) => {
     const pincodeBuffer = fs.readFileSync('src/assets/pincode.json');
     const allPincodes = await JSON.parse(pincodeBuffer);
     const result = await allPincodes.find((pinData) => pinData.Pincode === parseInt(pincode, 10));
-    // console.log(allPincodes.length);  total = 39734
     return result;
   } catch (e) {
     return false;
@@ -365,20 +364,3 @@ module.exports = {
   getLabTestDetails,
   getLabTestOrder,
 };
-
-/*
-const authFilter: function (req, res, next) {
-    if (_.has(req.headers, 'token')) {
-      if (req.headers.token != AUTH_KEY){
-        req.error = new Error(tokenMissingMessage);
-        exceptions.customException(req, res, tokenMissingMessage, 403);
-      }
-      else {
-        next();
-      }
-    } else {
-      req.error =  new Error(tokenMissingMessage);
-      exceptions.customException(req, res, tokenMissingMessage, 403);
-    }
-  }
-*/

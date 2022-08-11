@@ -98,14 +98,17 @@ const createAppointmentOrder = async (currency, appointmentid, orderId) => {
   }
 };
 
-const calculateSHADigestAppointment = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
+const calculateSHADigestAppointment = async (razorpayOrderID, razorpayPaymentId, razorpaySignature) => {
   const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-  shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
+  shasum.update(`${razorpayOrderID}|${razorpayPaymentId}`);
   const calculatedSHADigest = shasum.digest('hex');
   if (calculatedSHADigest === razorpaySignature) {
     // console.log('request is legit');
-    await AppointmentOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
-    await Appointment.findOneAndUpdate({ orderId: orderCreationId }, { $set: { paymentStatus: 'PAID' } });
+    await AppointmentOrder.updateOne({ razorpayOrderID }, { $set: { isPaid: true } });
+    const paymentDetails = await AppointmentOrder.findOne({ razorpayOrderID });
+    if (paymentDetails.isPaid === true) {
+      await Appointment.updateOne({ orderId: paymentDetails.AppointmentOrderID }, { $set: { paymentStatus: 'PAID' } });
+    }
     return 'match';
   }
   // console.log('calculatedSHADigest: ', digest);
@@ -164,19 +167,6 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
     throw new ApiError(httpStatus.NOT_FOUND, 'razorpay failed to create wallet order');
   }
 };
-
-// const calculateSHADigestWallet = async (orderCreationId, razorpayOrderID, razorpayPaymentId, razorpaySignature) => {
-//   const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-//   shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
-//   const calculatedSHADigest = shasum.digest('hex');
-//   if (calculatedSHADigest === razorpaySignature) {
-//     // console.log('request is legit');
-//     await walletOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } });
-//     return 'match';
-//   }
-//   // console.log('calculatedSHADigest: ', digest);
-//   return 'no_match';
-// };
 
 /* const withdrawFromWallet = async (options) => {
   let body = {

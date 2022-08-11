@@ -1,7 +1,22 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const userprofileService = require('../services/userprofile.service');
-const { authService } = require('../services');
+const { authService, appointmentService } = require('../services');
+
+const getStats = catchAsync(async (req, res) => {
+  const feedbacks = await appointmentService.getUserFeedbacks(req.query.id);
+
+  const RATING = (
+    feedbacks.reduce((doctorRatingsSum, feedback) => {
+      return doctorRatingsSum + feedback.doctorRating;
+    }, 0) / feedbacks.length
+  ).toFixed(1);
+
+  res.status(httpStatus.OK).json({
+    message: 'success',
+    data: RATING,
+  });
+});
 
 const showUserProfile = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -77,7 +92,7 @@ const addMember = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const memberDetails = await userprofileService.addMember(req.body, AuthData);
   if (memberDetails) {
-    res.status(httpStatus.OK).json({ message: 'New Family Member added ', data: memberDetails });
+    res.status(httpStatus.OK).json({ message: 'New Family Member added', data: memberDetails });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'You can only add 4 family Members' });
   }
@@ -128,6 +143,11 @@ const updateprofilepic = catchAsync(async (req, res) => {
   const result = await userprofileService.updateProfilePic(profilePhoto, AuthData);
   res.status(httpStatus.OK).json({ message: 'Profile pic updated successfully', result });
 });
+
+const getUpcomingEvents = catchAsync(async (req, res) => {
+  res.status(httpStatus.OK).json({ message: `TO BE IMPLEMENTED after Discussion` });
+});
+
 module.exports = {
   showUserProfile,
   submitBasicDetails,
@@ -142,4 +162,6 @@ module.exports = {
   getAllMembers,
   notifications,
   updateprofilepic,
+  getStats,
+  getUpcomingEvents,
 };

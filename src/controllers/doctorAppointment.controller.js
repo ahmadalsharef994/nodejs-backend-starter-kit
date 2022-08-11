@@ -1,37 +1,26 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { authService, appointmentService, userProfile } = require('../services');
+const { appointmentPreferenceService, authService, appointmentService, userProfile } = require('../services');
 const pick = require('../utils/pick');
-// const prescriptionUpload = require('../Microservices/generatePrescription.service');
-
-const initAppointmentDoctor = catchAsync(async (req, res) => {
-  const InitSession = await appointmentService.initiateAppointmentSession(req.body.appointmentInit);
-  res.status(httpStatus.CREATED).json(InitSession);
-});
+const ApiError = require('../utils/ApiError');
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const DoctorSession = await appointmentService.joinAppointmentSessionbyDoctor(
-    req.body.appointmentInit,
-    AuthData,
-    req.body.socketID
-  );
+  const appointmentId = req.body.appointmentId;
+  // new design. only pass appointmentId
+  const DoctorSession = await appointmentService.joinAppointmentDoctor(appointmentId);
   res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentUser = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const UserSession = await appointmentService.joinAppointmentSessionbyPatient(
-    req.body.appointmentInit,
-    AuthData,
-    req.body.socketID
-  );
+  const appointmentId = req.body.appointmentId;
+  // new design. only pass appointmentId
+  const UserSession = await appointmentService.joinAppointmentPatient(appointmentId);
   res.status(httpStatus.CREATED).json(UserSession);
 });
 
 const bookAppointment = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  const { id, orderId } = await appointmentService.submitAppointmentDetails(
+  const { id, orderId } = await appointmentService.bookAppointment(
     req.body.docId,
     AuthData,
     req.body.slotId,
@@ -46,28 +35,13 @@ const bookAppointment = catchAsync(async (req, res) => {
 });
 
 const getAppointmentDetails = catchAsync(async (req, res) => {
-  const AppointmentSession = await appointmentService.getAppointmentById(req.params.appointmentId);
-  const PatientBasic = await userProfile.fetchBasicDetails(AppointmentSession.AuthUser);
-  if (AppointmentSession !== false) {
-    res.status(httpStatus.CREATED).json({ PatientBasic, AppointmentSession });
+  const appointment = await appointmentService.getAppointmentById(req.params.appointmentId);
+  const PatientBasic = await userProfile.fetchBasicDetails(appointment.AuthUser);
+  if (appointment !== false) {
+    res.status(httpStatus.CREATED).json({ PatientBasic, appointment });
   } else {
     res.status(httpStatus.OK).json({ message: 'No Appointment present with this id', data: [] });
   }
-});
-
-const assignFollowup = catchAsync(async (req, res) => {
-  await appointmentService
-    .submitFollowupDetails(
-      req.params.appointmentId,
-      req.Docid,
-      req.body.slotId,
-      req.body.date,
-      req.body.documents,
-      req.body.status
-    )
-    .then((result) => {
-      return res.status(httpStatus.OK).json({ message: 'Followup Slot assigned', data: result });
-    });
 });
 
 const getFollowupsById = catchAsync(async (req, res) => {
@@ -91,8 +65,7 @@ const getAvailableFollowUps = catchAsync(async (req, res) => {
 });
 
 const getAvailableAppointments = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId); // AuthDoctor: AuthData._id
-  const result = await appointmentService.getAvailableAppointments(AuthData);
+  const result = await appointmentService.getAvailableAppointments(req.SubjectId);
   return res.status(httpStatus.OK).json({ message: 'Success', data: result });
 });
 
@@ -116,6 +89,21 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
   appointmentService
     .getAppointmentsByType(req.Docid, fromDate, endDate, filter, options)
+    .then((result) => {
+      return res.status(httpStatus.OK).send(result);
+    })
+    .catch((err) => {
+      return res.status(httpStatus.BAD_REQUEST).send(err);
+    });
+});
+
+const getAppointmentsByStatus = catchAsync(async (req, res) => {
+  const filter = { Type: req.query.status };
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  appointmentService
+    .getAppointmentsByStatus(req.Docid, fromDate, endDate, filter, options)
     .then((result) => {
       return res.status(httpStatus.OK).send(result);
     })
@@ -154,8 +142,9 @@ const getPrescription = catchAsync(async (req, res) => {
 });
 
 const getPatientDetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const patientData = await appointmentService.getPatientDetails(req.params.patientId, AuthData);
+  const doctorId = req.SubjectId;
+  const patientId = req.params.patientId;
+  const patientData = await appointmentService.getPatientDetails(patientId, doctorId);
   if (patientData.length) {
     res.status(httpStatus.OK).json({
       'Patient Name': patientData[0],
@@ -205,10 +194,10 @@ const getUserFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelAppointment = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-
+  const appointmentId = req.params.appointmentId;
+  const doctorId = req.SubjectId;
   await appointmentService
-    .cancelAppointment(req.body.appointmentId, AuthData._id)
+    .cancelAppointment(appointmentId, doctorId)
     .then((result) => {
       if (result) {
         return res.status(httpStatus.OK).json({ message: 'Success', data: result });
@@ -258,14 +247,14 @@ const cancelFollowup = catchAsync(async (req, res) => {
   }
 });
 
-const rescheduleFollowup = catchAsync(async (req, res) => {
-  const result = await appointmentService.rescheduleFollowup(req.body.followupId, req.body.slotId, req.body.date);
-  if (result) {
-    res.status(httpStatus.OK).json({ message: 'followup rescheduled', result });
-  } else {
-    res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant reschedule followup' });
-  }
-});
+// const rescheduleFollowup = catchAsync(async (req, res) => {
+//   const result = await appointmentService.rescheduleFollowup(req.body.followupId, req.body.slotId, req.body.date);
+//   if (result) {
+//     res.status(httpStatus.OK).json({ message: 'followup rescheduled', result });
+//   } else {
+//     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant reschedule followup' });
+//   }
+// });
 
 const allAppointments = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
@@ -278,6 +267,7 @@ const allAppointments = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant fetch appointments' });
   }
 });
+
 const deleteSlot = catchAsync(async (req, res) => {
   const updatedslots = await appointmentService.deleteSlot(req.SubjectId, req.body.slotId);
   if (updatedslots) {
@@ -286,12 +276,55 @@ const deleteSlot = catchAsync(async (req, res) => {
     res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
   }
 });
+
+const getNextAppointmentDoctor = catchAsync(async (req, res) => {
+  const nextAppointment = await appointmentService.getNextAppointmentDoctor(req.Docid);
+  if (nextAppointment) {
+    res.status(httpStatus.OK).json({ nextAppointment });
+  } else {
+    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
+  }
+});
+
+const updateAppointmentPreference = catchAsync(async (req, res) => {
+  const doctorAuthId = req.SubjectId;
+  const docId = req.Docid;
+  const isPriceSet = await appointmentPreferenceService.checkForAppointmentPrice(doctorAuthId);
+  if (!isPriceSet) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'General Appointment Price Not Set');
+  }
+  const preferences = req.body;
+
+  const result = await appointmentPreferenceService.updateAppointmentPreference(preferences, doctorAuthId, docId);
+
+  if (result === null) {
+    res.status(httpStatus.NOT_FOUND).json({ message: "Slots doesn't exist. Create slots inorder to update them!" });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'slots updated', result });
+  }
+});
+
+const getAppointmentPreferences = catchAsync(async (req, res) => {
+  const doctorId = await authService.getAuthById(req.SubjectId);
+  appointmentPreferenceService
+    .getAppointmentPreferences(doctorId)
+    .then((result) => {
+      if (result === null) {
+        return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });
+      }
+      return res.status(httpStatus.OK).json(result);
+    })
+    .catch(() => {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Something went wrong with getAppointments service');
+    });
+});
+
 module.exports = {
-  initAppointmentDoctor,
+  // initAppointmentDoctor,
   joinAppointmentDoctor,
   joinAppointmentUser,
   bookAppointment,
-  assignFollowup,
+  // assignFollowup,
   getFollowupsById,
   getAvailableFollowUps,
   getAvailableAppointments,
@@ -309,7 +342,11 @@ module.exports = {
   rescheduleAppointment,
   bookingConfirmation,
   cancelFollowup,
-  rescheduleFollowup,
+  // rescheduleFollowup,
   allAppointments,
   deleteSlot,
+  getNextAppointmentDoctor,
+  getAppointmentsByStatus,
+  getAppointmentPreferences,
+  updateAppointmentPreference,
 };

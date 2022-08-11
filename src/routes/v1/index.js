@@ -13,6 +13,8 @@ const couponRoute = require('./coupon.route');
 const walletRoute = require('./wallet.route');
 const elasticSearchRoute = require('./elasticSearch.route');
 const autoReplyRoute = require('./autoReply.route');
+const pusherRoute = require('./pusher.route');
+const eventRoute = require('./event.route');
 
 const router = express.Router();
 
@@ -64,7 +66,7 @@ const defaultRoutes = [
   {
     path: '/wallet',
     route: walletRoute,
-  }, // Wallet Route (NEW)
+  },
   {
     path: '/elasticsearch',
     route: elasticSearchRoute,
@@ -72,6 +74,14 @@ const defaultRoutes = [
   {
     path: '/autoreply',
     route: autoReplyRoute,
+  },
+  {
+    path: '/pusher',
+    route: pusherRoute,
+  },
+  {
+    path: '/events',
+    route: eventRoute,
   },
 ];
 

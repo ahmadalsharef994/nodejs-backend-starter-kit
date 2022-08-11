@@ -4,8 +4,9 @@ const { authService, userAppointmentService, appointmentService } = require('../
 const pick = require('../utils/pick');
 
 const upcomingAppointments = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const result = await userAppointmentService.getNextAppointment(AuthData, req.query.limit);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const result = await userAppointmentService.getUpcomingAppointment(req.SubjectId, endDate, options);
   if (result.length === 0) {
     return res.status(httpStatus.OK).json({ message: 'No Upcoming Appointments', data: [] });
   }
@@ -13,14 +14,30 @@ const upcomingAppointments = catchAsync(async (req, res) => {
 });
 
 const getAppointmentsByType = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const filter = { AuthUser: AuthData.id, Type: req.query.type };
+  const filter = req.query.type;
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userAppointmentService.getAppointmentsByType(filter, options);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const result = await userAppointmentService.getAppointmentsByType(req.SubjectId, fromDate, endDate, filter, options);
   if (result.length === 0) {
     return res.status(httpStatus.OK).json({ message: 'No Appointments to show', data: [] });
   }
   return res.status(httpStatus.OK).json(result);
+});
+
+const getAppointmentsByStatus = catchAsync(async (req, res) => {
+  const filter = { Type: req.query.status };
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  appointmentService
+    .getAppointmentsByStatus(req.SubjectId, fromDate, endDate, filter, options)
+    .then((result) => {
+      return res.status(httpStatus.OK).send(result);
+    })
+    .catch((err) => {
+      return res.status(httpStatus.BAD_REQUEST).send(err);
+    });
 });
 
 const showPrescriptions = catchAsync(async (req, res) => {
@@ -56,8 +73,18 @@ const getDoctorsByCategories = catchAsync(async (req, res) => {
   const { doctorDetails } = await appointmentService.getDoctorsByCategories(req.body.Category);
   if (doctorDetails.length > 0) {
     res.status(httpStatus.OK).json(doctorDetails);
+  } else {
+    res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
   }
-  res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
+});
+const getNextAppointment = catchAsync(async (req, res) => {
+  const nextAppointment = await userAppointmentService.getNextAppointment(req.SubjectId);
+  // eslint-disable-next-line eqeqeq
+  if (nextAppointment != null || nextAppointment != undefined) {
+    res.status(httpStatus.OK).json({ nextAppointment });
+  } else {
+    res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointments not found' });
+  }
 });
 module.exports = {
   upcomingAppointments,
@@ -66,4 +93,6 @@ module.exports = {
   showLabTestOrders,
   fetchHealthPackages,
   getDoctorsByCategories,
+  getNextAppointment,
+  getAppointmentsByStatus,
 };

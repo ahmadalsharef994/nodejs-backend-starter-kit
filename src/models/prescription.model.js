@@ -4,6 +4,15 @@ const Appointment = require('./auth.model');
 
 const PrescriptionSchema = mongoose.Schema(
   {
+    patientName: {
+      type: String,
+      required: true,
+    },
+    userAuth: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Appointment,
+      required: true,
+    },
     Appointment: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Appointment,

@@ -26,7 +26,7 @@ const saveToken = async (token) => {
  * @param {string} useragent
  * @param {string} fcmtoken
  */
-const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devicetype, fcmtoken) => {
+const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devicetype) => {
   const devicecheck = await Devices.findOne({ devicehash });
   if (devicecheck) {
     const authtokenhere = authtoken;
@@ -40,7 +40,6 @@ const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devic
       ipaddress,
       devicehash,
       devicetype,
-      fcmtoken,
     });
     return deviceDoc;
   }
@@ -67,18 +66,12 @@ const logoutdevice = async (authtoken) => {
  * @param {string} [secret]
  * @returns {string}
  */
-const generateChatAppointmentSessionToken = (
-  appointmentID,
-  doctorAuth,
-  userAuth,
-  requestedby,
-  secret = config.jwt.secret
-) => {
+const generateChatAppointmentSessionToken = (appointmentID, doctorAuth, userAuth, entity, secret = config.jwt.secret) => {
   const payload = {
     appointment: appointmentID,
     doctor: doctorAuth,
     user: userAuth,
-    entity: requestedby,
+    entity,
     iat: moment().unix(),
     exp: moment().add(20, 'minutes').unix(),
   };

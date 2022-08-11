@@ -12,19 +12,18 @@ const {
 } = require('../models');
 const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
-// const appointmentService = require('./appointment.service');
 const netEarn = require('../utils/netEarnCalculator');
 
-const fetchbasicdetails = async (AuthData) => {
-  const DoctorBasicExist = await DoctorBasic.findOne({ auth: AuthData });
-  return DoctorBasicExist;
+const fetchbasicdetails = async (doctorId) => {
+  const basicDetails = await DoctorBasic.findOne({ auth: doctorId });
+  return basicDetails;
 };
 
-const submitbasicdetails = async (BasicDetailBody, AuthData) => {
+const submitbasicdetails = async (basicDetails, AuthData) => {
   // eslint-disable-next-line no-param-reassign
-  BasicDetailBody.auth = AuthData; // Assign Reference to Req Body
-  const basicDetailDoc = await DoctorBasic.create(BasicDetailBody);
-  return basicDetailDoc;
+  basicDetails.auth = AuthData; // Assign Reference to Req Body
+  const doctorBasic = await DoctorBasic.create(basicDetails);
+  return doctorBasic;
 };
 
 const submitprofilepicture = async (ProfilePhoto, AuthData) => {
@@ -127,17 +126,17 @@ const updteClinicDetails = async (Auth, timings, clinicId) => {
   return false;
 };
 
-const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
-  const Auth = { auth };
-  const About = { about, address, pincode, experience, country, state, city };
-  try {
-    await DoctorBasic.findOneAndUpdate(Auth, About);
-    await DoctorExperience.updateOne({ auth }, { $set: { experience } });
-    return true;
-  } catch (error) {
-    return error;
-  }
-};
+// const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
+//   const Auth = { auth };
+//   const About = { about, address, pincode, experience, country, state, city };
+//   try {
+//     await DoctorBasic.findOneAndUpdate(Auth, About);
+//     await DoctorExperience.updateOne({ auth }, { $set: { experience } });
+//     return true;
+//   } catch (error) {
+//     return error;
+//   }
+// };
 
 const doctorExpEducation = async (auth, experience, education) => {
   // eslint-disable-next-line no-param-reassign
@@ -147,7 +146,7 @@ const doctorExpEducation = async (auth, experience, education) => {
   const edu = await DoctorEducation.findOne({ auth });
   const exp = await DoctorExperience.findOne({ auth });
   if (edu || exp) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'these details were already submitted ');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'these details were already submitted');
   } else {
     const Education = await DoctorEducation.create(education);
     const Experience = await DoctorExperience.create(experience);
@@ -246,7 +245,7 @@ module.exports = {
   addConsultationfee,
   notificationSettings,
   updteClinicDetails,
-  updateDetails,
+  // updateDetails,
   doctorExpEducation,
   updateappointmentPrice,
   doctorClinicTimings,

@@ -1,33 +1,26 @@
 const { Client } = require('@elastic/elasticsearch');
 const fs = require('fs');
-const split = require('split2');
 require('dotenv').config();
 const ApiError = require('../utils/ApiError');
 
 const client = new Client({
   node: process.env.ELASTIC_URL,
-  auth: {
-    username: process.env.ELASTIC_USERNAME,
-    password: process.env.ELASTIC_PASSWORD,
-  },
-  tls: {
-    rejectUnauthorized: false,
-  },
 });
 
 const createMedicinesIndex = async (index) => {
-  const exists = await client.indices.exists({ index });
-  if (exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (exists.body) {
     throw new ApiError(400, `index with name ${index} already exists`);
   }
-  const result = await client.indices.create({
+  const result = await client.index({
     index,
+    id: 1,
     body: {
       mappings: {
         dynamic: 'strict',
         properties: {
-          generic: { type: 'keyword' },
-          brand: { type: 'keyword' },
+          generic: { type: 'text' },
+          brand: { type: 'text' },
           packing: { type: 'text', index: false }, // not available for querying
           price: { type: 'text' },
           company: { type: 'text' },
@@ -39,18 +32,19 @@ const createMedicinesIndex = async (index) => {
 };
 
 const createDoctorsIndex = async (index) => {
-  const exists = await client.indices.exists({ index });
-  if (exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (exists.body) {
     throw new ApiError(400, `index with name ${index} already exists`);
   }
-  const result = await client.indices.create({
+  const result = await client.index({
     index,
+    id: 1,
     body: {
       mappings: {
         dynamic: 'strict',
         properties: {
-          name: { type: 'keyword' },
-          specializations: { type: 'keyword' },
+          name: { type: 'text' },
+          specializations: { type: 'text' },
           doctorClinicAddress: { type: 'text' },
           appointmentPrice: { type: 'integer' },
           Experience: { type: 'integer' },
@@ -62,77 +56,68 @@ const createDoctorsIndex = async (index) => {
 };
 
 const deleteIndex = async (index) => {
-  const exists = await client.indices.exists({ index });
-  if (!exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (!exists.body) {
     throw new ApiError(400, 'Index doesnt exist');
   }
-  const response = await client.indices.delete({ index });
+  const response = await client.delete({ index, id: 1 });
   return response;
 };
 
 const createDocument = async (index, document) => {
-  const exists = await client.indices.exists({ index });
-  if (!exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (!exists.body) {
     throw new ApiError(400, 'Index doeesnt exist');
   }
-  const documentJson = JSON.parse(document);
+  const body = JSON.parse(document);
   const response = await client.index({
     index,
-    document: documentJson,
+    id: body.brand,
+    body, // previously, having body: {documentJson} caused an error in searching
   });
   return response; // object having _index, _id, result, etc..
 };
 
 const searchDocument = async (index, keyword, value) => {
-  const exists = await client.indices.exists({ index });
-  if (!exists) {
+  const exists = await client.exists({ index, id: 1 });
+  if (!exists.body) {
     throw new ApiError(400, 'Index doesnt exist');
   }
   const result = await client.search({
     index,
-    query: {
-      wildcard: {
-        [keyword]: {
-          value: `*${value}*`,
-          case_insensitive: true,
+    body: {
+      size: 20,
+      query: {
+        regexp: {
+          [keyword]: {
+            value: `.*${value}.*`,
+            case_insensitive: true,
+          },
         },
       },
     },
   });
-  return result.hits.hits;
+  return result.body.hits.hits;
 };
 
 const indexJsonDataset = async (index, datasetPath) => {
-  // const datasetPath = path.join(__dirname, "medz.json")
-  const datasource = fs.createReadStream(datasetPath).pipe(split());
-  const result = await client.helpers.bulk({
-    datasource,
-    onDocument() {
-      return {
-        index: { _index: index },
-      };
-    },
-    onDrop() {
-      // eslint-disable-next-line no-console
-      console.log(`can't index document`);
-    },
-    refreshOnCompletion: index,
+  const datasource = JSON.parse(fs.readFileSync(datasetPath));
+  const result = [];
+  datasource.forEach(async (document) => {
+    const temp = await createDocument(index, JSON.stringify(document));
+    result.push(temp);
   });
   return result;
-};
-
-const getJsonFile = (filepath) => {
-  const response = fs.readFileSync(filepath);
-  const json = response
-    .toString()
-    .split('\n')
-    .map((s) => JSON.parse(s));
-  return json;
 };
 
 const getClientInfo = async () => {
   const response = await client.info();
   return response;
+};
+
+const countDocumentsInIndex = async (index) => {
+  const count = await client.count({ index });
+  return count.body.count;
 };
 
 module.exports = {
@@ -142,6 +127,6 @@ module.exports = {
   createDoctorsIndex,
   deleteIndex,
   indexJsonDataset,
-  getJsonFile,
   getClientInfo,
+  countDocumentsInIndex,
 };

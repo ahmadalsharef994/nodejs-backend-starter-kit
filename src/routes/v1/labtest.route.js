@@ -14,8 +14,10 @@ const router = express.Router();
 router.route('/thyrocare/labtests').get(labTestController.thyrocareLabTests);
 
 router.route('/thyrocare/labtest-packages').get(labTestController.getLabtestPackages);
+
 // admin endpoint
 router.route('/thyrocare/auto-update').get(authAdmin(), labTestController.startAutoUpdateCreds);
+
 router
   .route('/thyrocare/pincode-availability')
   .post(validate(labTestValidator.pincode), labTestController.checkPincodeAvailability);

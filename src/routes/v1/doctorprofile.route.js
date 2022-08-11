@@ -4,9 +4,9 @@ const doctorProfileValidator = require('../../validations/DoctorProfile.validati
 const doctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
-const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
 const appointmentPreferenceValidator = require('../../validations/appointmentpreference.validation');
 const profilePhotoUpload = require('../../Microservices/profilePicture.service');
+const { appointmentController } = require('../../controllers');
 
 const router = express.Router();
 
@@ -31,17 +31,6 @@ router
       res.status(201).json({ message: 'Profile picture Updated!', location });
     }
   );
-
-// router
-//   .route('/basic-details/update-profile-picture')
-//   .post(
-//     profilePhotoUpload.publicupload.fields([{ name: 'avatar', maxCount: 1 }]),
-//     authdoctornonverified(),
-//     function (req, res) {
-//       doctorProfileController.submitprofilepicture(req);
-//       res.status(201).json('Profile picture Updated!');
-//     }
-//   );
 
 router.route('/education-details').get(authdoctornonverified(), doctorProfileController.fetcheducationdetails);
 router
@@ -74,17 +63,14 @@ router
   .put(
     authdoctorverified(),
     validate(appointmentPreferenceValidator.preferenceDetails),
-    appointmentPreferenceController.updateAppointmentPreference
+    appointmentController.updateAppointmentPreference
   );
 
-/* currently not being in use */
-/* router.route('/createPref').post(authdoctorverified(),validate(preferenceValidator.preferenceDetails),appointmentPreferenceController.submitAppointmentPreference); */
-
 // get all appointment preference slots
-router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.showAppointments);
+router.route('/getappointments').get(authdoctorverified(), appointmentController.getAppointmentPreferences);
 
 // get all followup preference slots
-router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);
+// router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);
 
 router.route('/payout-details').get(authdoctornonverified(), doctorProfileController.fetchpayoutsdetails);
 router
@@ -116,9 +102,9 @@ router
 router
   .route('/update-clinic-timings')
   .post(authdoctorverified(), validate(doctorProfileValidator.timings), doctorProfileController.updateClinicDetails);
-router
-  .route('/update-details')
-  .post(authdoctornonverified(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
+// router
+//   .route('/update-details')
+//   .post(authdoctornonverified(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
 router
   .route('/update-appointmentPrice')
   .post(
@@ -128,58 +114,18 @@ router
   );
 router.route('/get-doctor-clinictimings').get(authdoctornonverified(), doctorProfileController.getDoctorClinicTimings);
 
-/**
- * @openapi
- * /doctor/profile/:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails); // ISE
 
-/**
- * @openapi
- * /doctor/profile/send-quries:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/send-quries')
   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-/**
- * @openapi
- * /doctor/profile/billing:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/billing').get(authdoctornonverified(), doctorProfileController.getBillingDetails);
 
-/**
- * @openapi
- * /doctor/profile/send-queries:
- *  post:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router
   .route('/send-queries')
   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-/**
- * @openapi
- * /doctor/profile/get-doctor-queries:
- *  get:
- *     tags:
- *     - doctor
- *     - doctor profile
- */
 router.route('/get-doctor-queries').get(authdoctorverified(), doctorProfileController.getDoctorQueries);
 
 module.exports = router;

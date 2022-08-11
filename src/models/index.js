@@ -1,6 +1,6 @@
 module.exports.Appointment = require('./appointment.model');
 module.exports.AppointmentPreference = require('./appointmentPreference.model');
-module.exports.AppointmentSession = require('./appointmentSession.model');
+module.exports.DyteSession = require('./dyteSession.model');
 module.exports.Auth = require('./auth.model');
 module.exports.ConsultationFee = require('./consultationFee.model');
 module.exports.Devices = require('./devices.model');
@@ -33,3 +33,4 @@ module.exports.doctordetails = require('./doctordetails.model');
 module.exports.AppointmentOrder = require('./appointmentOrder.model');
 module.exports.Wallet = require('./wallet.model');
 module.exports.DoctorQueries = require('./doctorQuries.model');
+module.exports.Event = require('./event.model');

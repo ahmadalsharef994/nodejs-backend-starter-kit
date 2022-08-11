@@ -1,39 +1,34 @@
 const Wallet = require('../models/wallet.model');
 const WalletWithdrawRequest = require('../models/withrawRequest.model');
 
-const getBalanceInWallet = async (AuthData) => {
-  const wallet = await Wallet.findOne({ auth: AuthData.id });
-  return { balance: wallet.balance, cashback: wallet.cashback }; // equals to return Promise.resolve({xxx}) or promise.reject( new Error)
+const getBalanceInWallet = async (authId) => {
+  const wallet = await Wallet.findOne({ auth: authId });
+  return { balance: wallet.balance, cashback: wallet.cashback }; // await equals to return Promise.resolve({xxx}) or promise.reject( new Error)
 };
 
 const refundToWallet = async (AuthData, amount, cashback) => {
   const wallet = await Wallet.findOne({ auth: AuthData.id });
   const newCashback = Number(wallet.cashback) + Number(cashback);
   const newBalance = Number(wallet.balance) + Number(amount);
-  const result = await wallet.updateOne({ balance: newBalance, cashback: newCashback });
-  return result;
+  wallet.balance = newBalance;
+  wallet.cashback = newCashback;
+  await wallet.save();
+  return wallet;
 };
 
 const payFromWallet = async (AuthData, payFromCashback, payFromBalance) => {
   const wallet = await Wallet.findOne({ auth: AuthData });
-  const result = await wallet.updateOne({
-    cashback: wallet.cashback - payFromCashback,
-    balance: wallet.balance - payFromBalance,
-  });
-  return result;
+  wallet.cashback -= payFromCashback;
+  wallet.balance -= payFromBalance;
+  await wallet.save();
+  return wallet;
 };
-
-// const withdrawFromWallet = async (AuthData, amount) => {
-//   const wallet = await Wallet.findOne({ auth: AuthData });
-//   const result = await Wallet.findByIdAndUpdate(wallet.walletId, { balance: wallet.balance - amount });
-//   return result;
-// };
 
 const logTransaction = async (AuthData, transactionDetails) => {
   const wallet = await Wallet.findOne({ auth: AuthData });
   wallet.transactions.push(transactionDetails);
-  const result = await wallet.save();
-  return result;
+  await wallet.save();
+  return wallet;
 };
 
 const getWithdrawRequests = async () => {
@@ -53,8 +48,8 @@ const postWithdrawRequest = async (AuthData, transactionDetails) => {
   if (transactionDetails.amount > wallet.balance) {
     return "Can't withdraw more than your balance";
   }
-  const result = await walletWithdrawRequest.save();
-  return result;
+  await walletWithdrawRequest.save();
+  return walletWithdrawRequest;
 };
 
 const fulfillWithdrawRequest = async (withdrawRequestId) => {
@@ -68,11 +63,9 @@ const fulfillWithdrawRequest = async (withdrawRequestId) => {
 };
 
 module.exports = {
-  // createNewWallet,
   getBalanceInWallet,
   refundToWallet,
   payFromWallet,
-  // withdrawFromWallet,
   logTransaction,
   getWithdrawRequests,
   postWithdrawRequest,

@@ -26,7 +26,7 @@ const saveToken = async (token) => {
  * @param {string} useragent
  * @param {string} fcmtoken
  */
-const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devicetype, fcmtoken) => {
+const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devicetype) => {
   const devicecheck = await Devices.findOne({ devicehash });
   if (devicecheck) {
     const authtokenhere = authtoken;
@@ -40,7 +40,6 @@ const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devic
       ipaddress,
       devicehash,
       devicetype,
-      fcmtoken,
     });
     return deviceDoc;
   }

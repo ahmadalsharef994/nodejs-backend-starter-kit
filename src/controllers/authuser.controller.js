@@ -46,8 +46,8 @@ const register = catchAsync(async (req, res) => {
     const authtoken = tokenService.generateUserToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;
-    const fcmtoken = req.headers.fcmtoken;
-    await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+    // const fcmtoken = req.headers.fcmtoken;
+    await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
     await otpServices.initiateOTPData(AuthData);
     res.status(httpStatus.CREATED).json({ AuthData, basicDetails, authtoken });
   } else {
@@ -61,8 +61,8 @@ const login = catchAsync(async (req, res) => {
   const authtoken = await tokenService.generateUserToken(AuthData.id);
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
-  const fcmtoken = req.headers.fcmtoken;
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  // const fcmtoken = req.headers.fcmtoken;
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   res.status(httpStatus.OK).json({ AuthData, authtoken });
 });
 
@@ -72,8 +72,8 @@ const loginWithGoogle = catchAsync(async (req, res) => {
   const authtoken = await tokenService.generateUserToken(AuthData.id);
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
-  const fcmtoken = req.headers.fcmtoken;
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  // const fcmtoken = req.headers.fcmtoken;
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   res.status(httpStatus.CREATED).json({ AuthData, authtoken });
 });
 

@@ -35,8 +35,8 @@ const registeradmin = catchAsync(async (req, res) => {
     const authtoken = await tokenService.generateAdminToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;
-    const fcmtoken = req.headers.fcmtoken;
-    await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+    // const fcmtoken = req.headers.fcmtoken;
+    await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
     res.status(httpStatus.CREATED).json({ AuthData, authtoken });
   }
 });
@@ -53,8 +53,8 @@ const loginadmin = catchAsync(async (req, res) => {
     const authtoken = await tokenService.generateAdminToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;
-    const fcmtoken = req.headers.fcmtoken;
-    await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+    // const fcmtoken = req.headers.fcmtoken;
+    await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
     res.status(httpStatus.OK).json({ AuthData, authtoken });
   }
 });

@@ -12,7 +12,6 @@ const {
 } = require('../models');
 const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
-// const appointmentService = require('./appointment.service');
 const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (doctorId) => {

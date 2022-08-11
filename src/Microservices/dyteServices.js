@@ -1,6 +1,6 @@
 const axios = require('axios');
 const ApiError = require('../utils/ApiError');
-const AppointmentSession = require('../models/appointmentSession.model');
+const DyteSession = require('../models/dyteSession.model');
 
 // to initiate a meeting
 const InitiateMeetingRoom = async (appointmentID) => {
@@ -98,7 +98,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
   const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
   const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
-  const existingSession = await AppointmentSession.findOne({ appointmentid: appointmentID });
+  const existingSession = await DyteSession.findOne({ appointmentid: appointmentID });
   if (existingSession) {
     existingSession.meetingroom = meetingroom;
     existingSession.doctorparticipation = doctorparticipation;
@@ -106,7 +106,7 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
     return existingSession;
     // throw new ApiError(400, 'There was Already A Session Intiated For This Appointment Use appointment id to Live Join !');
   }
-  const AppointmentSessionData = await AppointmentSession.create({
+  const dyteSession = await DyteSession.create({
     appointmentid: appointmentID,
     AuthDoctor: doctorId,
     AuthUser: patientId,
@@ -115,13 +115,13 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
     dytedoctortoken: doctorparticipation.authResponse.authToken,
     dyteusertoken: userparticipation.authResponse.authToken,
   });
-  if (!AppointmentSessionData) {
+  if (!dyteSession) {
     throw new ApiError(400, 'Error Triggered it to Developer DYTE Services down');
   }
-  AppointmentSessionData.meetingroom = meetingroom;
-  AppointmentSessionData.doctorparticipation = doctorparticipation;
-  AppointmentSessionData.userparticipation = userparticipation;
-  return AppointmentSessionData;
+  dyteSession.meetingroom = meetingroom;
+  dyteSession.doctorparticipation = doctorparticipation;
+  dyteSession.userparticipation = userparticipation;
+  return dyteSession;
 };
 
 module.exports = {

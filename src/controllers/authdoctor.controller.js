@@ -67,10 +67,10 @@ const getOnboardingChallenge = async (AuthData) => {
 const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
-  const fcmtoken = req.headers.fcmtoken;
+  // const fcmtoken = req.headers.fcmtoken;
   const AuthData = await authService.createAuthData(req.body);
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   await otpServices.initiateOTPData(AuthData);
   const challenge = await getOnboardingChallenge(AuthData);
   res
@@ -90,8 +90,8 @@ const login = catchAsync(async (req, res) => {
   }
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
-  const fcmtoken = req.headers.fcmtoken;
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype, fcmtoken);
+  // const fcmtoken = req.headers.fcmtoken;
+  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({
     AuthData,

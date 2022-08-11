@@ -2,8 +2,7 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const authService = require('../services/auth.service');
 const walletService = require('../services/wallet.service');
-const appointmentService = require('../services/appointment.service');
-// const labTestService = require('../services/labTest.service');
+const appointmentService = require('../services/doctorAppointment.service.js');
 
 const getBalanceInWallet = catchAsync(async (req, res) => {
   const authId = req.SubjectId;

@@ -4,9 +4,9 @@ const doctorProfileValidator = require('../../validations/DoctorProfile.validati
 const doctorProfileController = require('../../controllers/doctorprofile.controller');
 const authdoctornonverified = require('../../middlewares/authDoctorNonVerified');
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
-const appointmentPreferenceController = require('../../controllers/appointmentpreference.controller');
 const appointmentPreferenceValidator = require('../../validations/appointmentpreference.validation');
 const profilePhotoUpload = require('../../Microservices/profilePicture.service');
+const { appointmentController } = require('../../controllers');
 
 const router = express.Router();
 
@@ -63,11 +63,11 @@ router
   .put(
     authdoctorverified(),
     validate(appointmentPreferenceValidator.preferenceDetails),
-    appointmentPreferenceController.updateAppointmentPreference
+    appointmentController.updateAppointmentPreference
   );
 
 // get all appointment preference slots
-router.route('/getappointments').get(authdoctorverified(), appointmentPreferenceController.getAppointmentPreferences);
+router.route('/getappointments').get(authdoctorverified(), appointmentController.getAppointmentPreferences);
 
 // get all followup preference slots
 // router.route('/getfollowups').get(authdoctorverified(), appointmentPreferenceController.showFollowups);

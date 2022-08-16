@@ -163,7 +163,7 @@ const bookAppointment = async (
   } catch (err) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
-  const Doctordetails = await doctordetails.findOne({ docid });
+  const Doctordetails = await doctordetails.findOne({ doctorId: docid });
   const doctorname = Doctordetails.doctorname;
   const appointmentPrice = Doctordetails.appointmentPrice;
 

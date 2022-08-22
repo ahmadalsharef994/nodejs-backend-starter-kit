@@ -122,16 +122,21 @@ const forgotPassword = catchAsync(async (req, res) => {
   }
 });
 
-const resetPassword = catchAsync(async (req, res) => {
+const verifyOtp = catchAsync(async (req, res) => {
   const service = req.body.choice;
+  let verification;
   if (service === 'email') {
     const AuthData = await authService.getAuthByEmail(req.body.email);
-    await authService.resetPassword(AuthData.email, req.body.resetcode, req.body.newPassword);
+    verification = await authService.verifyOtp(AuthData.email, req.body.resetcode);
   } else if (service === 'phone') {
     const AuthData = await authService.getAuthByPhone(req.body.phone);
-    await authService.resetPassword(AuthData.email, req.body.resetcode, req.body.newPassword);
+    verification = await authService.verifyOtp(AuthData.email, req.body.resetcode);
   }
-  res.status(httpStatus.OK).json({ message: 'Password Reset Successfull' });
+  if (verification) {
+    res.status(httpStatus.OK).json({ message: 'Otp Verification Successfull' });
+  } else {
+    res.status(400).json({ message: 'Otp Verification failed' });
+  }
 });
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
@@ -171,7 +176,15 @@ const resendOtp = catchAsync(async (req, res) => {
   await otpServices.resendOtp(OTP, AuthData);
   res.status(httpStatus.OK).json({ message: 'OTP sent over Phone' });
 });
-
+const resetPassowrd = catchAsync(async (req, res) => {
+  const AuthData = await authService.getAuthByPhone(req.body.phone);
+  const response = await authService.resetPassword(AuthData, req.body.newPassword, req.body.confirmNewPassword);
+  if (response) {
+    res.status(httpStatus.OK).json({ message: 'Password Reset Successfull' });
+  } else {
+    res.status(400).json({ message: 'Password Reset Failed' });
+  }
+});
 module.exports = {
   createUser,
   resendCreateUserOtp,
@@ -181,11 +194,12 @@ module.exports = {
   loginWithGoogle,
   logout,
   forgotPassword,
-  resetPassword,
+  resetPassowrd,
   sendVerificationEmail,
   verifyEmail,
   changePassword,
   requestOtp,
   verifyPhone,
   resendOtp,
+  verifyOtp,
 };

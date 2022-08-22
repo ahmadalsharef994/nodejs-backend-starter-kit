@@ -25,7 +25,8 @@ router.post('/login', deviceauth(), validate(authUserValidation.login), authUser
 router.post('/login-with-google', authUserController.loginWithGoogle);
 router.post('/logout', validate(authUserValidation.logout), authUserController.logout);
 router.post('/forgot-password', validate(authUserValidation.forgotPassword), authUserController.forgotPassword);
-router.post('/reset-password', validate(authUserValidation.resetPassword), authUserController.resetPassword);
+router.post('/verify-otp', validate(authUserValidation.verifyOtp), authUserController.verifyOtp);
+router.post('/reset-password', validate(authUserValidation.resetPassword), authUserController.resetPassowrd);
 router.post('/send-verification-email', authuser(), authUserController.sendVerificationEmail);
 router.post('/verify-email', authuser(), validate(authUserValidation.verifyEmail), authUserController.verifyEmail);
 router.post('/change-password', authuser(), validate(authUserValidation.changepassword), authUserController.changePassword);

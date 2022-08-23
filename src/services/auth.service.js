@@ -194,14 +194,23 @@ const changeAuthPassword = async (oldPassword, newPassword, token, SubjectId) =>
  * @param {string} newPassword
  * @returns {Promise}
  */
-const resetPassword = async (email, resetcode, newPassword) => {
+const verifyOtp = async (email, resetcode) => {
   const AuthData = await getAuthByEmail(email);
   const verification = await otpServices.verifyForgetPasswordOtp(resetcode, AuthData);
-  if (verification) {
-    await updateAuthById(AuthData._id, { password: newPassword });
-  }
+  // if (verification) {
+  //   await updateAuthById(AuthData._id, { password: newPassword });
+  // }
+  return verification;
 };
-
+const resetPassword = async (AuthData, newPassword, confirmPassword) => {
+  let response;
+  if (newPassword === confirmPassword) {
+    response = await updateAuthById(AuthData._id, { password: newPassword });
+  } else {
+    throw new ApiError(httpStatus.BAD_REQUEST, "passwords doesn't match");
+  }
+  return response;
+};
 module.exports = {
   createAuthData,
   queryAuthData,
@@ -216,5 +225,6 @@ module.exports = {
   loginAuthWithEmailAndPassworDoctor,
   loginAuthWithEmailAndPasswordAdmin,
   resetPassword,
+  verifyOtp,
   changeAuthPassword,
 };

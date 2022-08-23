@@ -177,8 +177,16 @@ const resendOtp = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).json({ message: 'OTP sent over Phone' });
 });
 const resetPassowrd = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthByPhone(req.body.phone);
-  const response = await authService.resetPassword(AuthData, req.body.newPassword, req.body.confirmNewPassword);
+  let response;
+  if (req.body.choice === 'phone') {
+    const AuthData = await authService.getAuthByPhone(req.body.phone);
+    response = await authService.resetPassword(AuthData, req.body.newPassword, req.body.confirmNewPassword);
+  }
+  if (req.body.choice === 'email') {
+    const AuthData = await authService.getAuthByEmail(req.body.email);
+    response = await authService.resetPassword(AuthData, req.body.newPassword, req.body.confirmNewPassword);
+  }
+
   if (response) {
     res.status(httpStatus.OK).json({ message: 'Password Reset Successfull' });
   } else {

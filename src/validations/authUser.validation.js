@@ -72,7 +72,9 @@ const verifyOtp = {
 };
 const resetPassword = {
   body: Joi.object().keys({
-    phone: Joi.number().required().max(9999999999),
+    choice: Joi.string().required().valid('email', 'phone'),
+    email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
     newPassword: Joi.string().required().custom(password),
     confirmNewPassword: Joi.string().required().custom(password),
   }),

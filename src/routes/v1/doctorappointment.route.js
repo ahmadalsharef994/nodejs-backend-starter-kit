@@ -10,18 +10,10 @@ const chatValidator = require('../../validations/chat.validation');
 
 const router = express.Router();
 
-// router.post(
-//   '/init',
-//   authdoctorverified(),
-//   validate(appointmentValidator.joinAppointmentDoctor),
-//   appointmentController.initAppointmentDoctor
-// );
-// This is used fot Initiaing Appointment Session Manually while testing
-
 router.post(
   '/doctor-join',
   authdoctorverified(),
-  validate(appointmentValidator.joinAppointmentDoctor),
+  validate(appointmentValidator.joinAppointment),
   appointmentController.joinAppointmentDoctor
 );
 

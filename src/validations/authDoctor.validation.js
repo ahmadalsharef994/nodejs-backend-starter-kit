@@ -1,7 +1,7 @@
 const Joi = require('joi');
 const { password } = require('./custom.validation');
 
-const registerdoctor = {
+const register = {
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().min(8).max(30).required(),
@@ -71,7 +71,7 @@ const verifyforget = {
 };
 
 module.exports = {
-  registerdoctor,
+  register,
   login,
   logout,
   changepassword,

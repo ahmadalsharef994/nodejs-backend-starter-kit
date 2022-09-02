@@ -2,7 +2,7 @@ const Joi = require('joi');
 Joi.objectId = require('joi-objectid')(Joi);
 const { objectId } = require('./custom.validation');
 
-const joinAppointmentDoctor = {
+const joinAppointment = {
   body: Joi.object().keys({
     appointmentId: Joi.string().required(),
   }),
@@ -10,11 +10,6 @@ const joinAppointmentDoctor = {
 const deleteSlot = {
   body: Joi.object().keys({
     slotId: Joi.string().required(),
-  }),
-};
-const joinAppointmentUser = {
-  body: Joi.object().keys({
-    appointmentId: Joi.objectId().required(),
   }),
 };
 
@@ -197,8 +192,7 @@ const bookingConfirmation = {
 // };
 
 module.exports = {
-  joinAppointmentDoctor,
-  joinAppointmentUser,
+  joinAppointment,
   bookAppointment,
   // assignFollowup,
   getFollowups,

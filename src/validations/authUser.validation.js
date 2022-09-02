@@ -62,17 +62,23 @@ const forgotPassword = {
   }),
 };
 
-const resetPassword = {
+const verifyOtp = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
     phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
     resetcode: Joi.number().required(),
-    newPassword: Joi.string().required().custom(password),
-    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
   }),
 };
-
+const resetPassword = {
+  body: Joi.object().keys({
+    choice: Joi.string().required().valid('email', 'phone'),
+    email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    newPassword: Joi.string().required().custom(password),
+    confirmNewPassword: Joi.string().required().custom(password),
+  }),
+};
 const verifyEmail = {
   body: Joi.object().keys({
     emailcode: Joi.number().required(),
@@ -100,8 +106,9 @@ module.exports = {
   logout,
   changepassword,
   forgotPassword,
-  resetPassword,
+  verifyOtp,
   verifyEmail,
   verifyPhone,
   verifyforget,
+  resetPassword,
 };

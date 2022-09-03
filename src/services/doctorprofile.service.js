@@ -41,14 +41,10 @@ const fetcheducationdetails = async (AuthData) => {
 };
 
 const submiteducationdetails = async (EducationDetailBody, AuthData) => {
-  const alreayExist = await fetcheducationdetails(AuthData);
-  if (!alreayExist) {
-    // eslint-disable-next-line no-param-reassign
-    EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
-    const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
-    return educationDetailDoc;
-  }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
+  // eslint-disable-next-line no-param-reassign
+  EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
+  const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
+  return educationDetailDoc;
 };
 
 const fetchClinicdetails = async (AuthData) => {
@@ -69,14 +65,10 @@ const fetchexperiencedetails = async (AuthData) => {
 };
 
 const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
-  const alreayExist = await fetchexperiencedetails(AuthData);
-  if (!alreayExist) {
-    // eslint-disable-next-line no-param-reassign
-    ExperienceDetailBody.auth = AuthData; // Assign Reference to Req Body
-    const ExperienceDetailDoc = await DoctorExperience.create(ExperienceDetailBody);
-    return ExperienceDetailDoc;
-  }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
+  // eslint-disable-next-line no-param-reassign
+  ExperienceDetailBody.auth = AuthData; // Assign Reference to Req Body
+  const ExperienceDetailDoc = await DoctorExperience.create(ExperienceDetailBody);
+  return ExperienceDetailDoc;
 };
 
 const fetchpayoutsdetails = async (AuthData) => {
@@ -85,14 +77,10 @@ const fetchpayoutsdetails = async (AuthData) => {
 };
 
 const submitpayoutsdetails = async (PayoutDetailBody, AuthData) => {
-  const alreayExist = await fetchpayoutsdetails(AuthData);
-  if (!alreayExist) {
-    // eslint-disable-next-line no-param-reassign
-    PayoutDetailBody.auth = AuthData; // Assign Reference to Req Body
-    const PayoutDetailDoc = await DoctorPayout.create(PayoutDetailBody);
-    return PayoutDetailDoc;
-  }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Data Already Submitted');
+  // eslint-disable-next-line no-param-reassign
+  PayoutDetailBody.auth = AuthData; // Assign Reference to Req Body
+  const PayoutDetailDoc = await DoctorPayout.create(PayoutDetailBody);
+  return PayoutDetailDoc;
 };
 
 const addConsultationfee = async (consultationfeeDoc) => {

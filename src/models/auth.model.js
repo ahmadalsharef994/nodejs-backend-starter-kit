@@ -10,10 +10,6 @@ const userSchema = mongoose.Schema(
       required: true,
       trim: true,
     },
-    googleId: {
-      type: String,
-      default: null,
-    },
     email: {
       type: String,
       required: true,

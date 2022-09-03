@@ -87,6 +87,7 @@ const submitbasicdetails = catchAsync(async (req, res) => {
       message: 'Basic details Submitted',
       challenge: challenge.challenge,
       optionalchallenge: challenge.optionalChallenge,
+      data: resultData,
     });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({

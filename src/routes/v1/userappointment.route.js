@@ -12,7 +12,7 @@ router
 
 router
   .route('/patient-join')
-  .post(authuser(), validate(appointmentValidation.joinAppointmentUser), appointmentController.joinAppointmentUser);
+  .post(authuser(), validate(appointmentValidation.joinAppointment), appointmentController.joinAppointmentUser);
 
 router.route('/upcoming-appointments').get(authuser(), userAppointmentController.upcomingAppointments);
 router.route('/next-appointment').get(authuser(), userAppointmentController.getNextAppointment);

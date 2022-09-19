@@ -124,7 +124,7 @@ const deleteMember = {
   }),
 };
 
-const notifications = {
+const updateNotificationSettings = {
   body: Joi.object().keys({
     appNotifications: Joi.boolean().required(),
     promotionalEmails: Joi.boolean().required(),
@@ -140,5 +140,5 @@ module.exports = {
   updateMember,
   updateBasicDetails,
   deleteMember,
-  notifications,
+  updateNotificationSettings,
 };

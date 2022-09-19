@@ -13,3 +13,5 @@ router
   .post(authuser(), validate(autoReplyValidation.autoReplySymptoms), autoReplyController.autoReplySymptoms);
 
 module.exports = router;
+
+// THIS ENDPOINT IS NOT USED

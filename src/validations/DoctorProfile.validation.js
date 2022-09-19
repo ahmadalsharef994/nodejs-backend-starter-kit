@@ -219,7 +219,7 @@ const addConsultationfee = {
   }),
 };
 
-const notifications = {
+const notificationSettings = {
   body: Joi.object().keys({
     appNotifications: Joi.boolean().required(),
     promotionalEmails: Joi.boolean().required(),
@@ -297,7 +297,7 @@ module.exports = {
   ClinicDoctorDetails,
   PayoutsDoctorDetails,
   addConsultationfee,
-  notifications,
+  notificationSettings,
   timings,
   // updateDetails,
   EducationExperience,

@@ -7,22 +7,25 @@ const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 
-router.post('/create-user', deviceauth(), validate(authUserValidation.createUser), authUserController.createUser);
-router.post(
-  '/resend-create-user-otp',
-  deviceauth(),
-  validate(authUserValidation.resendCreateUserOtp),
-  authUserController.resendCreateUserOtp
-);
-router.post(
-  '/verify-new-user',
-  deviceauth(),
-  validate(authUserValidation.verifyCreatedUser),
-  authUserController.verifyCreatedUser
-);
+// router.post('/create-user', deviceauth(), validate(authUserValidation.createUser), authUserController.createUser);
+
+// router.post(
+//   '/resend-create-user-otp',
+//   deviceauth(),
+//   validate(authUserValidation.resendCreateUserOtp),
+//   authUserController.resendCreateUserOtp
+// );
+
+// router.post(
+//   '/verify-new-user',
+//   deviceauth(),
+//   validate(authUserValidation.verifyCreatedUser),
+//   authUserController.verifyCreatedUser
+// );
+
 router.post('/register', deviceauth(), validate(authUserValidation.registeruser), authUserController.register);
 router.post('/login', deviceauth(), validate(authUserValidation.login), authUserController.login);
-router.post('/login-with-google', authUserController.loginWithGoogle);
+// router.post('/login-with-google', authUserController.loginWithGoogle);
 router.post('/logout', validate(authUserValidation.logout), authUserController.logout);
 router.post('/forgot-password', validate(authUserValidation.forgotPassword), authUserController.forgotPassword);
 router.post('/verify-otp', validate(authUserValidation.verifyOtp), authUserController.verifyOtp);

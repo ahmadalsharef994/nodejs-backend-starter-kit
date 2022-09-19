@@ -313,54 +313,54 @@ const getAppointmentsByStatus = async (doctorId, fromDate, endDate, filter, opti
   return result;
 };
 
-const allAppointments = async (doctorId, fromDate, endDate, options) => {
-  try {
-    const followup = await Appointment.paginate(
-      { docid: doctorId, Type: 'FOLLOWUP', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
-      options
-    );
-    const cancelled = await Appointment.paginate(
-      { Status: 'cancelled', docid: doctorId, StartTime: { $gte: fromDate, $lt: endDate } },
-      options
-    );
-    const past = await Appointment.paginate(
-      {
-        StartTime: { $gte: fromDate, $lt: new Date() },
-        paymentStatus: 'PAID',
-        docid: doctorId,
-        Status: { $nin: 'cancelled' },
-      },
-      options
-    );
-    const today = await Appointment.paginate(
-      {
-        StartTime: { $gte: fromDate, $lt: endDate },
-        Date: new Date().toDateString(),
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        docid: doctorId,
-      },
-      options
-    );
-    const referred = await Appointment.paginate(
-      { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
-      options
-    );
-    const upcoming = await Appointment.paginate(
-      {
-        docid: doctorId,
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: new Date(), $lt: endDate },
-      },
-      options
-    );
-    const data = { followup, today, cancelled, past, referred, upcoming };
-    return data;
-  } catch (error) {
-    return error;
-  }
-};
+// const allAppointments = async (doctorId, fromDate, endDate, options) => {
+//   try {
+//     const followup = await Appointment.paginate(
+//       { docid: doctorId, Type: 'FOLLOWUP', Status: { $nin: 'cancelled' }, StartTime: { $gte: fromDate, $lt: endDate } },
+//       options
+//     );
+//     const cancelled = await Appointment.paginate(
+//       { Status: 'cancelled', docid: doctorId, StartTime: { $gte: fromDate, $lt: endDate } },
+//       options
+//     );
+//     const past = await Appointment.paginate(
+//       {
+//         StartTime: { $gte: fromDate, $lt: new Date() },
+//         paymentStatus: 'PAID',
+//         docid: doctorId,
+//         Status: { $nin: 'cancelled' },
+//       },
+//       options
+//     );
+//     const today = await Appointment.paginate(
+//       {
+//         StartTime: { $gte: fromDate, $lt: endDate },
+//         Date: new Date().toDateString(),
+//         paymentStatus: 'PAID',
+//         Status: { $nin: 'cancelled' },
+//         docid: doctorId,
+//       },
+//       options
+//     );
+//     const referred = await Appointment.paginate(
+//       { docid: doctorId, Type: 'REFERRED', paymentStatus: 'PAID', Status: { $nin: 'cancelled' } },
+//       options
+//     );
+//     const upcoming = await Appointment.paginate(
+//       {
+//         docid: doctorId,
+//         paymentStatus: 'PAID',
+//         Status: { $nin: 'cancelled' },
+//         StartTime: { $gte: new Date(), $lt: endDate },
+//       },
+//       options
+//     );
+//     const data = { followup, today, cancelled, past, referred, upcoming };
+//     return data;
+//   } catch (error) {
+//     return error;
+//   }
+// };
 
 const getFollowupsById = async (limit) => {
   const count = parseInt(limit, 10);
@@ -600,6 +600,13 @@ const cancelAppointment = async (appointmentId, doctorId) => {
     const result = await Appointment.find({ AuthDoctor: doctorId });
     return result;
   }
+  // await emailService.sendEmail({
+  //   from: process.env.EMAIL_FROM,
+  //   to: appointment.patientMail,
+  //   subject: 'Cancelled Appointment',
+  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team Medzgo`,
+  // });
+
   return 'appintment already cancelled';
 };
 
@@ -794,7 +801,7 @@ module.exports = {
   getDoctorsByCategories,
   bookingConfirmation,
   cancelFollowup,
-  allAppointments,
+  // allAppointments,
   deleteSlot,
   getPatientsCount,
   getTotalRevenue,

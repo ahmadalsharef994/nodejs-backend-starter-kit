@@ -40,7 +40,12 @@ router
     authuser(),
     UserProfileController.updateprofilepic
   );
-router.post('/notifications', authuser(), validate(UserProfileValidator.notifications), UserProfileController.notifications);
+router.post(
+  '/notifications',
+  authuser(),
+  validate(UserProfileValidator.updateNotificationSettings),
+  UserProfileController.updateNotificationSettings
+);
 
 router.route('/stats').get(authuser(), UserProfileController.getStats);
 

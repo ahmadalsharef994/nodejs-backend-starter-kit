@@ -242,7 +242,7 @@ const addConsultationfee = catchAsync(async (req, res) => {
   }
 });
 
-const notifications = catchAsync(async (req, res) => {
+const updateNotificationSettings = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const notificationsData = await doctorprofileService.notificationSettings(req.body, AuthData);
   if (notificationsData) {
@@ -344,10 +344,10 @@ const getBillingDetails = catchAsync(async (req, res) => {
   });
 });
 
-const getDoctorQueries = catchAsync(async (req, res) => {
-  const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
-  res.status(httpStatus.OK).json({ message: 'success', doctorQueries });
-});
+// const getDoctorQueries = catchAsync(async (req, res) => {
+//   const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
+//   res.status(httpStatus.OK).json({ message: 'success', doctorQueries });
+// });
 
 module.exports = {
   getStats,
@@ -364,7 +364,7 @@ module.exports = {
   fetchpayoutsdetails,
   fetchprofiledetails,
   addConsultationfee,
-  notifications,
+  updateNotificationSettings,
   updateClinicDetails,
   // updateDetails,
   doctorExpandEducation,
@@ -372,5 +372,5 @@ module.exports = {
   getDoctorClinicTimings,
   getBillingDetails,
   sendDoctorQueries,
-  getDoctorQueries,
+  // getDoctorQueries,
 };

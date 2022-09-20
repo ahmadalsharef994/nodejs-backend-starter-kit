@@ -6,3 +6,5 @@ const router = express.Router();
 router.route('/').get(couponController.showCoupons);
 
 module.exports = router;
+
+// THIS ENDPOINT IS NOT USED

@@ -77,8 +77,8 @@ router.post(
 router.post(
   '/notifications',
   authdoctorverified(),
-  validate(doctorProfileValidator.notifications),
-  doctorProfileController.notifications
+  validate(doctorProfileValidator.notificationSettings),
+  doctorProfileController.updateNotificationSettings
 );
 router
   .route('/submit-education-and-experience')
@@ -100,9 +100,9 @@ router.route('/get-doctor-clinictimings').get(authDoctor(), doctorProfileControl
 
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails); // ISE
 
-router
-  .route('/send-quries')
-  .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
+// router
+//   .route('/send-quries')
+//   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
 router.route('/billing').get(authDoctor(), doctorProfileController.getBillingDetails);
 
@@ -110,6 +110,6 @@ router
   .route('/send-queries')
   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-router.route('/get-doctor-queries').get(authdoctorverified(), doctorProfileController.getDoctorQueries);
+// router.route('/get-doctor-queries').get(authdoctorverified(), doctorProfileController.getDoctorQueries);
 
 module.exports = router;

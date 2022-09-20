@@ -95,11 +95,11 @@ const getAppointmentsByStatus = {
     .max(6),
 };
 
-const getAppointmentDetails = {
-  params: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId),
-  }),
-};
+// const getAppointmentDetails = {
+//   params: Joi.object().keys({
+//     appointmentId: Joi.string().custom(objectId),
+//   }),
+// };
 
 const createPrescription = {
   body: Joi.object().keys({
@@ -198,7 +198,7 @@ module.exports = {
   getFollowups,
   getAppointmentsByType,
   // getAvailableAppointments,
-  getAppointmentDetails,
+  // getAppointmentDetails,
   createPrescription,
   getPrescription,
   getPatientDetails,

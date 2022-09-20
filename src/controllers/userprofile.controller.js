@@ -128,7 +128,7 @@ const getAllMembers = catchAsync(async (req, res) => {
   }
 });
 
-const notifications = catchAsync(async (req, res) => {
+const updateNotificationSettings = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const notificationsData = await userprofileService.notificationSettings(req.body, AuthData);
   if (notificationsData) {
@@ -160,7 +160,7 @@ module.exports = {
   updateMember,
   deleteMember,
   getAllMembers,
-  notifications,
+  updateNotificationSettings,
   updateprofilepic,
   getStats,
   getUpcomingEvents,

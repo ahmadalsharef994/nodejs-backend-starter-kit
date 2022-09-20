@@ -2,34 +2,34 @@ const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const generateOTP = require('../utils/generateOTP');
 const checkHeader = require('../utils/chechHeader');
-const googleStrategy = require('../utils/googleStrategy');
+// const googleStrategy = require('../utils/googleStrategy');
 const { authService, tokenService, otpServices, verifiedUserService, userProfile } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
 
-const createUser = catchAsync(async (req, res) => {
-  const userId = await verifiedUserService.createVerifiedUser(req.body.mobile);
-  if (userId) {
-    res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
-  }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'Create User Account Failed' });
-});
+// const createUser = catchAsync(async (req, res) => {
+//   const userId = await verifiedUserService.createVerifiedUser(req.body.mobile);
+//   if (userId) {
+//     res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
+//   }
+//   res.status(httpStatus.BAD_REQUEST).json({ message: 'Create User Account Failed' });
+// });
 
-const resendCreateUserOtp = catchAsync(async (req, res) => {
-  const userId = await verifiedUserService.resendVerifiedUserOtp(req.body.mobile);
-  if (userId) {
-    return res.status(httpStatus.OK).json({ message: 'OTP Sent Successfully', userId });
-  }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'Resent OTP Failed' });
-});
+// const resendCreateUserOtp = catchAsync(async (req, res) => {
+//   const userId = await verifiedUserService.resendVerifiedUserOtp(req.body.mobile);
+//   if (userId) {
+//     return res.status(httpStatus.OK).json({ message: 'OTP Sent Successfully', userId });
+//   }
+//   res.status(httpStatus.BAD_REQUEST).json({ message: 'Resent OTP Failed' });
+// });
 
-const verifyCreatedUser = catchAsync(async (req, res) => {
-  const userId = await verifiedUserService.verifyVerifiedUser(req.body.userId, req.body.otp);
-  if (userId) {
-    res.status(httpStatus.OK).json({ message: 'User Mobile Number Verified Successfully', userId });
-  }
-  res.status(httpStatus.BAD_REQUEST).json({ message: 'User Mobile Number Verification Failed' });
-});
+// const verifyCreatedUser = catchAsync(async (req, res) => {
+//   const userId = await verifiedUserService.verifyVerifiedUser(req.body.userId, req.body.otp);
+//   if (userId) {
+//     res.status(httpStatus.OK).json({ message: 'User Mobile Number Verified Successfully', userId });
+//   }
+//   res.status(httpStatus.BAD_REQUEST).json({ message: 'User Mobile Number Verification Failed' });
+// });
 
 const register = catchAsync(async (req, res) => {
   const { userId, email, password, fullname, dob, gender, pincode } = await req.body;
@@ -66,16 +66,16 @@ const login = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).json({ AuthData, authtoken });
 });
 
-const loginWithGoogle = catchAsync(async (req, res) => {
-  const profileData = await googleStrategy();
-  const AuthData = await authService.createGoogleAuthData(profileData);
-  const authtoken = await tokenService.generateUserToken(AuthData.id);
-  const devicehash = req.headers.devicehash;
-  const devicetype = req.headers.devicetype;
-  // const fcmtoken = req.headers.fcmtoken;
-  await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
-  res.status(httpStatus.CREATED).json({ AuthData, authtoken });
-});
+// const loginWithGoogle = catchAsync(async (req, res) => {
+//   const profileData = await googleStrategy();
+//   const AuthData = await authService.createGoogleAuthData(profileData);
+//   const authtoken = await tokenService.generateUserToken(AuthData.id);
+//   const devicehash = req.headers.devicehash;
+//   const devicetype = req.headers.devicetype;
+//   // const fcmtoken = req.headers.fcmtoken;
+//   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
+//   res.status(httpStatus.CREATED).json({ AuthData, authtoken });
+// });
 
 const logout = catchAsync(async (req, res) => {
   await tokenService.logoutdevice(req.body.authtoken);
@@ -194,12 +194,12 @@ const resetPassowrd = catchAsync(async (req, res) => {
   }
 });
 module.exports = {
-  createUser,
-  resendCreateUserOtp,
-  verifyCreatedUser,
+  // createUser,
+  // resendCreateUserOtp,
+  // verifyCreatedUser,
   register,
   login,
-  loginWithGoogle,
+  // loginWithGoogle,
   logout,
   forgotPassword,
   resetPassowrd,

@@ -1,24 +1,24 @@
 const Joi = require('joi');
 const { password, objectId } = require('./custom.validation');
 
-const createUser = {
-  body: Joi.object().keys({
-    mobile: Joi.number().required().min(1000000000).max(9999999999),
-  }),
-};
+// const createUser = {
+//   body: Joi.object().keys({
+//     mobile: Joi.number().required().min(1000000000).max(9999999999),
+//   }),
+// };
 
-const resendCreateUserOtp = {
-  body: Joi.object().keys({
-    mobile: Joi.number().required().min(1000000000).max(9999999999),
-  }),
-};
+// const resendCreateUserOtp = {
+//   body: Joi.object().keys({
+//     mobile: Joi.number().required().min(1000000000).max(9999999999),
+//   }),
+// };
 
-const verifyCreatedUser = {
-  body: Joi.object().keys({
-    userId: Joi.string().custom(objectId).required(),
-    otp: Joi.number().required().min(100000).max(999999),
-  }),
-};
+// const verifyCreatedUser = {
+//   body: Joi.object().keys({
+//     userId: Joi.string().custom(objectId).required(),
+//     otp: Joi.number().required().min(100000).max(999999),
+//   }),
+// };
 
 const registeruser = {
   body: Joi.object().keys({
@@ -98,9 +98,9 @@ const verifyforget = {
 };
 
 module.exports = {
-  createUser,
-  resendCreateUserOtp,
-  verifyCreatedUser,
+  // createUser,
+  // resendCreateUserOtp,
+  // verifyCreatedUser,
   registeruser,
   login,
   logout,

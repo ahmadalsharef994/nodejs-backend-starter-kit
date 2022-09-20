@@ -1,6 +1,6 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
-const { appointmentPreferenceService, authService, appointmentService, userProfile } = require('../services');
+const { appointmentPreferenceService, authService, appointmentService } = require('../services');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 
@@ -34,15 +34,15 @@ const bookAppointment = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).json({ AppointmentId: id, orderId });
 });
 
-const getAppointmentDetails = catchAsync(async (req, res) => {
-  const appointment = await appointmentService.getAppointmentById(req.params.appointmentId);
-  const PatientBasic = await userProfile.fetchBasicDetails(appointment.AuthUser);
-  if (appointment !== false) {
-    res.status(httpStatus.CREATED).json({ PatientBasic, appointment });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'No Appointment present with this id', data: [] });
-  }
-});
+// const getAppointmentDetails = catchAsync(async (req, res) => {
+//   const appointment = await appointmentService.getAppointmentById(req.params.appointmentId);
+//   const PatientBasic = await userProfile.fetchBasicDetails(appointment.AuthUser);
+//   if (appointment !== false) {
+//     res.status(httpStatus.CREATED).json({ PatientBasic, appointment });
+//   } else {
+//     res.status(httpStatus.OK).json({ message: 'No Appointment present with this id', data: [] });
+//   }
+// });
 
 const getFollowupsById = catchAsync(async (req, res) => {
   await appointmentService.getFollowupsById(req.query.limit).then((result) => {
@@ -256,17 +256,17 @@ const cancelFollowup = catchAsync(async (req, res) => {
 //   }
 // });
 
-const allAppointments = catchAsync(async (req, res) => {
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
-  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
-  const data = await appointmentService.allAppointments(req.Docid, fromDate, endDate, options);
-  if (data) {
-    res.status(httpStatus.OK).json({ data });
-  } else {
-    res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant fetch appointments' });
-  }
-});
+// const allAppointments = catchAsync(async (req, res) => {
+//   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+//   const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+//   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+//   const data = await appointmentService.allAppointments(req.Docid, fromDate, endDate, options);
+//   if (data) {
+//     res.status(httpStatus.OK).json({ data });
+//   } else {
+//     res.status(httpStatus.BAD_GATEWAY).json({ message: 'cant fetch appointments' });
+//   }
+// });
 
 const deleteSlot = catchAsync(async (req, res) => {
   const updatedslots = await appointmentService.deleteSlot(req.SubjectId, req.body.slotId);
@@ -337,13 +337,13 @@ module.exports = {
   getPatients,
   getDoctorFeedback,
   getUserFeedback,
-  getAppointmentDetails,
+  // getAppointmentDetails,
   cancelAppointment,
   rescheduleAppointment,
   bookingConfirmation,
   cancelFollowup,
   // rescheduleFollowup,
-  allAppointments,
+  // allAppointments,
   deleteSlot,
   getNextAppointmentDoctor,
   getAppointmentsByStatus,

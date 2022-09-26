@@ -8,7 +8,7 @@ const ApiError = require('../utils/ApiError');
 // eslint-disable-next-line import/no-useless-path-segments
 const doctorprofileService = require('../services/doctorprofile.service');
 
-const slotTime = parseInt(process.env.SLOT_TIME, 10);
+const slotTime = 15;
 
 const getDoctorPreferences = async (AuthData) => {
   const preference = await AppointmentPreference.find({ doctorAuthId: AuthData._id });

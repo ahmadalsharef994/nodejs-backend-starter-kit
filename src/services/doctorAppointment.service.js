@@ -265,52 +265,67 @@ const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, option
 };
 
 const getAppointmentsByStatus = async (doctorId, fromDate, endDate, filter, options) => {
-  if (filter.Status === 'ALL') {
-    const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
-    return result;
-  }
-  if (filter.Status === 'TODAY') {
+  try {
+    if (filter.Status === 'ALL') {
+      const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
+      return result;
+    }
+    if (filter.Status === 'TODAY') {
+      const result = await Appointment.paginate(
+        {
+          docid: doctorId,
+          paymentStatus: 'PAID',
+          StartTime: { $gte: fromDate, $lt: endDate },
+          Date: new Date().toDateString(),
+        },
+        options
+      );
+      return result;
+    }
+    if (filter.Status === 'PAST') {
+      const result = await Appointment.paginate(
+        { docid: doctorId, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: new Date() } },
+        options
+      );
+      return result;
+    }
+    if (filter.Status === 'UPCOMING') {
+      const result = await Appointment.paginate(
+        {
+          docid: doctorId,
+          paymentStatus: 'PAID',
+          Status: { $nin: 'cancelled' },
+          StartTime: { $gte: new Date(), $lt: endDate },
+        },
+        options
+      );
+      return result;
+    }
+    if (filter.Status === 'CANCELLED') {
+      const result = await Appointment.paginate(
+        {
+          docid: doctorId,
+          paymentStatus: 'PAID',
+          Status: 'cancelled',
+        },
+        options
+      );
+      return result;
+    }
+    // else
     const result = await Appointment.paginate(
       {
         docid: doctorId,
         paymentStatus: 'PAID',
         StartTime: { $gte: fromDate, $lt: endDate },
-        Date: new Date().toDateString(),
+        Status: filter.Type,
       },
       options
     );
     return result;
+  } catch (er) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'No appointments found with this id');
   }
-  if (filter.Status === 'PAST') {
-    const result = await Appointment.paginate(
-      { docid: doctorId, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: new Date() } },
-      options
-    );
-    return result;
-  }
-  if (filter.Status === 'UPCOMING') {
-    const result = await Appointment.paginate(
-      {
-        docid: doctorId,
-        paymentStatus: 'PAID',
-        Status: { $nin: 'cancelled' },
-        StartTime: { $gte: new Date(), $lt: endDate },
-      },
-      options
-    );
-    return result;
-  }
-  // else
-  const result = await Appointment.paginate(
-    {
-      docid: doctorId,
-      paymentStatus: 'PAID',
-      StartTime: { $gte: fromDate, $lt: endDate },
-      Status: filter.Type,
-    },
-    options
-  );
-  return result;
 };
 
 // const allAppointments = async (doctorId, fromDate, endDate, options) => {
@@ -597,6 +612,7 @@ const cancelAppointment = async (appointmentId, doctorId) => {
   const appointment = await Appointment.findById({ _id: appointmentId });
   if (appointment.Status !== 'cancelled') {
     await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
+    await emailService.bookingCancellationMail(appointment);
     const result = await Appointment.find({ AuthDoctor: doctorId });
     return result;
   }
@@ -666,23 +682,40 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
 
 const doctorSlots = async (doctorid) => {
   const res = await getAvailableAppointmentsManually(doctorid);
-  return res;
+  if (res) {
+    return res;
+  }
+  return 'NOT FOUND';
 };
-
+const checkSlots = async (doctorAuthId) => {
+  const slots = await AppointmentPreference.find({ doctorAuthId });
+  if (slots.length > 0) {
+    return true;
+  }
+  return false;
+};
 const getDoctorsByCategories = async (category) => {
   const Doctordetails = await doctordetails.find({ specializations: { $in: [category] } });
-  const res = await Promise.all(
+  let res = await Promise.all(
     Doctordetails.map(async (appointment) => {
+      const slot = await checkSlots(appointment.doctorauthId);
       // eslint-disable-next-line no-shadow
-      const result = await doctorSlots(appointment.doctorId);
-      const appObj = {
-        appointment,
-        slots: result,
-      };
-      return appObj;
+      if (slot === true) {
+        const result = await doctorSlots(appointment.doctorId);
+        const appObj = {
+          appointment,
+          slots: result,
+        };
+        return appObj;
+      }
     })
   );
-
+  // eslint-disable-next-line array-callback-return
+  res = res.filter((valid) => {
+    if (valid !== null || valid !== undefined) {
+      return valid;
+    }
+  });
   const isVerified = async (doctorid) => {
     const doctor = await VerifiedDoctors.findOne({ docid: doctorid });
     if (doctor) {

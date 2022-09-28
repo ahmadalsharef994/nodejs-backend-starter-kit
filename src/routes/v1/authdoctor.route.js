@@ -11,7 +11,9 @@ router.post('/register', deviceauth(), validate(authDoctorValidation.register), 
 router.post('/login', deviceauth(), validate(authDoctorValidation.login), authDoctorController.login);
 router.post('/logout', validate(authDoctorValidation.logout), authDoctorController.logout); // Thinking to make it GET and Validated
 router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), authDoctorController.forgotPassword);
-router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassword);
+// router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassword);
+router.post('/verify-otp', validate(authDoctorValidation.verifyOtp), authDoctorController.verifyOtp);
+router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassowrd);
 router.post('/send-verification-email', OnboardingAuth(), authDoctorController.sendVerificationEmail);
 router.post('/change-email', OnboardingAuth(), authDoctorController.changeEmail);
 router.post('/change-phone', OnboardingAuth(), authDoctorController.changePhone);

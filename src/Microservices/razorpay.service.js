@@ -8,6 +8,7 @@ const { LabtestOrder, GuestOrder, Appointment, AppointmentOrder } = require('../
 const { getCartValue } = require('../services/labTest.service');
 const WalletOrder = require('../models/walletOrder.model');
 const walletService = require('../services/wallet.service');
+const emailService = require('./email.service');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -108,6 +109,8 @@ const calculateSHADigestAppointment = async (razorpayOrderID, razorpayPaymentId,
     const paymentDetails = await AppointmentOrder.findOne({ razorpayOrderID });
     if (paymentDetails.isPaid === true) {
       await Appointment.updateOne({ orderId: paymentDetails.AppointmentOrderID }, { $set: { paymentStatus: 'PAID' } });
+      const appointmentdetails = await Appointment.findOne({ orderId: paymentDetails.AppointmentOrderID });
+      await emailService.appointmentBookingMail(appointmentdetails);
     }
     return 'match';
   }

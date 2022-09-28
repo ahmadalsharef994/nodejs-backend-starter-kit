@@ -26,11 +26,11 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
 });
 
 const getAppointmentsByStatus = catchAsync(async (req, res) => {
-  const filter = { Type: req.query.status };
+  const filter = { Status: req.query.status };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
-  appointmentService
+  userAppointmentService
     .getAppointmentsByStatus(req.SubjectId, fromDate, endDate, filter, options)
     .then((result) => {
       return res.status(httpStatus.OK).send(result);
@@ -70,7 +70,17 @@ const fetchHealthPackages = catchAsync(async (req, res) => {
   }
 });
 const getDoctorsByCategories = catchAsync(async (req, res) => {
-  const { doctorDetails } = await appointmentService.getDoctorsByCategories(req.body.Category);
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const filter = pick(req.query, [
+    'FromExperience',
+    'ToExperience',
+    'Availability',
+    'Languages',
+    'Gender',
+    'StartPrice',
+    'EndPrice',
+  ]);
+  const { doctorDetails } = await appointmentService.getDoctorsByCategories(req.body.Category, filter, options);
   if (doctorDetails.length > 0) {
     res.status(httpStatus.OK).json(doctorDetails);
   } else {

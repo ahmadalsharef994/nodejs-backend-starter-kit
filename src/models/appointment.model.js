@@ -44,6 +44,7 @@ const AppointmentSchema = mongoose.Schema(
     patientMail: {
       type: String,
       default: null,
+      required: true,
     },
     slotId: {
       type: String,

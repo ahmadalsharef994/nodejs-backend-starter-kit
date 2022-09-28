@@ -45,6 +45,10 @@ const DoctorDetailsSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
     },
+    Languages: {
+      type: Array,
+      default: 'EN',
+    },
   },
   {
     timestamps: true,

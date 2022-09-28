@@ -70,7 +70,7 @@ const getFollowups = {
 const getAppointmentsByType = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('REFERRED', 'FOLLOWUP', 'SCHEULED', 'LIVE', 'PREBOOKING', 'ALL'),
+      type: Joi.string().valid('REFERRED', 'FOLLOWUP', 'SCHEULED', 'LIVE', 'PREBOOKING', 'CANCELLED', 'ALL'),
       limit: Joi.number(),
       page: Joi.number(),
       sortBy: Joi.string(),
@@ -84,7 +84,7 @@ const getAppointmentsByType = {
 const getAppointmentsByStatus = {
   query: Joi.object()
     .keys({
-      type: Joi.string().valid('RESCHEDULED', 'CANCELLED', 'TODAY', 'PAST', 'UPCOMING', 'ALL'),
+      status: Joi.string().valid('RESCHEDULED', 'CANCELLED', 'TODAY', 'PAST', 'UPCOMING', 'ALL'),
       limit: Joi.number(),
       page: Joi.number(),
       sortBy: Joi.string(),

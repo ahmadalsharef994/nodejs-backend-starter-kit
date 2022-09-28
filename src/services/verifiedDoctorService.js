@@ -1,5 +1,13 @@
 const httpStatus = require('http-status');
-const { VerifiedDoctors, DoctorBasic, DoctorEducation, doctordetails, Auth } = require('../models');
+const {
+  VerifiedDoctors,
+  DoctorBasic,
+  DoctorEducation,
+  doctordetails,
+  DoctorExperience,
+  DoctorClinic,
+  Auth,
+} = require('../models');
 const ApiError = require('../utils/ApiError');
 const docuniqueidgenerator = require('../utils/generateDoctorID');
 const { authService } = require('.');
@@ -22,8 +30,16 @@ const createVerifiedDoctor = async (doctorauthid, AuthData) => {
 
   const Doctorbasic = await DoctorBasic.findOne({ auth: doctorauthid });
   const Doctoreducation = await DoctorEducation.findOne({ auth: doctorauthid });
+  const Doctorclinic = await DoctorClinic.findOne({ auth: doctorauthid });
+  const Doctorexp = await DoctorExperience.findOne({ auth: doctorauthid });
   if (!Doctorbasic) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Basic details were not submitted for this id');
+  }
+  if (!Doctorclinic) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Clinic details were not submitted for this id');
+  }
+  if (!Doctorexp) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Experience details were not submitted for this id');
   }
 
   if (!Doctoreducation) {
@@ -39,19 +55,19 @@ const createVerifiedDoctor = async (doctorauthid, AuthData) => {
 
   await DoctorBasic.updateOne({ auth: doctorauthid }, { $set: { isBasicDetailsVerified: true } });
   await DoctorEducation.updateOne({ auth: doctorauthid }, { $set: { isEducationVerified: true } });
-  // await DoctorExperience.updateOne({ auth: doctorauthid }, { $set: { isExperienceVerified: true } });
+  await DoctorExperience.updateOne({ auth: doctorauthid }, { $set: { isExperienceVerified: true } });
 
   const { appointmentPrice } = await DoctorBasic.findOne({ auth: doctorauthid });
   const { fullname } = await Auth.findById(doctorauthid);
-  // const { AddressSecondline } = await DoctorClinic.findOne({ auth: doctorauthid });
-  // const { experience, skills, mainstream } = await DoctorExperience.findOne({ auth: doctorauthid });
+  const { AddressSecondline } = await DoctorClinic.findOne({ auth: doctorauthid });
+  const { experience, skills, mainstream } = await DoctorExperience.findOne({ auth: doctorauthid });
   doctordetails.create({
     doctorname: fullname,
-    specializations: ['N/A'],
+    specializations: skills,
     doctorauthId: doctorauthid,
-    Experience: 0,
-    doctorDegree: 'Null',
-    doctorClinicAddress: 'Null',
+    Experience: experience,
+    doctorDegree: mainstream,
+    doctorClinicAddress: AddressSecondline,
     appointmentPrice,
     doctorId: uniqueID,
     Adminauth: AuthData._id,

@@ -98,7 +98,7 @@ const getAppointmentsByType = catchAsync(async (req, res) => {
 });
 
 const getAppointmentsByStatus = catchAsync(async (req, res) => {
-  const filter = { Type: req.query.status };
+  const filter = { Status: req.query.status };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
@@ -194,7 +194,7 @@ const getUserFeedback = catchAsync(async (req, res) => {
 });
 
 const cancelAppointment = catchAsync(async (req, res) => {
-  const appointmentId = req.params.appointmentId;
+  const appointmentId = req.body.appointmentId;
   const doctorId = req.SubjectId;
   await appointmentService
     .cancelAppointment(appointmentId, doctorId)
@@ -282,7 +282,7 @@ const getNextAppointmentDoctor = catchAsync(async (req, res) => {
   if (nextAppointment) {
     res.status(httpStatus.OK).json({ nextAppointment });
   } else {
-    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: null });
+    res.status(httpStatus.NOT_FOUND).json({ nextAppointment: 'No appointments found' });
   }
 });
 

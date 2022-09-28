@@ -159,22 +159,22 @@ const forgotPassword = catchAsync(async (req, res) => {
   }
 });
 
-const resetPassword = catchAsync(async (req, res) => {
-  const service = req.body.choice;
-  let AuthData;
-  if (service === 'email') {
-    AuthData = await authService.getAuthByEmail(req.body.email);
-    await authService.resetPassword(AuthData.email, req.body.resetcode, req.body.newPassword);
-  } else if (service === 'phone') {
-    AuthData = await authService.getAuthByPhone(req.body.phone);
-    await authService.resetPassword(AuthData.email, req.body.resetcode, req.body.newPassword);
+const resetPassowrd = catchAsync(async (req, res) => {
+  let response;
+  if (req.body.choice === 'phone') {
+    const AuthData = await authService.getAuthByPhone(req.body.phone);
+    response = await authService.resetPassword(AuthData, req.body.newPassword, req.body.confirmNewPassword);
   }
-  const challenge = await getOnboardingChallenge(AuthData);
-  res.status(httpStatus.OK).json({
-    message: 'Password Reset Successful',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
-  });
+  if (req.body.choice === 'email') {
+    const AuthData = await authService.getAuthByEmail(req.body.email);
+    response = await authService.resetPassword(AuthData, req.body.newPassword, req.body.confirmNewPassword);
+  }
+
+  if (response) {
+    res.status(httpStatus.OK).json({ message: 'Password Reset Successfull' });
+  } else {
+    res.status(400).json({ message: 'Password Reset Failed' });
+  }
 });
 
 const sendVerificationEmail = catchAsync(async (req, res) => {
@@ -295,6 +295,23 @@ const tryverification = catchAsync(async (req, res) => {
   }
 });
 
+const verifyOtp = catchAsync(async (req, res) => {
+  const service = req.body.choice;
+  let verification;
+  if (service === 'email') {
+    const AuthData = await authService.getAuthByEmail(req.body.email);
+    verification = await authService.verifyOtp(AuthData.email, req.body.resetcode);
+  } else if (service === 'phone') {
+    const AuthData = await authService.getAuthByPhone(req.body.phone);
+    verification = await authService.verifyOtp(AuthData.email, req.body.resetcode);
+  }
+  if (verification) {
+    res.status(httpStatus.OK).json({ message: 'Otp Verification Successfull' });
+  } else {
+    res.status(400).json({ message: 'Otp Verification failed' });
+  }
+});
+
 const onboardingstatus = catchAsync(async (req, res) => {
   const AuthStatus = {};
   const OnboardingStatusData = {};
@@ -338,7 +355,7 @@ module.exports = {
   login,
   logout,
   forgotPassword,
-  resetPassword,
+  resetPassowrd,
   sendVerificationEmail,
   verifyEmail,
   changeEmail,
@@ -348,5 +365,6 @@ module.exports = {
   verifyPhone,
   resendOtp,
   getOnboardingChallenge,
+  verifyOtp,
   tryverification,
 };

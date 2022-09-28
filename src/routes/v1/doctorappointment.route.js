@@ -35,20 +35,20 @@ router
   .post(authdoctorverified(), validate(appointmentValidator.deleteSlot), appointmentController.deleteSlot);
 
 router
-  .route('/appointments-type')
-  .get(
-    authdoctorverified(),
-    validate(appointmentValidator.getAppointmentsByType),
-    appointmentController.getAppointmentsByType
-  );
-
-// get appointments by status/all
-router
   .route('/appointments-status')
   .get(
     authdoctorverified(),
     validate(appointmentValidator.getAppointmentsByStatus),
     appointmentController.getAppointmentsByStatus
+  );
+
+// get appointments by status/all
+router
+  .route('/appointments-type')
+  .get(
+    authdoctorverified(),
+    validate(appointmentValidator.getAppointmentsByType),
+    appointmentController.getAppointmentsByType
   );
 
 // get followup slots available for booking

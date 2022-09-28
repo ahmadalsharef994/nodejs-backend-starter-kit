@@ -43,6 +43,59 @@ const sendEmailQueries = async (emailbody, TicketNo) => {
     });
   return result;
 };
+
+const appointmentBookingMail = async (appointmentdetails) => {
+  const emailbody = `Congratulations your order was booked !
+  Appointment details:
+  Orderid :${appointmentdetails._id}
+  Booking date :${appointmentdetails.Date}
+  Appointment starts at:${new Date(appointmentdetails.StartTime).toLocaleTimeString()};
+  Appointment ends at:${new Date(appointmentdetails.EndTime).toLocaleTimeString()}
+  
+  Thank you ,
+  Team medzgo.`;
+
+  const options = {
+    from: process.env.EMAIL_FROM,
+    to: appointmentdetails.patientMail,
+    subject: 'Booking Success',
+    text: emailbody,
+  };
+  const result = mail(options);
+  result
+    .then((res) => {
+      return res.response.response;
+    })
+    .catch(() => {
+      return null;
+    });
+  return result;
+};
+const bookingCancellationMail = async (appointmentdetails) => {
+  const emailbody = `We regret to inform you that your appointment on ${appointmentdetails.Date} , appointment id${appointmentdetails._id} has been cancelled since doctor is not available at this time 
+  You will get your refund in 7 working days in wallet or given bank account.
+  
+  Thank you ,
+  Team medzgo.
+  `;
+
+  const options = {
+    from: process.env.EMAIL_FROM,
+    to: appointmentdetails.patientMail,
+    subject: 'Cancelled Appointment',
+    text: emailbody,
+  };
+  const result = mail(options);
+  result
+    .then((res) => {
+      return res.response.response;
+    })
+    .catch(() => {
+      return null;
+    });
+  return result;
+};
+
 const sendEmailQueriesUser = async (recivermail, query, TicketNo) => {
   const options = {
     from: process.env.EMAIL_FROM,
@@ -154,4 +207,6 @@ module.exports = {
   sendEmailQueries,
   sendEmailQueriesUser,
   sendRescheduledEmail,
+  appointmentBookingMail,
+  bookingCancellationMail,
 };

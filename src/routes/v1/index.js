@@ -15,6 +15,9 @@ const elasticSearchRoute = require('./elasticSearch.route');
 const autoReplyRoute = require('./autoReply.route');
 // const pusherRoute = require('./pusher.route');
 const eventRoute = require('./event.route');
+const productRoute = require('./product.route');
+const orderRoute = require('./order.route');
+const cartRoute = require('./cart.route');
 
 const router = express.Router();
 
@@ -82,6 +85,18 @@ const defaultRoutes = [
   {
     path: '/events',
     route: eventRoute,
+  },
+  {
+    path: '/products',
+    route: productRoute,
+  },
+  {
+    path: '/cart',
+    route: cartRoute,
+  },
+  {
+    path: '/orders',
+    route: orderRoute,
   },
 ];
 

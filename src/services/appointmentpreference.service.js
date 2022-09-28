@@ -26,64 +26,6 @@ const checkForAppointmentPrice = async (doctorId) => {
   return true;
 };
 
-// const createPreference = async (body, doctorID, AuthData, update = false) => {
-//   const appointmentPreferences = await AppointmentPreference.findOne({ docid: doctorID, doctorAuthId: AuthData });
-//   if (appointmentPreferences && !update) {
-//     return Promise.reject(
-//       new ApiError(httpStatus.FORBIDDEN, 'Appointment preference already exist!. Please update them instead!')
-//     );
-//   }
-//   const result = {};
-//   const days = Object.keys(body);
-//   const durations = [];
-//   for (let i = 0; i < days.length; i += 1) {
-//     // eslint-disable-next-line no-await-in-loop
-//     durations.push(await calculateDuration(body[days[i]]));
-//   }
-//   const validDurations = durations.every((durationArr) => {
-//     return durationArr.every((dur) => {
-//       return dur % 15 === 0;
-//     });
-//   });
-//   if (!validDurations) {
-//     return Promise.reject(
-//       new ApiError(httpStatus.FORBIDDEN, 'Difference between "Start Time" and "End Time" in mins should be a multiply of 15')
-//     );
-//   }
-//   const daysAndDurations = {};
-//   days.forEach((day, i) => {
-//     daysAndDurations[day] = durations[i];
-//   });
-
-//   const slots = [];
-//   // creating slots for each day
-//   for (let i = 0; i < days.length; i += 1) {
-//     /* input is 24-hr format */
-//     for (let j = 0; j < body[days[i]].length; j += 1) {
-//       const startHr = body[days[i]][j].FromHour;
-//       const startMin = body[days[i]][j].FromMinutes;
-//       // eslint-disable-next-line no-await-in-loop
-//       const element = await createSlots(
-//         { FromHour: startHr, FromMinute: startMin },
-//         days[i],
-//         doctorID,
-//         daysAndDurations[days[i]][j]
-//       );
-//       slots.push(element);
-//     }
-//   }
-//   const finalSlots = slots;
-//   days.forEach((day, i) => {
-//     result[day] = finalSlots[i];
-//   });
-//   if (!update) {
-//     result.docid = doctorID;
-//     result.doctorAuthId = AuthData;
-//     await AppointmentPreference.create(result);
-//   }
-//   return result;
-// };
-
 const generateSlots = (fhr, fmin, thr, tmin, day) => {
   const slots = [];
   let startMin = fmin;
@@ -155,22 +97,9 @@ const getAppointmentPreferences = async (doctorId) => {
   return appointmentPreference;
 };
 
-// const checkAppointmentPreference = async (docid, doctorauth) => {
-//   try {
-//     const { doctorAuthId } = await AppointmentPreference.findOne({ docid });
-//     if (`${doctorauth}` === `${doctorAuthId}`) {
-//       return true;
-//     }
-//   } catch (err) {
-//     return false;
-//   }
-// };
-
 module.exports = {
   checkForAppointmentPrice,
-  // createPreference,
   updateAppointmentPreference,
   getAppointmentPreferences,
   getDoctorPreferences,
-  // checkAppointmentPreference,
 };

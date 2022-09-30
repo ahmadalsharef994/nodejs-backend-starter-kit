@@ -190,7 +190,12 @@ const bookingConfirmation = {
 //     slotId: Joi.string().required(),
 //   }),
 // };
-
+const getSlots = {
+  body: Joi.object().keys({
+    Date: Joi.string().required(),
+    docId: Joi.number().required(),
+  }),
+};
 module.exports = {
   joinAppointment,
   bookAppointment,
@@ -212,4 +217,5 @@ module.exports = {
   // rescheduleFollowup,
   deleteSlot,
   getAppointmentsByStatus,
+  getSlots,
 };

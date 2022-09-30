@@ -3,13 +3,14 @@
 /* eslint-disable no-plusplus */
 const httpStatus = require('http-status');
 const AppointmentPreference = require('../models/appointmentPreference.model');
+const Appointment = require('../models/appointment.model');
+const doctordetails = require('../models/doctordetails.model');
 // const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
-// eslint-disable-next-line import/no-useless-path-segments
-const doctorprofileService = require('../services/doctorprofile.service');
+const doctorprofileService = require('./doctorprofile.service');
 
 const slotTime = 15;
-
+const weekday = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 const getDoctorPreferences = async (AuthData) => {
   const preference = await AppointmentPreference.find({ doctorAuthId: AuthData._id });
   if (typeof preference[0] === 'object') {
@@ -17,7 +18,38 @@ const getDoctorPreferences = async (AuthData) => {
   }
   return null;
 };
-
+const getAvailableSlots = async (docid, date) => {
+  const AllAppointmentSlots = await AppointmentPreference.findOne({ docid });
+  if (!AllAppointmentSlots) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
+  }
+  let bookedAppointmentSlots;
+  if (date) {
+    bookedAppointmentSlots = await Appointment.find({
+      docid,
+      Date: date,
+      paymentStatus: 'PAID',
+      StartTime: { $gte: new Date(), $lte: new Date().getTime() + 7 * 24 * 60 * 60 * 1000 },
+    });
+  }
+  bookedAppointmentSlots = await Appointment.find({
+    docid,
+    paymentStatus: 'PAID',
+    StartTime: { $gte: new Date(), $lte: new Date().getTime() + 7 * 24 * 60 * 60 * 1000 },
+  });
+  if (bookedAppointmentSlots === []) {
+    const availableAppointmentSlots = AllAppointmentSlots;
+    return availableAppointmentSlots;
+  }
+  const bookedSlotIds = bookedAppointmentSlots.map((item) => item.slotId);
+  const availableAppointmentSlots = {};
+  for (let i = 0; i < 7; i += 1) {
+    availableAppointmentSlots[`${weekday[i]}`] = AllAppointmentSlots[`${weekday[i]}`].filter(
+      (item) => !bookedSlotIds.includes(item.slotId)
+    );
+  }
+  return availableAppointmentSlots;
+};
 const checkForAppointmentPrice = async (doctorId) => {
   const basicDetails = await doctorprofileService.fetchbasicdetails(doctorId);
   if (!basicDetails || !basicDetails.appointmentPrice) {
@@ -146,7 +178,10 @@ const updateAppointmentPreference = async (preferences, doctorAuthId, docid) => 
       });
     }
   });
+
   await existingSlots.save();
+  const Slots = await getAvailableSlots(docid);
+  await doctordetails.updateOne({ doctorauthId: doctorAuthId }, { $set: { Slots } });
   return existingSlots;
 };
 
@@ -172,5 +207,6 @@ module.exports = {
   updateAppointmentPreference,
   getAppointmentPreferences,
   getDoctorPreferences,
+  getAvailableSlots,
   // checkAppointmentPreference,
 };

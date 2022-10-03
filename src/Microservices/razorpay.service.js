@@ -4,7 +4,8 @@ const short = require('short-uuid');
 const httpStatus = require('http-status');
 const events = require('events');
 const ApiError = require('../utils/ApiError');
-const { LabtestOrder, GuestOrder, Appointment, AppointmentOrder } = require('../models');
+const { LabtestOrder, GuestOrder, Appointment, AppointmentOrder, doctordetails } = require('../models');
+const doctorAppointmentService = require('../services/doctorAppointment.service');
 const { getCartValue } = require('../services/labTest.service');
 const WalletOrder = require('../models/walletOrder.model');
 const walletService = require('../services/wallet.service');
@@ -111,6 +112,13 @@ const calculateSHADigestAppointment = async (razorpayOrderID, razorpayPaymentId,
       await Appointment.updateOne({ orderId: paymentDetails.AppointmentOrderID }, { $set: { paymentStatus: 'PAID' } });
       const appointmentdetails = await Appointment.findOne({ orderId: paymentDetails.AppointmentOrderID });
       await emailService.appointmentBookingMail(appointmentdetails);
+      const Slots = await doctorAppointmentService.getAvailableAppointmentsManually(appointmentdetails.docid);
+      await doctordetails.updateOne(
+        {
+          doctorauthId: appointmentdetails.AuthDoctor,
+        },
+        { $set: { Slots } }
+      );
     }
     return 'match';
   }

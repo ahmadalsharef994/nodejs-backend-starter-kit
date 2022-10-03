@@ -1,4 +1,5 @@
 const { Prescription, Appointment, ThyrocareOrder, HealthPackage, doctordetails } = require('../models');
+const appointmentPreferenceService = require('./appointmentpreference.service');
 
 const getUpcomingAppointment = async (auth, endDate, options) => {
   const result = await Appointment.paginate(
@@ -144,6 +145,11 @@ const getNextAppointment = async (AuthUser) => {
     return null;
   }
 };
+const getSlots = async (docId, date) => {
+  const data = await appointmentPreferenceService.getAvailableSlots(docId, date);
+  const day = date.split(' ')[0];
+  return data[`${day.toUpperCase()}`];
+};
 module.exports = {
   getNextAppointment,
   getUpcomingAppointment,
@@ -152,4 +158,5 @@ module.exports = {
   getAllLabTestOrders,
   fetchHealthPackages,
   getAppointmentsByStatus,
+  getSlots,
 };

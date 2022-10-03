@@ -57,7 +57,7 @@ const createVerifiedDoctor = async (doctorauthid, AuthData) => {
   await DoctorEducation.updateOne({ auth: doctorauthid }, { $set: { isEducationVerified: true } });
   await DoctorExperience.updateOne({ auth: doctorauthid }, { $set: { isExperienceVerified: true } });
 
-  const { appointmentPrice } = await DoctorBasic.findOne({ auth: doctorauthid });
+  const { appointmentPrice, gender, languages } = await DoctorBasic.findOne({ auth: doctorauthid });
   const { fullname } = await Auth.findById(doctorauthid);
   const { AddressSecondline } = await DoctorClinic.findOne({ auth: doctorauthid });
   const { experience, skills, mainstream } = await DoctorExperience.findOne({ auth: doctorauthid });
@@ -71,6 +71,8 @@ const createVerifiedDoctor = async (doctorauthid, AuthData) => {
     appointmentPrice,
     doctorId: uniqueID,
     Adminauth: AuthData._id,
+    Languages: languages,
+    Gender: gender,
   });
   return doctorverifieddata;
 };

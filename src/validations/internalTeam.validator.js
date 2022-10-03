@@ -53,6 +53,8 @@ const doctordetails = {
     doctorClinicAddress: Joi.string().required(),
     appointmentPrice: Joi.number().default(600),
     doctorId: Joi.number().required(),
+    Gender: Joi.string(),
+    Languages: Joi.array(),
   }),
 };
 

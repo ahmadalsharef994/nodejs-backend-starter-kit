@@ -29,9 +29,60 @@ const productReviewSchema = mongoose.Schema(
 
 const productSchema = new mongoose.Schema(
   {
-    productId: {
+    item_id: {
       type: String,
       required: true,
+    },
+    sku: {
+      type: String,
+      required: true,
+    },
+    category_name: {
+      type: String,
+    },
+    cf_mrp: {
+      type: Number,
+      required: true,
+    },
+    cf_therapeutic_class: {
+      type: String,
+    },
+    cf_action_class: {
+      type: String,
+    },
+    cf_salt: {
+      type: String,
+    },
+    cf_side_effects: {
+      type: String,
+    },
+    cf_habit_forming: {
+      type: Boolean,
+    },
+    cf_prescription: {
+      type: Boolean,
+    },
+    cf_type_of_sell: {
+      type: String,
+    },
+    image: {
+      // image_name in Zoho
+      type: String,
+    },
+    unit: {
+      type: String,
+    },
+    stock_on_hand: {
+      type: Number,
+    },
+    manufacturer: {
+      type: String,
+    },
+    brand: {
+      type: String,
+    },
+    name: {
+      type: String,
     },
     reviews: {
       type: [productReviewSchema],
@@ -49,6 +100,10 @@ productSchema.virtual('averageRating').get(function () {
 
 productSchema.virtual('reviewCount').get(function () {
   return this.reviews ? this.reviews.length : 0;
+});
+
+productSchema.virtual('isAvailable').get(function () {
+  return this.stock_on_hand > 0;
 });
 
 productSchema.set('toJSON', { virtuals: true });

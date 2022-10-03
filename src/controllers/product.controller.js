@@ -2,14 +2,6 @@ const httpStatus = require('http-status');
 const ApiError = require('../utils/ApiError');
 const catchAsync = require('../utils/catchAsync');
 const productService = require('../services/product.service');
-// const { default: axios } = require('axios');
-
-// const pick = require('../utils/pick');
-
-const createProduct = catchAsync(async (req, res) => {
-  const product = await productService.createProduct(req.body);
-  res.status(httpStatus.CREATED).json({ message: 'Product created successfully', data: product });
-});
 
 // const getProducts = catchAsync(async (req, res) => {
 // const filter = pick(req.query, ['name', 'category', 'isPromoted', 'isActive']);
@@ -44,7 +36,6 @@ const getProductProperty = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  createProduct,
   getProducts,
   getProductById,
   addProductReview,

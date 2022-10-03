@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.route('/').get(authUser(), productController.getProducts);
 
-router.route('/:id').get(authUser(), productController.getProductById); // validate(productValidation.getProductById),
+router.route('/:id').get(authUser(), productController.getProductById);
 
 // post review to product
 router.route('/:id/reviews').post(authUser(), productController.addProductReview);

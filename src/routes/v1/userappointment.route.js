@@ -39,6 +39,7 @@ router
     validate(appointmentValidation.getDoctorsByCategories),
     userAppointmentController.getDoctorsByCategories
   );
+router.route('/get-slots').post(authuser(), validate(appointmentValidation.getSlots), userAppointmentController.getSlots);
 router
   .route('/bookingConfirmation')
   .post(validate(appointmentValidation.bookingConfirmation), appointmentController.bookingConfirmation);

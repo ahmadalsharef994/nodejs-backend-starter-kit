@@ -187,7 +187,7 @@ const bookAppointment = async (
     }
   });
 
-  const appointmentExist = await Appointment.findOne({ docid, StartTime: startTime }).exec();
+  const appointmentExist = await Appointment.findOne({ docid, StartTime: startTime, paymentStatus: 'PAID' }).exec();
   if (appointmentExist || startTime === null || endTime === null) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
@@ -411,7 +411,11 @@ const getAvailableAppointmentsManually = async (docid) => {
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
-  const bookedAppointmentSlots = await Appointment.find({ docid, paymentStatus: 'PAID' });
+  const bookedAppointmentSlots = await Appointment.find({
+    docid,
+    paymentStatus: 'PAID',
+    StartTime: { $gte: new Date(), $lte: new Date().getTime() + 7 * 24 * 60 * 60 * 1000 },
+  });
   if (bookedAppointmentSlots === []) {
     const availableAppointmentSlots = AllAppointmentSlots;
     return availableAppointmentSlots;
@@ -680,59 +684,275 @@ const rescheduleAppointment = async (doctorId, appointmentId, slotId, date, Resc
   return { result, emailSent };
 };
 
-const doctorSlots = async (doctorid) => {
-  const res = await getAvailableAppointmentsManually(doctorid);
-  if (res) {
-    return res;
-  }
-  return 'NOT FOUND';
-};
-const checkSlots = async (doctorAuthId) => {
-  const slots = await AppointmentPreference.find({ doctorAuthId });
-  if (slots.length > 0) {
-    return true;
-  }
-  return false;
-};
-const getDoctorsByCategories = async (category) => {
-  const Doctordetails = await doctordetails.find({ specializations: { $in: [category] } });
-  let res = await Promise.all(
-    Doctordetails.map(async (appointment) => {
-      const slot = await checkSlots(appointment.doctorauthId);
-      // eslint-disable-next-line no-shadow
-      if (slot === true) {
-        const result = await doctorSlots(appointment.doctorId);
-        const appObj = {
-          appointment,
-          slots: result,
-        };
-        return appObj;
-      }
-    })
+const getDoctorsByCategories = async (category, filter, options) => {
+  const Doctordetails = await doctordetails.paginate(
+    { specializations: { $in: [category] }, Slots: { $ne: null } },
+    options
   );
-  // eslint-disable-next-line array-callback-return
-  res = res.filter((valid) => {
-    if (valid !== null || valid !== undefined) {
-      return valid;
-    }
-  });
-  const isVerified = async (doctorid) => {
-    const doctor = await VerifiedDoctors.findOne({ docid: doctorid });
-    if (doctor) {
-      return true;
-    }
-    return false;
-  };
-  const doctors = Doctordetails.filter(async (doctor) => {
-    isVerified(doctor.doctorId);
-    if (isVerified) {
-      return doctor;
-    }
-  });
-  if (doctors) {
-    return { doctorDetails: res };
+  if (Doctordetails.length <= 0) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No doctors found in this category');
   }
-  throw new ApiError(httpStatus.NOT_FOUND, 'No doctors in this category');
+  const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  if (filter.Availability === 'TODAY') {
+    // eslint-disable-next-line no-shadow
+    const today = days[new Date().getDay()];
+    if (filter.Gender && filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          [`Slots.${today}`]: { $ne: [] },
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          Languages: { $in: [filter.Languages] },
+          Gender: filter.Gender,
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    if (filter.Gender || filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          [`Slots.${today}`]: { $ne: [] },
+          $or: [{ Languages: { $in: [filter.Languages] } }, { Gender: filter.Gender }],
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    const Doctors = await doctordetails.paginate(
+      {
+        specializations: { $in: [category] },
+        [`Slots.${today}`]: { $ne: [] },
+        Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+        appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+      },
+      options
+    );
+    return Doctors;
+  }
+  // eslint-disable-next-line no-else-return
+  else if (filter.Availability === 'TOMORROW') {
+    // eslint-disable-next-line no-shadow
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowDay = days[tomorrow.getDay()];
+    if (filter.Gender && filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          [`Slots.${tomorrowDay}`]: { $ne: [] },
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          Languages: { $in: [filter.Languages] },
+          Gender: filter.Gender,
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    if (filter.Gender || filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          [`Slots.${tomorrowDay}`]: { $ne: [] },
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          $or: [{ Gender: filter.Gender }, { Languages: { $in: [filter.Languages] } }],
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    const Doctors = await doctordetails.paginate(
+      {
+        specializations: { $in: [category] },
+        [`Slots.${tomorrowDay}`]: { $ne: [] },
+        Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+        appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+      },
+      options
+    );
+    return Doctors;
+  } else if (filter.Availability === 'NEXT 3 DAYS') {
+    const today = new Date();
+    const tom = new Date(today);
+    tom.setDate(tom.getDate() + 1);
+    const getDay = (tomorrow) => {
+      let dayafter;
+      let daylater;
+      if (tomorrow === 6) {
+        dayafter = 0;
+        daylater = 1;
+      } else if (tomorrow === 5) {
+        dayafter = 6;
+        daylater = 0;
+      } else {
+        dayafter = tomorrow + 1;
+        daylater = tomorrow + 2;
+      }
+      return { tomorrow: days[tomorrow], dayafter: days[dayafter], daylater: days[daylater] };
+    };
+    const getday = getDay(tom.getDay());
+    if (filter.Gender && filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          $or: [
+            { [`Slots.${getday.tomorrow}`]: { $ne: [] } },
+            { [`Slots.${getday.dayafter}`]: { $ne: [] } },
+            { [`Slots.${getday.daylater}`]: { $ne: [] } },
+          ],
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          Languages: { $in: [filter.Languages] },
+          Gender: filter.Gender,
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    if (filter.Gender) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          $or: [
+            { [`Slots.${getday.tomorrow}`]: { $ne: [] } },
+            { [`Slots.${getday.dayafter}`]: { $ne: [] } },
+            { [`Slots.${getday.daylater}`]: { $ne: [] } },
+          ],
+          Experience: {
+            $gte: filter.FromExperience,
+            $lte: filter.ToExperience,
+          },
+          Gender: filter.Gender,
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    if (filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          $or: [
+            { [`Slots.${getday.tomorrow}`]: { $ne: [] } },
+            { [`Slots.${getday.dayafter}`]: { $ne: [] } },
+            { [`Slots.${getday.daylater}`]: { $ne: [] } },
+          ],
+          Experience: {
+            $gte: filter.FromExperience,
+            $lte: filter.ToExperience,
+          },
+          Languages: { $in: [`${filter.Languages}`] },
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    const Doctors = await doctordetails.paginate(
+      {
+        specializations: { $in: [category] },
+        $or: [
+          { [`Slots.${getday.tomorrow}`]: { $ne: [] } },
+          { [`Slots.${getday.dayafter}`]: { $ne: [] } },
+          { [`Slots.${getday.daylater}`]: { $ne: [] } },
+        ],
+        Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+        appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+      },
+      options
+    );
+    return Doctors;
+  } else {
+    if (filter.Gender && filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          $or: [
+            { 'Slots.MON': { $ne: [] } },
+            { 'Slots.TUE': { $ne: [] } },
+            { 'Slots.WED': { $ne: [] } },
+            { 'Slots.THU': { $ne: [] } },
+            { 'Slots.FRI': { $ne: [] } },
+            { 'Slots.SAT': { $ne: [] } },
+            { 'Slots.SUN': { $ne: [] } },
+          ],
+          Gender: filter.Gender,
+          Languages: { $in: [filter.Languages] },
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    if (filter.Gender) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          $or: [
+            { 'Slots.MON': { $ne: [] } },
+            { 'Slots.TUE': { $ne: [] } },
+            { 'Slots.WED': { $ne: [] } },
+            { 'Slots.THU': { $ne: [] } },
+            { 'Slots.FRI': { $ne: [] } },
+            { 'Slots.SAT': { $ne: [] } },
+            { 'Slots.SUN': { $ne: [] } },
+          ],
+          Gender: filter.Gender,
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    if (filter.Languages) {
+      const Doctors = await doctordetails.paginate(
+        {
+          specializations: { $in: [category] },
+          $or: [
+            { 'Slots.MON': { $ne: [] } },
+            { 'Slots.TUE': { $ne: [] } },
+            { 'Slots.WED': { $ne: [] } },
+            { 'Slots.THU': { $ne: [] } },
+            { 'Slots.FRI': { $ne: [] } },
+            { 'Slots.SAT': { $ne: [] } },
+            { 'Slots.SUN': { $ne: [] } },
+          ],
+          Languages: { $in: [filter.Languages] },
+          Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+          appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+        },
+        options
+      );
+      return Doctors;
+    }
+    const Doctors = await doctordetails.paginate(
+      {
+        specializations: { $in: [category] },
+        $or: [
+          { 'Slots.MON': { $ne: [] } },
+          { 'Slots.TUE': { $ne: [] } },
+          { 'Slots.WED': { $ne: [] } },
+          { 'Slots.THU': { $ne: [] } },
+          { 'Slots.FRI': { $ne: [] } },
+          { 'Slots.SAT': { $ne: [] } },
+          { 'Slots.SUN': { $ne: [] } },
+        ],
+        Experience: { $gte: filter.FromExperience, $lte: filter.ToExperience },
+        appointmentPrice: { $gte: filter.StartPrice, $lte: filter.EndPrice },
+      },
+      options
+    );
+    return Doctors;
+  }
 };
 
 const bookingConfirmation = async (orderId, appointmentId) => {

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+const { toJSON, paginate } = require('./plugins');
 const Auth = require('./auth.model');
 
 const DoctorDetailsSchema = mongoose.Schema(
@@ -49,6 +49,40 @@ const DoctorDetailsSchema = mongoose.Schema(
       type: Array,
       default: 'EN',
     },
+    Gender: {
+      type: String,
+      required: true,
+    },
+    Slots: {
+      MON: {
+        type: Array,
+        default: null,
+      },
+      TUE: {
+        type: Array,
+        default: null,
+      },
+      WED: {
+        type: Array,
+        default: null,
+      },
+      THU: {
+        type: Array,
+        default: null,
+      },
+      FRI: {
+        type: Array,
+        default: null,
+      },
+      SAT: {
+        type: Array,
+        default: null,
+      },
+      SUN: {
+        type: Array,
+        default: null,
+      },
+    },
   },
   {
     timestamps: true,
@@ -57,6 +91,7 @@ const DoctorDetailsSchema = mongoose.Schema(
 
 // add plugin that converts mongoose to json
 DoctorDetailsSchema.plugin(toJSON);
+DoctorDetailsSchema.plugin(paginate);
 
 /**
  * @typedef DoctorDetails

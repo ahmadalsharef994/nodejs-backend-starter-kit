@@ -80,12 +80,8 @@ const getDoctorsByCategories = catchAsync(async (req, res) => {
     'StartPrice',
     'EndPrice',
   ]);
-  const { doctorDetails } = await appointmentService.getDoctorsByCategories(req.body.Category, filter, options);
-  if (doctorDetails.length > 0) {
-    res.status(httpStatus.OK).json(doctorDetails);
-  } else {
-    res.status(httpStatus.NOT_FOUND).json({ ERROR: 'Oops ! Doctors Not Found With This Category' });
-  }
+  const response = await appointmentService.getDoctorsByCategories(req.body.Category, filter, options);
+  res.send(response);
 });
 const getNextAppointment = catchAsync(async (req, res) => {
   const nextAppointment = await userAppointmentService.getNextAppointment(req.SubjectId);
@@ -96,6 +92,11 @@ const getNextAppointment = catchAsync(async (req, res) => {
     res.status(httpStatus.BAD_REQUEST).json({ message: 'Appointments not found' });
   }
 });
+const getSlots = catchAsync(async (req, res) => {
+  const date = new Date(req.body.Date).toDateString();
+  const data = await userAppointmentService.getSlots(req.body.docId, date);
+  res.status(httpStatus.OK).json({ message: 'Success', data });
+});
 module.exports = {
   upcomingAppointments,
   getAppointmentsByType,
@@ -105,4 +106,5 @@ module.exports = {
   getDoctorsByCategories,
   getNextAppointment,
   getAppointmentsByStatus,
+  getSlots,
 };

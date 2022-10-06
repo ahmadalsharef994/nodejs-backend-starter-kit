@@ -13,9 +13,8 @@ const couponRoute = require('./coupon.route');
 const walletRoute = require('./wallet.route');
 const elasticSearchRoute = require('./elasticSearch.route');
 const autoReplyRoute = require('./autoReply.route');
-// const pusherRoute = require('./pusher.route');
 const eventRoute = require('./event.route');
-const productRoute = require('./product.route');
+const itemRoute = require('./item.route');
 const orderRoute = require('./order.route');
 const cartRoute = require('./cart.route');
 
@@ -78,17 +77,13 @@ const defaultRoutes = [
     path: '/autoreply',
     route: autoReplyRoute,
   },
-  // {
-  //   path: '/pusher',
-  //   route: pusherRoute,
-  // },
   {
     path: '/events',
     route: eventRoute,
   },
   {
-    path: '/products',
-    route: productRoute,
+    path: '/items',
+    route: itemRoute,
   },
   {
     path: '/cart',

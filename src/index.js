@@ -2,7 +2,6 @@ const mongoose = require('mongoose');
 // const Agenda = require('agenda');
 const { Server } = require('socket.io');
 const uuid = require('uuid');
-const axios = require('axios');
 const app = require('./app');
 const config = require('./config/config');
 const logger = require('./config/logger');
@@ -16,26 +15,26 @@ const { chatService } = require('./services');
 // });
 
 // global variable
-const getzohoToken = () => {
-  return axios
-    .post(
-      `https://accounts.zoho.in/oauth/v2/token?refresh_token=${process.env.REFRESH_TOKEN}&grant_type=refresh_token&client_id=${process.env.client_id}&client_secret=${process.env.client_secret}`
-    )
-    .then((response) => {
-      return response.data.access_token;
-    })
-    .catch((err) => {
-      return err;
-    });
-};
+// const getzohoToken = () => {
+//   return axios
+//     .post(
+//       `https://accounts.zoho.in/oauth/v2/token?refresh_token=${process.env.REFRESH_TOKEN}&grant_type=refresh_token&client_id=${process.env.client_id}&client_secret=${process.env.client_secret}`
+//     )
+//     .then((response) => {
+//       return response.data.access_token;
+//     })
+//     .catch((err) => {
+//       return err;
+//     });
+// };
 
-getzohoToken().then((data) => {
-  global.zohoToken = data;
-});
+// getzohoToken().then((data) => {
+//   global.zohoToken = data;
+// });
 
-setInterval(async () => {
-  global.zohoToken = await getzohoToken();
-}, 600000);
+// setInterval(async () => {
+//   global.zohoToken = await getzohoToken();
+// }, 600000);
 
 let server;
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {

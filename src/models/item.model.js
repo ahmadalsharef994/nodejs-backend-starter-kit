@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const { toJSON, paginate } = require('./plugins');
 
-const productReviewSchema = mongoose.Schema(
+const itemReviewSchema = mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -27,7 +27,7 @@ const productReviewSchema = mongoose.Schema(
   }
 );
 
-const productSchema = new mongoose.Schema(
+const itemSchema = new mongoose.Schema(
   {
     item_id: {
       type: String,
@@ -60,7 +60,7 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
     },
     cf_prescription: {
-      type: Boolean,
+      type: String,
     },
     cf_type_of_sell: {
       type: String,
@@ -85,7 +85,7 @@ const productSchema = new mongoose.Schema(
       type: String,
     },
     reviews: {
-      type: [productReviewSchema],
+      type: [itemReviewSchema],
       default: [],
     },
   },
@@ -94,23 +94,23 @@ const productSchema = new mongoose.Schema(
   }
 );
 
-productSchema.virtual('averageRating').get(function () {
+itemSchema.virtual('averageRating').get(function () {
   return this.reviews ? this.reviews.reduce((acc, review) => acc + review.score, 0) / this.reviews.length : 0;
 });
 
-productSchema.virtual('reviewCount').get(function () {
+itemSchema.virtual('reviewCount').get(function () {
   return this.reviews ? this.reviews.length : 0;
 });
 
-productSchema.virtual('isAvailable').get(function () {
+itemSchema.virtual('isAvailable').get(function () {
   return this.stock_on_hand > 0;
 });
 
-productSchema.set('toJSON', { virtuals: true });
+itemSchema.set('toJSON', { virtuals: true });
 
-productSchema.plugin(toJSON);
-productSchema.plugin(paginate);
+itemSchema.plugin(toJSON);
+itemSchema.plugin(paginate);
 
-const Product = mongoose.model('Product', productSchema);
+const Item = mongoose.model('Item', itemSchema);
 
-module.exports = Product;
+module.exports = Item;

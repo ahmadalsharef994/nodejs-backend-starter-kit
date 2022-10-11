@@ -28,12 +28,13 @@ const getItemProperty = catchAsync(async (req, res) => {
 });
 
 const syncItems = catchAsync(async (req, res) => {
-  const zohoItem = JSON.parse(req.body.JSONString.item);
+  logger.info('syncItems');
+  const reqBody = JSON.parse(req.body.JSONString);
+  const zohoItem = reqBody.item;
   await itemService.syncItems(zohoItem);
   logger.info(`Item synced successfully:\n${res}`);
-
   /*
-    console.log(JSON.parse(req.body.JSONString));
+  console.log(JSON.parse(req.body.JSONString));
   req.body.source ==> zoho
   req.body.JSONString  ==> updated/created item
   req.body.JSONString.item.sku ==> item sku

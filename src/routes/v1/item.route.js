@@ -15,6 +15,6 @@ router.route('/:sku/reviews').post(authUser(), itemController.addItemReview);
 // get item property
 router.route('/:sku/:property').get(authUser(), itemController.getItemProperty);
 
-router.post('/sync', itemController.syncItems);
+router.route('/sync').post(itemController.syncItems);
 
 module.exports = router;

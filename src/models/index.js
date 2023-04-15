@@ -19,7 +19,6 @@ module.exports.Notification = require('./notificationSettings.model');
 module.exports.Otp = require('./otp.model');
 module.exports.DoctorPayout = require('./payout.model');
 module.exports.Prescription = require('./prescription.model');
-module.exports.LabtestOrder = require('./labtestOrder.model');
 // module.exports.ThyrocareOrder = require('./thyrocareOrder.model');
 // module.exports.ThyrocareToken = require('./thyroToken.model');
 module.exports.Token = require('./token.model');

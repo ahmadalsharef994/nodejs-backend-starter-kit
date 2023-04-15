@@ -4,9 +4,9 @@ const short = require('short-uuid');
 const httpStatus = require('http-status');
 const events = require('events');
 const ApiError = require('../utils/ApiError');
-const { LabtestOrder, GuestOrder, Appointment, AppointmentOrder, doctordetails } = require('../models');
+const { LabtestOrder, Appointment, AppointmentOrder, doctordetails } = require('../models');
 const doctorAppointmentService = require('../services/doctorAppointment.service');
-const { getCartValue } = require('../services/labTest.service');
+// const { getCartValue } = require('../services/labTest.service');
 const WalletOrder = require('../models/walletOrder.model');
 const walletService = require('../services/wallet.service');
 const emailService = require('./email.service');
@@ -28,36 +28,36 @@ const fetchRazorpayOrderStatus = async (razorpayOrderId) => {
 };
 
 // createLabtestOrder
-const createLabtestOrder = async (currency, labTestOrderID, sessionID) => {
-  const labTestObject = await GuestOrder.findOne({ orderId: labTestOrderID });
-  const cartObject = await getCartValue(labTestObject.cart, labTestObject.couponCode);
-  const orderAmount = cartObject.totalCartAmount;
+// const createLabtestOrder = async (currency, labTestOrderID, sessionID) => {
+//   const labTestObject = await GuestOrder.findOne({ orderId: labTestOrderID });
+//   const cartObject = await getCartValue(labTestObject.cart, labTestObject.couponCode);
+//   const orderAmount = cartObject.totalCartAmount;
 
-  const options = {
-    amount: orderAmount * 100,
-    currency,
-    receipt: short.generate(),
-  };
+//   const options = {
+//     amount: orderAmount * 100,
+//     currency,
+//     receipt: short.generate(),
+//   };
 
-  try {
-    const response = await razorpay.orders.create(options);
-    response.amount /= 100;
+//   try {
+//     const response = await razorpay.orders.create(options);
+//     response.amount /= 100;
 
-    const razorpayOrderID = response.id;
-    // LabtestOrder
-    await LabtestOrder.create({
-      razorpayOrderID,
-      labTestOrderID,
-      amount: orderAmount,
-      currency,
-      sessionID,
-    });
+//     const razorpayOrderID = response.id;
+//     // LabtestOrder
+//     await LabtestOrder.create({
+//       razorpayOrderID,
+//       labTestOrderID,
+//       amount: orderAmount,
+//       currency,
+//       sessionID,
+//     });
 
-    return response;
-  } catch (err) {
-    throw new ApiError(httpStatus.NOT_FOUND);
-  }
-};
+//     return response;
+//   } catch (err) {
+//     throw new ApiError(httpStatus.NOT_FOUND);
+//   }
+// };
 // calculateSHADigestLabtest
 const calculateSHADigest = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
   const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
@@ -250,7 +250,7 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
 
 module.exports = {
   calculateSHADigest,
-  createLabtestOrder,
+  // createLabtestOrder,
   createAppointmentOrder,
   calculateSHADigestAppointment,
   // withdrawFromWallet,

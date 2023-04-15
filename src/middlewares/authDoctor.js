@@ -5,7 +5,7 @@ const config = require('../config/config');
 const checkBanned = require('../utils/CheckBanned');
 const SessionCheck = require('../utils/SessionCheck');
 
-const OnboardingAuth = () => async (req, res, next) => {
+const authDoctor = () => async (req, res, next) => {
   try {
     const header = req.headers.authorization;
     const bearer = header.split(' ');
@@ -31,4 +31,4 @@ const OnboardingAuth = () => async (req, res, next) => {
   }
 };
 
-module.exports = OnboardingAuth;
+module.exports = authDoctor;

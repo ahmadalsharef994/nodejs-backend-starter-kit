@@ -80,23 +80,23 @@ router.post(
   validate(doctorProfileValidator.notificationSettings),
   doctorProfileController.updateNotificationSettings
 );
-router
-  .route('/submit-education-and-experience')
-  .post(authDoctor(), validate(doctorProfileValidator.EducationExperience), doctorProfileController.doctorExpandEducation);
-router
-  .route('/update-clinic-timings')
-  .post(authdoctorverified(), validate(doctorProfileValidator.timings), doctorProfileController.updateClinicDetails);
+// router
+//   .route('/submit-education-and-experience')
+//   .post(authDoctor(), validate(doctorProfileValidator.EducationExperience), doctorProfileController.doctorExpandEducation);
+// router
+//   .route('/update-clinic-timings')
+//   .post(authdoctorverified(), validate(doctorProfileValidator.timings), doctorProfileController.updateClinicDetails);
 // router
 //   .route('/update-details')
 //   .post(authDoctor(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
-router
-  .route('/update-appointmentPrice')
-  .post(
-    authDoctor(),
-    validate(doctorProfileValidator.updateAppointmentPrice),
-    doctorProfileController.updateAppointmentPrice
-  );
-router.route('/get-doctor-clinictimings').get(authDoctor(), doctorProfileController.getDoctorClinicTimings);
+// router
+//   .route('/update-appointmentPrice')
+//   .post(
+//     authDoctor(),
+//     validate(doctorProfileValidator.updateAppointmentPrice),
+//     doctorProfileController.updateAppointmentPrice
+//   );
+// router.route('/get-doctor-clinictimings').get(authDoctor(), doctorProfileController.getDoctorClinicTimings);
 
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails); // ISE
 
@@ -104,7 +104,7 @@ router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofile
 //   .route('/send-quries')
 //   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-router.route('/billing').get(authDoctor(), doctorProfileController.getBillingDetails);
+// router.route('/billing').get(authDoctor(), doctorProfileController.getBillingDetails);
 
 router
   .route('/send-queries')

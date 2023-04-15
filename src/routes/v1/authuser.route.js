@@ -7,21 +7,21 @@ const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 
-router.post('/create-user', deviceauth(), validate(authUserValidation.createUser), authUserController.createUser);
+// router.post('/create-user', deviceauth(), validate(authUserValidation.createUser), authUserController.createUser);
 
-router.post(
-  '/resend-create-user-otp',
-  deviceauth(),
-  validate(authUserValidation.resendCreateUserOtp),
-  authUserController.resendCreateUserOtp
-);
+// router.post(
+//   '/resend-create-user-otp',
+//   deviceauth(),
+//   validate(authUserValidation.resendCreateUserOtp),
+//   authUserController.resendCreateUserOtp
+// );
 
-router.post(
-  '/verify-new-user',
-  deviceauth(),
-  validate(authUserValidation.verifyCreatedUser),
-  authUserController.verifyCreatedUser
-);
+// router.post(
+//   '/verify-new-user',
+//   deviceauth(),
+//   validate(authUserValidation.verifyCreatedUser),
+//   authUserController.verifyCreatedUser
+// );
 
 router.post('/register', deviceauth(), validate(authUserValidation.registeruser), authUserController.register);
 router.post('/login', deviceauth(), validate(authUserValidation.login), authUserController.login);
@@ -32,6 +32,8 @@ router.post('/verify-otp', validate(authUserValidation.verifyOtp), authUserContr
 router.post('/reset-password', validate(authUserValidation.resetPassword), authUserController.resetPassowrd);
 router.post('/send-verification-email', authuser(), authUserController.sendVerificationEmail);
 router.post('/verify-email', authuser(), validate(authUserValidation.verifyEmail), authUserController.verifyEmail);
+// router.post('/change-email', authuser(), authUserController.changeEmail);
+// router.post('/change-phone', authuser(), authUserController.changePhone);
 router.post('/change-password', authuser(), validate(authUserValidation.changepassword), authUserController.changePassword);
 router.post('/request-otp', authuser(), authUserController.requestOtp);
 router.post('/verify-phone', authuser(), validate(authUserValidation.verifyPhone), authUserController.verifyPhone);

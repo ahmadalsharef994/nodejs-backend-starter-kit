@@ -6,17 +6,17 @@ const doctorAppointmentRoute = require('./doctorappointment.route');
 const userAppointmentRoute = require('./userappointment.route');
 const internalTeamRoute = require('./internalTeam.route');
 const userProfileRoute = require('./userprofile.route');
-const labTestRoute = require('./labtest.route');
+// const labTestRoute = require('./labtest.route');
 const document = require('./document.route');
 const razorpayRoute = require('./razorpay.route');
-const couponRoute = require('./coupon.route');
+// const couponRoute = require('./coupon.route');
 const walletRoute = require('./wallet.route');
 const elasticSearchRoute = require('./elasticSearch.route');
-const autoReplyRoute = require('./autoReply.route');
+// const autoReplyRoute = require('./autoReply.route');
 const eventRoute = require('./event.route');
-const itemRoute = require('./item.route');
-const orderRoute = require('./order.route');
-const cartRoute = require('./cart.route');
+// const itemRoute = require('./item.route');
+// const orderRoute = require('./order.route');
+// const cartRoute = require('./cart.route');
 
 const router = express.Router();
 
@@ -53,18 +53,18 @@ const defaultRoutes = [
     path: '/user/appointment', // User Appointment Route
     route: userAppointmentRoute,
   },
-  {
-    path: '/labtest', // LabTests Route
-    route: labTestRoute,
-  },
+  // {
+  //   path: '/labtest', // LabTests Route
+  //   route: labTestRoute,
+  // },
   {
     path: '/razorpay',
     route: razorpayRoute,
   },
-  {
-    path: '/coupons',
-    route: couponRoute,
-  },
+  // {
+  //   path: '/coupons',
+  //   route: couponRoute,
+  // },
   {
     path: '/wallet',
     route: walletRoute,
@@ -73,26 +73,26 @@ const defaultRoutes = [
     path: '/elasticsearch',
     route: elasticSearchRoute,
   },
-  {
-    path: '/autoreply',
-    route: autoReplyRoute,
-  },
+  // {
+  //   path: '/autoreply',
+  //   route: autoReplyRoute,
+  // },
   {
     path: '/events',
     route: eventRoute,
   },
-  {
-    path: '/items',
-    route: itemRoute,
-  },
-  {
-    path: '/cart',
-    route: cartRoute,
-  },
-  {
-    path: '/orders',
-    route: orderRoute,
-  },
+  // {
+  //   path: '/items',
+  //   route: itemRoute,
+  // },
+  // {
+  //   path: '/cart',
+  //   route: cartRoute,
+  // },
+  // {
+  //   path: '/orders',
+  //   route: orderRoute,
+  // },
 ];
 
 defaultRoutes.forEach((route) => {

@@ -3,6 +3,7 @@ const validator = require('validator');
 const bcrypt = require('bcryptjs');
 const { toJSON, paginate } = require('./plugins');
 
+// Define the user schema
 const userSchema = mongoose.Schema(
   {
     fullname: {
@@ -25,7 +26,7 @@ const userSchema = mongoose.Schema(
     },
     mobile: {
       type: String,
-      default: false,
+      default: null,
       trim: true,
       unique: true,
     },
@@ -48,7 +49,7 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isbanned: {
+    isBanned: {
       type: Boolean,
       default: false,
     },
@@ -58,42 +59,28 @@ const userSchema = mongoose.Schema(
   }
 );
 
-// add plugin that converts mongoose to json
+// Add plugins that convert Mongoose to JSON and handle pagination
 userSchema.plugin(toJSON);
 userSchema.plugin(paginate);
 
-/**
- * Check if email is taken
- * @param {string} email - The user's email
- * @param {ObjectId} [excludeUserId] - The id of the user to be excluded
- * @returns {Promise<boolean>}
- */
+// Utility methods for checking if email or phone is taken
 userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
   const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
   return !!user;
 };
 
-/**
- * Check if phone is taken
- * @param {string} mobile - The user's email
- * @param {ObjectId} [excludeUserId] - The id of the user to be excluded
- * @returns {Promise<boolean>}
- */
 userSchema.statics.isPhoneTaken = async function (mobile, excludeUserId) {
   const user = await this.findOne({ mobile, _id: { $ne: excludeUserId } });
   return !!user;
 };
 
-/**
- * Check if password matches the user's password
- * @param {string} password
- * @returns {Promise<boolean>}
- */
+// Check if the given password matches the user's password
 userSchema.methods.isPasswordMatch = async function (password) {
   const user = this;
   return bcrypt.compare(password, user.password);
 };
 
+// Pre-save hook for hashing the password
 userSchema.pre('save', async function (next) {
   const user = this;
   if (user.isModified('password')) {
@@ -103,8 +90,8 @@ userSchema.pre('save', async function (next) {
 });
 
 /**
- * @typedef Auth
+ * @typedef User
  */
-const Auth = mongoose.model('Auth', userSchema);
+const User = mongoose.model('User', userSchema);
 
-module.exports = Auth;
+module.exports = User;

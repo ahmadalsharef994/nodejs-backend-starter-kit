@@ -72,10 +72,10 @@ const register = catchAsync(async (req, res) => {
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   await otpServices.initiateOTPData(AuthData);
-  const challenge = await getOnboardingChallenge(AuthData);
+  const challenges = await getOnboardingChallenge(AuthData);
   res
     .status(httpStatus.CREATED)
-    .json({ AuthData, authtoken, challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+    .json({ AuthData, authtoken, challenge: challenges.challenge, optionalchallenge: challenges.optionalChallenge });
 });
 
 const login = catchAsync(async (req, res) => {
@@ -143,7 +143,7 @@ const forgotPassword = catchAsync(async (req, res) => {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
     }
     try {
-      const response2F = await smsService.sendPhoneOtp2F(req.body.phone, OTP);
+      const response2F = await smsService.sendPhoneOtp2F(req.body.phone, req.body.isdcode, OTP);
       const dbresponse = await otpServices.sendResetPassOtp(OTP, AuthData);
       const challenge = await getOnboardingChallenge(AuthData);
       if (response2F && dbresponse) {

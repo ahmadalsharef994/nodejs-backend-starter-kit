@@ -111,7 +111,7 @@ const forgotPassword = catchAsync(async (req, res) => {
       throw new ApiError(httpStatus.BAD_REQUEST, 'No account is registered using this Phone please provide correct Phone');
     }
     try {
-      const response2F = await smsService.sendPhoneOtp2F(req.body.phone, OTP);
+      const response2F = await smsService.sendPhoneOtp2F(req.body.phone, req.body.isdcode, OTP);
       const dbresponse = await otpServices.sendResetPassOtp(OTP, AuthData);
       if (response2F && dbresponse) {
         res.status(httpStatus.OK).json({ message: 'Reset Code Sent to Registered Phone Number' });

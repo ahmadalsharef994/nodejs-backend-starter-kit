@@ -53,5 +53,10 @@ module.exports = {
       },
     },
     from: envVars.EMAIL_FROM,
+    templates: {
+      resetPassword: 'your-reset-password-template-id-here',
+      verifyEmail: 'your-verify-email-template-id-here',
+      labTestBooking: 'your-lab-test-booking-template-id-here',
+    },
   },
 };

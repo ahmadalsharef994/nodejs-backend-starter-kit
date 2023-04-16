@@ -21,20 +21,20 @@ const createAuthData = async (authBody) => {
   return auth;
 };
 
-const createGoogleAuthData = async (profileBody) => {
-  try {
-    const user = await Auth.findOne({ googleId: profileBody.id });
-    if (user) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
-    } else {
-      // if user is not preset in our database save user data to database.
-      const auth = await Auth.create(profileBody);
-      return auth;
-    }
-  } catch (err) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Google AUth Data Error');
-  }
-};
+// const createGoogleAuthData = async (profileBody) => {
+//   try {
+//     const user = await Auth.findOne({ googleId: profileBody.id });
+//     if (user) {
+//       throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
+//     } else {
+//       // if user is not preset in our database save user data to database.
+//       const auth = await Auth.create(profileBody);
+//       return auth;
+//     }
+//   } catch (err) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, 'Google AUth Data Error');
+//   }
+// };
 
 /**
  * Query for authusers
@@ -214,7 +214,7 @@ const resetPassword = async (AuthData, newPassword, confirmPassword) => {
 module.exports = {
   createAuthData,
   queryAuthData,
-  createGoogleAuthData,
+  // createGoogleAuthData,
   getAuthById,
   getAuthByEmail,
   getAuthByPhone,

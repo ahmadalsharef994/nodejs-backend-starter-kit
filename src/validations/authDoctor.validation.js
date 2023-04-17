@@ -6,8 +6,8 @@ const register = {
     email: Joi.string().required().email(),
     password: Joi.string().min(8).max(30).required(),
     fullname: Joi.string().required(),
-    isdcode: Joi.required().valid('91', '1'),
-    mobile: Joi.number().required().min(1000000000).max(9999999999),
+    isdcode: Joi.required(),
+    mobile: Joi.number().required(),
     role: Joi.valid('doctor').required(),
   }),
 };
@@ -37,7 +37,7 @@ const forgotPassword = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }),
   }),
 };
 
@@ -45,7 +45,7 @@ const verifyOtp = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }),
     resetcode: Joi.number().required(),
   }),
 };
@@ -53,7 +53,7 @@ const resetPassword = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }),
     newPassword: Joi.string().required().custom(password),
     confirmNewPassword: Joi.string().required().custom(password),
   }),

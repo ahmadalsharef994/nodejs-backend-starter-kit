@@ -71,11 +71,11 @@ const verifyPhone = {
   }),
 };
 
-const verifyforget = {
-  body: Joi.object().keys({
-    otp: Joi.number().required(),
-  }),
-};
+// const verifyforget = {
+//   body: Joi.object().keys({
+//     otp: Joi.number().required(),
+//   }),
+// };
 
 module.exports = {
   register,
@@ -86,6 +86,6 @@ module.exports = {
   resetPassword,
   verifyEmail,
   verifyPhone,
-  verifyforget,
+  // verifyforget,
   verifyOtp,
 };

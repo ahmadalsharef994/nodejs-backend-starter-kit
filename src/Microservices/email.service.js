@@ -127,8 +127,7 @@ const sendEmail = async (to, name, subject, template, OTP) => {
     to,
     from: config.email.from,
     subject,
-    text: 'Hello world', // plain text version of the email body
-    html: '<p>Hello world</p>', // HTML version of the email body
+    text: `Hello world${OTP}`, // plain text version of the email body
     templateId: '1c970714-ab3a-4729-a550-fed0af27c7ee',
     dynamicTemplateData: {
       OTP,

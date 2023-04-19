@@ -7,7 +7,7 @@ const deviceauth = require('../../middlewares/deviceauth');
 
 const router = express.Router();
 
-// router.post('/create-user', deviceauth(), validate(authUserValidation.createUser), authUserController.createUser);
+router.post('/create-user', deviceauth(), validate(authUserValidation.createUser), authUserController.createUser);
 
 // router.post(
 //   '/resend-create-user-otp',
@@ -16,12 +16,12 @@ const router = express.Router();
 //   authUserController.resendCreateUserOtp
 // );
 
-// router.post(
-//   '/verify-new-user',
-//   deviceauth(),
-//   validate(authUserValidation.verifyCreatedUser),
-//   authUserController.verifyCreatedUser
-// );
+router.post(
+  '/verify-new-user',
+  deviceauth(),
+  validate(authUserValidation.verifyCreatedUser),
+  authUserController.verifyCreatedUser
+);
 
 router.post('/register', deviceauth(), validate(authUserValidation.registeruser), authUserController.register);
 router.post('/login', deviceauth(), validate(authUserValidation.login), authUserController.login);

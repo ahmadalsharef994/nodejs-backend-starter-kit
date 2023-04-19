@@ -28,7 +28,7 @@ const registeradmin = catchAsync(async (req, res) => {
   if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@medzgo.com 😒kyu bhai kya haal he Admin banega woh bhi bina permission? 😂'
+      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@kraleba.com 😒😂'
     );
   } else {
     const AuthData = await authService.createAuthData(req.body);
@@ -45,11 +45,11 @@ const loginadmin = catchAsync(async (req, res) => {
   if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@medzgo.com 😒kyu bhai kya haal he Admin banega woh bhi bina permission? 😂'
+      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@kraleba.com  😒😂'
     );
   } else {
     const { email, password } = req.body;
-    const AuthData = await authService.loginAuthWithEmailAndPasswordAdmin(email, password);
+    const AuthData = await authService.loginWithEmailAndPassword(email, password);
     const authtoken = await tokenService.generateAdminToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;

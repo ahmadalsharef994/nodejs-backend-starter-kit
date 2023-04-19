@@ -3,7 +3,8 @@ const { password, objectId } = require('./custom.validation');
 
 const createUser = {
   body: Joi.object().keys({
-    mobile: Joi.number().required().min(1000000000).max(9999999999),
+    isdcode: Joi.number(),
+    mobile: Joi.number().required(),
   }),
 };
 
@@ -35,7 +36,7 @@ const registeruser = {
 
 const login = {
   body: Joi.object().keys({
-    username: Joi.string().required(),
+    email: Joi.string().required(),
     password: Joi.string().required(),
   }),
 };
@@ -91,11 +92,11 @@ const verifyPhone = {
   }),
 };
 
-const verifyforget = {
-  body: Joi.object().keys({
-    otp: Joi.number().required(),
-  }),
-};
+// const verifyforget = {
+//   body: Joi.object().keys({
+//     otp: Joi.number().required(),
+//   }),
+// };
 
 module.exports = {
   createUser,
@@ -109,6 +110,6 @@ module.exports = {
   verifyOtp,
   verifyEmail,
   verifyPhone,
-  verifyforget,
+  // verifyforget,
   resetPassword,
 };

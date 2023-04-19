@@ -112,7 +112,7 @@ const verifyPhoneOtp = async (otp, AuthData) => {
 };
 
 const resendOtp = async (OTP, user) => {
-  const response2F = await smsService.sendPhoneOtp2F(user.mobile, OTP);
+  const response2F = await smsService.sendPhoneOtp2F(user.mobile, 40, OTP);
   if (response2F.data.Status !== 'Success') {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Request Phone OTP Failed');
   }

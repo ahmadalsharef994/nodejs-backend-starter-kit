@@ -9,7 +9,6 @@ const {
   verifiedDoctorService,
   doctorprofileService,
   documentService,
-  internalTeamService,
   appointmentPreferenceService,
 } = require('../services');
 const { emailService, smsService } = require('../Microservices');
@@ -80,7 +79,7 @@ const register = catchAsync(async (req, res) => {
 
 const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
-  const AuthData = await authService.loginAuthWithEmailAndPassworDoctor(email, password);
+  const AuthData = await authService.loginWithEmailAndPassword(email, password);
   const verifiedcheckData = await verifiedDoctorService.checkVerification(AuthData._id);
   let authtoken = '';
   if (verifiedcheckData) {
@@ -275,25 +274,25 @@ const resendOtp = catchAsync(async (req, res) => {
   });
 });
 
-const tryverification = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const educationdata = await doctorprofileService.fetcheducationdetails(AuthData);
-  const verifytry = await internalTeamService.checkVerification(AuthData);
-  if (!verifytry) {
-    const try1 = await internalTeamService.AutoverifyDoctorByBNMC(
-      educationdata.registrationNo,
-      educationdata.stateMedicalCouncil,
-      educationdata.yearofRegistration
-    );
-    if (try1) {
-      res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ONBOARDING_SUCCESS' });
-    } else {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending', challenge: 'ONBOARDING_ONHOLD' });
-    }
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ONBOARDING_SUCCESS' });
-  }
-});
+// const tryverification = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const educationdata = await doctorprofileService.fetcheducationdetails(AuthData);
+//   const verifytry = await internalTeamService.checkVerification(AuthData);
+//   if (!verifytry) {
+//     const try1 = await internalTeamService.AutoverifyDoctorByBNMC(
+//       educationdata.registrationNo,
+//       educationdata.stateMedicalCouncil,
+//       educationdata.yearofRegistration
+//     );
+//     if (try1) {
+//       res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ONBOARDING_SUCCESS' });
+//     } else {
+//       res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending', challenge: 'ONBOARDING_ONHOLD' });
+//     }
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ONBOARDING_SUCCESS' });
+//   }
+// });
 
 const verifyOtp = catchAsync(async (req, res) => {
   const service = req.body.choice;
@@ -312,46 +311,46 @@ const verifyOtp = catchAsync(async (req, res) => {
   }
 });
 
-const onboardingstatus = catchAsync(async (req, res) => {
-  const AuthStatus = {};
-  const OnboardingStatusData = {};
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  let DoctorAlreadyOnboarded = await verifiedDoctorService.checkVerification(req.SubjectId);
-  // eslint-disable-next-line no-unused-expressions
-  DoctorAlreadyOnboarded === null ? (DoctorAlreadyOnboarded = false) : (DoctorAlreadyOnboarded = true);
-  // Auth Status for Onboarding
-  AuthStatus.Emailverified = AuthData.isEmailVerified;
-  AuthStatus.phoneverified = AuthData.isMobileVerified;
-  AuthStatus.banned = AuthData.isbanned;
-  // Onboarding steps status
-  OnboardingStatusData.basicdetailsSubmitted = await doctorprofileService.fetchbasicdetails(AuthData);
-  // eslint-disable-next-line no-unused-expressions
-  OnboardingStatusData.basicdetailsSubmitted == null
-    ? (OnboardingStatusData.basicdetailsSubmitted = false)
-    : (OnboardingStatusData.basicdetailsSubmitted = true);
-  OnboardingStatusData.educationdetailsSubmitted = await doctorprofileService.fetcheducationdetails(AuthData);
-  // eslint-disable-next-line no-unused-expressions
-  OnboardingStatusData.educationdetailsSubmitted == null
-    ? (OnboardingStatusData.educationdetailsSubmitted = false)
-    : (OnboardingStatusData.educationdetailsSubmitted = true);
-  OnboardingStatusData.experiencedetailsSubmitted = await doctorprofileService.fetchexperiencedetails(AuthData);
-  // eslint-disable-next-line no-unused-expressions
-  OnboardingStatusData.experiencedetailsSubmitted == null
-    ? (OnboardingStatusData.experiencedetailsSubmitted = false)
-    : (OnboardingStatusData.experiencedetailsSubmitted = true);
-  OnboardingStatusData.clinicdetailsSubmitted = await doctorprofileService.fetchClinicdetails(AuthData);
-  // eslint-disable-next-line no-unused-expressions
-  OnboardingStatusData.clinicdetailsSubmitted == null
-    ? (OnboardingStatusData.clinicdetailsSubmitted = false)
-    : (OnboardingStatusData.clinicdetailsSubmitted = true);
-  // Document Status
-  const DocumentStatusData = await documentService.fetchDocumentdata(AuthData);
-  res.status(httpStatus.OK).json({ DoctorAlreadyOnboarded, AuthStatus, OnboardingStatusData, DocumentStatusData });
-});
+// const onboardingstatus = catchAsync(async (req, res) => {
+//   const AuthStatus = {};
+//   const OnboardingStatusData = {};
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   let DoctorAlreadyOnboarded = await verifiedDoctorService.checkVerification(req.SubjectId);
+//   // eslint-disable-next-line no-unused-expressions
+//   DoctorAlreadyOnboarded === null ? (DoctorAlreadyOnboarded = false) : (DoctorAlreadyOnboarded = true);
+//   // Auth Status for Onboarding
+//   AuthStatus.Emailverified = AuthData.isEmailVerified;
+//   AuthStatus.phoneverified = AuthData.isMobileVerified;
+//   AuthStatus.banned = AuthData.isbanned;
+//   // Onboarding steps status
+//   OnboardingStatusData.basicdetailsSubmitted = await doctorprofileService.fetchbasicdetails(AuthData);
+//   // eslint-disable-next-line no-unused-expressions
+//   OnboardingStatusData.basicdetailsSubmitted == null
+//     ? (OnboardingStatusData.basicdetailsSubmitted = false)
+//     : (OnboardingStatusData.basicdetailsSubmitted = true);
+//   OnboardingStatusData.educationdetailsSubmitted = await doctorprofileService.fetcheducationdetails(AuthData);
+//   // eslint-disable-next-line no-unused-expressions
+//   OnboardingStatusData.educationdetailsSubmitted == null
+//     ? (OnboardingStatusData.educationdetailsSubmitted = false)
+//     : (OnboardingStatusData.educationdetailsSubmitted = true);
+//   OnboardingStatusData.experiencedetailsSubmitted = await doctorprofileService.fetchexperiencedetails(AuthData);
+//   // eslint-disable-next-line no-unused-expressions
+//   OnboardingStatusData.experiencedetailsSubmitted == null
+//     ? (OnboardingStatusData.experiencedetailsSubmitted = false)
+//     : (OnboardingStatusData.experiencedetailsSubmitted = true);
+//   OnboardingStatusData.clinicdetailsSubmitted = await doctorprofileService.fetchClinicdetails(AuthData);
+//   // eslint-disable-next-line no-unused-expressions
+//   OnboardingStatusData.clinicdetailsSubmitted == null
+//     ? (OnboardingStatusData.clinicdetailsSubmitted = false)
+//     : (OnboardingStatusData.clinicdetailsSubmitted = true);
+//   // Document Status
+//   const DocumentStatusData = await documentService.fetchDocumentdata(AuthData);
+//   res.status(httpStatus.OK).json({ DoctorAlreadyOnboarded, AuthStatus, OnboardingStatusData, DocumentStatusData });
+// });
 
 module.exports = {
   register,
-  onboardingstatus,
+  // onboardingstatus,
   login,
   logout,
   forgotPassword,
@@ -366,5 +365,5 @@ module.exports = {
   resendOtp,
   getOnboardingChallenge,
   verifyOtp,
-  tryverification,
+  // tryverification,
 };

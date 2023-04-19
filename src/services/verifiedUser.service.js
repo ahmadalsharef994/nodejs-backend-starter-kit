@@ -15,14 +15,15 @@ const getVerifiedUserById = async (userId) => {
   return VerificationExist;
 };
 
-const createVerifiedUser = async (mobile) => {
+const createVerifiedUser = async (body) => {
+  const { mobile, isdcode } = body;
   const userAuthExist = await authService.getAuthByPhone(mobile);
   if (userAuthExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Mobile Number Already Registered');
   }
   const OTP = generateOTP();
   const user = await VerifiedUser.create({ mobile, otp: OTP, otpTimestamp: new Date() });
-  const response2F = await smsService.sendPhoneOtp2F(mobile, OTP);
+  const response2F = await smsService.sendPhoneOtp2F(mobile, isdcode, OTP);
   if (response2F.data.Status === 'Success') {
     return user.id;
   }

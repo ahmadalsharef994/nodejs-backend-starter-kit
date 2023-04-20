@@ -50,25 +50,25 @@ const showPrescriptions = catchAsync(async (req, res) => {
   return res.status(httpStatus.OK).json(result);
 });
 
-const showLabTestOrders = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const filter = { Type: req.query.type };
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const result = await userAppointmentService.getAllLabTestOrders(AuthData, filter, options);
-  if (result.length === 0) {
-    return res.status(httpStatus.OK).json({ message: 'No Lab Test Orders to show', data: [] });
-  }
-  return res.status(httpStatus.OK).json(result);
-});
+// const showLabTestOrders = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const filter = { Type: req.query.type };
+//   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+//   const result = await userAppointmentService.getAllLabTestOrders(AuthData, filter, options);
+//   if (result.length === 0) {
+//     return res.status(httpStatus.OK).json({ message: 'No Lab Test Orders to show', data: [] });
+//   }
+//   return res.status(httpStatus.OK).json(result);
+// });
 
-const fetchHealthPackages = catchAsync(async (req, res) => {
-  const healthpackage = await userAppointmentService.fetchHealthPackages();
-  if (healthpackage) {
-    res.status(httpStatus.OK).json(healthpackage);
-  } else {
-    res.status(httpStatus[400]).json({ message: 'something went wrong' });
-  }
-});
+// const fetchHealthPackages = catchAsync(async (req, res) => {
+//   const healthpackage = await userAppointmentService.fetchHealthPackages();
+//   if (healthpackage) {
+//     res.status(httpStatus.OK).json(healthpackage);
+//   } else {
+//     res.status(httpStatus[400]).json({ message: 'something went wrong' });
+//   }
+// });
 const getDoctorsByCategories = catchAsync(async (req, res) => {
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const filter = pick(req.query, [
@@ -101,8 +101,8 @@ module.exports = {
   upcomingAppointments,
   getAppointmentsByType,
   showPrescriptions,
-  showLabTestOrders,
-  fetchHealthPackages,
+  // showLabTestOrders,
+  // fetchHealthPackages,
   getDoctorsByCategories,
   getNextAppointment,
   getAppointmentsByStatus,

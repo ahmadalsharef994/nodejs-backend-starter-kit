@@ -2,14 +2,14 @@ const fs = require('fs');
 const path = require('path');
 const ejs = require('ejs');
 const pdf = require('html-pdf');
-const AWS = require('aws-sdk');
+const cloudinary = require('cloudinary').v2;
 
 require('dotenv').config();
 
-const s3 = new AWS.S3({
-  accessKeyId: process.env.AWSID,
-  secretAccessKey: process.env.AWSKEY,
-  region: process.env.AWS_REGION,
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const data = {
@@ -23,27 +23,28 @@ const data = {
 
 const generatePrescription = async () => {
   const filePathName = path.resolve(__dirname, '../views/index.ejs');
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
   const htmlString = fs.readFileSync(filePathName).toString();
   const options = { format: 'Letter' };
   const ejsData = ejs.render(htmlString, data);
 
   await pdf.create(ejsData, options).toStream((err, response) => {
-    s3.upload(
-      {
-        Bucket: 'prescripto',
-        Key: 'doctorPrescription/questions.pdf',
-        ACL: 'public-read-write',
-        Body: response,
-        ContentType: 'application/pdf',
-      },
-      function (error, file) {
-        if (error) {
-          throw error;
-        } else {
-          return file;
+    cloudinary.uploader
+      .upload_stream(
+        {
+          folder: 'doctorPrescription',
+          public_id: 'questions',
+          resource_type: 'raw',
+        },
+        function (error, result) {
+          if (error) {
+            throw error;
+          } else {
+            return result;
+          }
         }
-      }
-    );
+      )
+      .end(response);
   });
 };
 

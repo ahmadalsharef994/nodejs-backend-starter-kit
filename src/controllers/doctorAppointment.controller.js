@@ -34,35 +34,25 @@ const bookAppointment = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).json({ AppointmentId: id, orderId });
 });
 
-// const getAppointmentDetails = catchAsync(async (req, res) => {
-//   const appointment = await appointmentService.getAppointmentById(req.params.appointmentId);
-//   const PatientBasic = await userProfile.fetchBasicDetails(appointment.AuthUser);
-//   if (appointment !== false) {
-//     res.status(httpStatus.CREATED).json({ PatientBasic, appointment });
-//   } else {
-//     res.status(httpStatus.OK).json({ message: 'No Appointment present with this id', data: [] });
-//   }
+// const getFollowupsById = catchAsync(async (req, res) => {
+//   await appointmentService.getFollowupsById(req.query.limit).then((result) => {
+//     if (result.length === 0) {
+//       res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
+//     } else {
+//       res.status(httpStatus.OK).json({ message: 'Success', data: result });
+//     }
+//   });
 // });
 
-const getFollowupsById = catchAsync(async (req, res) => {
-  await appointmentService.getFollowupsById(req.query.limit).then((result) => {
-    if (result.length === 0) {
-      res.status(httpStatus.OK).json({ message: 'No Followups found linked to this Appointment', data: [] });
-    } else {
-      res.status(httpStatus.OK).json({ message: 'Success', data: result });
-    }
-  });
-});
-
-const getAvailableFollowUps = catchAsync(async (req, res) => {
-  await appointmentService.getAvailableFollowUps(req.Docid, req.body.date).then((result) => {
-    if (result.length === 0) {
-      res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
-    } else {
-      res.status(httpStatus.OK).json({ message: 'Success', data: result });
-    }
-  });
-});
+// const getAvailableFollowUps = catchAsync(async (req, res) => {
+//   await appointmentService.getAvailableFollowUps(req.Docid, req.body.date).then((result) => {
+//     if (result.length === 0) {
+//       res.status(httpStatus.OK).json({ message: 'No Available Followup Slots found.', data: [] });
+//     } else {
+//       res.status(httpStatus.OK).json({ message: 'Success', data: result });
+//     }
+//   });
+// });
 
 const getAvailableAppointments = catchAsync(async (req, res) => {
   const result = await appointmentService.getAvailableAppointments(req.SubjectId);
@@ -175,23 +165,23 @@ const getPatients = catchAsync(async (req, res) => {
   }
 });
 
-const getDoctorFeedback = catchAsync(async (req, res) => {
-  const feedbackData = await appointmentService.getDoctorFeedback(req.body, req.params.appointmentId);
-  if (feedbackData !== false) {
-    res.status(httpStatus.CREATED).json({ feedbackData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
-  }
-});
+// const getDoctorFeedback = catchAsync(async (req, res) => {
+//   const feedbackData = await appointmentService.getDoctorFeedback(req.body, req.params.appointmentId);
+//   if (feedbackData !== false) {
+//     res.status(httpStatus.CREATED).json({ feedbackData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
+//   }
+// });
 
-const getUserFeedback = catchAsync(async (req, res) => {
-  const feedbackData = await appointmentService.getUserFeedback(req.body, req.params.appointmentId);
-  if (feedbackData !== false) {
-    res.status(httpStatus.CREATED).json({ feedbackData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
-  }
-});
+// const getUserFeedback = catchAsync(async (req, res) => {
+//   const feedbackData = await appointmentService.getUserFeedback(req.body, req.params.appointmentId);
+//   if (feedbackData !== false) {
+//     res.status(httpStatus.CREATED).json({ feedbackData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add your feedback ' });
+//   }
+// });
 
 const cancelAppointment = catchAsync(async (req, res) => {
   const appointmentId = req.body.appointmentId;
@@ -209,43 +199,43 @@ const cancelAppointment = catchAsync(async (req, res) => {
     });
 });
 
-const rescheduleAppointment = catchAsync(async (req, res) => {
-  const { appointmentId, slotId, date, message, sendMailToUser } = await req.body;
-  const { result, emailSent } = await appointmentService.rescheduleAppointment(
-    req.Docid,
-    appointmentId,
-    slotId,
-    date,
-    message,
-    sendMailToUser
-  );
-  if (result) {
-    res.status(httpStatus.OK).json({ message: 'Appointment Rescheduled!', data: result, emailSent });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'Failed to reschedule the Appointment', data: result, emailSent });
-  }
-});
+// const rescheduleAppointment = catchAsync(async (req, res) => {
+//   const { appointmentId, slotId, date, message, sendMailToUser } = await req.body;
+//   const { result, emailSent } = await appointmentService.rescheduleAppointment(
+//     req.Docid,
+//     appointmentId,
+//     slotId,
+//     date,
+//     message,
+//     sendMailToUser
+//   );
+//   if (result) {
+//     res.status(httpStatus.OK).json({ message: 'Appointment Rescheduled!', data: result, emailSent });
+//   } else {
+//     res.status(httpStatus.OK).json({ message: 'Failed to reschedule the Appointment', data: result, emailSent });
+//   }
+// });
 
-const bookingConfirmation = catchAsync(async (req, res) => {
-  const { status, bookingDetails, Message, appointmentId } = await appointmentService.bookingConfirmation(
-    req.body.orderId,
-    req.body.appointmentId
-  );
-  if (status === 'success') {
-    res.status(httpStatus.OK).json({ status, bookingDetails, Message, appointmentId });
-  } else {
-    res.status(httpStatus.CONFLICT).json({ reason: 'orderId not matched ', Message, status });
-  }
-});
+// const bookingConfirmation = catchAsync(async (req, res) => {
+//   const { status, bookingDetails, Message, appointmentId } = await appointmentService.bookingConfirmation(
+//     req.body.orderId,
+//     req.body.appointmentId
+//   );
+//   if (status === 'success') {
+//     res.status(httpStatus.OK).json({ status, bookingDetails, Message, appointmentId });
+//   } else {
+//     res.status(httpStatus.CONFLICT).json({ reason: 'orderId not matched ', Message, status });
+//   }
+// });
 
-const cancelFollowup = catchAsync(async (req, res) => {
-  const result = await appointmentService.cancelFollowup(req.body.followupId);
-  if (result === true) {
-    res.status(httpStatus.OK).json({ message: 'followup cancelled !' });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'cant cancel followup check appointment id and try again !' });
-  }
-});
+// const cancelFollowup = catchAsync(async (req, res) => {
+//   const result = await appointmentService.cancelFollowup(req.body.followupId);
+//   if (result === true) {
+//     res.status(httpStatus.OK).json({ message: 'followup cancelled !' });
+//   } else {
+//     res.status(httpStatus.OK).json({ message: 'cant cancel followup check appointment id and try again !' });
+//   }
+// });
 
 // const rescheduleFollowup = catchAsync(async (req, res) => {
 //   const result = await appointmentService.rescheduleFollowup(req.body.followupId, req.body.slotId, req.body.date);
@@ -268,14 +258,14 @@ const cancelFollowup = catchAsync(async (req, res) => {
 //   }
 // });
 
-const deleteSlot = catchAsync(async (req, res) => {
-  const updatedslots = await appointmentService.deleteSlot(req.SubjectId, req.body.slotId);
-  if (updatedslots) {
-    res.status(httpStatus.OK).json({ message: 'success', updatedslots });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
-  }
-});
+// const deleteSlot = catchAsync(async (req, res) => {
+//   const updatedslots = await appointmentService.deleteSlot(req.SubjectId, req.body.slotId);
+//   if (updatedslots) {
+//     res.status(httpStatus.OK).json({ message: 'success', updatedslots });
+//   } else {
+//     res.status(httpStatus.OK).json({ message: 'failed', updatedslots });
+//   }
+// });
 
 const getNextAppointmentDoctor = catchAsync(async (req, res) => {
   const nextAppointment = await appointmentService.getNextAppointmentDoctor(req.Docid);
@@ -325,8 +315,8 @@ module.exports = {
   joinAppointmentUser,
   bookAppointment,
   // assignFollowup,
-  getFollowupsById,
-  getAvailableFollowUps,
+  // getFollowupsById,
+  // getAvailableFollowUps,
   getAvailableAppointments,
   getUpcomingAppointments,
   getAppointmentsByType,
@@ -335,16 +325,16 @@ module.exports = {
   getPrescription,
   getPatientDetails,
   getPatients,
-  getDoctorFeedback,
-  getUserFeedback,
+  // getDoctorFeedback,
+  // getUserFeedback,
   // getAppointmentDetails,
   cancelAppointment,
-  rescheduleAppointment,
-  bookingConfirmation,
-  cancelFollowup,
+  // rescheduleAppointment,
+  // bookingConfirmation,
+  // cancelFollowup,
   // rescheduleFollowup,
   // allAppointments,
-  deleteSlot,
+  // deleteSlot,
   getNextAppointmentDoctor,
   getAppointmentsByStatus,
   getAppointmentPreferences,

@@ -1,8 +1,8 @@
 const express = require('express');
 const { documentController } = require('../../controllers');
 const authDoctor = require('../../middlewares/authDoctor');
-const authdoctorVerified = require('../../middlewares/authDoctorVerified');
-const { fileUpload, profilePhotoUpload } = require('../../Microservices');
+// const authdoctorVerified = require('../../middlewares/authDoctorVerified');
+const { fileUpload } = require('../../Microservices');
 const validate = require('../../middlewares/validate');
 const documentValidation = require('../../validations/document.validation');
 
@@ -28,10 +28,10 @@ router.post(
 router.get('/view/:doctype', validate(documentValidation.documentUrl), authDoctor(), function (req, res) {
   documentController.getUrl(req, res);
 });
-router.post(
-  '/update-esign',
-  authdoctorVerified(),
-  profilePhotoUpload.uploadPhoto.fields([{ name: 'esign', maxCount: 1 }]),
-  documentController.updateEsign
-);
+// router.post(
+//   '/update-esign',
+//   authdoctorVerified(),
+//   profilePhotoUpload.uploadPhoto.fields([{ name: 'esign', maxCount: 1 }]),
+//   documentController.updateEsign
+// );
 module.exports = router;

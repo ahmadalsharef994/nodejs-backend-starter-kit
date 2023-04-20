@@ -7,7 +7,7 @@ const appointmentPreferenceService = require('../services/appointmentpreference.
 const authDoctorController = require('./authdoctor.controller');
 const { authService, documentService, appointmentService } = require('../services');
 const netEarn = require('../utils/netEarnCalculator');
-const pick = require('../utils/pick');
+// const pick = require('../utils/pick');
 const daysDiff = require('../utils/calculateDays');
 
 const getStats = catchAsync(async (req, res) => {
@@ -242,41 +242,41 @@ const addConsultationfee = catchAsync(async (req, res) => {
   }
 });
 
-const updateNotificationSettings = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const notificationsData = await doctorprofileService.notificationSettings(req.body, AuthData);
-  if (notificationsData) {
-    res.status(httpStatus.CREATED).json({ notificationsData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
-  }
-});
+// const updateNotificationSettings = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const notificationsData = await doctorprofileService.notificationSettings(req.body, AuthData);
+//   if (notificationsData) {
+//     res.status(httpStatus.CREATED).json({ notificationsData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
+//   }
+// });
 
-const updateClinicDetails = catchAsync(async (req, res) => {
-  const response = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing, req.body.clinicId);
-  if (response) {
-    res.status(httpStatus.OK).json({ message: `Clinic Timings Updated for ${response.clinicName} (id :${response.id})` });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
-  }
-});
+// const updateClinicDetails = catchAsync(async (req, res) => {
+//   const response = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing, req.body.clinicId);
+//   if (response) {
+//     res.status(httpStatus.OK).json({ message: `Clinic Timings Updated for ${response.clinicName} (id :${response.id})` });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
+//   }
+// });
 
-const doctorExpandEducation = catchAsync(async (req, res) => {
-  const { Education, Experience } = await doctorprofileService.doctorExpEducation(
-    req.SubjectId,
-    req.body.experience,
-    req.body.education
-  );
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
-  if (Education || Experience) {
-    res.status(httpStatus.CREATED).json({
-      message: 'Experience and Education Details Submitted!',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
-    });
-  }
-});
+// const doctorExpandEducation = catchAsync(async (req, res) => {
+//   const { Education, Experience } = await doctorprofileService.doctorExpEducation(
+//     req.SubjectId,
+//     req.body.experience,
+//     req.body.education
+//   );
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
+//   if (Education || Experience) {
+//     res.status(httpStatus.CREATED).json({
+//       message: 'Experience and Education Details Submitted!',
+//       challenge: challenge.challenge,
+//       optionalchallenge: challenge.optionalChallenge,
+//     });
+//   }
+// });
 
 // const updateDetails = catchAsync(async (req, res) => {
 //   const result = await doctorprofileService.updateDetails(
@@ -296,53 +296,55 @@ const doctorExpandEducation = catchAsync(async (req, res) => {
 //   }
 // });
 
-const updateAppointmentPrice = catchAsync(async (req, res) => {
-  const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
-  if (result === true) {
-    res.status(httpStatus.OK).json({ message: 'appointmentPrice updated' });
-  } else {
-    res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
-  }
-});
+// const updateAppointmentPrice = catchAsync(async (req, res) => {
+//   const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
+//   if (result === true) {
+//     res.status(httpStatus.OK).json({ message: 'appointmentPrice updated' });
+//   } else {
+//     res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
+//   }
+// });
 
-const getDoctorClinicTimings = catchAsync(async (req, res) => {
-  const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
-  if (result !== null) {
-    res.status(httpStatus.OK).json({ message: 'success', result });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
-  }
-});
-const sendDoctorQueries = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const ticketDetails = await doctorprofileService.sendDoctorQueries(
-    req.SubjectId,
-    AuthData.email,
-    req.body.message,
-    AuthData.fullname
-  );
-  if (ticketDetails) {
-    res.status(httpStatus.OK).json({ message: 'query submitted successfully !', ticketDetails, emailSent: true });
-  } else {
-    res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
-  }
-});
+// const getDoctorClinicTimings = catchAsync(async (req, res) => {
+//   const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
+//   if (result !== null) {
+//     res.status(httpStatus.OK).json({ message: 'success', result });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
+//   }
 
-const getBillingDetails = catchAsync(async (req, res) => {
-  const doctorId = req.SubjectId;
-  const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
-  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
-  const billingDetails = await doctorprofileService.getBillingDetails(doctorId, fromDate, endDate, options);
-  res.status(httpStatus.OK).json({
-    message: `Billing details between ${fromDate} and ${endDate}`,
-    data: billingDetails,
-    totalPages: billingDetails.totalPages,
-    page: billingDetails.page,
-    limit: billingDetails.limit,
-    totalResults: billingDetails.totalResults,
-  });
-});
+// });
+
+// const sendDoctorQueries = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const ticketDetails = await doctorprofileService.sendDoctorQueries(
+//     req.SubjectId,
+//     AuthData.email,
+//     req.body.message,
+//     AuthData.fullname
+//   );
+//   if (ticketDetails) {
+//     res.status(httpStatus.OK).json({ message: 'query submitted successfully !', ticketDetails, emailSent: true });
+//   } else {
+//     res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
+//   }
+// });
+
+// const getBillingDetails = catchAsync(async (req, res) => {
+//   const doctorId = req.SubjectId;
+//   const options = pick(req.query, ['sortBy', 'limit', 'page']);
+//   const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+//   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+//   const billingDetails = await doctorprofileService.getBillingDetails(doctorId, fromDate, endDate, options);
+//   res.status(httpStatus.OK).json({
+//     message: `Billing details between ${fromDate} and ${endDate}`,
+//     data: billingDetails,
+//     totalPages: billingDetails.totalPages,
+//     page: billingDetails.page,
+//     limit: billingDetails.limit,
+//     totalResults: billingDetails.totalResults,
+//   });
+// });
 
 // const getDoctorQueries = catchAsync(async (req, res) => {
 //   const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
@@ -364,13 +366,13 @@ module.exports = {
   fetchpayoutsdetails,
   fetchprofiledetails,
   addConsultationfee,
-  updateNotificationSettings,
-  updateClinicDetails,
+  // updateNotificationSettings,
+  // updateClinicDetails,
   // updateDetails,
-  doctorExpandEducation,
-  updateAppointmentPrice,
-  getDoctorClinicTimings,
-  getBillingDetails,
-  sendDoctorQueries,
+  // doctorExpandEducation,
+  // updateAppointmentPrice,
+  // getDoctorClinicTimings,
+  // getBillingDetails,
+  // sendDoctorQueries,
   // getDoctorQueries,
 };

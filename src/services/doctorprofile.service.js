@@ -1,18 +1,18 @@
 const httpStatus = require('http-status');
-const { emailService } = require('../Microservices');
+// const { emailService } = require('../Microservices');
 const {
   DoctorBasic,
   DoctorEducation,
   DoctorClinic,
   DoctorExperience,
   DoctorPayout,
-  ConsultationFee,
-  Notification,
-  Appointment,
+  // ConsultationFee,
+  // Notification,
+  // Appointment,
 } = require('../models');
-const DoctorQueries = require('../models/doctorQuries.model');
+// const DoctorQueries = require('../models/doctorQuries.model');
 const ApiError = require('../utils/ApiError');
-const netEarn = require('../utils/netEarnCalculator');
+// const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (doctorId) => {
   const basicDetails = await DoctorBasic.findOne({ auth: doctorId });
@@ -83,25 +83,25 @@ const submitpayoutsdetails = async (PayoutDetailBody, AuthData) => {
   return PayoutDetailDoc;
 };
 
-const addConsultationfee = async (consultationfeeDoc) => {
-  const DoctorConsultationfee = await ConsultationFee.create(consultationfeeDoc);
-  if (DoctorConsultationfee) {
-    return { message: 'Consultation fee added Sucessfully', DoctorConsultationfee };
-  }
-  return false;
-};
+// const addConsultationfee = async (consultationfeeDoc) => {
+//   const DoctorConsultationfee = await ConsultationFee.create(consultationfeeDoc);
+//   if (DoctorConsultationfee) {
+//     return { message: 'Consultation fee added Sucessfully', DoctorConsultationfee };
+//   }
+//   return false;
+// };
 
-const notificationSettings = async (notifications, auth) => {
-  const notificationDoc = await Notification.findOneAndUpdate(
-    { auth },
-    { $set: { ...notifications, auth } },
-    { upsert: true, new: true }
-  );
-  if (notificationDoc) {
-    return { message: 'Notification Options Updated!', notificationDoc };
-  }
-  return false;
-};
+// const notificationSettings = async (notifications, auth) => {
+//   const notificationDoc = await Notification.findOneAndUpdate(
+//     { auth },
+//     { $set: { ...notifications, auth } },
+//     { upsert: true, new: true }
+//   );
+//   if (notificationDoc) {
+//     return { message: 'Notification Options Updated!', notificationDoc };
+//   }
+//   return false;
+// };
 
 const updteClinicDetails = async (Auth, timings, clinicId) => {
   const result = await DoctorClinic.find({ _id: clinicId, auth: Auth });
@@ -151,73 +151,73 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
   return false;
 };
 
-const doctorClinicTimings = async (auth) => {
-  const result = await DoctorClinic.find({ auth });
-  if (result) {
-    return result;
-  }
-  return null;
-};
+// const doctorClinicTimings = async (auth) => {
+//   const result = await DoctorClinic.find({ auth });
+//   if (result) {
+//     return result;
+//   }
+//   return null;
+// };
 
-const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
-  try {
-    const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
-    const ticketdetails = await DoctorQueries.create({ AuthDoctor, name, email, issue: message, ticketNumber });
-    const ticket = `name: ${ticketdetails.name}, \n email: ${ticketdetails.email},\nissue: ${ticketdetails.issue},\nticketnumber: ${ticketdetails.ticketNumber}`;
-    if (ticketdetails.ticketStatus === 'open') {
-      await emailService.sendEmailQueries(ticket, ticketNumber);
-      await emailService.sendEmailQueriesUser(email, message, ticketNumber);
-    } else {
-      throw new ApiError(httpStatus.BAD_GATEWAY, 'failed to send the email');
-    }
-    return ticketdetails;
-  } catch (error) {
-    return null;
-  }
-};
+// const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
+//   try {
+//     const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
+//     const ticketdetails = await DoctorQueries.create({ AuthDoctor, name, email, issue: message, ticketNumber });
+//     const ticket = `name: ${ticketdetails.name}, \n email: ${ticketdetails.email},\nissue: ${ticketdetails.issue},\nticketnumber: ${ticketdetails.ticketNumber}`;
+//     if (ticketdetails.ticketStatus === 'open') {
+//       await emailService.sendEmailQueries(ticket, ticketNumber);
+//       await emailService.sendEmailQueriesUser(email, message, ticketNumber);
+//     } else {
+//       throw new ApiError(httpStatus.BAD_GATEWAY, 'failed to send the email');
+//     }
+//     return ticketdetails;
+//   } catch (error) {
+//     return null;
+//   }
+// };
 
-const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
-  const pastPaidAppointments = await Appointment.paginate(
-    { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
-    options
-  );
+// const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
+//   const pastPaidAppointments = await Appointment.paginate(
+//     { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
+//     options
+//   );
 
-  const pickedProperties = pastPaidAppointments.results.map((appointment) => {
-    // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
-    // console.log(avatar)
-    return {
-      patientName: appointment.patientName,
-      consultationDate: appointment.Date,
-      StartTime: appointment.StartTime,
-      price: appointment.price,
-      avatar: 'https://docprofilephoto.s3.ap-south-1.amazonaws.com/avatar/b0f985ca-c2a4-4f6a-a97c-124a5b5192d9.png',
-      // avatar to be extracted from DB
-      orderId: appointment.orderId,
-    };
-  });
-  // eslint-disable-next-line array-callback-return
-  pickedProperties.map((appointment) => {
-    /* eslint-disable no-param-reassign */
-    appointment.taxes = 0.05 * appointment.price;
-    appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
-    appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
-    appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
-  });
+//   const pickedProperties = pastPaidAppointments.results.map((appointment) => {
+//     // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
+//     // console.log(avatar)
+//     return {
+//       patientName: appointment.patientName,
+//       consultationDate: appointment.Date,
+//       StartTime: appointment.StartTime,
+//       price: appointment.price,
+//       avatar: 'https://docprofilephoto.s3.ap-south-1.amazonaws.com/avatar/b0f985ca-c2a4-4f6a-a97c-124a5b5192d9.png',
+//       // avatar to be extracted from DB
+//       orderId: appointment.orderId,
+//     };
+//   });
+//   // eslint-disable-next-line array-callback-return
+//   pickedProperties.map((appointment) => {
+//     /* eslint-disable no-param-reassign */
+//     appointment.taxes = 0.05 * appointment.price;
+//     appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
+//     appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
+//     appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
+//   });
 
-  pickedProperties.totalPages = pastPaidAppointments.totalPages;
-  pickedProperties.page = pastPaidAppointments.page;
-  pickedProperties.limit = pastPaidAppointments.limit;
-  pickedProperties.totalResults = pastPaidAppointments.totalResults;
-  return pickedProperties;
-};
+//   pickedProperties.totalPages = pastPaidAppointments.totalPages;
+//   pickedProperties.page = pastPaidAppointments.page;
+//   pickedProperties.limit = pastPaidAppointments.limit;
+//   pickedProperties.totalResults = pastPaidAppointments.totalResults;
+//   return pickedProperties;
+// };
 
-const getDoctorQueries = async (AuthDoctor) => {
-  const doctorQueries = await DoctorQueries.find({ AuthDoctor });
-  if (doctorQueries) {
-    return doctorQueries;
-  }
-  return null;
-};
+// const getDoctorQueries = async (AuthDoctor) => {
+//   const doctorQueries = await DoctorQueries.find({ AuthDoctor });
+//   if (doctorQueries) {
+//     return doctorQueries;
+//   }
+//   return null;
+// };
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
@@ -230,14 +230,14 @@ module.exports = {
   fetchexperiencedetails,
   fetchpayoutsdetails,
   submitpayoutsdetails,
-  addConsultationfee,
-  notificationSettings,
+  // addConsultationfee,
+  // notificationSettings,
   updteClinicDetails,
   // updateDetails,
   doctorExpEducation,
   updateappointmentPrice,
-  doctorClinicTimings,
-  getBillingDetails,
-  sendDoctorQueries,
-  getDoctorQueries,
+  // doctorClinicTimings,
+  // getBillingDetails,
+  // sendDoctorQueries,
+  // getDoctorQueries,
 };

@@ -17,7 +17,7 @@ router
 router.route('/upcoming-appointments').get(authuser(), userAppointmentController.upcomingAppointments);
 router.route('/next-appointment').get(authuser(), userAppointmentController.getNextAppointment);
 router.route('/prescriptions').get(authuser(), userAppointmentController.showPrescriptions);
-router.route('/labtest-orders').get(authuser(), userAppointmentController.showLabTestOrders);
+// router.route('/labtest-orders').get(authuser(), userAppointmentController.showLabTestOrders);
 router
   .route('/appointment-status')
   .get(
@@ -29,9 +29,9 @@ router
   .route('/appointment-type')
   .get(authuser(), validate(appointmentValidation.getAppointmentsByType), userAppointmentController.getAppointmentsByType);
 
-router
-  .route('/:appointmentId/patient-feedback')
-  .post(authuser(), validate(appointmentValidation.getUserFeedback), appointmentController.getUserFeedback);
+// router
+//   .route('/:appointmentId/patient-feedback')
+//   .post(authuser(), validate(appointmentValidation.getUserFeedback), appointmentController.getUserFeedback);
 router
   .route('/fetchdoctors-by-categories')
   .post(
@@ -40,9 +40,9 @@ router
     userAppointmentController.getDoctorsByCategories
   );
 router.route('/get-slots').post(authuser(), validate(appointmentValidation.getSlots), userAppointmentController.getSlots);
-router
-  .route('/bookingConfirmation')
-  .post(validate(appointmentValidation.bookingConfirmation), appointmentController.bookingConfirmation);
-router.route('/fetchHealthPackages').get(authuser(), userAppointmentController.fetchHealthPackages);
+// router
+//   .route('/bookingConfirmation')
+//   .post(validate(appointmentValidation.bookingConfirmation), appointmentController.bookingConfirmation);
+// router.route('/fetchHealthPackages').get(authuser(), userAppointmentController.fetchHealthPackages);
 
 module.exports = router;

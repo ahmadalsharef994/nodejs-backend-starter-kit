@@ -10,7 +10,7 @@ const otpServices = require('./otp.service');
  * @returns {Promise<Auth>}
  */
 // create user auth data
-const createAuthData = async (AuthData) => {
+const register = async (AuthData) => {
   if (await Auth.isEmailTaken(AuthData.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
   }
@@ -212,7 +212,7 @@ const resetPassword = async (AuthData, newPassword, confirmPassword) => {
   return response;
 };
 module.exports = {
-  createAuthData,
+  register,
   queryAuthData,
   // createGoogleAuthData,
   getAuthById,

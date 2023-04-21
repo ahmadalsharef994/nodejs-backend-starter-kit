@@ -9,7 +9,7 @@ const {
   verifiedDoctorService,
   doctorprofileService,
   documentService,
-  appointmentPreferenceService,
+  // appointmentPreferenceService,
 } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
@@ -30,51 +30,33 @@ ONBOARDING_ONHOLD
 // Below Function not in use discarded flow
 const getOnboardingChallenge = async (AuthData) => {
   let challenge = 'ONBOARDING_ONHOLD';
-  let optionalChallenge = 'NONE';
+  // let optionalChallenge = 'NONE';
   const IsDoctorVerified = await verifiedDoctorService.checkVerification(AuthData.id);
   if (AuthData.isEmailVerified === false) {
     challenge = 'AUTH_EMAILVERIFY';
   } else if (AuthData.isMobileVerified === false) {
-    challenge = 'AUTH_OTPVERIFY';
+    challenge = 'AUTH_MOBILEVERIFY';
   } else if (!(await doctorprofileService.fetchbasicdetails(AuthData))) {
     challenge = 'BASIC_DETAILS';
   } else if (!(await documentService.fetchDocumentdata(AuthData))) {
     challenge = 'EDUCATION_DOCUMENTUPLOAD';
   } else if (!(await doctorprofileService.fetcheducationdetails(AuthData))) {
     challenge = 'EDUCATION_DETAILS';
-  } else if (!(await doctorprofileService.fetchexperiencedetails(AuthData))) {
-    if (IsDoctorVerified) {
-      challenge = 'ONBOARDING_SUCCESS';
-    }
-    optionalChallenge = 'EXPERIENCE_DETAILS';
-  } else if (!(await doctorprofileService.fetchClinicdetails(AuthData))) {
-    if (IsDoctorVerified) {
-      challenge = 'ONBOARDING_SUCCESS';
-    }
-    optionalChallenge = 'CLINIC_DETAILS';
-  } else if (!appointmentPreferenceService.getDoctorPreferences(AuthData)) {
-    if (IsDoctorVerified) {
-      challenge = 'ONBOARDING_SUCCESS';
-    }
-    optionalChallenge = 'APPOINTMENT_PREFERENCES';
   } else if (IsDoctorVerified) {
     challenge = 'ONBOARDING_SUCCESS';
-    optionalChallenge = 'ONBOARDING_SUCCESS';
   }
-  return { challenge, optionalChallenge };
+
+  return challenge;
 };
 const register = catchAsync(async (req, res) => {
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
-  // const fcmtoken = req.headers.fcmtoken;
-  const AuthData = await authService.createAuthData(req.body);
+  const AuthData = await authService.register(req.body);
   const authtoken = await tokenService.generateDoctorToken(AuthData.id);
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   await otpServices.initiateOTPData(AuthData);
-  const challenges = await getOnboardingChallenge(AuthData);
-  res
-    .status(httpStatus.CREATED)
-    .json({ AuthData, authtoken, challenge: challenges.challenge, optionalchallenge: challenges.optionalChallenge });
+  const challenge = await getOnboardingChallenge(AuthData);
+  res.status(httpStatus.CREATED).json({ AuthData, authtoken, challenge });
 });
 
 const login = catchAsync(async (req, res) => {
@@ -89,14 +71,12 @@ const login = catchAsync(async (req, res) => {
   }
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
-  // const fcmtoken = req.headers.fcmtoken;
   await tokenService.addDeviceHandler(AuthData.id, authtoken, req.ip4, devicehash, devicetype);
   const challenge = await getOnboardingChallenge(AuthData);
   res.status(httpStatus.OK).json({
     AuthData,
     authtoken,
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -133,8 +113,7 @@ const forgotPassword = catchAsync(async (req, res) => {
     const challenge = await getOnboardingChallenge(AuthData);
     res.status(httpStatus.OK).json({
       message: 'Reset Code Sent to Registered Email ID',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   } else if (service === 'phone') {
     const AuthData = await authService.getAuthByPhone(parseInt(req.body.phone, 10));
@@ -148,8 +127,7 @@ const forgotPassword = catchAsync(async (req, res) => {
       if (response2F && dbresponse) {
         res.status(httpStatus.OK).json({
           message: 'Reset Code Sent to Registered Phone Number',
-          challenge: challenge.challenge,
-          optionalchallenge: challenge.optionalChallenge,
+          challenge,
         });
       }
     } catch (err) {
@@ -196,14 +174,12 @@ const changeEmail = catchAsync(async (req, res) => {
   if (result !== false) {
     return res.status(httpStatus.OK).json({
       message: 'Email is updated sucessfully',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   }
   res.status(httpStatus.BAD_REQUEST).json({
     message: 'Email Already Verified',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -215,14 +191,12 @@ const changePhone = catchAsync(async (req, res) => {
   if (result !== false) {
     return res.status(httpStatus.CREATED).json({
       message: 'Phone is updated Sucessfully',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   }
   res.status(httpStatus.BAD_REQUEST).json({
     message: 'Phone Number already verified',
     challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
   });
 });
 
@@ -231,9 +205,7 @@ const verifyEmail = catchAsync(async (req, res) => {
   const verifystatus = await otpServices.verifyEmailOtp(req.body.emailcode, AuthData);
   const AuthDataUpdated = await authService.getAuthById(verifystatus.auth);
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
-  res
-    .status(httpStatus.OK)
-    .json({ message: 'Email Verified', challenge: challenge.challenge, optionalchallenge: challenge.optionalChallenge });
+  res.status(httpStatus.OK).json({ message: 'Email Verified', challenge });
 });
 
 const requestOtp = catchAsync(async (req, res) => {
@@ -244,8 +216,7 @@ const requestOtp = catchAsync(async (req, res) => {
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res.status(httpStatus.OK).json({
     message: 'OTP Sent over Phone',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -256,8 +227,7 @@ const verifyPhone = catchAsync(async (req, res) => {
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res.status(httpStatus.OK).json({
     message: 'Phone Number Verified',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -269,8 +239,7 @@ const resendOtp = catchAsync(async (req, res) => {
   const challenge = await getOnboardingChallenge(AuthDataUpdated);
   res.status(httpStatus.OK).json({
     message: 'OTP Sent Over Phone',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 

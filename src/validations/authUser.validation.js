@@ -1,12 +1,12 @@
 const Joi = require('joi');
 const { password, objectId } = require('./custom.validation');
 
-const createUser = {
-  body: Joi.object().keys({
-    isdcode: Joi.number(),
-    mobile: Joi.number().required(),
-  }),
-};
+// const createUser = {
+//   body: Joi.object().keys({
+//     isdcode: Joi.number(),
+//     mobile: Joi.number().required(),
+//   }),
+// };
 
 const resendCreateUserOtp = {
   body: Joi.object().keys({
@@ -14,12 +14,12 @@ const resendCreateUserOtp = {
   }),
 };
 
-const verifyCreatedUser = {
-  body: Joi.object().keys({
-    userId: Joi.string().custom(objectId).required(),
-    otp: Joi.number().required().min(100000).max(999999),
-  }),
-};
+// const verifyCreatedUser = {
+//   body: Joi.object().keys({
+//     userId: Joi.string().custom(objectId).required(),
+//     otp: Joi.number().required().min(100000).max(999999),
+//   }),
+// };
 
 const registeruser = {
   body: Joi.object().keys({
@@ -99,9 +99,9 @@ const verifyPhone = {
 // };
 
 module.exports = {
-  createUser,
+  // createUser,
   resendCreateUserOtp,
-  verifyCreatedUser,
+  // verifyCreatedUser,
   registeruser,
   login,
   logout,

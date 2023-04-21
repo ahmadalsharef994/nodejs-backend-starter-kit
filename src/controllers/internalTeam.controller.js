@@ -31,7 +31,7 @@ const registeradmin = catchAsync(async (req, res) => {
       'Alarm Triggered! Suspected Activity Detected 🧐reach at security@kraleba.com 😒😂'
     );
   } else {
-    const AuthData = await authService.createAuthData(req.body);
+    const AuthData = await authService.register(req.body);
     const authtoken = await tokenService.generateAdminToken(AuthData.id);
     const devicehash = req.headers.devicehash;
     const devicetype = req.headers.devicetype;

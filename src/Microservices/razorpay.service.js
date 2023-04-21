@@ -4,12 +4,13 @@ const short = require('short-uuid');
 const httpStatus = require('http-status');
 const events = require('events');
 const ApiError = require('../utils/ApiError');
-const { LabtestOrder, Appointment, AppointmentOrder, doctordetails } = require('../models');
+const { Appointment, AppointmentOrder, doctordetails } = require('../models');
 const doctorAppointmentService = require('../services/doctorAppointment.service');
 // const { getCartValue } = require('../services/labTest.service');
 const WalletOrder = require('../models/walletOrder.model');
 const walletService = require('../services/wallet.service');
 const emailService = require('./email.service');
+const Order = require('../models/order.model');
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -59,19 +60,19 @@ const fetchRazorpayOrderStatus = async (razorpayOrderId) => {
 //   }
 // };
 // calculateSHADigestLabtest
-const calculateSHADigest = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
-  const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
-  shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
-  const calculatedSHADigest = shasum.digest('hex');
+// const calculateSHADigest = async (orderCreationId, razorpayOrderId, razorpayPaymentId, razorpaySignature) => {
+//   const shasum = crypto.createHmac('sha256', process.env.RAZORPAY_KEY_SECRET);
+//   shasum.update(`${orderCreationId}|${razorpayPaymentId}`);
+//   const calculatedSHADigest = shasum.digest('hex');
 
-  if (calculatedSHADigest === razorpaySignature) {
-    // console.log('request is legit');
-    await LabtestOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } }, { new: true });
-    return 'match';
-  }
-  // console.log('calculatedSHADigest: ', digest);
-  return 'no_match';
-};
+//   if (calculatedSHADigest === razorpaySignature) {
+//     // console.log('request is legit');
+//     await LabtestOrder.findOneAndUpdate({ razorpayOrderID: razorpayOrderId }, { $set: { isPaid: true } }, { new: true });
+//     return 'match';
+//   }
+//   // console.log('calculatedSHADigest: ', digest);
+//   return 'no_match';
+// };
 
 const createAppointmentOrder = async (currency, appointmentid, orderId) => {
   const { _id, price } = await Appointment.findOne({ orderId });
@@ -166,7 +167,7 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
 
     // 4th: when payment gets confirmed (check every 5 mins), trigger isPaid event (execute 3rd)
     const timer = setInterval(async () => {
-      if (fetchRazorpayOrderStatus(razorpayOrderID) === 'paid') {
+      if ((await fetchRazorpayOrderStatus(razorpayOrderID)) === 'paid') {
         await WalletOrder.findByIdAndUpdate(walletOrder.id, { isPaid: true });
         eventEmitter.emit('isPaid');
         clearInterval(timer);
@@ -248,12 +249,81 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
   return { contact, fundAccount, payout };
 }; */
 
+const getRazorpayOrder = async (razorpayOrderId) => {
+  const razorpayOrder = await razorpay.orders.fetch(razorpayOrderId);
+  if (razorpayOrder.error) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `getStatus service: ${razorpayOrder.error.description}`);
+  }
+  return razorpayOrder;
+};
+
+const createRazorpayOrder = async (orderId) => {
+  const order = await Order.findById(orderId);
+  const razorpayOrder = await razorpay.orders.create({
+    amount: order.amount,
+    notes: {
+      order_id: orderId,
+    },
+  });
+  if (razorpayOrder.error) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `payOrder service: ${razorpayOrder.error.description}`);
+  }
+  order.paymentRef = razorpayOrder.id;
+  await order.save();
+  return razorpayOrder;
+};
+
+const createRazorpayPayment = async (orderId) => {
+  const order = await Order.findById(orderId);
+  const razorpayPayment = razorpay.payments.createPaymentJson({
+    amount: 100,
+    currency: 'INR',
+    email: 'gaurav.kumar@example.com',
+    contact: '9123456789',
+    order_id: 'order_KCXbXeev1x7fnr',
+    method: 'netbanking',
+    bank: 'HDFC',
+  });
+  if (razorpayPayment.error) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `createRazorpayPayment service: ${razorpayPayment.error.description}`);
+  }
+  order.paymentId = razorpayPayment.id;
+  order.paymentStatus = 'PAID';
+  order.status = 'ORDERED';
+  // order.shippingDetails.shippingStatus = 'SHIPPED';
+  await order.save();
+  return razorpayPayment;
+};
+
+// razorpay refund
+const refundOrder = async (orderId) => {
+  const order = await Order.findById(orderId);
+
+  const razorpayOrder = await razorpay.payments.refund(order.paymentRef, {
+    amount: order.amount,
+    notes: {
+      order_id: orderId,
+    },
+  });
+  if (razorpayOrder.error) {
+    throw new ApiError(httpStatus.BAD_REQUEST, `refundOrder service: ${razorpayOrder.error.description}`);
+  }
+  order.paymentStatus = 'REFUNDED';
+  order.status = 'CANCELLED';
+  await order.save();
+  return razorpayOrder;
+};
+
 module.exports = {
-  calculateSHADigest,
+  // calculateSHADigest,
   // createLabtestOrder,
   createAppointmentOrder,
   calculateSHADigestAppointment,
   // withdrawFromWallet,
   createWalletOrder,
   fetchRazorpayOrderStatus,
+  getRazorpayOrder,
+  createRazorpayOrder,
+  createRazorpayPayment,
+  refundOrder,
 };

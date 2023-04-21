@@ -49,6 +49,10 @@ const UserBasicSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: Wallet,
     },
+    address: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

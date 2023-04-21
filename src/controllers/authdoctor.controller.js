@@ -196,7 +196,7 @@ const changePhone = catchAsync(async (req, res) => {
   }
   res.status(httpStatus.BAD_REQUEST).json({
     message: 'Phone Number already verified',
-    challenge: challenge.challenge,
+    challenge,
   });
 });
 

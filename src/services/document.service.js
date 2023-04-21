@@ -2,7 +2,7 @@
 /* eslint-disable no-unused-expressions */
 const httpStatus = require('http-status');
 const { Document } = require('../models');
-const fileUpload = require('../Microservices/fileUpload.service');
+// const fileUpload = require('../Microservices/fileUpload.service');
 const ApiError = require('../utils/ApiError');
 
 const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {
@@ -57,36 +57,36 @@ const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, a
   return false;
 };
 
-const signedUrl = async (Authdata, document) => {
-  const DocDataExist = await Document.findOne({ auth: Authdata });
-  let docUrl = '';
-  switch (document) {
-    case 'resume':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.resume);
-      break;
-    case 'esign':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.esign);
-      break;
-    case 'medicalDegree':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.medicalDegree);
-      break;
-    case 'medicalRegistration':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.medicalRegistration);
-      break;
-    case 'aadharCardDoc':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.aadharCardDoc);
-      break;
-    case 'pancardDoc':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.pancardDoc);
-      break;
-    case 'ifsc':
-      docUrl = await fileUpload.getSignedUrl(DocDataExist.ifsc);
-      break;
-    default:
-      docUrl = 'Document not Found';
-  }
-  return docUrl;
-};
+// const signedUrl = async (Authdata, document) => {
+//   const DocDataExist = await Document.findOne({ auth: Authdata });
+//   let docUrl = '';
+//   switch (document) {
+//     case 'resume':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.resume);
+//       break;
+//     case 'esign':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.esign);
+//       break;
+//     case 'medicalDegree':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.medicalDegree);
+//       break;
+//     case 'medicalRegistration':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.medicalRegistration);
+//       break;
+//     case 'aadharCardDoc':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.aadharCardDoc);
+//       break;
+//     case 'pancardDoc':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.pancardDoc);
+//       break;
+//     case 'ifsc':
+//       docUrl = await fileUpload.getSignedUrl(DocDataExist.ifsc);
+//       break;
+//     default:
+//       docUrl = 'Document not Found';
+//   }
+//   return docUrl;
+// };
 
 const fetchDocumentdata = async (AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
@@ -106,7 +106,7 @@ const updateEsign = async (Esign, Auth) => {
 
 module.exports = {
   Upload,
-  signedUrl,
+  // signedUrl,
   fetchDocumentdata,
   updateEsign,
 };

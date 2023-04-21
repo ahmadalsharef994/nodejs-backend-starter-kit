@@ -9,11 +9,11 @@ const AppointmentSchema = mongoose.Schema(
       ref: Auth,
       required: true,
     },
-    docid: {
-      type: Number,
-      required: true,
-      index: true,
-    },
+    // docid: {
+    //   type: Number,
+    //   required: true,
+    //   index: true,
+    // },
     doctorName: {
       type: String,
       required: true,
@@ -95,34 +95,34 @@ const AppointmentSchema = mongoose.Schema(
       type: Array,
       required: true,
     },
-    LabTest: {
-      type: Array,
-      default: null,
-    },
-    DoctorAction: {
-      type: String,
-      default: null,
-    },
-    UserAction: {
-      type: String,
-      default: null,
-    },
-    UserReason: {
-      type: String,
-      default: null,
-    },
-    isRescheduled: {
-      type: Boolean,
-      default: false,
-    },
-    RescheduledReason: {
-      type: String,
-      default: null,
-    },
-    DoctorRescheduled: {
-      type: String,
-      default: null,
-    },
+    // LabTest: {
+    //   type: Array,
+    //   default: null,
+    // },
+    // DoctorAction: {
+    //   type: String,
+    //   default: null,
+    // },
+    // UserAction: {
+    //   type: String,
+    //   default: null,
+    // },
+    // UserReason: {
+    //   type: String,
+    //   default: null,
+    // },
+    // isRescheduled: {
+    //   type: Boolean,
+    //   default: false,
+    // },
+    // RescheduledReason: {
+    //   type: String,
+    //   default: null,
+    // },
+    // DoctorRescheduled: {
+    //   type: String,
+    //   default: null,
+    // },
     orderId: {
       type: String,
       required: true,

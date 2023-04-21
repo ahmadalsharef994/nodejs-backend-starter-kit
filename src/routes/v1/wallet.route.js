@@ -30,6 +30,6 @@ router
 
 router
   .route('/fulfill-withdraw-request')
-  .post(authAdmin(), validate(walletValidation.fulfillWithdrawRequest), walletController.fulfillWithdrawRequest);
+  .post(authAdmin(), validate(walletValidation.fullfillWithdrawRequest), walletController.fulfillWithdrawRequest);
 
 module.exports = router;

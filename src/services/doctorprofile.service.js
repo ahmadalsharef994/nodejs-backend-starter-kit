@@ -1,17 +1,17 @@
-const httpStatus = require('http-status');
+// const httpStatus = require('http-status');
 // const { emailService } = require('../Microservices');
 const {
   DoctorBasic,
-  DoctorEducation,
-  DoctorClinic,
-  DoctorExperience,
+  // DoctorEducation,
+  // DoctorClinic,
+  // DoctorExperience,
   DoctorPayout,
   // ConsultationFee,
   // Notification,
   // Appointment,
 } = require('../models');
 // const DoctorQueries = require('../models/doctorQuries.model');
-const ApiError = require('../utils/ApiError');
+// const ApiError = require('../utils/ApiError');
 // const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (doctorId) => {
@@ -26,50 +26,50 @@ const submitbasicdetails = async (basicDetails, AuthData) => {
   return doctorBasic;
 };
 
-const submitprofilepicture = async (ProfilePhoto, AuthData) => {
-  const alreadyExist = await fetchbasicdetails(AuthData);
-  if (alreadyExist) {
-    await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
-    return 'profile Picture updated';
-  }
-  return false;
-};
+// const submitprofilepicture = async (ProfilePhoto, AuthData) => {
+//   const alreadyExist = await fetchbasicdetails(AuthData);
+//   if (alreadyExist) {
+//     await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
+//     return 'profile Picture updated';
+//   }
+//   return false;
+// };
 
-const fetcheducationdetails = async (AuthData) => {
-  const DoctorEducationExist = await DoctorEducation.findOne({ auth: AuthData });
-  return DoctorEducationExist;
-};
+// const fetcheducationdetails = async (AuthData) => {
+//   const DoctorEducationExist = await DoctorEducation.findOne({ auth: AuthData });
+//   return DoctorEducationExist;
+// };
 
-const submiteducationdetails = async (EducationDetailBody, AuthData) => {
-  // eslint-disable-next-line no-param-reassign
-  EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
-  const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
-  return educationDetailDoc;
-};
+// const submiteducationdetails = async (EducationDetailBody, AuthData) => {
+//   // eslint-disable-next-line no-param-reassign
+//   EducationDetailBody.auth = AuthData; // Assign Reference to Req Body
+//   const educationDetailDoc = await DoctorEducation.create(EducationDetailBody);
+//   return educationDetailDoc;
+// };
 
-const fetchClinicdetails = async (AuthData) => {
-  const DoctorClinicExist = await DoctorClinic.find({ auth: AuthData });
-  return DoctorClinicExist;
-};
+// const fetchClinicdetails = async (AuthData) => {
+//   const DoctorClinicExist = await DoctorClinic.find({ auth: AuthData });
+//   return DoctorClinicExist;
+// };
 
-const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
-  // eslint-disable-next-line no-param-reassign
-  ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
-  const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
-  return clinicDetailDoc;
-};
+// const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
+//   // eslint-disable-next-line no-param-reassign
+//   ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
+//   const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
+//   return clinicDetailDoc;
+// };
 
-const fetchexperiencedetails = async (AuthData) => {
-  const DoctorExperienceExist = await DoctorExperience.findOne({ auth: AuthData });
-  return DoctorExperienceExist;
-};
+// const fetchexperiencedetails = async (AuthData) => {
+//   const DoctorExperienceExist = await DoctorExperience.findOne({ auth: AuthData });
+//   return DoctorExperienceExist;
+// };
 
-const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
-  // eslint-disable-next-line no-param-reassign
-  ExperienceDetailBody.auth = AuthData; // Assign Reference to Req Body
-  const ExperienceDetailDoc = await DoctorExperience.create(ExperienceDetailBody);
-  return ExperienceDetailDoc;
-};
+// const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
+//   // eslint-disable-next-line no-param-reassign
+//   ExperienceDetailBody.auth = AuthData; // Assign Reference to Req Body
+//   const ExperienceDetailDoc = await DoctorExperience.create(ExperienceDetailBody);
+//   return ExperienceDetailDoc;
+// };
 
 const fetchpayoutsdetails = async (AuthData) => {
   const DoctorPayoutExist = await DoctorPayout.findOne({ auth: AuthData });
@@ -103,16 +103,16 @@ const submitpayoutsdetails = async (PayoutDetailBody, AuthData) => {
 //   return false;
 // };
 
-const updteClinicDetails = async (Auth, timings, clinicId) => {
-  const result = await DoctorClinic.find({ _id: clinicId, auth: Auth });
-  if (typeof result[0] === 'object') {
-    await DoctorClinic.updateOne({ _id: clinicId }, { $set: { timing: timings } });
-    const res = await DoctorClinic.findById(clinicId);
-    const response = { id: res._id, clinicName: res.clinicName };
-    return response;
-  }
-  return false;
-};
+// const updteClinicDetails = async (Auth, timings, clinicId) => {
+//   const result = await DoctorClinic.find({ _id: clinicId, auth: Auth });
+//   if (typeof result[0] === 'object') {
+//     await DoctorClinic.updateOne({ _id: clinicId }, { $set: { timing: timings } });
+//     const res = await DoctorClinic.findById(clinicId);
+//     const response = { id: res._id, clinicName: res.clinicName };
+//     return response;
+//   }
+//   return false;
+// };
 
 // const updateDetails = async (about, address, pincode, experience, country, state, city, auth) => {
 //   const Auth = { auth };
@@ -126,21 +126,21 @@ const updteClinicDetails = async (Auth, timings, clinicId) => {
 //   }
 // };
 
-const doctorExpEducation = async (auth, experience, education) => {
-  // eslint-disable-next-line no-param-reassign
-  education.auth = auth;
-  // eslint-disable-next-line no-param-reassign
-  experience.auth = auth;
-  const edu = await DoctorEducation.findOne({ auth });
-  const exp = await DoctorExperience.findOne({ auth });
-  if (edu || exp) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'these details were already submitted');
-  } else {
-    const Education = await DoctorEducation.create(education);
-    const Experience = await DoctorExperience.create(experience);
-    return { Education, Experience };
-  }
-};
+// const doctorExpEducation = async (auth, experience, education) => {
+//   // eslint-disable-next-line no-param-reassign
+//   education.auth = auth;
+//   // eslint-disable-next-line no-param-reassign
+//   experience.auth = auth;
+//   const edu = await DoctorEducation.findOne({ auth });
+//   const exp = await DoctorExperience.findOne({ auth });
+//   if (edu || exp) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, 'these details were already submitted');
+//   } else {
+//     const Education = await DoctorEducation.create(education);
+//     const Experience = await DoctorExperience.create(experience);
+//     return { Education, Experience };
+//   }
+// };
 
 const updateappointmentPrice = async (appointmentPrice, auth) => {
   await DoctorBasic.updateOne({ auth }, { $set: { appointmentPrice } });
@@ -221,20 +221,20 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
 module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
-  submiteducationdetails,
-  fetcheducationdetails,
-  submitedClinicdetails,
-  fetchClinicdetails,
-  submitprofilepicture,
-  submitexperiencedetails,
-  fetchexperiencedetails,
+  // submiteducationdetails,
+  // fetcheducationdetails,
+  // submitedClinicdetails,
+  // fetchClinicdetails,
+  // submitprofilepicture,
+  // submitexperiencedetails,
+  // fetchexperiencedetails,
   fetchpayoutsdetails,
   submitpayoutsdetails,
   // addConsultationfee,
   // notificationSettings,
-  updteClinicDetails,
+  // updteClinicDetails,
   // updateDetails,
-  doctorExpEducation,
+  // doctorExpEducation,
   updateappointmentPrice,
   // doctorClinicTimings,
   // getBillingDetails,

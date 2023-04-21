@@ -68,12 +68,12 @@ router.route('/payout-details').get(authDoctor(), doctorProfileController.fetchp
 router
   .route('/payout-details')
   .post(authDoctor(), validate(doctorProfileValidator.PayoutsDoctorDetails), doctorProfileController.submitpayoutsdetails);
-router.post(
-  '/consultationfee',
-  authdoctorverified(),
-  validate(doctorProfileValidator.addConsultationfee),
-  doctorProfileController.addConsultationfee
-);
+// router.post(
+//   '/consultationfee',
+//   authdoctorverified(),
+//   validate(doctorProfileValidator.addConsultationfee),
+//   doctorProfileController.addConsultationfee
+// );
 // router.post(
 //   '/notifications',
 //   authdoctorverified(),

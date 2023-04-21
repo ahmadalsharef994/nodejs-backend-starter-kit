@@ -1,22 +1,22 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const userprofileService = require('../services/userprofile.service');
-const { authService, appointmentService } = require('../services');
+const { authService } = require('../services');
 
-const getStats = catchAsync(async (req, res) => {
-  const feedbacks = await appointmentService.getUserFeedbacks(req.query.id);
+// const getStats = catchAsync(async (req, res) => {
+//   const feedbacks = await appointmentService.getUserFeedbacks(req.query.id);
 
-  const RATING = (
-    feedbacks.reduce((doctorRatingsSum, feedback) => {
-      return doctorRatingsSum + feedback.doctorRating;
-    }, 0) / feedbacks.length
-  ).toFixed(1);
+//   const RATING = (
+//     feedbacks.reduce((doctorRatingsSum, feedback) => {
+//       return doctorRatingsSum + feedback.doctorRating;
+//     }, 0) / feedbacks.length
+//   ).toFixed(1);
 
-  res.status(httpStatus.OK).json({
-    message: 'success',
-    data: RATING,
-  });
-});
+//   res.status(httpStatus.OK).json({
+//     message: 'success',
+//     data: RATING,
+//   });
+// });
 
 const showUserProfile = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -162,6 +162,6 @@ module.exports = {
   // getAllMembers,
   // updateNotificationSettings,
   updateprofilepic,
-  getStats,
+  // getStats,
   getUpcomingEvents,
 };

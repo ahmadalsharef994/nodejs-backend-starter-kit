@@ -67,15 +67,15 @@ const getStats = catchAsync(async (req, res) => {
   const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
   const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
 
-  const feedbacks = await appointmentService.getDoctorFeedbacks(doctorId);
+  // const feedbacks = await appointmentService.getDoctorFeedbacks(doctorId);
 
-  const RATING = (
-    feedbacks.reduce((userRatingsSum, feedback) => {
-      return userRatingsSum + feedback.userRating;
-    }, 0) / feedbacks.length
-  ).toFixed(1);
+  // const RATING = (
+  //   feedbacks.reduce((userRatingsSum, feedback) => {
+  //     return userRatingsSum + feedback.userRating;
+  //   }, 0) / feedbacks.length
+  // ).toFixed(1);
 
-  res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME, RATING });
+  res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME });
 });
 
 const submitbasicdetails = catchAsync(async (req, res) => {
@@ -85,15 +85,13 @@ const submitbasicdetails = catchAsync(async (req, res) => {
   if (resultData !== false) {
     res.status(httpStatus.CREATED).json({
       message: 'Basic details Submitted',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
       data: resultData,
     });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({
       message: 'Unknown Data  Submission Error',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   }
 });
@@ -125,8 +123,7 @@ const submiteducationdetails = catchAsync(async (req, res) => {
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   res.status(httpStatus.CREATED).json({
     message: 'Education Details Submitted!',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -146,8 +143,7 @@ const submitexperiencedetails = catchAsync(async (req, res) => {
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   res.status(httpStatus.CREATED).json({
     message: 'Experience Details Submitted!',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -168,14 +164,12 @@ const submitclinicdetails = catchAsync(async (req, res) => {
   if (!resultData) {
     res.status(httpStatus.BAD_REQUEST).json({
       message: 'Data already Submitted',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   } else {
     res.status(httpStatus.CREATED).json({
       message: 'Clinic details Submitted',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
       data: resultData,
     });
   }
@@ -232,15 +226,15 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
   }
 });
 
-const addConsultationfee = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const ConsultationData = await doctorprofileService.addConsultationfee(req.body, AuthData);
-  if (ConsultationData !== false) {
-    res.status(httpStatus.CREATED).json({ ConsultationData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
-  }
-});
+// const addConsultationfee = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const ConsultationData = await doctorprofileService.addConsultationfee(req.body, AuthData);
+//   if (ConsultationData !== false) {
+//     res.status(httpStatus.CREATED).json({ ConsultationData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
+//   }
+// });
 
 // const updateNotificationSettings = catchAsync(async (req, res) => {
 //   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -365,7 +359,7 @@ module.exports = {
   fetchexperiencedetails,
   fetchpayoutsdetails,
   fetchprofiledetails,
-  addConsultationfee,
+  // addConsultationfee,
   // updateNotificationSettings,
   // updateClinicDetails,
   // updateDetails,

@@ -1,22 +1,22 @@
 const Joi = require('joi');
 
 // eslint-disable-next-line prettier/prettier
-const createLabtestOrder = { // cartAmount -> createLabtestOrder
-  body: Joi.object().keys({
-    labTestOrderID: Joi.string().required(), // orderId
-    sessionID: Joi.string().required(), // labtestId
-  }),
-};
+// const createLabtestOrder = { // cartAmount -> createLabtestOrder
+//   body: Joi.object().keys({
+//     labTestOrderID: Joi.string().required(), // orderId
+//     sessionID: Joi.string().required(), // labtestId
+//   }),
+// };
 
-// eslint-disable-next-line prettier/prettier
-const verifyLabtestOrder = { // checkout -> verifyLabtestOrder
-  body: Joi.object().keys({
-    orderCreationId: Joi.string().required(),
-    razorpayOrderId: Joi.string().required(),
-    razorpayPaymentId: Joi.string().required(),
-    razorpaySignature: Joi.string().required(),
-  }),
-};
+// // eslint-disable-next-line prettier/prettier
+// const verifyLabtestOrder = { // checkout -> verifyLabtestOrder
+//   body: Joi.object().keys({
+//     orderCreationId: Joi.string().required(),
+//     razorpayOrderId: Joi.string().required(),
+//     razorpayPaymentId: Joi.string().required(),
+//     razorpaySignature: Joi.string().required(),
+//   }),
+// };
 
 // eslint-disable-next-line prettier/prettier
 const createAppointmentOrder = { // AppointmentOrder -> createAppointmentOrder
@@ -59,8 +59,8 @@ const fetchRazorpayOrderStatus = {
 };
 
 module.exports = {
-  createLabtestOrder,
-  verifyLabtestOrder,
+  // createLabtestOrder,
+  // verifyLabtestOrder,
   createAppointmentOrder,
   verifyApoointmentOrder,
   createWalletOrder,

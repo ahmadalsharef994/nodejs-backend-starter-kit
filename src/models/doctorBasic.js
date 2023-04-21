@@ -69,6 +69,48 @@ const DoctorBasicSchema = mongoose.Schema(
       type: Number,
       default: 0.1,
     },
+    clinicAddress: {
+      type: String,
+      default: null,
+    },
+    registrationNo: {
+      type: String,
+      required: true,
+    },
+    yearofRegistration: {
+      type: Number,
+      required: true,
+    },
+    stateMedicalCouncil: {
+      type: String,
+      required: true,
+    },
+    isEducationVerified: {
+      type: Boolean,
+      default: false,
+    },
+    mainstream: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    specialization: {
+      type: Array,
+      required: true,
+      trim: true,
+    },
+    experience: {
+      type: Number,
+      default: 0,
+    },
+    isExperienceVerified: {
+      type: Boolean,
+      default: false,
+    },
+    skills: {
+      type: Array,
+      required: true,
+    },
   },
   {
     timestamps: true,

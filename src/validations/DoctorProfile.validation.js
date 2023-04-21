@@ -211,13 +211,13 @@ const ExperienceDoctorDetails = {
   }),
 };
 
-const addConsultationfee = {
-  body: Joi.object().keys({
-    Consultationcharges: Joi.number().required(),
-    MedzgoCharge: Joi.number().required(),
-    NetFeeRecieved: Joi.number().required(),
-  }),
-};
+// const addConsultationfee = {
+//   body: Joi.object().keys({
+//     Consultationcharges: Joi.number().required(),
+//     MedzgoCharge: Joi.number().required(),
+//     NetFeeRecieved: Joi.number().required(),
+//   }),
+// };
 
 const notificationSettings = {
   body: Joi.object().keys({
@@ -296,7 +296,7 @@ module.exports = {
   ExperienceDoctorDetails,
   ClinicDoctorDetails,
   PayoutsDoctorDetails,
-  addConsultationfee,
+  // addConsultationfee,
   notificationSettings,
   timings,
   // updateDetails,

@@ -1,5 +1,5 @@
 const dotenv = require('dotenv');
-const AWS = require('aws-sdk');
+// const AWS = require('aws-sdk');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 const multer = require('multer');
@@ -10,13 +10,13 @@ const multer = require('multer');
 
 dotenv.config();
 
-const AwsS3 = new AWS.S3({
-  accessKeyId: process.env.AWSID,
-  region: 'us-east-2',
-  secretAccessKey: process.env.AWSKEY,
-  bucket: process.env.BUCKET,
-  signatureVersion: 'v4',
-});
+// const AwsS3 = new AWS.S3({
+//   accessKeyId: process.env.AWSID,
+//   region: 'us-east-2',
+//   secretAccessKey: process.env.AWSKEY,
+//   bucket: process.env.BUCKET,
+//   signatureVersion: 'v4',
+// });
 
 // const fileFilter = (req, file, cb) => {
 //   if (
@@ -45,28 +45,28 @@ const storage = new CloudinaryStorage({
 });
 
 const upload = multer({ storage });
-const getSignedUrl = async (file) => {
-  const params = {
-    Bucket: process.env.BUCKET,
-    Key: file,
-    Expires: 60 * 5,
-    ResponseContentDisposition: 'inline',
-  };
-  try {
-    const url = await new Promise((resolve, reject) => {
-      AwsS3.getSignedUrl('getObject', params, (err, docs) => {
-        return err ? reject(err) : resolve(docs);
-      });
-    });
-    return url;
-  } catch (err) {
-    if (err) {
-      return err;
-    }
-  }
-};
+// const getSignedUrl = async (file) => {
+//   const params = {
+//     Bucket: process.env.BUCKET,
+//     Key: file,
+//     Expires: 60 * 5,
+//     ResponseContentDisposition: 'inline',
+//   };
+//   try {
+//     const url = await new Promise((resolve, reject) => {
+//       AwsS3.getSignedUrl('getObject', params, (err, docs) => {
+//         return err ? reject(err) : resolve(docs);
+//       });
+//     });
+//     return url;
+//   } catch (err) {
+//     if (err) {
+//       return err;
+//     }
+//   }
+// };
 
 module.exports = {
   upload,
-  getSignedUrl,
+  // getSignedUrl,
 };

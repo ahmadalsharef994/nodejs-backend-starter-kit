@@ -47,7 +47,7 @@ router
 //   UserProfileController.updateNotificationSettings
 // );
 
-router.route('/stats').get(authuser(), UserProfileController.getStats);
+// router.route('/stats').get(authuser(), UserProfileController.getStats);
 
 router.route('/upcoming-events').get(authuser(), UserProfileController.getUpcomingEvents);
 

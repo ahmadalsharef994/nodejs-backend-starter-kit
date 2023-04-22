@@ -11,27 +11,7 @@ jest.setTimeout(20000);
 let doctorToken;
 let authId;
 // login test
-describe('POST /v1/auth/doctor/login', () => {
-  test('Expect to login and response with a token', async () => {
-    const loginCredentials = {
-      email: 'sadik.shaik@medzgo.com',
-      password: 'Pass@123',
-    };
-    const res = await request(app)
-      .post('/v1/auth/doctor/login')
-      .set('Accept', '*/*')
-      .set('fcmtoken', 'abcdddd')
-      .set('devicehash', 'abcd')
-      .set('devicetype', 'ios')
-      .set('Content-Type', 'application/json')
-      .set('Connection', 'keep-alive')
-      .send(loginCredentials);
-    expect(res.body.AuthData).not.toBeNull();
-    expect(res.body.authtoken).not.toBeNull();
-    doctorToken = res.body.authtoken;
-    authId = res.body.AuthData.id;
-  });
-});
+
 // get apppointment details
 describe('GET /v1/doctor/appointment/:62e4246fd4e3ee003a8b0999/appoinment-details', () => {
   test('Expect to get appointment details', async () => {

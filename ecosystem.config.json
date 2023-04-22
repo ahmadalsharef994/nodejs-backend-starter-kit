@@ -1,7 +1,7 @@
 {
   "apps": [
     {
-      "name": "Medzgo-RestAPI",
+      "name": "HEALTHCARE_APPI",
       "script": "src/index.js",
       "instances": 1,
       "autorestart": true,

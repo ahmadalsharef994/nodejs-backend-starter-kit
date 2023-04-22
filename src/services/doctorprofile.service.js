@@ -8,11 +8,11 @@ const {
   DoctorPayout,
   // ConsultationFee,
   // Notification,
-  // Appointment,
+  Appointment,
 } = require('../models');
 // const DoctorQueries = require('../models/doctorQuries.model');
 // const ApiError = require('../utils/ApiError');
-// const netEarn = require('../utils/netEarnCalculator');
+const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (doctorId) => {
   const basicDetails = await DoctorBasic.findOne({ auth: doctorId });
@@ -35,10 +35,11 @@ const submitbasicdetails = async (basicDetails, AuthData) => {
 //   return false;
 // };
 
-// const fetcheducationdetails = async (AuthData) => {
-//   const DoctorEducationExist = await DoctorEducation.findOne({ auth: AuthData });
-//   return DoctorEducationExist;
-// };
+const fetcheducationdetails = async (AuthData) => {
+  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  const { registrationNo, yearofRegistration, stateMedicalCouncil, isEducationVerified } = doctorBasic;
+  return { registrationNo, yearofRegistration, stateMedicalCouncil, isEducationVerified };
+};
 
 // const submiteducationdetails = async (EducationDetailBody, AuthData) => {
 //   // eslint-disable-next-line no-param-reassign
@@ -47,10 +48,11 @@ const submitbasicdetails = async (basicDetails, AuthData) => {
 //   return educationDetailDoc;
 // };
 
-// const fetchClinicdetails = async (AuthData) => {
-//   const DoctorClinicExist = await DoctorClinic.find({ auth: AuthData });
-//   return DoctorClinicExist;
-// };
+const fetchClinicdetails = async (AuthData) => {
+  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  const { clinicName, clinicAddress, clinicTiming } = doctorBasic;
+  return { clinicName, clinicAddress, clinicTiming };
+};
 
 // const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
 //   // eslint-disable-next-line no-param-reassign
@@ -59,10 +61,11 @@ const submitbasicdetails = async (basicDetails, AuthData) => {
 //   return clinicDetailDoc;
 // };
 
-// const fetchexperiencedetails = async (AuthData) => {
-//   const DoctorExperienceExist = await DoctorExperience.findOne({ auth: AuthData });
-//   return DoctorExperienceExist;
-// };
+const fetchexperiencedetails = async (AuthData) => {
+  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  const { experience, skills, isExperienceVerified } = doctorBasic;
+  return { experience, skills, isExperienceVerified };
+};
 
 // const submitexperiencedetails = async (ExperienceDetailBody, AuthData) => {
 //   // eslint-disable-next-line no-param-reassign
@@ -176,40 +179,40 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
 //   }
 // };
 
-// const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
-//   const pastPaidAppointments = await Appointment.paginate(
-//     { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
-//     options
-//   );
+const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
+  const pastPaidAppointments = await Appointment.paginate(
+    { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
+    options
+  );
 
-//   const pickedProperties = pastPaidAppointments.results.map((appointment) => {
-//     // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
-//     // console.log(avatar)
-//     return {
-//       patientName: appointment.patientName,
-//       consultationDate: appointment.Date,
-//       StartTime: appointment.StartTime,
-//       price: appointment.price,
-//       avatar: 'https://docprofilephoto.s3.ap-south-1.amazonaws.com/avatar/b0f985ca-c2a4-4f6a-a97c-124a5b5192d9.png',
-//       // avatar to be extracted from DB
-//       orderId: appointment.orderId,
-//     };
-//   });
-//   // eslint-disable-next-line array-callback-return
-//   pickedProperties.map((appointment) => {
-//     /* eslint-disable no-param-reassign */
-//     appointment.taxes = 0.05 * appointment.price;
-//     appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
-//     appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
-//     appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
-//   });
+  const pickedProperties = pastPaidAppointments.results.map((appointment) => {
+    // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
+    // console.log(avatar)
+    return {
+      patientName: appointment.patientName,
+      consultationDate: appointment.Date,
+      StartTime: appointment.StartTime,
+      price: appointment.price,
+      avatar: 'https://docprofilephoto.s3.ap-south-1.amazonaws.com/avatar/b0f985ca-c2a4-4f6a-a97c-124a5b5192d9.png',
+      // avatar to be extracted from DB
+      orderId: appointment.orderId,
+    };
+  });
+  // eslint-disable-next-line array-callback-return
+  pickedProperties.map((appointment) => {
+    /* eslint-disable no-param-reassign */
+    appointment.taxes = 0.05 * appointment.price;
+    appointment.serviceCharge = 0.1 * (appointment.price - appointment.taxes);
+    appointment.TDS = 0.0 * (appointment.price - appointment.serviceCharge - appointment.taxes);
+    appointment.netEarn = netEarn(appointment.price, 0.05, 0.1, 0);
+  });
 
-//   pickedProperties.totalPages = pastPaidAppointments.totalPages;
-//   pickedProperties.page = pastPaidAppointments.page;
-//   pickedProperties.limit = pastPaidAppointments.limit;
-//   pickedProperties.totalResults = pastPaidAppointments.totalResults;
-//   return pickedProperties;
-// };
+  pickedProperties.totalPages = pastPaidAppointments.totalPages;
+  pickedProperties.page = pastPaidAppointments.page;
+  pickedProperties.limit = pastPaidAppointments.limit;
+  pickedProperties.totalResults = pastPaidAppointments.totalResults;
+  return pickedProperties;
+};
 
 // const getDoctorQueries = async (AuthDoctor) => {
 //   const doctorQueries = await DoctorQueries.find({ AuthDoctor });
@@ -222,12 +225,12 @@ module.exports = {
   submitbasicdetails,
   fetchbasicdetails,
   // submiteducationdetails,
-  // fetcheducationdetails,
+  fetcheducationdetails,
   // submitedClinicdetails,
-  // fetchClinicdetails,
+  fetchClinicdetails,
   // submitprofilepicture,
   // submitexperiencedetails,
-  // fetchexperiencedetails,
+  fetchexperiencedetails,
   fetchpayoutsdetails,
   submitpayoutsdetails,
   // addConsultationfee,
@@ -237,7 +240,7 @@ module.exports = {
   // doctorExpEducation,
   updateappointmentPrice,
   // doctorClinicTimings,
-  // getBillingDetails,
+  getBillingDetails,
   // sendDoctorQueries,
   // getDoctorQueries,
 };

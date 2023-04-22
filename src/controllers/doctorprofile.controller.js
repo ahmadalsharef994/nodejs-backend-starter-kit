@@ -7,7 +7,7 @@ const appointmentPreferenceService = require('../services/appointmentpreference.
 const authDoctorController = require('./authdoctor.controller');
 const { authService, documentService, appointmentService } = require('../services');
 const netEarn = require('../utils/netEarnCalculator');
-// const pick = require('../utils/pick');
+const pick = require('../utils/pick');
 const daysDiff = require('../utils/calculateDays');
 
 const getStats = catchAsync(async (req, res) => {
@@ -198,7 +198,7 @@ const fetchpayoutsdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const payoutData = await doctorprofileService.fetchpayoutsdetails(AuthData);
   if (!payoutData) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
+    throw new ApiError(httpStatus.NO_CONTENT, 'Your payoutData is pending data submit');
   } else {
     res.status(httpStatus.OK).json({ data: payoutData });
   }
@@ -290,14 +290,14 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
 //   }
 // });
 
-// const updateAppointmentPrice = catchAsync(async (req, res) => {
-//   const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
-//   if (result === true) {
-//     res.status(httpStatus.OK).json({ message: 'appointmentPrice updated' });
-//   } else {
-//     res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
-//   }
-// });
+const updateAppointmentPrice = catchAsync(async (req, res) => {
+  const result = await doctorprofileService.updateappointmentPrice(req.body.appointmentPrice, req.SubjectId);
+  if (result === true) {
+    res.status(httpStatus.OK).json({ message: 'appointmentPrice updated' });
+  } else {
+    res.status(httpStatus.OK).json({ message: 'appointmentPrice not updated try again' });
+  }
+});
 
 // const getDoctorClinicTimings = catchAsync(async (req, res) => {
 //   const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
@@ -324,21 +324,21 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
 //   }
 // });
 
-// const getBillingDetails = catchAsync(async (req, res) => {
-//   const doctorId = req.SubjectId;
-//   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-//   const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
-//   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
-//   const billingDetails = await doctorprofileService.getBillingDetails(doctorId, fromDate, endDate, options);
-//   res.status(httpStatus.OK).json({
-//     message: `Billing details between ${fromDate} and ${endDate}`,
-//     data: billingDetails,
-//     totalPages: billingDetails.totalPages,
-//     page: billingDetails.page,
-//     limit: billingDetails.limit,
-//     totalResults: billingDetails.totalResults,
-//   });
-// });
+const getBillingDetails = catchAsync(async (req, res) => {
+  const doctorId = req.SubjectId;
+  const options = pick(req.query, ['sortBy', 'limit', 'page']);
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
+  const billingDetails = await doctorprofileService.getBillingDetails(doctorId, fromDate, endDate, options);
+  res.status(httpStatus.OK).json({
+    message: `Billing details between ${fromDate} and ${endDate}`,
+    data: billingDetails,
+    totalPages: billingDetails.totalPages,
+    page: billingDetails.page,
+    limit: billingDetails.limit,
+    totalResults: billingDetails.totalResults,
+  });
+});
 
 // const getDoctorQueries = catchAsync(async (req, res) => {
 //   const doctorQueries = await doctorprofileService.getDoctorQueries(req.SubjectId);
@@ -364,9 +364,9 @@ module.exports = {
   // updateClinicDetails,
   // updateDetails,
   // doctorExpandEducation,
-  // updateAppointmentPrice,
+  updateAppointmentPrice,
   // getDoctorClinicTimings,
-  // getBillingDetails,
+  getBillingDetails,
   // sendDoctorQueries,
   // getDoctorQueries,
 };

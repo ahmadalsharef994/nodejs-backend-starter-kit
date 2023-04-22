@@ -69,8 +69,17 @@ const DoctorBasicSchema = mongoose.Schema(
       type: Number,
       default: 0.1,
     },
+    clinicName: {
+      type: String,
+      required: true,
+      default: null,
+    },
     clinicAddress: {
       type: String,
+      default: null,
+    },
+    clinicTiming: {
+      type: Array,
       default: null,
     },
     registrationNo: {
@@ -103,13 +112,13 @@ const DoctorBasicSchema = mongoose.Schema(
       type: Number,
       default: 0,
     },
-    isExperienceVerified: {
-      type: Boolean,
-      default: false,
-    },
     skills: {
       type: Array,
       required: true,
+    },
+    isExperienceVerified: {
+      type: Boolean,
+      default: false,
     },
   },
   {

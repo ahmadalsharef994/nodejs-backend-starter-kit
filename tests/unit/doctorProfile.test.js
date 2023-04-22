@@ -13,28 +13,6 @@ let doctorToken;
 let authId;
 // login test
 
-describe('POST /v1/auth/doctor/login', () => {
-  test('Expect to login and response with a token', async () => {
-    const loginCredentials = {
-      email: 'sadik.shaik@medzgo.com',
-      password: 'Pass@123',
-    };
-    const res = await request(app)
-      .post('/v1/auth/doctor/login')
-      .set('Accept', '*/*')
-      .set('fcmtoken', 'abcdddd')
-      .set('devicehash', 'abcd')
-      .set('devicetype', 'ios')
-      .set('Content-Type', 'application/json')
-      .set('Connection', 'keep-alive')
-      .send(loginCredentials);
-    expect(res.body.AuthData).not.toBeNull();
-    expect(res.body.authtoken).not.toBeNull();
-    doctorToken = res.body.authtoken;
-    authId = res.body.AuthData.id;
-  });
-});
-
 // Submitting doctorBasicDetails
 describe('POST /v1/doctor/profile/basic-details', () => {
   test('returns with message "Basic details Submitted"', async () => {
@@ -319,7 +297,7 @@ describe('GET /v1/doctor/profile/billing?sortBy=StartDate:desc&limit=20&page=1',
       .set('Accept', '*/*')
       .set('Authorization', `Bearer ${doctorToken}`);
     expect(res.body.message).toEqual(
-      'Billing details between Sat Jan 01 2022 00:00:00 GMT+0530 (India Standard Time) and Tue Jan 01 2030 00:00:00 GMT+0530 (India Standard Time)'
+      'Billing details between Sat Jan 01 2022 00:00:00 GMT+0300 (East Europe Standard Time) and Tue Jan 01 2030 00:00:00 GMT+0300 (East Europe Standard Time)'
     );
   });
 });

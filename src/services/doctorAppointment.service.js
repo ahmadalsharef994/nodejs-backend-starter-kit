@@ -372,11 +372,17 @@ const getAppointmentsByStatus = async (doctorId, fromDate, endDate, filter, opti
 const getAvailableAppointments = async (doctorId) => {
   const AllAppointmentSlots = await appointmentPreferenceService.getAppointmentPreferences(doctorId);
   if (!AllAppointmentSlots) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
+    throw new ApiError(httpStatus.NO_CONTENT, 'No Appointment Slots Found');
   }
   const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: doctorId, paymentStatus: 'PAID' });
 
-  if (bookedAppointmentSlots === []) {
+  if (!bookedAppointmentSlots) {
+    const availableAppointmentSlots = AllAppointmentSlots;
+    return availableAppointmentSlots;
+  }
+
+  // Now we can safely access the length property
+  if (bookedAppointmentSlots.length === 0) {
     const availableAppointmentSlots = AllAppointmentSlots;
     return availableAppointmentSlots;
   }
@@ -523,8 +529,8 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
       'Prescription ': singlePatientData[4],
     });
   }
-  patientIds[0].metadata[0].totalPages = Math.ceil(patientIds[0].metadata[0].total / limit);
-  patientIds[0].metadata[0].limit = parseInt(limit, 10);
+  // patientIds[0].metadata[0].totalPages = Math.ceil(patientIds[0].metadata[0].total / limit);
+  // patientIds[0].metadata[0].limit = parseInt(limit, 10);
   if (allPatientsData.length) {
     return [allPatientsData, patientIds[0].metadata[0]];
   }

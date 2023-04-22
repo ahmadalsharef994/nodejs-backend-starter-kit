@@ -1,8 +1,8 @@
 #!/bin/bash
-cd Medzgo_RestAPI
+cd HEALTHCARE_APP
 pm2 stop all
 pm2 list
-pm2 start /Medzgo_RestAPI/ecosystem.config.json 
+pm2 start /HEALTHCARE_APP/ecosystem.config.json 
 
 tail -f /dev/null
 

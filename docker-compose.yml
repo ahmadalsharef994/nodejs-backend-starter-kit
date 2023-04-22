@@ -5,7 +5,7 @@ services:
     build: .
     image: node-app
     environment:
-      - MONGODB_URL=mongodb://mongodb:27017/medzgodatabase
+      - MONGODB_URL=mongodb+srv://admin:admin@cluster0.e2yuv.mongodb.net/test
     ports:
       - '3000:3000'
     depends_on:

@@ -161,7 +161,7 @@ const getPatients = catchAsync(async (req, res) => {
       totalResults: patientsData[1].total,
     });
   } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'No Patients Exits' });
+    res.status(httpStatus.NO_CONTENT).json({ message: 'No Patients Exits' });
   }
 });
 
@@ -272,7 +272,7 @@ const getNextAppointmentDoctor = catchAsync(async (req, res) => {
   if (nextAppointment) {
     res.status(httpStatus.OK).json({ nextAppointment });
   } else {
-    res.status(httpStatus.NOT_FOUND).json({ nextAppointment: 'No appointments found' });
+    res.status(httpStatus.NO_CONTENT).json({ nextAppointment: 'No appointments found' });
   }
 });
 
@@ -288,7 +288,7 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
   const result = await appointmentPreferenceService.updateAppointmentPreference(preferences, doctorAuthId, docId);
 
   if (result === null) {
-    res.status(httpStatus.NOT_FOUND).json({ message: "Slots doesn't exist. Create slots inorder to update them!" });
+    res.status(httpStatus.NO_CONTENT).json({ message: "Slots doesn't exist. Create slots inorder to update them!" });
   } else {
     res.status(httpStatus.OK).json({ message: 'slots updated', result });
   }
@@ -300,7 +300,7 @@ const getAppointmentPreferences = catchAsync(async (req, res) => {
     .getAppointmentPreferences(doctorId)
     .then((result) => {
       if (result === null) {
-        return res.status(httpStatus.NOT_FOUND).json({ message: "Appointment slots doesn't exist." });
+        return res.status(httpStatus.NO_CONTENT).json({ message: "Appointment slots doesn't exist." });
       }
       return res.status(httpStatus.OK).json(result);
     })

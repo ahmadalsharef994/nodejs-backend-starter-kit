@@ -7,13 +7,13 @@ const { authService, tokenService, otpServices, verifiedUserService, userProfile
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
 
-// const createUser = catchAsync(async (req, res) => {
-//   const userId = await verifiedUserService.createVerifiedUser(req.body);
-//   if (userId) {
-//     res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
-//   }
-//   res.status(httpStatus.BAD_REQUEST).json({ message: 'Create User Account Failed' });
-// });
+const createUser = catchAsync(async (req, res) => {
+  const userId = await verifiedUserService.createVerifiedUser(req.body);
+  if (userId) {
+    res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
+  }
+  res.status(httpStatus.BAD_REQUEST).json({ message: 'Create User Account Failed' });
+});
 
 const resendCreateUserOtp = catchAsync(async (req, res) => {
   const userId = await verifiedUserService.resendVerifiedUserOtp(req.body.mobile);
@@ -23,13 +23,13 @@ const resendCreateUserOtp = catchAsync(async (req, res) => {
   res.status(httpStatus.BAD_REQUEST).json({ message: 'Resent OTP Failed' });
 });
 
-// const verifyCreatedUser = catchAsync(async (req, res) => {
-//   const userId = await verifiedUserService.verifyVerifiedUser(req.body.userId, req.body.otp);
-//   if (userId) {
-//     res.status(httpStatus.OK).json({ message: 'User Mobile Number Verified Successfully', userId });
-//   }
-//   res.status(httpStatus.BAD_REQUEST).json({ message: 'User Mobile Number Verification Failed' });
-// });
+const verifyCreatedUser = catchAsync(async (req, res) => {
+  const userId = await verifiedUserService.verifyVerifiedUser(req.body.userId, req.body.otp);
+  if (userId) {
+    res.status(httpStatus.OK).json({ message: 'User Mobile Number Verified Successfully', userId });
+  }
+  res.status(httpStatus.BAD_REQUEST).json({ message: 'User Mobile Number Verification Failed' });
+});
 
 const register = catchAsync(async (req, res) => {
   const { userId, email, password, fullname, dob, gender, pincode } = await req.body;
@@ -195,9 +195,9 @@ const resetPassowrd = catchAsync(async (req, res) => {
 });
 
 module.exports = {
-  // createUser,
+  createUser,
   resendCreateUserOtp,
-  // verifyCreatedUser,
+  verifyCreatedUser,
   register,
   login,
   // loginWithGoogle,

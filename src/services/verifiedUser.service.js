@@ -41,7 +41,7 @@ const resendVerifiedUserOtp = async (mobile) => {
     { $set: { otp: OTP, otpTimestamp: new Date() } },
     { new: true }
   );
-  const response2F = await smsService.sendPhoneOtp2F(mobile, OTP);
+  const response2F = await smsService.sendPhoneOtp2F(mobile, 40, OTP);
   if (response2F.data.Status === 'Success') {
     return user.id;
   }

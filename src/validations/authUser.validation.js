@@ -1,25 +1,25 @@
 const Joi = require('joi');
 const { password, objectId } = require('./custom.validation');
 
-// const createUser = {
-//   body: Joi.object().keys({
-//     isdcode: Joi.number(),
-//     mobile: Joi.number().required(),
-//   }),
-// };
-
-const resendCreateUserOtp = {
+const createUser = {
   body: Joi.object().keys({
-    mobile: Joi.number().required().min(1000000000).max(9999999999),
+    isdcode: Joi.number(),
+    mobile: Joi.number().required(),
   }),
 };
 
-// const verifyCreatedUser = {
-//   body: Joi.object().keys({
-//     userId: Joi.string().custom(objectId).required(),
-//     otp: Joi.number().required().min(100000).max(999999),
-//   }),
-// };
+const resendCreateUserOtp = {
+  body: Joi.object().keys({
+    mobile: Joi.number().required().min(100000000).max(9999999999),
+  }),
+};
+
+const verifyCreatedUser = {
+  body: Joi.object().keys({
+    userId: Joi.string().custom(objectId).required(),
+    otp: Joi.number().required().min(100000).max(999999),
+  }),
+};
 
 const registeruser = {
   body: Joi.object().keys({
@@ -59,7 +59,7 @@ const forgotPassword = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(100000000).max(9999999999),
   }),
 };
 
@@ -67,7 +67,7 @@ const verifyOtp = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(100000000).max(9999999999),
     resetcode: Joi.number().required(),
   }),
 };
@@ -75,7 +75,7 @@ const resetPassword = {
   body: Joi.object().keys({
     choice: Joi.string().required().valid('email', 'phone'),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(1000000000).max(9999999999),
+    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(100000000).max(9999999999),
     newPassword: Joi.string().required().custom(password),
     confirmNewPassword: Joi.string().required().custom(password),
   }),
@@ -99,9 +99,9 @@ const verifyPhone = {
 // };
 
 module.exports = {
-  // createUser,
+  createUser,
   resendCreateUserOtp,
-  // verifyCreatedUser,
+  verifyCreatedUser,
   registeruser,
   login,
   logout,

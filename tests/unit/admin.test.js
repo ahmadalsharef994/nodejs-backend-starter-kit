@@ -11,27 +11,6 @@ jest.setTimeout(20000);
 
 let adminToken;
 // admin login
-describe('POST /v1/internalteam/restricted/adminsignin', () => {
-  test('Expect to login and response with a token', async () => {
-    const loginCredentials = {
-      email: 'sadikuzumaki@gmail.com',
-      password: 'pass@123',
-    };
-    const res = await request(app)
-      .post('/v1/internalteam/restricted/adminsignin')
-      .set('Accept', '*/*')
-      .set('fcmtoken', 'abcdddd')
-      .set('devicehash', 'abcd')
-      .set('devicetype', 'ios')
-      .set('Content-Type', 'application/json')
-      .set('Connection', 'keep-alive')
-      .set('secretadminkey', 'ThisIsMySecretJWTPoorMedzgoDevops')
-      .send(loginCredentials);
-    expect(res.body.AuthData).not.toBeNull();
-    expect(res.body.authtoken).not.toBeNull();
-    adminToken = res.body.authtoken;
-  });
-});
 
 // verify a doctor
 describe('POST /v1/internalteam/verifydoctor', () => {

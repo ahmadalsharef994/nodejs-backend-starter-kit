@@ -10,14 +10,14 @@ const otpServices = require('./otp.service');
  * @returns {Promise<Auth>}
  */
 // create user auth data
-const createAuthData = async (authBody) => {
-  if (await Auth.isEmailTaken(authBody.email)) {
+const register = async (AuthData) => {
+  if (await Auth.isEmailTaken(AuthData.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
   }
-  if (await Auth.isPhoneTaken(authBody.mobile)) {
+  if (await Auth.isPhoneTaken(AuthData.mobile)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Phone Number Already Taken');
   }
-  const auth = await Auth.create(authBody);
+  const auth = await Auth.create(AuthData);
   return auth;
 };
 
@@ -85,11 +85,11 @@ const getAuthByPhone = async (phone) => {
  * @returns {Promise<Auth>}
  */
 // eslint-disable-next-line no-shadow
-const updateAuthPassByID = async (Auth, updateBody) => {
+const updatePassword = async (AuthData, newPassword) => {
   // eslint-disable-next-line no-param-reassign
-  Auth.password = updateBody;
-  await Auth.save();
-  return Auth;
+  AuthData.password = newPassword;
+  await AuthData.save();
+  return AuthData;
 };
 /**
  * Update Auth by id
@@ -130,59 +130,59 @@ const deleteAuthById = async (authId) => {
  * @returns {Promise<Auth>}
  */
 // login for doctor
-const loginAuthWithEmailAndPassworDoctor = async (email, password) => {
-  const doctor = await getAuthByEmail(email);
+const loginWithEmailAndPassword = async (email, password) => {
+  const auth = await getAuthByEmail(email);
 
-  if (!doctor) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Doctor not found');
+  if (!auth) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'not found');
   }
-  if (doctor) {
-    if (`${doctor.role[0]}` !== 'doctor') {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Doctor not found');
-    }
-  }
-  if (!doctor || !(await doctor.isPasswordMatch(password))) {
+  // if (doctor) {
+  //   if (`${doctor.role[0]}` !== 'doctor') {
+  //     throw new ApiError(httpStatus.UNAUTHORIZED, 'Doctor not found');
+  //   }
+  // }
+  if (!auth || !(await auth.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
-  return doctor;
+  return auth;
 };
 // login admin
-const loginAuthWithEmailAndPasswordAdmin = async (username, password) => {
-  const user = await getAuthByEmail(username);
-  if (!user || `${user.role[0]}` !== 'admin') {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
-  }
-  if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-  }
-  return user;
-};
-// login for user
-const loginAuthWithEmailAndPassword = async (username, password) => {
-  let user = await getAuthByEmail(username);
-  if (!user) {
-    user = await getAuthByPhone(username);
-    if (!user || `${user.role[0]}` !== 'user') {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
-    }
-  }
-  if (user) {
-    if (`${user.role[0]}` !== 'user') {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
-    }
-  }
-  if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-  }
-  return user;
-};
+// const loginWithEmailAndPassword = async (username, password) => {
+//   const user = await getAuthByEmail(username);
+//   if (!user || `${user.role[0]}` !== 'admin') {
+//     throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+//   }
+//   if (!user || !(await user.isPasswordMatch(password))) {
+//     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+//   }
+//   return user;
+// };
+// // login for user
+// const loginWithEmailAndPassword = async (username, password) => {
+//   let user = await getAuthByEmail(username);
+//   if (!user) {
+//     user = await getAuthByPhone(username);
+//     if (!user || `${user.role[0]}` !== 'user') {
+//       throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+//     }
+//   }
+//   if (user) {
+//     if (`${user.role[0]}` !== 'user') {
+//       throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
+//     }
+//   }
+//   if (!user || !(await user.isPasswordMatch(password))) {
+//     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+//   }
+//   return user;
+// };
 // change password
 const changeAuthPassword = async (oldPassword, newPassword, token, SubjectId) => {
   const userdocs = await getAuthById(SubjectId);
   if (!userdocs || !(await userdocs.isPasswordMatch(oldPassword))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Password InCorrect');
   }
-  await updateAuthPassByID(userdocs, newPassword);
+  await updatePassword(userdocs, newPassword);
   await tokenService.logoutdevice(token);
   return userdocs;
 };
@@ -212,7 +212,7 @@ const resetPassword = async (AuthData, newPassword, confirmPassword) => {
   return response;
 };
 module.exports = {
-  createAuthData,
+  register,
   queryAuthData,
   // createGoogleAuthData,
   getAuthById,
@@ -220,10 +220,10 @@ module.exports = {
   getAuthByPhone,
   updateAuthById,
   deleteAuthById,
-  updateAuthPassByID,
-  loginAuthWithEmailAndPassword,
-  loginAuthWithEmailAndPassworDoctor,
-  loginAuthWithEmailAndPasswordAdmin,
+  updatePassword,
+  loginWithEmailAndPassword,
+  // loginWithEmailAndPassword,
+  // loginWithEmailAndPassword,
   resetPassword,
   verifyOtp,
   changeAuthPassword,

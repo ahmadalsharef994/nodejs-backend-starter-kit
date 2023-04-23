@@ -66,7 +66,7 @@ const register = new promclient.Registry();
 
 // Add a default label which is added to all metrics
 register.setDefaultLabels({
-  app: 'medzgo-restAPI',
+  app: 'HEALTHCARE_APP',
 });
 
 // Enable the collection of default metrics

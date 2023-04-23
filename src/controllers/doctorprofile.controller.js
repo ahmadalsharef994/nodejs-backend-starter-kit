@@ -67,15 +67,15 @@ const getStats = catchAsync(async (req, res) => {
   const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
   const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
 
-  const feedbacks = await appointmentService.getDoctorFeedbacks(doctorId);
+  // const feedbacks = await appointmentService.getDoctorFeedbacks(doctorId);
 
-  const RATING = (
-    feedbacks.reduce((userRatingsSum, feedback) => {
-      return userRatingsSum + feedback.userRating;
-    }, 0) / feedbacks.length
-  ).toFixed(1);
+  // const RATING = (
+  //   feedbacks.reduce((userRatingsSum, feedback) => {
+  //     return userRatingsSum + feedback.userRating;
+  //   }, 0) / feedbacks.length
+  // ).toFixed(1);
 
-  res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME, RATING });
+  res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME });
 });
 
 const submitbasicdetails = catchAsync(async (req, res) => {
@@ -85,15 +85,13 @@ const submitbasicdetails = catchAsync(async (req, res) => {
   if (resultData !== false) {
     res.status(httpStatus.CREATED).json({
       message: 'Basic details Submitted',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
       data: resultData,
     });
   } else {
     res.status(httpStatus.BAD_REQUEST).json({
       message: 'Unknown Data  Submission Error',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   }
 });
@@ -125,8 +123,7 @@ const submiteducationdetails = catchAsync(async (req, res) => {
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   res.status(httpStatus.CREATED).json({
     message: 'Education Details Submitted!',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -146,8 +143,7 @@ const submitexperiencedetails = catchAsync(async (req, res) => {
   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
   res.status(httpStatus.CREATED).json({
     message: 'Experience Details Submitted!',
-    challenge: challenge.challenge,
-    optionalchallenge: challenge.optionalChallenge,
+    challenge,
   });
 });
 
@@ -168,14 +164,12 @@ const submitclinicdetails = catchAsync(async (req, res) => {
   if (!resultData) {
     res.status(httpStatus.BAD_REQUEST).json({
       message: 'Data already Submitted',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
     });
   } else {
     res.status(httpStatus.CREATED).json({
       message: 'Clinic details Submitted',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
+      challenge,
       data: resultData,
     });
   }
@@ -204,7 +198,7 @@ const fetchpayoutsdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const payoutData = await doctorprofileService.fetchpayoutsdetails(AuthData);
   if (!payoutData) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
+    throw new ApiError(httpStatus.NO_CONTENT, 'Your payoutData is pending data submit');
   } else {
     res.status(httpStatus.OK).json({ data: payoutData });
   }
@@ -232,51 +226,51 @@ const fetchprofiledetails = catchAsync(async (req, res) => {
   }
 });
 
-const addConsultationfee = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const ConsultationData = await doctorprofileService.addConsultationfee(req.body, AuthData);
-  if (ConsultationData !== false) {
-    res.status(httpStatus.CREATED).json({ ConsultationData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
-  }
-});
+// const addConsultationfee = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const ConsultationData = await doctorprofileService.addConsultationfee(req.body, AuthData);
+//   if (ConsultationData !== false) {
+//     res.status(httpStatus.CREATED).json({ ConsultationData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to add Consultation fee' });
+//   }
+// });
 
-const updateNotificationSettings = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const notificationsData = await doctorprofileService.notificationSettings(req.body, AuthData);
-  if (notificationsData) {
-    res.status(httpStatus.CREATED).json({ notificationsData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
-  }
-});
+// const updateNotificationSettings = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const notificationsData = await doctorprofileService.notificationSettings(req.body, AuthData);
+//   if (notificationsData) {
+//     res.status(httpStatus.CREATED).json({ notificationsData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification option' });
+//   }
+// });
 
-const updateClinicDetails = catchAsync(async (req, res) => {
-  const response = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing, req.body.clinicId);
-  if (response) {
-    res.status(httpStatus.OK).json({ message: `Clinic Timings Updated for ${response.clinicName} (id :${response.id})` });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
-  }
-});
+// const updateClinicDetails = catchAsync(async (req, res) => {
+//   const response = await doctorprofileService.updteClinicDetails(req.SubjectId, req.body.timing, req.body.clinicId);
+//   if (response) {
+//     res.status(httpStatus.OK).json({ message: `Clinic Timings Updated for ${response.clinicName} (id :${response.id})` });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Clinic Details For This Id Not Found' });
+//   }
+// });
 
-const doctorExpandEducation = catchAsync(async (req, res) => {
-  const { Education, Experience } = await doctorprofileService.doctorExpEducation(
-    req.SubjectId,
-    req.body.experience,
-    req.body.education
-  );
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
-  if (Education || Experience) {
-    res.status(httpStatus.CREATED).json({
-      message: 'Experience and Education Details Submitted!',
-      challenge: challenge.challenge,
-      optionalchallenge: challenge.optionalChallenge,
-    });
-  }
-});
+// const doctorExpandEducation = catchAsync(async (req, res) => {
+//   const { Education, Experience } = await doctorprofileService.doctorExpEducation(
+//     req.SubjectId,
+//     req.body.experience,
+//     req.body.education
+//   );
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const challenge = await authDoctorController.getOnboardingChallenge(AuthData);
+//   if (Education || Experience) {
+//     res.status(httpStatus.CREATED).json({
+//       message: 'Experience and Education Details Submitted!',
+//       challenge: challenge.challenge,
+//       optionalchallenge: challenge.optionalChallenge,
+//     });
+//   }
+// });
 
 // const updateDetails = catchAsync(async (req, res) => {
 //   const result = await doctorprofileService.updateDetails(
@@ -305,28 +299,30 @@ const updateAppointmentPrice = catchAsync(async (req, res) => {
   }
 });
 
-const getDoctorClinicTimings = catchAsync(async (req, res) => {
-  const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
-  if (result !== null) {
-    res.status(httpStatus.OK).json({ message: 'success', result });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
-  }
-});
-const sendDoctorQueries = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const ticketDetails = await doctorprofileService.sendDoctorQueries(
-    req.SubjectId,
-    AuthData.email,
-    req.body.message,
-    AuthData.fullname
-  );
-  if (ticketDetails) {
-    res.status(httpStatus.OK).json({ message: 'query submitted successfully !', ticketDetails, emailSent: true });
-  } else {
-    res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
-  }
-});
+// const getDoctorClinicTimings = catchAsync(async (req, res) => {
+//   const result = await doctorprofileService.doctorClinicTimings(req.SubjectId);
+//   if (result !== null) {
+//     res.status(httpStatus.OK).json({ message: 'success', result });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'failed', reason: 'clinic timings not found' });
+//   }
+
+// });
+
+// const sendDoctorQueries = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const ticketDetails = await doctorprofileService.sendDoctorQueries(
+//     req.SubjectId,
+//     AuthData.email,
+//     req.body.message,
+//     AuthData.fullname
+//   );
+//   if (ticketDetails) {
+//     res.status(httpStatus.OK).json({ message: 'query submitted successfully !', ticketDetails, emailSent: true });
+//   } else {
+//     res.status(httpStatus[404]).json({ message: 'failed to send query', ticketDetails, emailSent: false });
+//   }
+// });
 
 const getBillingDetails = catchAsync(async (req, res) => {
   const doctorId = req.SubjectId;
@@ -363,14 +359,14 @@ module.exports = {
   fetchexperiencedetails,
   fetchpayoutsdetails,
   fetchprofiledetails,
-  addConsultationfee,
-  updateNotificationSettings,
-  updateClinicDetails,
+  // addConsultationfee,
+  // updateNotificationSettings,
+  // updateClinicDetails,
   // updateDetails,
-  doctorExpandEducation,
+  // doctorExpandEducation,
   updateAppointmentPrice,
-  getDoctorClinicTimings,
+  // getDoctorClinicTimings,
   getBillingDetails,
-  sendDoctorQueries,
+  // sendDoctorQueries,
   // getDoctorQueries,
 };

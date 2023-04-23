@@ -8,7 +8,7 @@ const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
 
 const createUser = catchAsync(async (req, res) => {
-  const userId = await verifiedUserService.createVerifiedUser(req.body.mobile);
+  const userId = await verifiedUserService.createVerifiedUser(req.body);
   if (userId) {
     res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
   }
@@ -35,7 +35,7 @@ const register = catchAsync(async (req, res) => {
   const { userId, email, password, fullname, dob, gender, pincode } = await req.body;
   const verifiedUser = await verifiedUserService.getVerifiedUserById(userId);
   if (verifiedUser) {
-    const AuthData = await authService.createAuthData({
+    const AuthData = await authService.register({
       email,
       password,
       fullname,
@@ -56,8 +56,8 @@ const register = catchAsync(async (req, res) => {
 });
 
 const login = catchAsync(async (req, res) => {
-  const { username, password } = req.body;
-  const AuthData = await authService.loginAuthWithEmailAndPassword(username, password);
+  const { email, password } = req.body;
+  const AuthData = await authService.loginWithEmailAndPassword(email, password);
   const authtoken = await tokenService.generateUserToken(AuthData.id);
   const devicehash = req.headers.devicehash;
   const devicetype = req.headers.devicetype;
@@ -193,6 +193,7 @@ const resetPassowrd = catchAsync(async (req, res) => {
     res.status(400).json({ message: 'Password Reset Failed' });
   }
 });
+
 module.exports = {
   createUser,
   resendCreateUserOtp,

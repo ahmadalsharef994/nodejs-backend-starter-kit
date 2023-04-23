@@ -1,4 +1,4 @@
-const { Prescription, Appointment, ThyrocareOrder, HealthPackage, doctordetails } = require('../models');
+const { Prescription, Appointment, DoctorBasic, doctordetails } = require('../models');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 
 const getUpcomingAppointment = async (auth, endDate, options) => {
@@ -88,14 +88,14 @@ const getAllPrescriptions = async (auth, options) => {
   return result;
 };
 
-const getAllLabTestOrders = async (auth, options) => {
-  const result = await ThyrocareOrder.paginate({ mobile: auth.mobile }, options);
-  return result;
-};
-const fetchHealthPackages = async () => {
-  const healthpackage = await HealthPackage.find({});
-  return { Healthpackages: healthpackage };
-};
+// const getAllLabTestOrders = async (auth, options) => {
+//   const result = await ThyrocareOrder.paginate({ mobile: auth.mobile }, options);
+//   return result;
+// };
+// const fetchHealthPackages = async () => {
+//   const healthpackage = await HealthPackage.find({});
+//   return { Healthpackages: healthpackage };
+// };
 const getNextAppointment = async (AuthUser) => {
   try {
     const upcoming = await Appointment.find({
@@ -107,7 +107,7 @@ const getNextAppointment = async (AuthUser) => {
     });
     let doctorSpeciality = '';
     if (upcoming[0]) {
-      const res = await doctordetails.find({ doctorauthId: upcoming[0].AuthDoctor });
+      const res = await DoctorBasic.find({ doctorauthId: upcoming[0].AuthDoctor });
       doctorSpeciality = res[0].specializations[0];
       Object.assign(upcoming[0], { doctorSpeciality });
     }
@@ -155,8 +155,8 @@ module.exports = {
   getUpcomingAppointment,
   getAppointmentsByType,
   getAllPrescriptions,
-  getAllLabTestOrders,
-  fetchHealthPackages,
+  // getAllLabTestOrders,
+  // fetchHealthPackages,
   getAppointmentsByStatus,
   getSlots,
 };

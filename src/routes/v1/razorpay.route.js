@@ -9,17 +9,17 @@ const router = express.Router();
 // changes: createRazorpayOrder -> createLabtestOrder
 //          razorpayCreateOrder -> createLabtestOrder
 //          razorpayVerification -> verifyLabtestOrder
-router.route('/create-order').post(validate(razorpayValidation.cartAmount), razorpayController.createLabtestOrder);
-router.route('/checkout-verify').post(validate(razorpayValidation.checkout), razorpayController.verifyLabtestOrder);
+// router.route('/create-order').post(validate(razorpayValidation.cartAmount), razorpayController.createLabtestOrder);
+// router.route('/checkout-verify').post(validate(razorpayValidation.checkout), razorpayController.verifyLabtestOrder);
 
 // changes: razorpayAppointment -> createAppointmentOrder
 //          razorpayAppointmentVerification -> verifyAppointmentOrder
 router
   .route('/createorder-appointment')
-  .post(validate(razorpayValidation.AppointmentOrder), razorpayController.createAppointmentOrder);
+  .post(validate(razorpayValidation.createAppointmentOrder), razorpayController.createAppointmentOrder);
 router
   .route('/verifyorder-appointment')
-  .post(validate(razorpayValidation.AppointmentCheckout), razorpayController.verifyAppointmentOrder);
+  .post(validate(razorpayValidation.verifyApoointmentOrder), razorpayController.verifyAppointmentOrder);
 
 router
   .route('/createorder-wallet')

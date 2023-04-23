@@ -14,16 +14,18 @@ router.post('/forgot-password', validate(authDoctorValidation.forgotPassword), a
 
 router.post('/verify-otp', validate(authDoctorValidation.verifyOtp), authDoctorController.verifyOtp);
 router.post('/reset-password', validate(authDoctorValidation.resetPassword), authDoctorController.resetPassowrd);
-router.post('/send-verification-email', authDoctor(), authDoctorController.sendVerificationEmail);
-router.post('/change-email', authDoctor(), authDoctorController.changeEmail);
-router.post('/change-phone', authDoctor(), authDoctorController.changePhone);
-router.post('/verify-email', authDoctor(), validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
 router.post(
   '/change-password',
   authDoctor(),
   validate(authDoctorValidation.changepassword),
   authDoctorController.changePassword
 );
+router.post('/send-verification-email', authDoctor(), authDoctorController.sendVerificationEmail);
+router.post('/verify-email', authDoctor(), validate(authDoctorValidation.verifyEmail), authDoctorController.verifyEmail);
+
+router.post('/change-email', authDoctor(), authDoctorController.changeEmail);
+router.post('/change-phone', authDoctor(), authDoctorController.changePhone);
+
 router.post('/request-otp', authDoctor(), authDoctorController.requestOtp);
 router.post('/verify-phone', authDoctor(), validate(authDoctorValidation.verifyPhone), authDoctorController.verifyPhone);
 router.post('/resend-otp', authDoctor(), authDoctorController.resendOtp);

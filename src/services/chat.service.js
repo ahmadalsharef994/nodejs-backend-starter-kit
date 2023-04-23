@@ -1,24 +1,25 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 const dotenv = require('dotenv');
 const httpStatus = require('http-status');
 const uuid = require('uuid');
-const AWS = require('aws-sdk');
+const cloudinary = require('cloudinary').v2;
+
 const { Appointment, DoctorBasic, UserBasic } = require('../models');
 const ApiError = require('../utils/ApiError');
 
 dotenv.config();
 
-const AwsS3 = new AWS.S3({
-  accessKeyId: process.env.AWSID,
-  region: 'us-east-2',
-  secretAccessKey: process.env.AWSKEY,
-  bucket: process.env.PUBLICBUCKET,
-  signatureVersion: 'v4',
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 const getMessages = async (appointmentId, authId) => {
   const appointment = await Appointment.findOne({ _id: appointmentId });
   if (!appointment) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID does not gives you Access');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID does not give you access');
   }
   if (appointment.AuthDoctor.equals(authId) || appointment.AuthUser.equals(authId)) {
     const result = appointment.chatHistory;
@@ -26,28 +27,11 @@ const getMessages = async (appointmentId, authId) => {
   }
   throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");
 };
-const getBase64FileType = (base64) => {
-  switch (base64.charAt(0)) {
-    case '/':
-      return 'image/jpg';
-    case 'i':
-      return 'image/png';
-    case 'R':
-      return 'image/gif';
-    case 'U':
-      return 'image/webp';
-    case 'J':
-      return 'application/pdf';
-    default:
-      return 'unknown';
-  }
-};
+
 const saveMessage = async (data) => {
-  // this part is asynchronous
   const appointmentId = data.appointmentId;
   const appointment = await Appointment.findOne({ _id: appointmentId });
 
-  // if chatHistory null
   if (!appointment.chatHistory) {
     appointment.chatHistory = {};
     appointment.chatHistory.messages = [];
@@ -63,44 +47,31 @@ const saveMessage = async (data) => {
   }
 
   appointment.chatHistory.messages.push({
-    messageId: uuid(), // unique id of msg
+    messageId: uuid(),
     body: data.body,
     contentType: 'text',
-    attachments: data.attachments, // data.location
+    attachments: data.attachments,
     createdAt: Date.now(),
     senderId: data.senderId,
   });
   await Appointment.findByIdAndUpdate(appointmentId, appointment);
 };
-// uploads attachment to S3 and returns corresponding URL
-const uploadAttachment = (attachments) => {
-  // eslint-disable-next-line no-param-reassign
-  attachments = attachments.map((attachment) => {
-    const attachmentKey = `${uuid()}`;
-    // eslint-disable-next-line security/detect-new-buffer
-    const base64String = attachment.toString('base64');
-    const base64Data = Buffer.from(base64String.replace(/^data:image\/\w+;base64,/, ''), 'base64');
-    // const type = base64data.split(';')[0].split('/')[1];
-    const type = getBase64FileType(base64String);
 
-    const params = {
-      Bucket: process.env.PUBLICBUCKET,
-      Key: attachmentKey,
-      Body: base64Data,
-      ContentEncoding: 'base64',
-      ContentType: `${type}`,
-      ACL: 'public-read',
-    };
-    // eslint-disable-next-line no-shadow
-    AwsS3.upload(params, (err, data) => {
-      if (err) throw new ApiError(httpStatus.BAD_REQUEST, 'Failed to upload file to S3');
-      return data;
+const uploadAttachment = async (attachments) => {
+  const urls = [];
+
+  for (const attachment of attachments) {
+    const uploadResponse = await cloudinary.uploader.upload(attachment, {
+      folder: 'attachments',
+      use_filename: true,
+      unique_filename: false,
+      resource_type: 'auto',
+      overwrite: false,
     });
+    urls.push(uploadResponse.secure_url);
+  }
 
-    const url = `https://${params.Bucket}.s3.amazonaws.com/${params.Key}`;
-    return url;
-  });
-  return attachments;
+  return urls;
 };
 
 module.exports = {

@@ -5,7 +5,7 @@ const doctorProfileController = require('../../controllers/doctorprofile.control
 const authDoctor = require('../../middlewares/authDoctor');
 const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const appointmentPreferenceValidator = require('../../validations/appointmentpreference.validation');
-const profilePhotoUpload = require('../../Microservices/profilePicture.service');
+// const profilePhotoUpload = require('../../Microservices/profilePicture.service');
 const { appointmentController } = require('../../controllers');
 
 const router = express.Router();
@@ -20,13 +20,13 @@ router.route('/basic-details').post(
   doctorProfileController.submitbasicdetails
 ); // postBasicDetails
 
-router
-  .route('/basic-details/profile-picture')
-  .post(profilePhotoUpload.uploadPhoto.fields([{ name: 'avatar', maxCount: 1 }]), authDoctor(), function (req, res) {
-    doctorProfileController.submitprofilepicture(req);
-    const location = req.files.avatar[0].location;
-    res.status(201).json({ message: 'Profile picture Updated!', location });
-  });
+// router
+//   .route('/basic-details/profile-picture')
+//   .post(profilePhotoUpload.uploadPhoto.fields([{ name: 'avatar', maxCount: 1 }]), authDoctor(), function (req, res) {
+//     doctorProfileController.submitprofilepicture(req);
+//     const location = req.files.avatar[0].location;
+//     res.status(201).json({ message: 'Profile picture Updated!', location });
+//   });
 
 router.route('/education-details').get(authDoctor(), doctorProfileController.fetcheducationdetails);
 router
@@ -68,18 +68,18 @@ router.route('/payout-details').get(authDoctor(), doctorProfileController.fetchp
 router
   .route('/payout-details')
   .post(authDoctor(), validate(doctorProfileValidator.PayoutsDoctorDetails), doctorProfileController.submitpayoutsdetails);
-router.post(
-  '/consultationfee',
-  authdoctorverified(),
-  validate(doctorProfileValidator.addConsultationfee),
-  doctorProfileController.addConsultationfee
-);
-router.post(
-  '/notifications',
-  authdoctorverified(),
-  validate(doctorProfileValidator.notificationSettings),
-  doctorProfileController.updateNotificationSettings
-);
+// router.post(
+//   '/consultationfee',
+//   authdoctorverified(),
+//   validate(doctorProfileValidator.addConsultationfee),
+//   doctorProfileController.addConsultationfee
+// );
+// router.post(
+//   '/notifications',
+//   authdoctorverified(),
+//   validate(doctorProfileValidator.notificationSettings),
+//   doctorProfileController.updateNotificationSettings
+// );
 // router
 //   .route('/submit-education-and-experience')
 //   .post(authDoctor(), validate(doctorProfileValidator.EducationExperience), doctorProfileController.doctorExpandEducation);
@@ -89,13 +89,13 @@ router.post(
 // router
 //   .route('/update-details')
 //   .post(authDoctor(), validate(doctorProfileValidator.updateDetails), doctorProfileController.updateDetails);
-// router
-//   .route('/update-appointmentPrice')
-//   .post(
-//     authDoctor(),
-//     validate(doctorProfileValidator.updateAppointmentPrice),
-//     doctorProfileController.updateAppointmentPrice
-//   );
+router
+  .route('/update-appointmentPrice')
+  .post(
+    authDoctor(),
+    validate(doctorProfileValidator.updateAppointmentPrice),
+    doctorProfileController.updateAppointmentPrice
+  );
 // router.route('/get-doctor-clinictimings').get(authDoctor(), doctorProfileController.getDoctorClinicTimings);
 
 router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofiledetails); // ISE
@@ -104,11 +104,11 @@ router.route('/').get(authdoctorverified(), doctorProfileController.fetchprofile
 //   .route('/send-quries')
 //   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
-// router.route('/billing').get(authDoctor(), doctorProfileController.getBillingDetails);
+router.route('/billing').get(authDoctor(), doctorProfileController.getBillingDetails);
 
-router
-  .route('/send-queries')
-  .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
+// router
+//   .route('/send-queries')
+//   .post(authdoctorverified(), validate(doctorProfileValidator.doctorQueries), doctorProfileController.sendDoctorQueries);
 
 // router.route('/get-doctor-queries').get(authdoctorverified(), doctorProfileController.getDoctorQueries);
 

@@ -30,7 +30,7 @@ const registeradmin = {
     email: Joi.string().required().email(),
     password: Joi.string().required().custom(password),
     fullname: Joi.string().required(),
-    isdcode: Joi.required().valid('91', '1'),
+    isdcode: Joi.required(),
     mobile: Joi.number().required(),
     role: Joi.valid('admin').required(),
   }),

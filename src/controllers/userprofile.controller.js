@@ -1,22 +1,22 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const userprofileService = require('../services/userprofile.service');
-const { authService, appointmentService } = require('../services');
+const { authService } = require('../services');
 
-const getStats = catchAsync(async (req, res) => {
-  const feedbacks = await appointmentService.getUserFeedbacks(req.query.id);
+// const getStats = catchAsync(async (req, res) => {
+//   const feedbacks = await appointmentService.getUserFeedbacks(req.query.id);
 
-  const RATING = (
-    feedbacks.reduce((doctorRatingsSum, feedback) => {
-      return doctorRatingsSum + feedback.doctorRating;
-    }, 0) / feedbacks.length
-  ).toFixed(1);
+//   const RATING = (
+//     feedbacks.reduce((doctorRatingsSum, feedback) => {
+//       return doctorRatingsSum + feedback.doctorRating;
+//     }, 0) / feedbacks.length
+//   ).toFixed(1);
 
-  res.status(httpStatus.OK).json({
-    message: 'success',
-    data: RATING,
-  });
-});
+//   res.status(httpStatus.OK).json({
+//     message: 'success',
+//     data: RATING,
+//   });
+// });
 
 const showUserProfile = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -48,15 +48,15 @@ const fetchBasicDetails = catchAsync(async (req, res) => {
   }
 });
 
-const updateBasicDetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const updatedBasicDetails = await userprofileService.updateBasicDetails(req.body, AuthData);
-  if (updatedBasicDetails) {
-    res.status(httpStatus.OK).json({ message: 'Basic details updated Successfully', data: updatedBasicDetails });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'You have not added your basic details' });
-  }
-});
+// const updateBasicDetails = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const updatedBasicDetails = await userprofileService.updateBasicDetails(req.body, AuthData);
+//   if (updatedBasicDetails) {
+//     res.status(httpStatus.OK).json({ message: 'Basic details updated Successfully', data: updatedBasicDetails });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'You have not added your basic details' });
+//   }
+// });
 
 const fetchAddressDetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -78,15 +78,15 @@ const addAddressDetails = catchAsync(async (req, res) => {
   }
 });
 
-const updateAddressDetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const addressDetails = await userprofileService.updateAddress(req.body, AuthData);
-  if (addressDetails) {
-    res.status(httpStatus.OK).json({ message: 'Address details updated Successfully', data: addressDetails });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'You have not added your basic details' });
-  }
-});
+// const updateAddressDetails = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const addressDetails = await userprofileService.updateAddress(req.body, AuthData);
+//   if (addressDetails) {
+//     res.status(httpStatus.OK).json({ message: 'Address details updated Successfully', data: addressDetails });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'You have not added your basic details' });
+//   }
+// });
 
 const addMember = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -98,45 +98,45 @@ const addMember = catchAsync(async (req, res) => {
   }
 });
 
-const updateMember = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const updatedMemberDetails = await userprofileService.updateMember(req.body, AuthData);
-  if (updatedMemberDetails) {
-    res.status(httpStatus.OK).json({ message: 'Family Member details updated Successfully', data: updatedMemberDetails });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Update Family member details failed. Check memberId' });
-  }
-});
+// const updateMember = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const updatedMemberDetails = await userprofileService.updateMember(req.body, AuthData);
+//   if (updatedMemberDetails) {
+//     res.status(httpStatus.OK).json({ message: 'Family Member details updated Successfully', data: updatedMemberDetails });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Update Family member details failed. Check memberId' });
+//   }
+// });
 
-const deleteMember = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const deletedMember = await userprofileService.deleteMember(req.params.memberId, AuthData);
-  if (deletedMember) {
-    res.status(httpStatus.OK).json({ message: 'Member Deleted Successfully' });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: "Family Member Doesn't Exist. Check memberId" });
-  }
-});
+// const deleteMember = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const deletedMember = await userprofileService.deleteMember(req.params.memberId, AuthData);
+//   if (deletedMember) {
+//     res.status(httpStatus.OK).json({ message: 'Member Deleted Successfully' });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: "Family Member Doesn't Exist. Check memberId" });
+//   }
+// });
 
-const getAllMembers = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const membersData = await userprofileService.fetchAllMembers(AuthData);
-  if (membersData) {
-    res.status(httpStatus.OK).json({ message: 'Success', members: membersData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Family Members Not Added' });
-  }
-});
+// const getAllMembers = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const membersData = await userprofileService.fetchAllMembers(AuthData);
+//   if (membersData) {
+//     res.status(httpStatus.OK).json({ message: 'Success', members: membersData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Family Members Not Added' });
+//   }
+// });
 
-const updateNotificationSettings = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const notificationsData = await userprofileService.notificationSettings(req.body, AuthData);
-  if (notificationsData) {
-    res.status(httpStatus.CREATED).json({ notificationsData });
-  } else {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification settings' });
-  }
-});
+// const updateNotificationSettings = catchAsync(async (req, res) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   const notificationsData = await userprofileService.notificationSettings(req.body, AuthData);
+//   if (notificationsData) {
+//     res.status(httpStatus.CREATED).json({ notificationsData });
+//   } else {
+//     res.status(httpStatus.BAD_REQUEST).json({ message: 'Unable to change notification settings' });
+//   }
+// });
 const updateprofilepic = catchAsync(async (req, res) => {
   const AuthData = req.SubjectId;
   const profilePhoto = req.files.avatar[0].location;
@@ -153,15 +153,15 @@ module.exports = {
   submitBasicDetails,
   fetchBasicDetails,
   addAddressDetails,
-  updateAddressDetails,
+  // updateAddressDetails,
   fetchAddressDetails,
-  updateBasicDetails,
+  // updateBasicDetails,
   addMember,
-  updateMember,
-  deleteMember,
-  getAllMembers,
-  updateNotificationSettings,
+  // updateMember,
+  // deleteMember,
+  // getAllMembers,
+  // updateNotificationSettings,
   updateprofilepic,
-  getStats,
+  // getStats,
   getUpcomingEvents,
 };

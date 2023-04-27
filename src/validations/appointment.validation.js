@@ -57,15 +57,15 @@ const bookAppointment = {
 //     .max(4),
 // };
 
-const getFollowups = {
-  params: Joi.object()
-    .keys({
-      appointmentId: Joi.string(),
-      limit: Joi.string(),
-    })
-    .min(1)
-    .max(1),
-};
+// const getFollowups = {
+//   params: Joi.object()
+//     .keys({
+//       appointmentId: Joi.string(),
+//       limit: Joi.string(),
+//     })
+//     .min(1)
+//     .max(1),
+// };
 
 const getAppointmentsByType = {
   query: Joi.object()
@@ -132,25 +132,25 @@ const getPatientDetails = {
   }),
 };
 
-const getUserFeedback = {
-  params: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId),
-  }),
-  body: Joi.object().keys({
-    doctorRating: Joi.number().required(),
-    doctorDescription: Joi.string().required(),
-  }),
-};
+// const getUserFeedback = {
+//   params: Joi.object().keys({
+//     appointmentId: Joi.string().custom(objectId),
+//   }),
+//   body: Joi.object().keys({
+//     doctorRating: Joi.number().required(),
+//     doctorDescription: Joi.string().required(),
+//   }),
+// };
 
-const getDoctorFeedback = {
-  params: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId),
-  }),
-  body: Joi.object().keys({
-    userRating: Joi.number().required(),
-    userDescription: Joi.string().required(),
-  }),
-};
+// const getDoctorFeedback = {
+//   params: Joi.object().keys({
+//     appointmentId: Joi.string().custom(objectId),
+//   }),
+//   body: Joi.object().keys({
+//     userRating: Joi.number().required(),
+//     userDescription: Joi.string().required(),
+//   }),
+// };
 
 // const getAvailableAppointments = {
 //   body: Joi.object().keys({
@@ -167,26 +167,28 @@ const cancelAppointment = {
     .max(1),
 };
 
-const cancelFollowup = {
-  body: Joi.object().keys({
-    followupId: Joi.string().custom(objectId),
-  }),
-};
+// const cancelFollowup = {
+//   body: Joi.object().keys({
+//     followupId: Joi.string().custom(objectId),
+//   }),
+// };
 
-const rescheduleAppointment = {
-  body: Joi.object().keys({
-    appointmentId: Joi.string().custom(objectId).required(),
-    slotId: Joi.string().required(),
-    date: Joi.string().required(),
-    message: Joi.string().required(),
-    sendMailToUser: Joi.boolean().required(),
-  }),
-};
+// const rescheduleAppointment = {
+//   body: Joi.object().keys({
+//     appointmentId: Joi.string().custom(objectId).required(),
+//     slotId: Joi.string().required(),
+//     date: Joi.string().required(),
+//     message: Joi.string().required(),
+//     sendMailToUser: Joi.boolean().required(),
+//   }),
+// };
+
 const getDoctorsByCategories = {
   body: Joi.object().keys({
     Category: Joi.string().required(),
   }),
 };
+
 const bookingConfirmation = {
   body: Joi.object().keys({
     orderId: Joi.string().required(),
@@ -210,20 +212,20 @@ module.exports = {
   joinAppointment,
   bookAppointment,
   // assignFollowup,
-  getFollowups,
+  // getFollowups,
   getAppointmentsByType,
   // getAvailableAppointments,
   // getAppointmentDetails,
   createPrescription,
   getPrescription,
   getPatientDetails,
-  getUserFeedback,
-  getDoctorFeedback,
+  // getUserFeedback,
+  // getDoctorFeedback,
   cancelAppointment,
-  rescheduleAppointment,
+  // rescheduleAppointment,
   getDoctorsByCategories,
   bookingConfirmation,
-  cancelFollowup,
+  // cancelFollowup,
   // rescheduleFollowup,
   deleteSlot,
   getAppointmentsByStatus,

@@ -18,22 +18,22 @@ const getDoctorPreferences = async (AuthData) => {
   }
   return null;
 };
-const getAvailableSlots = async (docid, date) => {
-  const AllAppointmentSlots = await AppointmentPreference.findOne({ docid });
+const getAvailableSlots = async (doctorAuthId, date) => {
+  const AllAppointmentSlots = await AppointmentPreference.findOne({ doctorAuthId });
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No Appointment Slots Found');
   }
   let bookedAppointmentSlots;
   if (date) {
     bookedAppointmentSlots = await Appointment.find({
-      docid,
+      doctorAuthId,
       Date: date,
       paymentStatus: 'PAID',
       StartTime: { $gte: new Date(), $lte: new Date().getTime() + 7 * 24 * 60 * 60 * 1000 },
     });
   }
   bookedAppointmentSlots = await Appointment.find({
-    docid,
+    doctorAuthId,
     paymentStatus: 'PAID',
     StartTime: { $gte: new Date(), $lte: new Date().getTime() + 7 * 24 * 60 * 60 * 1000 },
   });
@@ -122,7 +122,7 @@ const updateAppointmentPreference = async (preferences, doctorAuthId, docid) => 
   });
 
   await existingSlots.save();
-  const Slots = await getAvailableSlots(docid);
+  const Slots = await getAvailableSlots(doctorAuthId);
   await doctordetails.updateOne({ doctorauthId: doctorAuthId }, { $set: { Slots } });
   return existingSlots;
 };

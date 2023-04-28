@@ -145,8 +145,8 @@ const getNextAppointment = async (AuthUser) => {
     return null;
   }
 };
-const getSlots = async (docId, date) => {
-  const data = await appointmentPreferenceService.getAvailableSlots(docId, date);
+const getSlots = async (doctorAuthId, date) => {
+  const data = await appointmentPreferenceService.getAvailableSlots(doctorAuthId, date);
   const day = date.split(' ')[0];
   return data[`${day.toUpperCase()}`];
 };

@@ -7,15 +7,12 @@ const DoctorBasicSchema = mongoose.Schema(
   {
     appointmentPrice: {
       type: Number,
-      required: true,
     },
     gender: {
       type: String,
-      required: true,
     },
     dob: {
       type: Date,
-      required: true,
     },
     languages: {
       type: Array,
@@ -23,24 +20,18 @@ const DoctorBasicSchema = mongoose.Schema(
     },
     state: {
       type: String,
-      required: true,
     },
     pincode: {
       type: Number,
-      required: true,
-    },
-    isBasicDetailsVerified: {
-      type: Boolean,
-      default: false,
     },
     avatar: {
       type: String,
       default: null,
     },
-    thumbnail: {
-      type: String,
-      default: null,
-    },
+    // thumbnail: {
+    //   type: String,
+    //   default: null,
+    // },
     about: {
       type: String,
       default: null,
@@ -71,7 +62,6 @@ const DoctorBasicSchema = mongoose.Schema(
     },
     clinicName: {
       type: String,
-      required: true,
       default: null,
     },
     clinicAddress: {
@@ -82,30 +72,25 @@ const DoctorBasicSchema = mongoose.Schema(
       type: Array,
       default: null,
     },
+    clinicTelephone: {
+      type: Number,
+      default: null,
+    },
     registrationNo: {
       type: String,
-      required: true,
     },
     yearofRegistration: {
       type: Number,
-      required: true,
     },
     stateMedicalCouncil: {
       type: String,
-      required: true,
-    },
-    isEducationVerified: {
-      type: Boolean,
-      default: false,
     },
     mainstream: {
       type: String,
-      required: true,
       trim: true,
     },
     specialization: {
       type: Array,
-      required: true,
       trim: true,
     },
     experience: {
@@ -114,11 +99,29 @@ const DoctorBasicSchema = mongoose.Schema(
     },
     skills: {
       type: Array,
-      required: true,
+    },
+    isBasicDetailsVerified: {
+      type: Boolean,
+      default: false,
+    },
+    isEducationVerified: {
+      type: Boolean,
+      default: false,
     },
     isExperienceVerified: {
       type: Boolean,
       default: false,
+    },
+    isDoctorVerified: {
+      type: Boolean,
+      default: false,
+    },
+    verifiedDoctorId: {
+      type: String,
+    },
+    verifiedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: Auth,
     },
   },
   {

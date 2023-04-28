@@ -94,7 +94,7 @@ const getNextAppointment = catchAsync(async (req, res) => {
 });
 const getSlots = catchAsync(async (req, res) => {
   const date = new Date(req.body.Date).toDateString();
-  const data = await userAppointmentService.getSlots(req.body.docId, date);
+  const data = await userAppointmentService.getSlots(req.SubjectId, date);
   res.status(httpStatus.OK).json({ message: 'Success', data });
 });
 module.exports = {

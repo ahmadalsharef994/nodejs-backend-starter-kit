@@ -48,18 +48,24 @@ const fetcheducationdetails = async (AuthData) => {
 //   return educationDetailDoc;
 // };
 
-const fetchClinicdetails = async (AuthData) => {
-  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
-  const { clinicName, clinicAddress, clinicTiming } = doctorBasic;
-  return { clinicName, clinicAddress, clinicTiming };
+const fetchClinicdetails = async (authId) => {
+  const doctorBasic = await DoctorBasic.findOne({ auth: authId });
+  const { clinicName, clinicAddress, clinicTiming, clinicTelephone } = doctorBasic;
+  return { clinicName, clinicAddress, clinicTiming, clinicTelephone };
 };
 
-// const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
-//   // eslint-disable-next-line no-param-reassign
-//   ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
-//   const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
-//   return clinicDetailDoc;
-// };
+const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
+  // eslint-disable-next-line no-param-reassign
+  ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
+  // const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
+  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  doctorBasic.clinicName = ClinicDetailBody.clinicName;
+  doctorBasic.clinicAddress = ClinicDetailBody.AddressFirstline;
+  doctorBasic.clinicTiming = ClinicDetailBody.timing;
+  doctorBasic.clinicTelephone = ClinicDetailBody.clinicTelephone;
+  await doctorBasic.save();
+  return doctorBasic;
+};
 
 const fetchexperiencedetails = async (AuthData) => {
   const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
@@ -226,7 +232,7 @@ module.exports = {
   fetchbasicdetails,
   // submiteducationdetails,
   fetcheducationdetails,
-  // submitedClinicdetails,
+  submitedClinicdetails,
   fetchClinicdetails,
   // submitprofilepicture,
   // submitexperiencedetails,

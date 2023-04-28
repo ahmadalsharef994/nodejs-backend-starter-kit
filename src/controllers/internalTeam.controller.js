@@ -5,8 +5,8 @@ const { authService, verifiedDoctorService, internalTeamService, tokenService } 
 
 const verifydoctor = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
-  await verifiedDoctorService.createVerifiedDoctor(req.body.docid, AuthData);
-  res.status(httpStatus.CREATED).json({ message: 'Doctor Verified' });
+  const verifiedDoctorBasic = await verifiedDoctorService.createVerifiedDoctor(req.body.docid, AuthData);
+  res.status(httpStatus.CREATED).json({ message: 'Doctor Verified', verifiedDoctorBasic });
 });
 
 const rejectdoctor = catchAsync(async (req, res) => {

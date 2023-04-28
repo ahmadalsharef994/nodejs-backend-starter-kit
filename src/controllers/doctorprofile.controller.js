@@ -176,8 +176,8 @@ const submitclinicdetails = catchAsync(async (req, res) => {
 });
 
 const fetchclinicdetails = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  const clinicdata = await doctorprofileService.fetchClinicdetails(AuthData);
+  // const AuthData = await authService.getAuthById(req.SubjectId);
+  const clinicdata = await doctorprofileService.fetchClinicdetails(req.SubjectId);
   if (!clinicdata) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Your OnBoarding is pending data submit');
   } else {

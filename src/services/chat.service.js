@@ -21,7 +21,7 @@ const getMessages = async (appointmentId, authId) => {
   if (!appointment) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID does not give you access');
   }
-  if (appointment.AuthDoctor.equals(authId) || appointment.AuthUser.equals(authId)) {
+  if (appointment.doctorAuthId.equals(authId) || appointment.userAuthId.equals(authId)) {
     const result = appointment.chatHistory;
     return result;
   }
@@ -36,9 +36,9 @@ const saveMessage = async (data) => {
     appointment.chatHistory = {};
     appointment.chatHistory.messages = [];
     appointment.chatHistory.appointmentId = appointmentId;
-    const doctorBasic = await DoctorBasic.findOne({ auth: appointment.AuthDoctor });
+    const doctorBasic = await DoctorBasic.findOne({ auth: appointment.doctorAuthId });
     const doctorProfilePic = doctorBasic.avatar;
-    const userBasic = await UserBasic.findOne({ auth: appointment.AuthUser });
+    const userBasic = await UserBasic.findOne({ auth: appointment.userAuthId });
     const userProfilePic = userBasic.avatar;
     appointment.chatHistory.particpants = [
       { name: appointment.doctorName, profilePic: doctorProfilePic },

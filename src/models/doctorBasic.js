@@ -5,6 +5,9 @@ const Wallet = require('./wallet.model');
 
 const DoctorBasicSchema = mongoose.Schema(
   {
+    fullName: {
+      type: String,
+    },
     appointmentPrice: {
       type: Number,
     },
@@ -48,7 +51,7 @@ const DoctorBasicSchema = mongoose.Schema(
       type: String,
       default: null,
     },
-    auth: {
+    doctorAuthId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
     },
@@ -93,6 +96,10 @@ const DoctorBasicSchema = mongoose.Schema(
       type: Array,
       trim: true,
     },
+    specializations: {
+      type: Array,
+      required: true,
+    },
     experience: {
       type: Number,
       default: 0,
@@ -122,6 +129,36 @@ const DoctorBasicSchema = mongoose.Schema(
     verifiedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
+    },
+    Slots: {
+      MON: {
+        type: Array,
+        default: null,
+      },
+      TUE: {
+        type: Array,
+        default: null,
+      },
+      WED: {
+        type: Array,
+        default: null,
+      },
+      THU: {
+        type: Array,
+        default: null,
+      },
+      FRI: {
+        type: Array,
+        default: null,
+      },
+      SAT: {
+        type: Array,
+        default: null,
+      },
+      SUN: {
+        type: Array,
+        default: null,
+      },
     },
   },
   {

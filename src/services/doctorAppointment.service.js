@@ -7,20 +7,22 @@ const {
   // Followup,
   Prescription,
   Appointment,
-  VerifiedDoctors,
+  // VerifiedDoctors,
   AppointmentPreference,
   // Feedback,
   UserBasic,
   DoctorBasic,
-  doctordetails,
+  // doctordetails,
+  // Auth,
 } = require('../models');
 const DyteService = require('../Microservices/dyteServices');
-const tokenService = require('./token.service');
+// const tokenService = require('./token.service');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 const config = require('../config/config');
 const authService = require('./auth.service');
 const { emailService } = require('../Microservices');
 const netEarn = require('../utils/netEarnCalculator');
+// const User = require('../models/auth.model');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -35,59 +37,64 @@ const initiateAppointmentSession = async (appointmentId) => {
     throw new ApiError(400, 'Cannot Initiate Appointment Session');
   }
   // Dyte Service
-  const DyteSessionToken = await DyteService.createDyteMeeting(appointmentId, appointment.AuthDoctor, appointment.AuthUser);
-  if (!DyteSessionToken) {
+  const dyteSession = await DyteService.createDyteMeeting(appointmentId, appointment.doctorAuthId, appointment.userAuthId);
+  if (!dyteSession) {
     throw new ApiError(400, 'Error Generating Video Session');
   }
-  return DyteSessionToken;
+  return dyteSession;
 };
 
-const joinAppointmentDoctor = async (appointmentId) => {
-  // get participants data and store in Appointment
-  const appointment = await Appointment.findOne({ _id: appointmentId });
-  if (!appointment) {
-    throw new ApiError(400, 'Cannot Initiate Appointment Session');
-  }
-  // Dyte Service
-  const dyteSession = await DyteService.createDyteMeeting(appointmentId, appointment.AuthDoctor, appointment.AuthUser);
-  if (!dyteSession) {
-    throw new ApiError(400, 'Error Generating Video Session, Maybe, You do not have access to this Appointment');
-  }
+// const joinAppointmentDoctor = async (appointmentId) => {
+//   // get participants data and store in Appointment
+//   const appointment = await Appointment.findOne({ _id: appointmentId });
+//   if (!appointment) {
+//     throw new ApiError(400, 'Cannot Initiate Appointment Session');
+//   }
+//   // Dyte Service
+//   const dyteSession = await DyteService.createDyteMeeting(appointmentId, appointment.doctorAuthId, appointment.userAuthId);
+//   if (!dyteSession) {
+//     throw new ApiError(400, 'Error Generating Video Session, Maybe, You do not have access to this Appointment');
+//   }
+//   try {
+//     await DyteService.addDoctorParticipantToMeeting(dyteSession.dytemeetingid, appointment.doctorAuthId);
+//   } catch (error) {
+//     throw new ApiError(400, 'Error Adding Doctor Participant Video Session');
+//   }
 
-  const videoToken = dyteSession.dytedoctortoken;
-  const roomName = dyteSession.dyteroomname;
-  const chatExchangeToken = tokenService.generateChatAppointmentSessionToken(
-    dyteSession.appointmentid,
-    dyteSession.AuthDoctor,
-    dyteSession.AuthUser,
-    'doctor'
-  );
-  return { videoToken, roomName, chatExchangeToken };
-};
+//   const videoToken = dyteSession.authToken;
+//   const roomName = dyteSession.dyteroomname;
+//   const chatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+//     dyteSession.appointmentId,
+//     dyteSession.doctorAuthId,
+//     dyteSession.userAuthId,
+//     'doctor'
+//   );
+//   return { videoToken, roomName, chatExchangeToken };
+// };
 
-const joinAppointmentPatient = async (appointmentId) => {
-  const appointment = await Appointment.findById({ _id: appointmentId });
-  if (!appointment) {
-    throw new ApiError(400, 'Cannot Initiate Appointment Session');
-  }
+// const joinAppointmentPatient = async (appointmentId) => {
+//   const appointment = await Appointment.findById({ _id: appointmentId });
+//   if (!appointment) {
+//     throw new ApiError(400, 'Cannot Initiate Appointment Session');
+//   }
 
-  // Dyte Service
-  const dyteSession = await DyteService.createDyteMeeting(appointmentId, appointment.AuthDoctor, appointment.AuthUser);
-  if (!dyteSession) {
-    throw new ApiError(400, 'Error Generating Video Session, Maybe, You do not have access to this Appointment');
-  }
+//   // Dyte Service
+//   const dyteSession = await DyteService.createDyteMeeting(appointmentId, appointment.doctorAuthId, appointment.userAuthId);
+//   if (!dyteSession) {
+//     throw new ApiError(400, 'Error Generating Video Session, Maybe, You do not have access to this Appointment');
+//   }
 
-  const videoToken = dyteSession.dyteusertoken;
-  const roomName = dyteSession.dyteroomname;
+//   const videoToken = dyteSession.dyteusertoken;
+//   const roomName = dyteSession.dyteroomname;
 
-  const chatExchangeToken = tokenService.generateChatAppointmentSessionToken(
-    dyteSession.appointmentid,
-    dyteSession.AuthDoctor,
-    dyteSession.AuthUser,
-    'user'
-  );
-  return { videoToken, roomName, chatExchangeToken };
-};
+//   const chatExchangeToken = tokenService.generateChatAppointmentSessionToken(
+//     dyteSession.appointmentId,
+//     dyteSession.doctorAuthId,
+//     dyteSession.userAuthId,
+//     'user'
+//   );
+//   return { videoToken, roomName, chatExchangeToken };
+// };
 
 const ScheduleSessionJob = async (appointmentId, startTime) => {
   const datetime = startTime.getTime() - 300000; // Scheduling Job 5mins before Appointment
@@ -95,14 +102,17 @@ const ScheduleSessionJob = async (appointmentId, startTime) => {
     const { appointment } = job.attrs.data;
     await initiateAppointmentSession(appointment);
   });
-  await agenda.schedule(datetime, 'createSessions', { appointment: appointmentId }); // Scheduling a Job in Agenda
+  // const jobScheduled = await agenda.schedule(Date.now() + 1000, 'createSessions', { appointment: appointmentId }); // Scheduling a Job in Agenda for NOW
+  // CHANGE IT TO 5 MINS BEFORE APPOINTMENT:
+  const jobScheduled = await agenda.schedule(datetime, 'createSessions', { appointment: appointmentId }); // Scheduling a Job in Agenda
+  return jobScheduled;
 };
 
 const weekday = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
 const bookAppointment = async (
   docid,
-  userAuth,
+  userAuthId,
   slotId,
   date,
   bookingType,
@@ -111,7 +121,7 @@ const bookAppointment = async (
   patientmobile,
   patientmail
 ) => {
-  const userBasic = await UserBasic.findOne({ auth: `${userAuth._id}` });
+  const userBasic = await UserBasic.findOne({ auth: userAuthId });
   const currentDate = new Date().toDateString();
   const bookingDate = new Date(date).toDateString();
 
@@ -133,23 +143,24 @@ const bookAppointment = async (
     Gender = userBasic.gender;
     age = new Date().getFullYear() - userBasic.dob.getFullYear();
   } else {
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      'IN ORDER TO COMPLETE YOUR APPOINTMENT BOOKING YOU NEED TO COMPLETE YOUR BASIC PROFILE FIRST !'
-    );
+    // throw new ApiError(
+    //   httpStatus.BAD_REQUEST,
+    //   'IN ORDER TO COMPLETE YOUR APPOINTMENT BOOKING YOU NEED TO COMPLETE YOUR BASIC PROFILE FIRST !'
+    // );
   }
   let startTime = null;
   let endTime = null;
-  let doctorauth = null;
+  let doctorBasic;
   try {
-    const { doctorauthid } = await VerifiedDoctors.findOne({ docid });
-    doctorauth = doctorauthid;
+    doctorBasic = await DoctorBasic.findOne({ verifiedDoctorId: docid });
   } catch (err) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Doctor not found');
   }
-  const Doctordetails = await doctordetails.findOne({ doctorId: docid });
-  const doctorname = Doctordetails.doctorname;
-  const appointmentPrice = Doctordetails.appointmentPrice;
+  // const doctorAuth = await Auth.findById(doctorBasic.auth);
+  // console.log(doctorAuth)
+
+  const doctorname = doctorBasic.fullName || 'Doctor';
+  const appointmentPrice = doctorBasic.appointmentPrice;
 
   await AppointmentPreference.findOne({ docid }).then((pref) => {
     const day = slotId.split('-')[0];
@@ -158,8 +169,8 @@ const bookAppointment = async (
     if (slot.length === 0) {
       throw new ApiError(httpStatus.BAD_REQUEST, 'Slot not found');
     }
-    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0530`);
-    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0530`);
+    startTime = new Date(`${date} ${slot[0].FromHour}:${slot[0].FromMinutes}:00 GMT+0300`);
+    endTime = new Date(`${date} ${slot[0].ToHour}:${slot[0].ToMinutes}:00 GMT+0300`);
     const currentTime = new Date();
     const correctDay = startTime.getDay();
     const requestedDay = slotId.split('-')[0];
@@ -176,44 +187,39 @@ const bookAppointment = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment Already Booked');
   }
   const orderid = `MDZGX${Math.floor(Math.random() * 10)}${short.generate().toUpperCase()}`;
-  try {
-    const bookedAppointment = await Appointment.create({
-      AuthDoctor: doctorauth,
-      docid,
-      doctorName: doctorname,
-      slotId,
-      AuthUser: userAuth,
-      Type: bookingType,
-      Date: bookingDate,
-      StartTime: startTime,
-      EndTime: endTime,
-      Gender,
-      age,
-      HealthIssue: issue,
-      price: appointmentPrice,
-      patientName: patientname,
-      patientMobile: patientmobile,
-      patientMail: patientmail,
-      orderId: orderid,
-    });
-    bookedAppointment.chatHistory = {};
-    bookedAppointment.chatHistory.messages = [];
-    bookedAppointment.chatHistory.appointmentId = bookedAppointment._id;
-    const doctorBasic = await DoctorBasic.findOne({ auth: bookedAppointment.AuthDoctor });
-    const doctorProfilePic = doctorBasic.avatar;
-    const userProfilePic = userBasic.avatar;
-    const participants = [
-      { id: bookedAppointment.AuthDoctor, name: bookedAppointment.doctorName, profilePic: doctorProfilePic },
-      { id: bookedAppointment.AuthUser, name: bookedAppointment.patientName, profilePic: userProfilePic },
-    ];
-    bookedAppointment.chatHistory.participants = [...participants];
-    await bookedAppointment.save();
-    agenda.start();
-    await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
-    return { id: bookedAppointment.id, orderId: bookedAppointment.orderId };
-  } catch (error) {
-    return false;
-  }
+  const bookedAppointment = await Appointment.create({
+    doctorAuthId: doctorBasic.doctorAuthId,
+    docid,
+    doctorName: doctorname,
+    slotId,
+    userAuthId,
+    Type: bookingType,
+    Date: bookingDate,
+    StartTime: startTime,
+    EndTime: endTime,
+    Gender,
+    age,
+    HealthIssue: issue,
+    price: appointmentPrice,
+    patientName: patientname,
+    patientMobile: patientmobile,
+    patientMail: patientmail,
+    orderId: orderid,
+  });
+  bookedAppointment.chatHistory = {};
+  bookedAppointment.chatHistory.messages = [];
+  bookedAppointment.chatHistory.appointmentId = bookedAppointment._id;
+  const doctorProfilePic = doctorBasic.avatar;
+  const userProfilePic = userBasic.avatar;
+  const participants = [
+    { id: bookedAppointment.doctorAuthId, name: bookedAppointment.doctorName, profilePic: doctorProfilePic },
+    { id: bookedAppointment.userAuthId, name: bookedAppointment.patientName, profilePic: userProfilePic },
+  ];
+  bookedAppointment.chatHistory.participants = [...participants];
+  await bookedAppointment.save();
+  agenda.start();
+  await ScheduleSessionJob(bookedAppointment.id, bookedAppointment.StartTime);
+  return { id: bookedAppointment.id, orderId: bookedAppointment.orderId };
 };
 
 const getUpcomingAppointments = async (doctorId, fromDate, endDate, options) => {
@@ -374,7 +380,7 @@ const getAvailableAppointments = async (doctorId) => {
   if (!AllAppointmentSlots) {
     throw new ApiError(httpStatus.NO_CONTENT, 'No Appointment Slots Found');
   }
-  const bookedAppointmentSlots = await Appointment.find({ AuthDoctor: doctorId, paymentStatus: 'PAID' });
+  const bookedAppointmentSlots = await Appointment.find({ doctorAuthId: doctorId, paymentStatus: 'PAID' });
 
   if (!bookedAppointmentSlots) {
     const availableAppointmentSlots = AllAppointmentSlots;
@@ -441,7 +447,7 @@ const createPrescriptionDoc = async (prescriptionDoc, appointmentId, Authdata) =
     const appointment = await Appointment.find({ _id: appointmentId });
     prescriptionDoc.Appointment = appointmentId;
     prescriptionDoc.patientName = appointment[0].patientName;
-    prescriptionDoc.userAuth = appointment[0].AuthUser;
+    prescriptionDoc.userAuth = appointment[0].userAuthId;
     prescriptionDoc.doctorAuth = Authdata;
     const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
     if (DoctorPrescriptionDocument) {
@@ -459,10 +465,10 @@ const getPatientDetails = async (patientId, doctorId) => {
   const PatientContact = { mobile: PatientAuth.mobile, email: PatientAuth.email };
   const currentdate = new Date();
   const appointments = await Appointment.find({
-    AuthUser: patientId,
+    userAuthId: patientId,
     StartTime: { $lt: `${currentdate}` },
     paymentStatus: 'PAID',
-    AuthDoctor: doctorId,
+    doctorAuthId: doctorId,
   }).sort({
     StartTime: -1,
   });
@@ -473,7 +479,7 @@ const getPatientDetails = async (patientId, doctorId) => {
 };
 
 const getTotalRevenue = async (doctorAuthId) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
+  const appointments = await Appointment.find({ doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
   if (!appointments) return 0;
   const appoinmentPrices = appointments.map((appointment) => appointment.price);
   const totalRevenue = appoinmentPrices.reduce((sum, x) => sum + x);
@@ -481,7 +487,7 @@ const getTotalRevenue = async (doctorAuthId) => {
 };
 
 const getTotalIncome = async (doctorAuthId) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
+  const appointments = await Appointment.find({ doctorAuthId, paymentStatus: 'PAID', Type: 'PAST' });
   if (!appointments) return 0;
   const appointmentIncomes = appointments.map((appointment) => netEarn(appointment.price));
   const totalIncome = appointmentIncomes.reduce((sum, x) => sum + x);
@@ -489,14 +495,14 @@ const getTotalIncome = async (doctorAuthId) => {
 };
 
 const getPatientsCount = async (doctorAuthId) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
-  const patientIds = appointments.map((appointment) => appointment.AuthUser.toString());
+  const appointments = await Appointment.find({ doctorAuthId });
+  const patientIds = appointments.map((appointment) => appointment.userAuthId.toString());
   // convert objectId to String because objectIds aren't comparable (Set will consider duplicates as uniques)
   return new Set(patientIds).size;
 };
 
 const getPastPaidAppointments = async (doctorAuthId) => {
-  const appointments = await Appointment.find({ AuthDoctor: doctorAuthId });
+  const appointments = await Appointment.find({ doctorAuthId });
   const pastPaidAppointments = appointments.filter(
     (appointment) => appointment.paymentStatus === 'PAID' && appointment.Status !== 'CANCELLED'
   );
@@ -507,7 +513,7 @@ const getPastPaidAppointments = async (doctorAuthId) => {
 const getPatients = async (doctorid, page, limit, sortBy) => {
   const patientIds = await Appointment.aggregate([
     { $sort: { StartTime: parseInt(sortBy, 10) } },
-    { $group: { _id: { AuthUser: '$AuthUser' } } },
+    { $group: { _id: { userAuthId: '$userAuthId' } } },
     {
       $facet: {
         metadata: [{ $count: 'total' }, { $addFields: { page: parseInt(page, 10) } }],
@@ -519,7 +525,7 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
   let singlePatientData = {};
   for (let k = 0; k < patientIds[0].data.length; k += 1) {
     // eslint-disable-next-line no-await-in-loop
-    singlePatientData = await getPatientDetails(patientIds[0].data[k]._id.AuthUser, doctorid);
+    singlePatientData = await getPatientDetails(patientIds[0].data[k]._id.userAuthId, doctorid);
     allPatientsData.push({
       'No.': k,
       'Patient Name': singlePatientData[0],
@@ -544,24 +550,24 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
 
 // // for statistics
 // const getDoctorFeedbacks = async (doctorId) => {
-//   const feedbackData = await Feedback.find({ AuthDoctor: doctorId });
+//   const feedbackData = await Feedback.find({ doctorAuthId: doctorId });
 //   return feedbackData;
 // };
 
 // // for statistics
 // const getUserFeedbacks = async (userId) => {
-//   const feedbackData = await Feedback.find({ AuthUser: userId });
+//   const feedbackData = await Feedback.find({ userAuthId: userId });
 //   return feedbackData;
 // };
 
 // // for particular appointment
 // const getDoctorFeedback = async (feedbackDoc, appointmentId) => {
 //   const feedbackData = await Feedback.findOne({ appointmentId });
-//   const { AuthUser, AuthDoctor } = await Appointment.findById(appointmentId);
+//   const { userAuthId, doctorAuthId } = await Appointment.findById(appointmentId);
 //   if (feedbackData) {
 //     await Feedback.findOneAndUpdate(
 //       { appointmentId },
-//       { $set: { AuthDoctor, AuthUser, userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
+//       { $set: { doctorAuthId, userAuthId, userRating: feedbackDoc.userRating, userDescription: feedbackDoc.userDescription } },
 //       { useFindAndModify: false }
 //     );
 //     return { message: 'feedback added sucessfully' };
@@ -577,15 +583,15 @@ const getPatients = async (doctorid, page, limit, sortBy) => {
 // // for particular appointment
 // const getUserFeedback = async (feedbackDoc, appointmentId) => {
 //   const feedbackData = await Feedback.findOne({ appointmentId });
-//   const { AuthUser, AuthDoctor } = await Appointment.findById(appointmentId);
+//   const { userAuthId, doctorAuthId } = await Appointment.findById(appointmentId);
 
 //   if (feedbackData) {
 //     await Feedback.findOneAndUpdate(
 //       { appointmentId },
 //       {
 //         $set: {
-//           AuthDoctor,
-//           AuthUser,
+//           doctorAuthId,
+//           userAuthId,
 //           doctorRating: feedbackDoc.doctorRating,
 //           doctorDescription: feedbackDoc.doctorDescription,
 //         },
@@ -607,7 +613,7 @@ const cancelAppointment = async (appointmentId, doctorId) => {
   if (appointment.Status !== 'cancelled') {
     await Appointment.findOneAndUpdate({ _id: appointmentId }, { Status: 'cancelled' }, { new: true });
     await emailService.bookingCancellationMail(appointment);
-    const result = await Appointment.find({ AuthDoctor: doctorId });
+    const result = await Appointment.find({ doctorAuthId: doctorId });
     return result;
   }
   // await emailService.sendEmail({
@@ -675,10 +681,7 @@ const cancelAppointment = async (appointmentId, doctorId) => {
 // };
 
 const getDoctorsByCategories = async (category, filter, options) => {
-  const Doctordetails = await doctordetails.paginate(
-    { specializations: { $in: [category] }, Slots: { $ne: null } },
-    options
-  );
+  const Doctordetails = await DoctorBasic.paginate({ specializations: { $in: [category] }, Slots: { $ne: null } }, options);
   if (Doctordetails.length <= 0) {
     throw new ApiError(httpStatus.NOT_FOUND, 'No doctors found in this category');
   }
@@ -687,7 +690,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
     // eslint-disable-next-line no-shadow
     const today = days[new Date().getDay()];
     if (filter.Gender && filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           [`Slots.${today}`]: { $ne: [] },
@@ -701,7 +704,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       return Doctors;
     }
     if (filter.Gender || filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           [`Slots.${today}`]: { $ne: [] },
@@ -712,7 +715,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       );
       return Doctors;
     }
-    const Doctors = await doctordetails.paginate(
+    const Doctors = await DoctorBasic.paginate(
       {
         specializations: { $in: [category] },
         [`Slots.${today}`]: { $ne: [] },
@@ -731,7 +734,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowDay = days[tomorrow.getDay()];
     if (filter.Gender && filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           [`Slots.${tomorrowDay}`]: { $ne: [] },
@@ -745,7 +748,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       return Doctors;
     }
     if (filter.Gender || filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           [`Slots.${tomorrowDay}`]: { $ne: [] },
@@ -757,7 +760,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       );
       return Doctors;
     }
-    const Doctors = await doctordetails.paginate(
+    const Doctors = await DoctorBasic.paginate(
       {
         specializations: { $in: [category] },
         [`Slots.${tomorrowDay}`]: { $ne: [] },
@@ -788,7 +791,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
     };
     const getday = getDay(tom.getDay());
     if (filter.Gender && filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           $or: [
@@ -806,7 +809,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       return Doctors;
     }
     if (filter.Gender) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           $or: [
@@ -826,7 +829,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       return Doctors;
     }
     if (filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           $or: [
@@ -845,7 +848,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       );
       return Doctors;
     }
-    const Doctors = await doctordetails.paginate(
+    const Doctors = await DoctorBasic.paginate(
       {
         specializations: { $in: [category] },
         $or: [
@@ -861,7 +864,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
     return Doctors;
   } else {
     if (filter.Gender && filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           $or: [
@@ -883,7 +886,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       return Doctors;
     }
     if (filter.Gender) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           $or: [
@@ -904,7 +907,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       return Doctors;
     }
     if (filter.Languages) {
-      const Doctors = await doctordetails.paginate(
+      const Doctors = await DoctorBasic.paginate(
         {
           specializations: { $in: [category] },
           $or: [
@@ -924,7 +927,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
       );
       return Doctors;
     }
-    const Doctors = await doctordetails.paginate(
+    const Doctors = await DoctorBasic.paginate(
       {
         specializations: { $in: [category] },
         $or: [
@@ -1025,8 +1028,8 @@ const getNextAppointmentDoctor = async (doctorId) => {
 
 module.exports = {
   initiateAppointmentSession,
-  joinAppointmentDoctor,
-  joinAppointmentPatient,
+  // joinAppointmentDoctor,
+  // joinAppointmentPatient,
   bookAppointment,
   getUpcomingAppointments,
   getAppointmentsByType,

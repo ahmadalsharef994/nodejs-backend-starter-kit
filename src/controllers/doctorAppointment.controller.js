@@ -1,28 +1,44 @@
 const httpStatus = require('http-status');
 const catchAsync = require('../utils/catchAsync');
 const { appointmentPreferenceService, authService, appointmentService } = require('../services');
+const dyteService = require('../Microservices/dyteServices');
 const pick = require('../utils/pick');
 const ApiError = require('../utils/ApiError');
 
 const joinAppointmentDoctor = catchAsync(async (req, res) => {
   const appointmentId = req.body.appointmentId;
+  // let createdMeeting;
+  // let joinedMeeting;
   // new design. only pass appointmentId
-  const DoctorSession = await appointmentService.joinAppointmentDoctor(appointmentId);
-  res.status(httpStatus.CREATED).json(DoctorSession);
+  const dyteSession = await dyteService.getDyteSessionByAppointmentId(appointmentId);
+  if (!dyteSession) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Meeting Room Found');
+  }
+  res.status(httpStatus.CREATED).json({ roomName: dyteSession.roomName, authToken: dyteSession.doctorToken });
+  // const DoctorSession = await appointmentService.joinAppointmentDoctor(appointmentId);
+  // res.status(httpStatus.CREATED).json(DoctorSession);
 });
 
 const joinAppointmentUser = catchAsync(async (req, res) => {
   const appointmentId = req.body.appointmentId;
+  // let createdMeeting;
+  // let joinedMeeting;
   // new design. only pass appointmentId
-  const UserSession = await appointmentService.joinAppointmentPatient(appointmentId);
-  res.status(httpStatus.CREATED).json(UserSession);
+  const dyteSession = await dyteService.getDyteSessionByAppointmentId(appointmentId);
+  if (!dyteSession) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'No Meeting Room Found');
+  }
+  res.status(httpStatus.CREATED).json({ roomName: dyteSession.roomName, authToken: dyteSession.userToken });
+  // new design. only pass appointmentId
+  // const UserSession = await appointmentService.joinAppointmentPatient(appointmentId);
+  // res.status(httpStatus.CREATED).json(UserSession);
 });
 
 const bookAppointment = catchAsync(async (req, res) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
+  // const AuthData = await authService.getAuthById(req.SubjectId);
   const { id, orderId } = await appointmentService.bookAppointment(
     req.body.docId,
-    AuthData,
+    req.SubjectId,
     req.body.slotId,
     req.body.date,
     req.body.bookingType,

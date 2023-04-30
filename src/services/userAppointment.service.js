@@ -1,19 +1,24 @@
-const { Prescription, Appointment, DoctorBasic, doctordetails } = require('../models');
+const { Prescription, Appointment, DoctorBasic } = require('../models');
 const appointmentPreferenceService = require('./appointmentpreference.service');
 
 const getUpcomingAppointment = async (auth, endDate, options) => {
   const result = await Appointment.paginate(
-    { AuthUser: auth, paymentStatus: 'PAID', Status: { $nin: 'cancelled' }, StartTime: { $gte: new Date(), $lte: endDate } },
+    {
+      userAuthId: auth,
+      paymentStatus: 'PAID',
+      Status: { $nin: 'cancelled' },
+      StartTime: { $gte: new Date(), $lte: endDate },
+    },
     options
   );
   return result;
 };
 
-const getAppointmentsByType = async (AuthUser, fromDate, endDate, filter, options) => {
+const getAppointmentsByType = async (userAuthId, fromDate, endDate, filter, options) => {
   try {
     if (filter.Type === 'ALL') {
       const result = await Appointment.paginate(
-        { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, AuthUser },
+        { paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, userAuthId },
         options
       );
       return result;
@@ -21,7 +26,7 @@ const getAppointmentsByType = async (AuthUser, fromDate, endDate, filter, option
     // else
     const result = await Appointment.paginate(
       {
-        AuthUser,
+        userAuthId,
         paymentStatus: 'PAID',
         StartTime: { $gte: fromDate, $lt: endDate },
         Type: filter.Type,
@@ -34,15 +39,15 @@ const getAppointmentsByType = async (AuthUser, fromDate, endDate, filter, option
   }
 };
 
-const getAppointmentsByStatus = async (AuthUser, fromDate, endDate, filter, options) => {
+const getAppointmentsByStatus = async (userAuthId, fromDate, endDate, filter, options) => {
   if (filter.Status === 'ALL') {
-    const result = await Appointment.paginate({ AuthUser, paymentStatus: 'PAID' }, options);
+    const result = await Appointment.paginate({ userAuthId, paymentStatus: 'PAID' }, options);
     return result;
   }
   if (filter.Status === 'TODAY') {
     const result = await Appointment.paginate(
       {
-        AuthUser,
+        userAuthId,
         paymentStatus: 'PAID',
         StartTime: { $gte: fromDate, $lt: endDate },
         Date: new Date().toDateString(),
@@ -53,7 +58,7 @@ const getAppointmentsByStatus = async (AuthUser, fromDate, endDate, filter, opti
   }
   if (filter.Status === 'PAST') {
     const result = await Appointment.paginate(
-      { AuthUser, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: new Date() } },
+      { userAuthId, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: new Date() } },
       options
     );
     return result;
@@ -61,7 +66,7 @@ const getAppointmentsByStatus = async (AuthUser, fromDate, endDate, filter, opti
   if (filter.Status === 'UPCOMING') {
     const result = await Appointment.paginate(
       {
-        AuthUser,
+        userAuthId,
         paymentStatus: 'PAID',
         Status: { $nin: 'cancelled' },
         StartTime: { $gte: new Date(), $lt: endDate },
@@ -73,7 +78,7 @@ const getAppointmentsByStatus = async (AuthUser, fromDate, endDate, filter, opti
   // else
   const result = await Appointment.paginate(
     {
-      AuthUser,
+      userAuthId,
       paymentStatus: 'PAID',
       StartTime: { $gte: fromDate, $lt: endDate },
       Status: filter.Type,
@@ -96,10 +101,10 @@ const getAllPrescriptions = async (auth, options) => {
 //   const healthpackage = await HealthPackage.find({});
 //   return { Healthpackages: healthpackage };
 // };
-const getNextAppointment = async (AuthUser) => {
+const getNextAppointment = async (userAuthId) => {
   try {
     const upcoming = await Appointment.find({
-      AuthUser,
+      userAuthId,
       Date: new Date().toDateString(),
       paymentStatus: 'PAID',
       Status: { $nin: 'cancelled' },
@@ -107,12 +112,12 @@ const getNextAppointment = async (AuthUser) => {
     });
     let doctorSpeciality = '';
     if (upcoming[0]) {
-      const res = await DoctorBasic.find({ doctorauthId: upcoming[0].AuthDoctor });
+      const res = await DoctorBasic.find({ doctorauthId: upcoming[0].doctorAuthId });
       doctorSpeciality = res[0].specializations[0];
       Object.assign(upcoming[0], { doctorSpeciality });
     }
     const ongoing = await Appointment.find({
-      AuthUser,
+      userAuthId,
       Date: new Date().toDateString(),
       paymentStatus: 'PAID',
       Status: { $nin: 'cancelled' },
@@ -122,7 +127,7 @@ const getNextAppointment = async (AuthUser) => {
       return upcoming[0];
     }
     if (ongoing[0]) {
-      const res = await doctordetails.find({ doctorauthId: ongoing[ongoing.length - 1].AuthDoctor });
+      const res = await DoctorBasic.find({ doctorauthId: ongoing[ongoing.length - 1].doctorAuthId });
       doctorSpeciality = res[0].specializations[0];
       Object.assign(ongoing[ongoing.length - 1], { doctorSpeciality });
     }

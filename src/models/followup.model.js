@@ -65,7 +65,7 @@
 //       type: String,
 //       required: true,
 //     },
-//     AuthUser: {
+//     userAuthId: {
 //       type: mongoose.Schema.Types.ObjectId,
 //       ref: Appointment,
 //       required: true,

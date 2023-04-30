@@ -168,10 +168,10 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
 //   return null;
 // };
 
-// const sendDoctorQueries = async (AuthDoctor, email, message, name) => {
+// const sendDoctorQueries = async (doctorAuthId, email, message, name) => {
 //   try {
 //     const ticketNumber = `MEDZ${Math.round(Math.random() * 1200 * 1000)}`;
-//     const ticketdetails = await DoctorQueries.create({ AuthDoctor, name, email, issue: message, ticketNumber });
+//     const ticketdetails = await DoctorQueries.create({ doctorAuthId, name, email, issue: message, ticketNumber });
 //     const ticket = `name: ${ticketdetails.name}, \n email: ${ticketdetails.email},\nissue: ${ticketdetails.issue},\nticketnumber: ${ticketdetails.ticketNumber}`;
 //     if (ticketdetails.ticketStatus === 'open') {
 //       await emailService.sendEmailQueries(ticket, ticketNumber);
@@ -185,14 +185,14 @@ const updateappointmentPrice = async (appointmentPrice, auth) => {
 //   }
 // };
 
-const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
+const getBillingDetails = async (doctorAuthId, fromDate, endDate, options) => {
   const pastPaidAppointments = await Appointment.paginate(
-    { AuthDoctor, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
+    { doctorAuthId, paymentStatus: 'PAID', StartTime: { $gte: fromDate, $lt: endDate }, Status: { $nin: 'cancelled' } },
     options
   );
 
   const pickedProperties = pastPaidAppointments.results.map((appointment) => {
-    // const { avatar } = await UserBasic.findOne({ auth: appointment.AuthUser });
+    // const { avatar } = await UserBasic.findOne({ auth: appointment.userAuthId });
     // console.log(avatar)
     return {
       patientName: appointment.patientName,
@@ -220,8 +220,8 @@ const getBillingDetails = async (AuthDoctor, fromDate, endDate, options) => {
   return pickedProperties;
 };
 
-// const getDoctorQueries = async (AuthDoctor) => {
-//   const doctorQueries = await DoctorQueries.find({ AuthDoctor });
+// const getDoctorQueries = async (doctorAuthId) => {
+//   const doctorQueries = await DoctorQueries.find({ doctorAuthId });
 //   if (doctorQueries) {
 //     return doctorQueries;
 //   }

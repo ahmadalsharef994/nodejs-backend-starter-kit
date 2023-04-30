@@ -13,7 +13,7 @@ const docuniqueidgenerator = require('../utils/generateDoctorID');
 const { authService } = require('.');
 
 const checkVerification = async (authid) => {
-  const doctorBasic = await DoctorBasic.findOne({ auth: authid });
+  const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: authid });
   return doctorBasic.isDoctorVerified;
 };
 

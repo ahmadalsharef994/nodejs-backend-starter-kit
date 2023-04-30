@@ -4,7 +4,8 @@
 const httpStatus = require('http-status');
 const AppointmentPreference = require('../models/appointmentPreference.model');
 const Appointment = require('../models/appointment.model');
-const doctordetails = require('../models/doctordetails.model');
+// const doctordetails = require('../models/doctordetails.model');
+const DoctorBasic = require('../models/doctorBasic');
 // const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
 const doctorprofileService = require('./doctorprofile.service');
@@ -123,12 +124,12 @@ const updateAppointmentPreference = async (preferences, doctorAuthId, docid) => 
 
   await existingSlots.save();
   const Slots = await getAvailableSlots(doctorAuthId);
-  await doctordetails.updateOne({ doctorauthId: doctorAuthId }, { $set: { Slots } });
+  await DoctorBasic.updateOne({ doctorAuthId }, { $set: { Slots } });
   return existingSlots;
 };
 
-const getAppointmentPreferences = async (doctorId) => {
-  const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId: doctorId });
+const getAppointmentPreferences = async (doctorAuthId) => {
+  const appointmentPreference = await AppointmentPreference.findOne({ doctorAuthId });
   return appointmentPreference;
 };
 

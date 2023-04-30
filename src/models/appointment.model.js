@@ -27,7 +27,8 @@ const AppointmentSchema = mongoose.Schema(
     },
     paymentStatus: {
       type: String,
-      default: 'NOT PAID',
+      default: 'PAID',
+      // default: 'NOT PAID',
       required: true,
     },
     paymentType: {
@@ -50,7 +51,7 @@ const AppointmentSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    AuthUser: {
+    userAuthId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Auth,
       required: true,

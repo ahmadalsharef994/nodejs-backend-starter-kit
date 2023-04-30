@@ -4,7 +4,7 @@
 
 // const DoctorQuerySchema = mongoose.Schema(
 //   {
-//     AuthDoctor: {
+//     doctorAuthId: {
 //       type: mongoose.Schema.Types.ObjectId,
 //       ref: Auth,
 //       required: true,

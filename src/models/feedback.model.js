@@ -30,12 +30,12 @@
 //       type: String,
 //       default: null,
 //     },
-//     AuthDoctor: {
+//     doctorAuthId: {
 //       type: mongoose.Schema.Types.ObjectId,
 //       ref: Auth,
 //       required: true,
 //     },
-//     AuthUser: {
+//     userAuthId: {
 //       type: mongoose.Schema.Types.ObjectId,
 //       ref: Auth,
 //       required: true,

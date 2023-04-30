@@ -74,7 +74,7 @@ const fetchRazorpayOrderStatus = async (razorpayOrderId) => {
 //   return 'no_match';
 // };
 
-const createAppointmentOrder = async (currency, appointmentid, orderId) => {
+const createAppointmentOrder = async (currency, appointmentId, orderId) => {
   const { _id, price } = await Appointment.findOne({ orderId });
   const options = {
     amount: price * 100,
@@ -116,7 +116,7 @@ const calculateSHADigestAppointment = async (razorpayOrderID, razorpayPaymentId,
       const Slots = await doctorAppointmentService.getAvailableAppointmentsManually(appointmentdetails.docid);
       await doctordetails.updateOne(
         {
-          doctorauthId: appointmentdetails.AuthDoctor,
+          doctorauthId: appointmentdetails.doctorAuthId,
         },
         { $set: { Slots } }
       );

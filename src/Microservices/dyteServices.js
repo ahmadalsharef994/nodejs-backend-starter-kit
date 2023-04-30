@@ -2,17 +2,22 @@ const axios = require('axios');
 const ApiError = require('../utils/ApiError');
 const DyteSession = require('../models/dyteSession.model');
 
+const getDyteSessionByAppointmentId = async (appointmentID) => {
+  const dyteSession = await DyteSession.findOne({ appointmentId: appointmentID });
+  return dyteSession;
+};
+
 // to initiate a meeting
 const InitiateMeetingRoom = async (appointmentID) => {
   const InitMeeting = JSON.stringify({
     title: appointmentID,
     presetName: 'Appointment',
-    authorization: { closed: true },
+    authorization: { closed: false },
   });
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: `APIKEY ${process.env.DYTEKey}`,
+    Authorization: `${process.env.DYTEKey}`,
   };
   let Meetingresult = '';
 
@@ -23,19 +28,16 @@ const InitiateMeetingRoom = async (appointmentID) => {
     .then((response) => {
       Meetingresult = response.data.data;
     })
-    .catch(() => {
-      throw new ApiError(400, 'Error Generating Video Session');
+    .catch((error) => {
+      throw new ApiError(400, `Error Generating Video Session: ${error}`);
     });
 
   return Meetingresult;
 };
 
-const addDoctorParticipantToMeeting = async (meetingID, doctorId) => {
+const addDoctorParticipantToMeeting = async (meetingID, doctorAuthId) => {
   const AddDoctorToMeeting = JSON.stringify({
-    userDetails: {
-      name: 'DoctorName',
-    },
-    clientSpecificId: doctorId,
+    clientSpecificId: doctorAuthId,
     presetName: 'Appointment',
   });
   const headers = {
@@ -55,25 +57,22 @@ const addDoctorParticipantToMeeting = async (meetingID, doctorId) => {
     .then((response) => {
       DocParticipantresult = response.data.data;
     })
-    .catch(() => {
-      throw new ApiError(400, 'Error Adding Doctor Participant Video Session');
+    .catch((error) => {
+      throw new ApiError(400, `Error Adding Doctor Participant Video Session${error}`);
     });
 
   return DocParticipantresult;
 };
 
-const addUserParticipantToMeeting = async (meetingID, patientId) => {
+const addUserParticipantToMeeting = async (meetingID, userAuthId) => {
   const AddUserToMeeting = JSON.stringify({
-    userDetails: {
-      name: 'UserFullName',
-    },
-    clientSpecificId: patientId,
+    clientSpecificId: userAuthId,
     presetName: 'Appointment',
   });
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
-    Authorization: `APIKEY ${process.env.DYTEKey}`,
+    Authorization: ` ${process.env.DYTEKey}`,
   };
   let UserParticipantresult = '';
   await axios
@@ -87,18 +86,19 @@ const addUserParticipantToMeeting = async (meetingID, patientId) => {
     .then((response) => {
       UserParticipantresult = response.data.data;
     })
-    .catch(() => {
-      throw new ApiError(400, 'Error Adding User Participant Video Session');
+    .catch((error) => {
+      throw new ApiError(400, `Error Adding User Participant Video Session${error}`);
     });
 
   return UserParticipantresult;
 };
 // creating tokens for dyte meeting
-const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
+const createDyteMeeting = async (appointmentID, doctorAuthId, userAuthId) => {
   const meetingroom = await InitiateMeetingRoom(appointmentID);
-  const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorId);
-  const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, patientId);
-  const existingSession = await DyteSession.findOne({ appointmentid: appointmentID });
+  // Wait for 1 second to give the meeting enough time to be created
+  const doctorparticipation = await addDoctorParticipantToMeeting(meetingroom.meeting.id, doctorAuthId);
+  const userparticipation = await addUserParticipantToMeeting(meetingroom.meeting.id, userAuthId);
+  const existingSession = await DyteSession.findOne({ appointmentId: appointmentID });
   if (existingSession) {
     existingSession.meetingroom = meetingroom;
     existingSession.doctorparticipation = doctorparticipation;
@@ -107,13 +107,13 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
     // throw new ApiError(400, 'There was Already A Session Intiated For This Appointment Use appointment id to Live Join !');
   }
   const dyteSession = await DyteSession.create({
-    appointmentid: appointmentID,
-    AuthDoctor: doctorId,
-    AuthUser: patientId,
-    dytemeetingid: meetingroom.meeting.id,
-    dyteroomname: meetingroom.meeting.roomName,
-    dytedoctortoken: doctorparticipation.authResponse.authToken,
-    dyteusertoken: userparticipation.authResponse.authToken,
+    appointmentId: appointmentID,
+    doctorAuthId,
+    userAuthId,
+    meetingId: meetingroom.meeting.id,
+    roomName: meetingroom.meeting.roomName,
+    doctorToken: doctorparticipation.authResponse.authToken,
+    userToken: userparticipation.authResponse.authToken,
   });
   if (!dyteSession) {
     throw new ApiError(400, 'Error Triggered it to Developer DYTE Services down');
@@ -125,5 +125,9 @@ const createDyteMeeting = async (appointmentID, doctorId, patientId) => {
 };
 
 module.exports = {
+  getDyteSessionByAppointmentId,
+  // InitiateMeetingRoom,
+  // addDoctorParticipantToMeeting,
+  // addUserParticipantToMeeting,
   createDyteMeeting,
 };

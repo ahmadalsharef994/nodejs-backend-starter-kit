@@ -5,6 +5,7 @@ const { objectId } = require('./custom.validation');
 const joinAppointment = {
   body: Joi.object().keys({
     appointmentId: Joi.string().required(),
+    socketID: Joi.string(),
   }),
 };
 const deleteSlot = {

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const { toJSON } = require('./plugins');
 const Auth = require('./auth.model');
 
-const docSchema = mongoose.Schema({
+const documentSchema = mongoose.Schema({
   resume: {
     type: String,
     default: null,
@@ -42,11 +42,11 @@ const docSchema = mongoose.Schema({
 });
 
 // add plugin that converts mongoose to json
-docSchema.plugin(toJSON);
+documentSchema.plugin(toJSON);
 
 /**
  * @typedef doc
  */
-const Document = mongoose.model('Document', docSchema);
+const Document = mongoose.model('Document', documentSchema);
 
 module.exports = Document;

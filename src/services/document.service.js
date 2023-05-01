@@ -5,8 +5,8 @@ const { Document } = require('../models');
 // const fileUpload = require('../Microservices/fileUpload.service');
 const ApiError = require('../utils/ApiError');
 
-const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, AuthData) => {
-  const DocDataExist = await Document.findOne({ auth: AuthData._id });
+const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, auth) => {
+  const DocDataExist = await Document.findOne({ auth });
   if (!DocDataExist) {
     // If doctor uploaded docx already exists
     const uploadDoc = await Document.create({
@@ -17,44 +17,39 @@ const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, a
       medicalRegistration,
       aadharCardDoc,
       pancardDoc,
-      auth: AuthData,
+      auth,
     });
     return uploadDoc;
   }
-  if (DocDataExist.isRestricted !== true) {
-    // Check is Restricted
-    const DataToUpdate = {};
-    let throwError = false;
-    resume != null ? (DocDataExist.resume != null ? (throwError = true) : (DataToUpdate.resume = resume)) : false;
-    esign != null ? (DocDataExist.esign != null ? (throwError = true) : (DataToUpdate.esign = esign)) : false;
-    ifsc != null ? (DocDataExist.ifsc != null ? (throwError = true) : (DataToUpdate.ifsc = ifsc)) : false;
-    medicalDegree != null
-      ? DocDataExist.medicalDegree != null
-        ? (throwError = true)
-        : (DataToUpdate.medicalDegree = medicalDegree)
-      : false;
-    medicalRegistration != null
-      ? DocDataExist.medicalRegistration != null
-        ? (throwError = true)
-        : (DataToUpdate.medicalRegistration = medicalRegistration)
-      : false;
-    aadharCardDoc != null
-      ? DocDataExist.aadharCardDoc != null
-        ? (throwError = true)
-        : (DataToUpdate.aadharCardDoc = aadharCardDoc)
-      : false;
-    pancardDoc != null
-      ? DocDataExist.pancardDoc != null
-        ? (throwError = true)
-        : (DataToUpdate.pancardDoc = pancardDoc)
-      : false;
-    if (throwError === false && DataToUpdate !== {}) {
-      const uploadDoc = await Document.updateOne({ _id: DocDataExist._id }, { $set: DataToUpdate });
-      return uploadDoc;
-    }
+  if (DocDataExist.isRestricted) {
     return false;
   }
-  return false;
+
+  const updateFields = {
+    resume,
+    esign,
+    ifsc,
+    medicalDegree,
+    medicalRegistration,
+    aadharCardDoc,
+    pancardDoc,
+  };
+
+  // Check if any field already has a value
+  // eslint-disable-next-line no-restricted-syntax
+  for (const field in updateFields) {
+    if (DocDataExist[field] != null && updateFields[field] != null) {
+      // throw new Error(`Error updating ${field}: field already has a value`);
+    }
+  }
+
+  // Update fields if no errors occurred
+  const updatedDoc = await Document.findOneAndUpdate(
+    { _id: DocDataExist._id },
+    { $set: updateFields },
+    { new: true } // Return the updated document instead of the original document
+  );
+  return updatedDoc;
 };
 
 // const signedUrl = async (Authdata, document) => {
@@ -88,17 +83,47 @@ const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, a
 //   return docUrl;
 // };
 
+const getDocumentUrl = async (Authdata, document) => {
+  const DocDataExist = await Document.findOne({ auth: Authdata });
+  let documentUrl = '';
+  switch (document) {
+    case 'resume':
+      documentUrl = DocDataExist.resume;
+      break;
+    case 'esign':
+      documentUrl = DocDataExist.esign;
+      break;
+    case 'medicalDegree':
+      documentUrl = DocDataExist.medicalDegree;
+      break;
+    case 'medicalRegistration':
+      documentUrl = DocDataExist.medicalRegistration;
+      break;
+    case 'aadharCardDoc':
+      documentUrl = DocDataExist.aadharCardDoc;
+      break;
+    case 'pancardDoc':
+      documentUrl = DocDataExist.pancardDoc;
+      break;
+    case 'ifsc':
+      documentUrl = DocDataExist.ifsc;
+      break;
+    default:
+      documentUrl = false;
+  }
+  return documentUrl;
+};
 const fetchDocumentdata = async (AuthData) => {
   const DocDataExist = await Document.findOne({ auth: AuthData });
   return DocDataExist;
 };
-const updateEsign = async (Esign, Auth) => {
-  await Document.updateOne({ auth: Auth }, { $set: { esign: Esign.location } });
+const updateEsign = async (esignlocation, Auth) => {
+  await Document.updateOne({ auth: Auth }, { $set: { esign: esignlocation } });
   const { esign } = await Document.findOne({ auth: Auth });
   if (esign === undefined) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'ID not found please contact support ');
   }
-  if (esign === Esign.location) {
+  if (esign === esignlocation) {
     return true;
   }
   return false;
@@ -109,4 +134,5 @@ module.exports = {
   // signedUrl,
   fetchDocumentdata,
   updateEsign,
+  getDocumentUrl,
 };

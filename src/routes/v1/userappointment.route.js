@@ -16,7 +16,7 @@ router
 
 // router.route('/upcoming-appointments').get(authuser(), userAppointmentController.upcomingAppointments);
 router.route('/next-appointment').get(authuser(), userAppointmentController.getNextAppointment);
-router.route('/prescriptions').get(authuser(), userAppointmentController.showPrescriptions);
+router.route('/prescriptions').get(authuser(), userAppointmentController.getPrescriptions);
 // router.route('/labtest-orders').get(authuser(), userAppointmentController.showLabTestOrders);
 router
   .route('/appointment-status')

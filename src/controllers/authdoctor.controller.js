@@ -9,23 +9,9 @@ const {
   verifiedDoctorService,
   doctorprofileService,
   documentService,
-  // appointmentPreferenceService,
 } = require('../services');
 const { emailService, smsService } = require('../Microservices');
 const ApiError = require('../utils/ApiError');
-
-/* Challenge Heirarchy for Onboarding API
-AUTH_LOGIN
-AUTH_EMAILVERIFY
-AUTH_OTPVERIFY
-BASIC_DETAILS
-EDUCATION_DETAILS
-EDUCATION_DOCUMENTUPLOAD
-EXPERIENCE_DETAILS
-CLINIC_DETAILS
-ONBOARDING_SUCCESS
-ONBOARDING_ONHOLD
-*/
 
 // Below Function not in use discarded flow
 const getOnboardingChallenge = async (AuthData) => {
@@ -242,26 +228,6 @@ const resendOtp = catchAsync(async (req, res) => {
     challenge,
   });
 });
-
-// const tryverification = catchAsync(async (req, res) => {
-//   const AuthData = await authService.getAuthById(req.SubjectId);
-//   const educationdata = await doctorprofileService.fetcheducationdetails(AuthData);
-//   const verifytry = await internalTeamService.checkVerification(AuthData);
-//   if (!verifytry) {
-//     const try1 = await internalTeamService.AutoverifyDoctorByBNMC(
-//       educationdata.registrationNo,
-//       educationdata.stateMedicalCouncil,
-//       educationdata.yearofRegistration
-//     );
-//     if (try1) {
-//       res.status(httpStatus.OK).json({ message: 'Your Verification Successful', challenge: 'ONBOARDING_SUCCESS' });
-//     } else {
-//       res.status(httpStatus.BAD_REQUEST).json({ message: 'Your Verification is Pending', challenge: 'ONBOARDING_ONHOLD' });
-//     }
-//   } else {
-//     res.status(httpStatus.BAD_REQUEST).json({ message: 'You are already verified!', challenge: 'ONBOARDING_SUCCESS' });
-//   }
-// });
 
 const verifyOtp = catchAsync(async (req, res) => {
   const service = req.body.choice;

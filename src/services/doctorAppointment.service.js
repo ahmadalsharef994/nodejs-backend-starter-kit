@@ -444,14 +444,14 @@ const getPrescription = async (prescriptionid) => {
 
 const createPrescriptionDoc = async (prescriptionDoc, appointmentId, Authdata) => {
   try {
-    const appointment = await Appointment.find({ _id: appointmentId });
+    const appointment = await Appointment.findOne({ _id: appointmentId });
     prescriptionDoc.Appointment = appointmentId;
-    prescriptionDoc.patientName = appointment[0].patientName;
-    prescriptionDoc.userAuth = appointment[0].userAuthId;
+    prescriptionDoc.patientName = appointment.patientName;
+    prescriptionDoc.userAuth = appointment.userAuthId || '644d818a46205e53b648df51';
     prescriptionDoc.doctorAuth = Authdata;
-    const DoctorPrescriptionDocument = await Prescription.create(prescriptionDoc);
-    if (DoctorPrescriptionDocument) {
-      return DoctorPrescriptionDocument;
+    const prescription = await Prescription.create(prescriptionDoc);
+    if (prescription) {
+      return prescription;
     }
   } catch (e) {
     return false;

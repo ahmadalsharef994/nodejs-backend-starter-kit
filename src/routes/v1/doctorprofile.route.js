@@ -1,4 +1,6 @@
 const express = require('express');
+const multer = require('multer');
+const cloudinary = require('cloudinary').v2;
 const validate = require('../../middlewares/validate');
 const doctorProfileValidator = require('../../validations/DoctorProfile.validation');
 const doctorProfileController = require('../../controllers/doctorprofile.controller');
@@ -7,6 +9,7 @@ const authdoctorverified = require('../../middlewares/authDoctorVerified');
 const appointmentPreferenceValidator = require('../../validations/appointmentpreference.validation');
 // const profilePhotoUpload = require('../../Microservices/profilePicture.service');
 const { appointmentController } = require('../../controllers');
+const { doctorprofileService } = require('../../services');
 
 const router = express.Router();
 
@@ -20,13 +23,50 @@ router.route('/basic-details').post(
   doctorProfileController.submitbasicdetails
 ); // postBasicDetails
 
-// router
-//   .route('/basic-details/profile-picture')
-//   .post(profilePhotoUpload.uploadPhoto.fields([{ name: 'avatar', maxCount: 1 }]), authDoctor(), function (req, res) {
-//     doctorProfileController.submitprofilepicture(req);
-//     const location = req.files.avatar[0].location;
-//     res.status(201).json({ message: 'Profile picture Updated!', location });
-//   });
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
+    cb(null, true);
+  } else {
+    cb(new Error('Invalid file type'), false);
+  }
+};
+
+const upload = multer({
+  storage: multer.diskStorage({}),
+  limits: { fileSize: 2000000 }, // 2MB limit
+  fileFilter,
+});
+
+// Set up Cloudinary for image uploading
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+router.route('/basic-details/profile-picture').post(authDoctor(), upload.single('avatar'), async (req, res, next) => {
+  // doctorProfileController.submitprofilepicture(req);
+  // const location = req.files.avatar[0].location;
+  // res.status(201).json({ message: 'Profile picture Updated!', location });
+  try {
+    // Upload image to Cloudinary
+    const result = await cloudinary.uploader.upload(req.file.path, { folder: 'avatar' });
+
+    // Call the controller method to update the esign field in the database
+    const auth = req.SubjectId;
+
+    const updated = await doctorprofileService.submitprofilepicture(result.secure_url, auth);
+
+    // Check if the update was successful
+    if (updated) {
+      res.status(200).json({ message: 'avatar updated', location: result.secure_url });
+    } else {
+      res.status(500).json({ message: 'Failed to update avatar' });
+    }
+  } catch (error) {
+    next(error);
+  }
+});
 
 router.route('/education-details').get(authDoctor(), doctorProfileController.fetcheducationdetails);
 router

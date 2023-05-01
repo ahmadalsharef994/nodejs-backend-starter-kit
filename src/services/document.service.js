@@ -1,9 +1,20 @@
-/* eslint-disable no-nested-ternary */
-/* eslint-disable no-unused-expressions */
+const fs = require('fs');
+const path = require('path');
+const ejs = require('ejs');
+const pdf = require('html-pdf');
+const cloudinary = require('cloudinary').v2;
 const httpStatus = require('http-status');
 const { Document } = require('../models');
 // const fileUpload = require('../Microservices/fileUpload.service');
 const ApiError = require('../utils/ApiError');
+
+require('dotenv').config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 const Upload = async (resume, esign, ifsc, medicalDegree, medicalRegistration, aadharCardDoc, pancardDoc, auth) => {
   const DocDataExist = await Document.findOne({ auth });
@@ -129,10 +140,57 @@ const updateEsign = async (esignlocation, Auth) => {
   return false;
 };
 
+const generatePrescriptionDocument = async (prescription) => {
+  const filePathName = path.resolve(__dirname, '../views/prescription.ejs');
+  // eslint-disable-next-line security/detect-non-literal-fs-filename
+  const htmlString = fs.readFileSync(filePathName).toString();
+  const options = { format: 'Letter' };
+  const ejsData = ejs.render(htmlString, prescription);
+
+  const pdfBuffer = await new Promise((resolve, reject) => {
+    pdf.create(ejsData, options).toBuffer((err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
+      }
+    });
+  });
+  // save PDF buffer to file
+  fs.writeFileSync('output.pdf', pdfBuffer, (err) => {
+    if (err) {
+      throw err;
+    }
+  });
+
+  // UPLOAD PDF TO CLOUDINARY
+  const uploadResult = await cloudinary.uploader.upload(
+    'output.pdf',
+    {
+      resource_type: 'raw',
+      folder: 'prescriptions',
+      overwrite: true,
+      format: 'pdf',
+      transformation: [{ width: 500, height: 500, crop: 'limit' }],
+      public_id: 'prescription',
+    },
+    (err, result) => {
+      if (err) {
+        throw err;
+      } else {
+        return result;
+      }
+    }
+  );
+
+  return uploadResult.secure_url;
+};
+
 module.exports = {
   Upload,
   // signedUrl,
   fetchDocumentdata,
   updateEsign,
   getDocumentUrl,
+  generatePrescriptionDocument,
 };

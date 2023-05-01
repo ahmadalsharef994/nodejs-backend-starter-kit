@@ -99,7 +99,7 @@ const getAppointmentById = catchAsync(async (req, res) => {
 const createPrescription = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
 
-  const Prescription = await appointmentService.createPrescriptionDoc(req.body, req.params.appointmentId, AuthData);
+  const Prescription = await appointmentService.createPrescription(req.body, req.params.appointmentId, AuthData);
   if (Prescription !== false) {
     res.status(httpStatus.CREATED).json({ message: 'Prescription Generated Sucessfully', Prescription });
   } else {

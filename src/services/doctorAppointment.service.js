@@ -23,6 +23,7 @@ const authService = require('./auth.service');
 const { emailService } = require('../Microservices');
 const netEarn = require('../utils/netEarnCalculator');
 // const User = require('../models/auth.model');
+const documentService = require('./document.service');
 
 const dbURL = config.mongoose.url;
 const agenda = new Agenda({
@@ -442,13 +443,18 @@ const getPrescription = async (prescriptionid) => {
   return false;
 };
 
-const createPrescriptionDoc = async (prescriptionDoc, appointmentId, Authdata) => {
+const createPrescription = async (prescriptionDoc, appointmentId, Authdata) => {
   try {
     const appointment = await Appointment.findOne({ _id: appointmentId });
     prescriptionDoc.Appointment = appointmentId;
     prescriptionDoc.patientName = appointment.patientName;
+    prescriptionDoc.doctorName = appointment.doctorName;
+    prescriptionDoc.appointmentDate = appointment.Date;
     prescriptionDoc.userAuth = appointment.userAuthId || '644d818a46205e53b648df51';
     prescriptionDoc.doctorAuth = Authdata;
+    const prescriptionUrl = await documentService.generatePrescriptionDocument(prescriptionDoc);
+    prescriptionDoc.prescriptionUrl = prescriptionUrl;
+
     const prescription = await Prescription.create(prescriptionDoc);
     if (prescription) {
       return prescription;
@@ -1036,7 +1042,7 @@ module.exports = {
   getAvailableAppointments,
   // getFollowupsById,
   getAppointmentById,
-  createPrescriptionDoc,
+  createPrescription,
   getPrescription,
   getPatientDetails,
   getPatients,

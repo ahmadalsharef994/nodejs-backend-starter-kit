@@ -26,14 +26,10 @@ const submitbasicdetails = async (basicDetails, AuthData) => {
   return doctorBasic;
 };
 
-// const submitprofilepicture = async (ProfilePhoto, AuthData) => {
-//   const alreadyExist = await fetchbasicdetails(AuthData);
-//   if (alreadyExist) {
-//     await DoctorBasic.updateOne({ _id: alreadyExist._id }, { $set: { avatar: ProfilePhoto } });
-//     return 'profile Picture updated';
-//   }
-//   return false;
-// };
+const submitprofilepicture = async (ProfilePhoto, doctorAuthId) => {
+  const doctorBasic = await DoctorBasic.updateOne({ doctorAuthId }, { $set: { avatar: ProfilePhoto } });
+  return doctorBasic;
+};
 
 const fetcheducationdetails = async (AuthData) => {
   const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
@@ -234,7 +230,7 @@ module.exports = {
   fetcheducationdetails,
   submitedClinicdetails,
   fetchClinicdetails,
-  // submitprofilepicture,
+  submitprofilepicture,
   // submitexperiencedetails,
   fetchexperiencedetails,
   fetchpayoutsdetails,

@@ -40,7 +40,7 @@ const getAppointmentsByStatus = catchAsync(async (req, res) => {
     });
 });
 
-const showPrescriptions = catchAsync(async (req, res) => {
+const getPrescriptions = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
   const result = await userAppointmentService.getAllPrescriptions(AuthData, options);
@@ -100,7 +100,7 @@ const getSlots = catchAsync(async (req, res) => {
 module.exports = {
   upcomingAppointments,
   getAppointmentsByType,
-  showPrescriptions,
+  getPrescriptions,
   // showLabTestOrders,
   // fetchHealthPackages,
   getDoctorsByCategories,

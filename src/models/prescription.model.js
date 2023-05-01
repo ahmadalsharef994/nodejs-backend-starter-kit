@@ -8,6 +8,10 @@ const PrescriptionSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    doctorName: {
+      type: String,
+      required: true,
+    },
     userAuth: {
       type: mongoose.Schema.Types.ObjectId,
       ref: Appointment,
@@ -41,6 +45,14 @@ const PrescriptionSchema = mongoose.Schema(
       default: null,
     },
     OtherInstructions: {
+      type: String,
+      default: null,
+    },
+    appointmentDate: {
+      type: Date,
+      required: true,
+    },
+    prescriptionUrl: {
       type: String,
       default: null,
     },

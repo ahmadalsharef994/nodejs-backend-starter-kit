@@ -14,22 +14,15 @@ const getStats = catchAsync(async (req, res) => {
   const doctorId = req.SubjectId;
 
   const pastPaidAppointments = await appointmentService.getPastPaidAppointments(doctorId);
-
-  const todayDate = new Date();
-  const yesterdayDate = new Date();
-  yesterdayDate.setDate(todayDate.getDate() - 1);
+  const yesterdayDate = new Date(Date.now() - 86400000);
 
   const currentWeekAppointments = pastPaidAppointments.filter((appointment) => {
-    const day1 = new Date(appointment.Date).getTime();
-    const day2 = yesterdayDate.getTime();
-    const days = daysDiff(day2, day1);
-    return days > 0 && days < 7; // 0 (yesterday), 6 (7 days back)
+    const days = daysDiff(yesterdayDate.getTime(), new Date(appointment.Date).getTime());
+    return days > 0 && days < 7;
   });
+
   const pastWeekAppointments = pastPaidAppointments.filter((appointment) => {
-    const day1 = new Date(appointment.Date).getTime();
-    const day2 = new Date();
-    day2.setDate(yesterdayDate.getDate() - 7);
-    const days = daysDiff(day2, day1);
+    const days = daysDiff(new Date(yesterdayDate.getTime() - 604800000).getTime(), new Date(appointment.Date).getTime());
     return days > 0 && days < 7;
   });
 
@@ -46,15 +39,12 @@ const getStats = catchAsync(async (req, res) => {
   const pastWeekIncomes = pastWeekAppointments.reduce((sum, appointment) => sum + netEarn(appointment.price), 0);
   const PERCENT_INCOME = 100 - (pastWeekIncomes / currentWeekIncomes) * 100 || 0;
 
-  // CHARTS
   const PATIENTS_CHART = new Array(7).fill(0);
   const REVENUE_CHART = new Array(7).fill(0);
   const INCOME_CHART = new Array(7).fill(0);
 
   currentWeekAppointments.forEach((appointment) => {
-    const day1 = new Date(appointment.Date).getTime();
-    const day2 = yesterdayDate;
-    const days = daysDiff(day2, day1);
+    const days = daysDiff(yesterdayDate.getTime(), new Date(appointment.Date).getTime());
     if (days > 0 && days < 7) {
       PATIENTS_CHART[6 - days] += 1;
       REVENUE_CHART[6 - days] += appointment.price;
@@ -66,14 +56,6 @@ const getStats = catchAsync(async (req, res) => {
   const PATIENTS = { PERCENT_PATIENTS, TOTAL_PATIENTS, PATIENTS_CHART, AVERAGE_PATIENTS_PER_DAY };
   const REVENUE = { PERCENT_REVENUE, TOTAL_REVENUE, REVENUE_CHART };
   const INCOME = { PERCENT_INCOME, TOTAL_INCOME, INCOME_CHART };
-
-  // const feedbacks = await appointmentService.getDoctorFeedbacks(doctorId);
-
-  // const RATING = (
-  //   feedbacks.reduce((userRatingsSum, feedback) => {
-  //     return userRatingsSum + feedback.userRating;
-  //   }, 0) / feedbacks.length
-  // ).toFixed(1);
 
   res.status(httpStatus.OK).send({ PATIENTS, REVENUE, INCOME });
 });
@@ -96,16 +78,16 @@ const submitbasicdetails = catchAsync(async (req, res) => {
   }
 });
 
-const submitprofilepicture = catchAsync(async (req) => {
-  const AuthData = await authService.getAuthById(req.SubjectId);
-  let profilePhoto = '';
-  try {
-    profilePhoto = req.files.avatar[0].location;
-  } catch (err) {
-    profilePhoto = null;
-  }
-  await doctorprofileService.submitprofilepicture(profilePhoto, AuthData);
-});
+// const submitprofilepicture = catchAsync(async (req) => {
+//   const AuthData = await authService.getAuthById(req.SubjectId);
+//   let profilePhoto = '';
+//   try {
+//     profilePhoto = req.files.avatar[0].location;
+//   } catch (err) {
+//     profilePhoto = null;
+//   }
+//   await doctorprofileService.submitprofilepicture(profilePhoto, req.SubjectId);
+// });
 
 const fetchbasicdetails = catchAsync(async (req, res) => {
   const AuthData = await authService.getAuthById(req.SubjectId);
@@ -354,7 +336,7 @@ module.exports = {
   submitclinicdetails,
   submitpayoutsdetails,
   fetchclinicdetails,
-  submitprofilepicture,
+  // submitprofilepicture,
   submitexperiencedetails,
   fetchexperiencedetails,
   fetchpayoutsdetails,

@@ -56,7 +56,11 @@ const queryAuthData = async (filter, options) => {
  * @returns {Promise<Auth>}
  */
 const getAuthById = async (id) => {
-  return Auth.findOne({ _id: id });
+  const userAuth = await Auth.findOne({ _id: id });
+  if (!userAuth) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  return userAuth;
 };
 
 /**

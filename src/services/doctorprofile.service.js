@@ -15,7 +15,7 @@ const {
 const netEarn = require('../utils/netEarnCalculator');
 
 const fetchbasicdetails = async (doctorId) => {
-  const basicDetails = await DoctorBasic.findOne({ auth: doctorId });
+  const basicDetails = await DoctorBasic.findOne({ doctorAuthId: doctorId });
   return basicDetails;
 };
 
@@ -32,7 +32,7 @@ const submitprofilepicture = async (ProfilePhoto, doctorAuthId) => {
 };
 
 const fetcheducationdetails = async (AuthData) => {
-  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: AuthData });
   const { registrationNo, yearofRegistration, stateMedicalCouncil, isEducationVerified } = doctorBasic;
   return { registrationNo, yearofRegistration, stateMedicalCouncil, isEducationVerified };
 };
@@ -45,7 +45,7 @@ const fetcheducationdetails = async (AuthData) => {
 // };
 
 const fetchClinicdetails = async (authId) => {
-  const doctorBasic = await DoctorBasic.findOne({ auth: authId });
+  const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: authId });
   const { clinicName, clinicAddress, clinicTiming, clinicTelephone } = doctorBasic;
   return { clinicName, clinicAddress, clinicTiming, clinicTelephone };
 };
@@ -54,7 +54,7 @@ const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
   // eslint-disable-next-line no-param-reassign
   ClinicDetailBody.auth = AuthData; // Assign Reference to Req Body
   // const clinicDetailDoc = await DoctorClinic.create(ClinicDetailBody);
-  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: AuthData });
   doctorBasic.clinicName = ClinicDetailBody.clinicName;
   doctorBasic.clinicAddress = ClinicDetailBody.AddressFirstline;
   doctorBasic.clinicTiming = ClinicDetailBody.timing;
@@ -64,7 +64,7 @@ const submitedClinicdetails = async (ClinicDetailBody, AuthData) => {
 };
 
 const fetchexperiencedetails = async (AuthData) => {
-  const doctorBasic = await DoctorBasic.findOne({ auth: AuthData });
+  const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: AuthData });
   const { experience, skills, isExperienceVerified } = doctorBasic;
   return { experience, skills, isExperienceVerified };
 };
@@ -147,9 +147,9 @@ const submitpayoutsdetails = async (PayoutDetailBody, AuthData) => {
 //   }
 // };
 
-const updateappointmentPrice = async (appointmentPrice, auth) => {
-  await DoctorBasic.updateOne({ auth }, { $set: { appointmentPrice } });
-  const result = await DoctorBasic.findOne({ appointmentPrice });
+const updateappointmentPrice = async (appointmentPrice, doctorAuthId) => {
+  const result = await DoctorBasic.findOneAndUpdate({ doctorAuthId }, { $set: { appointmentPrice } }, { new: true });
+
   if (result.appointmentPrice === appointmentPrice) {
     return true;
   }

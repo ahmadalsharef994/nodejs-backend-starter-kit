@@ -60,16 +60,11 @@ const getUpcomingAppointments = catchAsync(async (req, res) => {
 const getAppointmentsByType = catchAsync(async (req, res) => {
   const filter = { Type: req.query.type };
   const options = pick(req.query, ['sortBy', 'limit', 'page']);
-  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01'); // example: 2022/04/26 ==> 2022-04-25T18:30:00.000Z;
+  const fromDate = req.query.fromDate ? new Date(req.query.fromDate) : new Date('2022/01/01');
   const endDate = req.query.endDate ? new Date(req.query.endDate) : new Date('2030/01/01');
-  appointmentService
-    .getAppointmentsByType(req.Docid, fromDate, endDate, filter, options)
-    .then((result) => {
-      return res.status(httpStatus.OK).send(result);
-    })
-    .catch((err) => {
-      return res.status(httpStatus.BAD_REQUEST).send(err);
-    });
+
+  const result = await appointmentService.getAppointmentsByType(req.Docid, fromDate, endDate, filter, options);
+  return res.status(httpStatus.OK).send(result);
 });
 
 const getAppointmentsByStatus = catchAsync(async (req, res) => {
@@ -180,7 +175,7 @@ const updateAppointmentPreference = catchAsync(async (req, res) => {
   const docId = req.Docid;
   const isPriceSet = await appointmentPreferenceService.checkForAppointmentPrice(doctorAuthId);
   if (!isPriceSet) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'General Appointment Price Not Set');
+    return res.status(httpStatus.BAD_REQUEST).json({ message: 'General Appointment Price Not Set' });
   }
   const preferences = req.body;
 

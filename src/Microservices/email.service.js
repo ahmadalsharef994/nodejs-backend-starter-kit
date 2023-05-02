@@ -109,7 +109,7 @@ const bookingCancellationMail = async (appointmentdetails) => {
 //     to: recivermail,
 //     from: process.env.EMAIL_FROM,
 //     subject: 'Rescheduled Appointment',
-//     text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) is rescheduled since doctor is not available at this time \n\nReason:${Reason}\n\nNew AppointmentTiming:${Appointmenttime}\n\n\nThank you Team Medzgo`,
+//     text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) is rescheduled since doctor is not available at this time \n\nReason:${Reason}\n\nNew AppointmentTiming:${Appointmenttime}\n\n\nThank you Team wellpath`,
 //   };
 //   const result = sgMail.send(msg);
 //   result

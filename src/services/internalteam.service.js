@@ -153,7 +153,7 @@ const verfieddoctors = async () => {
 // };
 
 const setServiceCharges = async (doctorAuthId, serviceCharges) => {
-  const doctorBasic = await DoctorBasic.findOne({ auth: doctorAuthId });
+  const doctorBasic = await DoctorBasic.findOne({ doctorAuthId });
   doctorBasic.serviceCharges = serviceCharges;
   await doctorBasic.save();
   return doctorBasic;

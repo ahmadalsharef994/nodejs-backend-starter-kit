@@ -8,7 +8,7 @@ const Appointment = require('../models/appointment.model');
 const DoctorBasic = require('../models/doctorBasic');
 // const { createSlots, calculateDuration } = require('../utils/SlotsCreator');
 const ApiError = require('../utils/ApiError');
-const doctorprofileService = require('./doctorprofile.service');
+// const doctorprofileService = require('./doctorprofile.service');
 
 const slotTime = 15;
 const weekday = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
@@ -52,7 +52,7 @@ const getAvailableSlots = async (doctorAuthId, date) => {
   return availableAppointmentSlots;
 };
 const checkForAppointmentPrice = async (doctorId) => {
-  const basicDetails = await doctorprofileService.fetchbasicdetails(doctorId);
+  const basicDetails = await DoctorBasic.findOne({ doctorAuthId: doctorId });
   if (!basicDetails || !basicDetails.appointmentPrice) {
     return false;
   }

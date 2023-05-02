@@ -8,7 +8,7 @@
 //       type: Number,
 //       required: true,
 //     },
-//     MedzgoCharge: {
+//     wellpathCharge: {
 //       type: Number,
 //       required: true,
 //     },

@@ -36,9 +36,9 @@ const saveMessage = async (data) => {
     appointment.chatHistory = {};
     appointment.chatHistory.messages = [];
     appointment.chatHistory.appointmentId = appointmentId;
-    const doctorBasic = await DoctorBasic.findOne({ auth: appointment.doctorAuthId });
+    const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: appointment.doctorAuthId });
     const doctorProfilePic = doctorBasic.avatar;
-    const userBasic = await UserBasic.findOne({ auth: appointment.userAuthId });
+    const userBasic = await UserBasic.findOne({ doctorAuthId: appointment.userAuthId });
     const userProfilePic = userBasic.avatar;
     appointment.chatHistory.particpants = [
       { name: appointment.doctorName, profilePic: doctorProfilePic },

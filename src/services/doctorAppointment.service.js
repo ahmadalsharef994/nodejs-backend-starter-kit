@@ -241,12 +241,44 @@ const getAppointmentsByType = async (doctorId, fromDate, endDate, filter, option
     const result = await Appointment.paginate({ docid: doctorId, paymentStatus: 'PAID' }, options);
     return result;
   }
-  // else
+  if (filter.Type === 'TODAY') {
+    const result = await Appointment.paginate(
+      {
+        docid: doctorId,
+        paymentStatus: 'PAID',
+        Date: new Date().toDateString(),
+      },
+      options
+    );
+    return result;
+  }
+  if (filter.Type === 'UPCOMING') {
+    const result = await Appointment.paginate(
+      {
+        docid: doctorId,
+        paymentStatus: 'PAID',
+        StartTime: { $gte: new Date(), $lt: endDate },
+      },
+      options
+    );
+    return result;
+  }
+  if (filter.Type === 'PAST') {
+    const result = await Appointment.paginate(
+      {
+        docid: doctorId,
+        paymentStatus: 'PAID',
+        StartTime: { $gte: fromDate, $lt: new Date() },
+      },
+      options
+    );
+    return result;
+  }
+
   const result = await Appointment.paginate(
     {
       docid: doctorId,
       paymentStatus: 'PAID',
-      Status: { $nin: 'cancelled' },
       StartTime: { $gte: fromDate, $lt: endDate },
       Type: filter.Type,
     },
@@ -465,22 +497,23 @@ const createPrescription = async (prescriptionDoc, appointmentId, Authdata) => {
 };
 
 const getPatientDetails = async (patientId, doctorId) => {
-  const PatientBasicDetails = await UserBasic.findOne({ auth: patientId }, { auth: 0 });
-  const PatientAuth = await authService.getAuthById(patientId);
+  const [PatientAuth, PatientBasicDetails, appointments, prescription] = await Promise.all([
+    authService.getAuthById(patientId),
+    UserBasic.findOne({ auth: patientId }, { auth: 0 }),
+    Appointment.findOne({
+      userAuthId: patientId,
+      StartTime: { $lt: new Date() },
+      paymentStatus: 'PAID',
+      doctorAuthId: doctorId,
+    }).sort({ StartTime: -1 }),
+    Prescription.findOne({ Appointment: patientId }).sort({ createdAt: -1 }),
+  ]);
+
   const PatientName = PatientAuth.fullname;
   const PatientContact = { mobile: PatientAuth.mobile, email: PatientAuth.email };
-  const currentdate = new Date();
-  const appointments = await Appointment.find({
-    userAuthId: patientId,
-    StartTime: { $lt: `${currentdate}` },
-    paymentStatus: 'PAID',
-    doctorAuthId: doctorId,
-  }).sort({
-    StartTime: -1,
-  });
-  const RecentAppointment = appointments[0];
-  const prescription = await Prescription.find({ Appointment: `${RecentAppointment.id}` }).sort({ createdAt: -1 });
-  const LatestPrescription = prescription[0];
+  const RecentAppointment = appointments;
+  const LatestPrescription = prescription;
+
   return [PatientName, PatientBasicDetails, PatientContact, RecentAppointment, LatestPrescription];
 };
 
@@ -502,6 +535,10 @@ const getTotalIncome = async (doctorAuthId) => {
 
 const getPatientsCount = async (doctorAuthId) => {
   const appointments = await Appointment.find({ doctorAuthId });
+  // Check if there are any appointments
+  if (appointments.length === 0) {
+    return 0; // Return 0 patients count when there are no appointments
+  }
   const patientIds = appointments.map((appointment) => appointment.userAuthId.toString());
   // convert objectId to String because objectIds aren't comparable (Set will consider duplicates as uniques)
   return new Set(patientIds).size;
@@ -517,34 +554,43 @@ const getPastPaidAppointments = async (doctorAuthId) => {
 };
 
 const getPatients = async (doctorid, page, limit, sortBy) => {
+  // Get patientIds based on doctorId
   const patientIds = await Appointment.aggregate([
+    { $match: { docid: doctorid } },
     { $sort: { StartTime: parseInt(sortBy, 10) } },
-    { $group: { _id: { userAuthId: '$userAuthId' } } },
-    {
-      $facet: {
-        metadata: [{ $count: 'total' }, { $addFields: { page: parseInt(page, 10) } }],
-        data: [{ $skip: (parseInt(page, 10) - 1) * parseInt(limit, 10) }, { $limit: parseInt(limit, 10) }], // add projection here wish you re-shape the docs
-      },
-    },
+    { $group: { _id: '$userAuthId' } },
+    { $skip: (parseInt(page, 10) - 1) * parseInt(limit, 10) },
+    { $limit: parseInt(limit, 10) },
   ]);
-  const allPatientsData = [];
-  let singlePatientData = {};
-  for (let k = 0; k < patientIds[0].data.length; k += 1) {
-    // eslint-disable-next-line no-await-in-loop
-    singlePatientData = await getPatientDetails(patientIds[0].data[k]._id.userAuthId, doctorid);
-    allPatientsData.push({
-      'No.': k,
-      'Patient Name': singlePatientData[0],
-      'Patient Basic Details': singlePatientData[1],
-      'Patient Contact Details': singlePatientData[2],
-      'Patient Recent Appointment': singlePatientData[3],
-      'Prescription ': singlePatientData[4],
-    });
-  }
-  // patientIds[0].metadata[0].totalPages = Math.ceil(patientIds[0].metadata[0].total / limit);
-  // patientIds[0].metadata[0].limit = parseInt(limit, 10);
+
+  // Get patient details and appointment data for each patient
+  const allPatientsData = await Promise.all(
+    patientIds.map(async ({ _id: userAuthId }, index) => {
+      const singlePatientData = await getPatientDetails(userAuthId, doctorid);
+      return {
+        'No.': index,
+        'Patient Name': singlePatientData[0],
+        'Patient Basic Details': singlePatientData[1],
+        'Patient Contact Details': singlePatientData[2],
+        'Patient Recent Appointment': singlePatientData[3],
+        'Prescription ': singlePatientData[4],
+      };
+    })
+  );
+
+  // Get the total number of patients for pagination metadata
+  const totalPatients = await Appointment.distinct('userAuthId', { docid: doctorid });
+  const totalPages = Math.ceil(totalPatients.length / limit);
+
+  const metadata = {
+    total: totalPatients.length,
+    totalPages,
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+  };
+
   if (allPatientsData.length) {
-    return [allPatientsData, patientIds[0].metadata[0]];
+    return [allPatientsData, metadata];
   }
   return false;
 };
@@ -626,7 +672,7 @@ const cancelAppointment = async (appointmentId, doctorId) => {
   //   from: process.env.EMAIL_FROM,
   //   to: appointment.patientMail,
   //   subject: 'Cancelled Appointment',
-  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team Medzgo`,
+  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team wellpath`,
   // });
 
   return 'appintment already cancelled';

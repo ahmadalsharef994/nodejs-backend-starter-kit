@@ -535,6 +535,10 @@ const getTotalIncome = async (doctorAuthId) => {
 
 const getPatientsCount = async (doctorAuthId) => {
   const appointments = await Appointment.find({ doctorAuthId });
+  // Check if there are any appointments
+  if (appointments.length === 0) {
+    return 0; // Return 0 patients count when there are no appointments
+  }
   const patientIds = appointments.map((appointment) => appointment.userAuthId.toString());
   // convert objectId to String because objectIds aren't comparable (Set will consider duplicates as uniques)
   return new Set(patientIds).size;
@@ -668,7 +672,7 @@ const cancelAppointment = async (appointmentId, doctorId) => {
   //   from: process.env.EMAIL_FROM,
   //   to: appointment.patientMail,
   //   subject: 'Cancelled Appointment',
-  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team Medzgo`,
+  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team wellpath`,
   // });
 
   return 'appintment already cancelled';

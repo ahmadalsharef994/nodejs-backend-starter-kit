@@ -232,7 +232,7 @@ const ExperienceDoctorDetails = {
 // const addConsultationfee = {
 //   body: Joi.object().keys({
 //     Consultationcharges: Joi.number().required(),
-//     MedzgoCharge: Joi.number().required(),
+//     wellpathCharge: Joi.number().required(),
 //     NetFeeRecieved: Joi.number().required(),
 //   }),
 // };

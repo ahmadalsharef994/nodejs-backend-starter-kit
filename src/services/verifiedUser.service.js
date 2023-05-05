@@ -16,7 +16,11 @@ const getVerifiedUserById = async (userId) => {
 };
 
 const createVerifiedUser = async (body) => {
-  const { mobile, isdcode } = body;
+  const { mobile } = body;
+  let isdcode = body.isdcode;
+  if (!isdcode) {
+    isdcode = '40';
+  }
   const userAuthExist = await authService.getAuthByPhone(mobile);
   if (userAuthExist) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Mobile Number Already Registered');

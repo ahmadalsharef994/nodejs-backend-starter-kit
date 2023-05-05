@@ -10,7 +10,7 @@ const ApiError = require('../utils/ApiError');
 const createUser = catchAsync(async (req, res) => {
   const userId = await verifiedUserService.createVerifiedUser(req.body);
   if (userId) {
-    res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
+    return res.status(httpStatus.OK).json({ message: 'User Created successfully', userId });
   }
   res.status(httpStatus.BAD_REQUEST).json({ message: 'Create User Account Failed' });
 });
@@ -26,7 +26,7 @@ const resendCreateUserOtp = catchAsync(async (req, res) => {
 const verifyCreatedUser = catchAsync(async (req, res) => {
   const userId = await verifiedUserService.verifyVerifiedUser(req.body.userId, req.body.otp);
   if (userId) {
-    res.status(httpStatus.OK).json({ message: 'User Mobile Number Verified Successfully', userId });
+    return res.status(httpStatus.OK).json({ message: 'User Mobile Number Verified Successfully', userId });
   }
   res.status(httpStatus.BAD_REQUEST).json({ message: 'User Mobile Number Verification Failed' });
 });

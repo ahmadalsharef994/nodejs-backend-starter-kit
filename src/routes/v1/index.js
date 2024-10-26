@@ -17,10 +17,15 @@ const eventRoute = require('./event.route');
 // const itemRoute = require('./item.route');
 // const orderRoute = require('./order.route');
 // const cartRoute = require('./cart.route');
+const authRoute = require('./auth.route')
 
 const router = express.Router();
 
 const defaultRoutes = [
+  {
+    path: '/auth',
+    route: authRoute
+  },
   {
     path: '/auth/doctor', // Doctor Auth Endpoints
     route: authRouteDoctor,

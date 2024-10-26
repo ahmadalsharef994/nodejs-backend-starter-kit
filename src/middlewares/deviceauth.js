@@ -6,7 +6,7 @@ const deviceauth = () => async (req, res, next) => {
     const devicetype = req.headers.devicetype;
     // const fcmtoken = req.headers.fcmtoken;
     if (devicehash === undefined || devicetype === undefined) {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'Device Registration Failed' });
+      res.status(400).json({ message: 'Device Registration Failed' });
     } else if (devicetype === 'web') {
       next();
     } else if (devicetype === 'ios') {
@@ -16,10 +16,10 @@ const deviceauth = () => async (req, res, next) => {
     } else if (devicetype === 'unknown') {
       next();
     } else {
-      res.status(httpStatus.BAD_REQUEST).json({ message: 'DeviceType Authentication Failed' });
+      res.status(400).json({ message: 'DeviceType Authentication Failed' });
     }
   } catch (error) {
-    res.status(httpStatus.BAD_REQUEST).json({ message: 'Device Registration Failed' });
+    res.status(400).json({ message: 'Device Registration Failed' });
   }
 };
 

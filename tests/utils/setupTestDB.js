@@ -1,17 +1,27 @@
+// tests/utils/setupTestDB.js
 const mongoose = require('mongoose');
-const config = require('../../src/config/config');
+const { MongoMemoryServer } = require('mongodb-memory-server');
+
+let mongoServer;
 
 const setupTestDB = () => {
   beforeAll(async () => {
-    await mongoose.connect(config.mongoose.url, config.mongoose.options);
+    mongoServer = await MongoMemoryServer.create();
+    const mongoUri = mongoServer.getUri();
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
   });
 
   beforeEach(async () => {
-    // await Promise.all(Object.values(mongoose.connection.collections).map(async (collection) => collection.deleteMany()));
+    // Clear all data before each test
+    await mongoose.connection.db.dropDatabase();
   });
 
   afterAll(async () => {
     await mongoose.disconnect();
+    await mongoServer.stop();
   });
 };
 

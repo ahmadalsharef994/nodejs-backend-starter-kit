@@ -1,3 +1,5 @@
+// Updated token.service.js
+
 const jwt = require('jsonwebtoken');
 const moment = require('moment');
 const httpStatus = require('http-status');
@@ -5,6 +7,54 @@ const config = require('../config/config');
 const { Token } = require('../models');
 const { Devices } = require('../models');
 const ApiError = require('../utils/ApiError');
+
+/**
+ * Generate auth tokens based on role
+ * @param {Object} user - The user object containing role and id
+ * @returns {Object} tokens - JWT token and its expiration
+ */
+const generateAuthTokens = (user) => {
+  let expires;
+  let payload;
+  const secret = config.jwt.secret;
+
+  // Set token expiration and role-specific payload
+  switch (user.role) {
+    case 'admin':
+      expires = moment().add(1, 'days');
+      payload = {
+        sub: user.id,
+        role: 'admin',
+        iat: moment().unix(),
+        exp: expires.unix(),
+      };
+      break;
+    case 'doctor':
+      expires = moment().add(45, 'days');
+      payload = {
+        sub: user.id,
+        role: 'doctor',
+        iat: moment().unix(),
+        exp: expires.unix(),
+      };
+      break;
+    case 'user':
+      expires = moment().add(5, 'days');
+      payload = {
+        sub: user.id,
+        role: 'user',
+        iat: moment().unix(),
+        exp: expires.unix(),
+      };
+      break;
+    default:
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid user role');
+  }
+
+  // Sign and return JWT
+  const token = jwt.sign(payload, secret);
+  return { token, expires: expires.toDate() };
+};
 
 /**
  * Save a token
@@ -53,116 +103,13 @@ const addDeviceHandler = async (session, authtoken, ipaddress, devicehash, devic
 const logoutdevice = async (authtoken) => {
   const LoggedSessionDoc = await Devices.findOne({ authtoken });
   if (!LoggedSessionDoc) {
-    throw new ApiError(httpStatus.BAD_GATEWAY, 'Something went wrong we are Monitoring');
+    throw new ApiError(httpStatus.BAD_GATEWAY, 'Something went wrong, we are monitoring');
   }
   await Devices.updateOne({ _id: LoggedSessionDoc._id }, { $set: { loggedstatus: false } });
 };
 
-/**
- * Generate Appointment Session token
- * @param {ObjectId} userId
- * @param {Moment} expires
- * @param {string} type
- * @param {string} [secret]
- * @returns {string}
- */
-const generateChatAppointmentSessionToken = (appointmentID, doctorAuth, userAuth, entity, secret = config.jwt.secret) => {
-  const payload = {
-    appointment: appointmentID,
-    doctor: doctorAuth,
-    user: userAuth,
-    entity,
-    iat: moment().unix(),
-    exp: moment().add(20, 'minutes').unix(),
-  };
-  const jwttoken = jwt.sign(payload, secret);
-  return jwttoken;
-};
-
-/**
- * Generate Admin token
- * @param {ObjectId} userId
- * @param {Moment} expires
- * @param {string} type
- * @param {string} [secret]
- * @returns {string}
- */
-const generateAdminToken = (userId, expires, secret = config.jwt.secret) => {
-  const payload = {
-    sub: userId,
-    iat: moment().unix(),
-    role: 'admin',
-    exp: moment().add(1, 'days').unix(),
-  };
-  const jwttoken = jwt.sign(payload, secret);
-  return jwttoken;
-};
-
-/**
- * Generate Doctor token
- * @param {ObjectId} userId
- * @param {Moment} expires
- * @param {string} type
- * @param {string} [secret]
- * @returns {string}
- */
-const generateDoctorToken = (userId, expires, secret = config.jwt.secret) => {
-  const payload = {
-    sub: userId,
-    iat: moment().unix(),
-    role: 'doctor',
-    exp: moment().add(45, 'days').unix(),
-  };
-  const jwttoken = jwt.sign(payload, secret);
-  return jwttoken;
-};
-
-/**
- * Generate Verified Doctor token
- * @param {ObjectId} userId
- * @param {string} docId
- * @param {Moment} expires
- * @param {string} type
- * @param {string} [secret]
- * @returns {string}
- */
-const generateVerifiedDoctorToken = (userId, docId, expires, secret = config.jwt.secret) => {
-  const payload = {
-    sub: userId,
-    iat: moment().unix(),
-    role: 'doctor',
-    docid: docId,
-    exp: moment().add(45, 'days').unix(),
-  };
-  const jwttoken = jwt.sign(payload, secret);
-  return jwttoken;
-};
-
-/**
- * Generate User token
- * @param {ObjectId} userId
- * @param {Moment} expires
- * @param {string} type
- * @param {string} [secret]
- * @returns {string}
- */
-const generateUserToken = (userId, expires, secret = config.jwt.secret) => {
-  const payload = {
-    sub: userId,
-    iat: moment().unix(),
-    role: 'user',
-    exp: moment().add(5, 'days').unix(),
-  };
-  const jwttoken = jwt.sign(payload, secret);
-  return jwttoken;
-};
-
 module.exports = {
-  generateAdminToken,
-  generateDoctorToken,
-  generateVerifiedDoctorToken,
-  generateChatAppointmentSessionToken,
-  generateUserToken,
+  generateAuthTokens,
   addDeviceHandler,
   logoutdevice,
   saveToken,

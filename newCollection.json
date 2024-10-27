@@ -185,7 +185,7 @@
     "variable": [
 		{
 			"key": "Apiurl",
-			"value": "http://localhost:3001"
+			"value": "http://localhost:3000"
 		},
 		{
 			"key": "DoctorJWTToken",

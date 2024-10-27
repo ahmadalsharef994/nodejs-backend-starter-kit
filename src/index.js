@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const mongoose = require('mongoose');
 const { Server } = require('socket.io');
 const uuid = require('uuid');

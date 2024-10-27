@@ -31,4 +31,17 @@ passport and jwt, passport uses jwtstrategy
 otp and doctor verification by admin is skipped for now.
 
 
+
+
 use in-memory db for testing: mongodb-memory-server
+
+
+
+docker:
+Dockerfile how to build image
+yamls how to run containers
+
+
+to build image from Dockerfile docker build -t wellpath .
+
+run the image: docker run -d -p 3000:3000 --name wellpath_container wellpath

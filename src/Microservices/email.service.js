@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 const httpStatus = require('http-status');
 // const { env } = require('process');
 const sgMail = require('@sendgrid/mail');
@@ -109,7 +110,7 @@ const bookingCancellationMail = async (appointmentdetails) => {
 //     to: recivermail,
 //     from: process.env.EMAIL_FROM,
 //     subject: 'Rescheduled Appointment',
-//     text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) is rescheduled since doctor is not available at this time \n\nReason:${Reason}\n\nNew AppointmentTiming:${Appointmenttime}\n\n\nThank you Team wellpath`,
+//     text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) is rescheduled since doctor is not available at this time \n\nReason:${Reason}\n\nNew AppointmentTiming:${Appointmenttime}\n\n\nThank you Team backend_app`,
 //   };
 //   const result = sgMail.send(msg);
 //   result

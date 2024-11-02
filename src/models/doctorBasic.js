@@ -109,19 +109,19 @@ const DoctorBasicSchema = mongoose.Schema(
     },
     isBasicDetailsVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     isEducationVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     isExperienceVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     isDoctorVerified: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     verifiedDoctorId: {
       type: String,

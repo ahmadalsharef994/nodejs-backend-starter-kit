@@ -1,4 +1,4 @@
-/* eslint-disable no-param-reassign */
+/* eslint-disable no-unused-vars */
 const Agenda = require('agenda');
 const httpStatus = require('http-status');
 const short = require('short-uuid');
@@ -445,7 +445,8 @@ const getAvailableAppointmentsManually = async (docid) => {
     paymentStatus: 'PAID',
     StartTime: { $gte: new Date(), $lte: new Date().getTime() + 7 * 24 * 60 * 60 * 1000 },
   });
-  if (bookedAppointmentSlots === []) {
+  // eslint-disable-next-line no-constant-binary-expression
+  if (bookedAppointmentSlots == []) {
     const availableAppointmentSlots = AllAppointmentSlots;
     return availableAppointmentSlots;
   }
@@ -672,7 +673,7 @@ const cancelAppointment = async (appointmentId, doctorId) => {
   //   from: process.env.EMAIL_FROM,
   //   to: appointment.patientMail,
   //   subject: 'Cancelled Appointment',
-  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team wellpath`,
+  //   text: `hi !\nthis mail is to inform you that your appointment (${appointmentId}) has been cancelled since doctor is not available at this time \n\n\nThank you Team backend_app`,
   // });
 
   return 'appintment already cancelled';
@@ -739,7 +740,6 @@ const getDoctorsByCategories = async (category, filter, options) => {
   }
   const days = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   if (filter.Availability === 'TODAY') {
-    // eslint-disable-next-line no-shadow
     const today = days[new Date().getDay()];
     if (filter.Gender && filter.Languages) {
       const Doctors = await DoctorBasic.paginate(
@@ -778,9 +778,7 @@ const getDoctorsByCategories = async (category, filter, options) => {
     );
     return Doctors;
   }
-  // eslint-disable-next-line no-else-return
   else if (filter.Availability === 'TOMORROW') {
-    // eslint-disable-next-line no-shadow
     const today = new Date();
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);

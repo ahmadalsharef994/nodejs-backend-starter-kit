@@ -1,10 +1,11 @@
+
+// auth.model.js
 const mongoose = require('mongoose');
-const validator = require('validator');
 const bcrypt = require('bcryptjs');
+const validator = require('validator');
 const { toJSON, paginate } = require('./plugins');
 
-// Define the user schema
-const userSchema = mongoose.Schema(
+const authSchema = mongoose.Schema(
   {
     fullname: {
       type: String,
@@ -16,7 +17,6 @@ const userSchema = mongoose.Schema(
       required: true,
       unique: true,
       trim: true,
-      index: true,
       lowercase: true,
       validate(value) {
         if (!validator.isEmail(value)) {
@@ -26,20 +26,20 @@ const userSchema = mongoose.Schema(
     },
     mobile: {
       type: String,
-      default: null,
-      trim: true,
+      required: true,
       unique: true,
+      trim: true,
     },
     password: {
       type: String,
       required: true,
       trim: true,
       minlength: 8,
-      private: true, // used by the toJSON plugin
     },
     role: {
-      type: Array,
-      default: ['user'],
+      type: String,
+      enum: ['user', 'doctor', 'admin'],
+      default: 'user',
     },
     isEmailVerified: {
       type: Boolean,
@@ -49,49 +49,37 @@ const userSchema = mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    isBanned: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     timestamps: true,
   }
 );
 
-// Add plugins that convert Mongoose to JSON and handle pagination
-userSchema.plugin(toJSON);
-userSchema.plugin(paginate);
+authSchema.plugin(toJSON);
+authSchema.plugin(paginate);
 
 // Utility methods for checking if email or phone is taken
-userSchema.statics.isEmailTaken = async function (email, excludeUserId) {
+authSchema.statics.isEmailTaken = async function (email, excludeUserId) {
   const user = await this.findOne({ email, _id: { $ne: excludeUserId } });
   return !!user;
 };
 
-userSchema.statics.isPhoneTaken = async function (mobile, excludeUserId) {
+authSchema.statics.isPhoneTaken = async function (mobile, excludeUserId) {
   const user = await this.findOne({ mobile, _id: { $ne: excludeUserId } });
   return !!user;
 };
 
-// Check if the given password matches the user's password
-userSchema.methods.isPasswordMatch = async function (password) {
-  const user = this;
-  return bcrypt.compare(password, user.password);
+authSchema.methods.isPasswordMatch = async function (password) {
+  return bcrypt.compare(password, this.password);
 };
 
-// Pre-save hook for hashing the password
-userSchema.pre('save', async function (next) {
-  const user = this;
-  if (user.isModified('password')) {
-    user.password = await bcrypt.hash(user.password, 8);
+authSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
   }
   next();
 });
 
-/**
- * @typedef User
- */
-const User = mongoose.model('User', userSchema);
+const Auth = mongoose.model('Auth', authSchema);
 
-module.exports = User;
+module.exports = Auth;

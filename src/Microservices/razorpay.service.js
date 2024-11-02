@@ -252,7 +252,7 @@ const createWalletOrder = async (AuthData, walletId, orderAmount, currency) => {
 const getRazorpayOrder = async (razorpayOrderId) => {
   const razorpayOrder = await razorpay.orders.fetch(razorpayOrderId);
   if (razorpayOrder.error) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `getStatus service: ${razorpayOrder.error.description}`);
+    throw new ApiError(400, `getStatus service: ${razorpayOrder.error.description}`);
   }
   return razorpayOrder;
 };
@@ -266,7 +266,7 @@ const createRazorpayOrder = async (orderId) => {
     },
   });
   if (razorpayOrder.error) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `payOrder service: ${razorpayOrder.error.description}`);
+    throw new ApiError(400, `payOrder service: ${razorpayOrder.error.description}`);
   }
   order.paymentRef = razorpayOrder.id;
   await order.save();
@@ -285,7 +285,7 @@ const createRazorpayPayment = async (orderId) => {
     bank: 'HDFC',
   });
   if (razorpayPayment.error) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `createRazorpayPayment service: ${razorpayPayment.error.description}`);
+    throw new ApiError(400, `createRazorpayPayment service: ${razorpayPayment.error.description}`);
   }
   order.paymentId = razorpayPayment.id;
   order.paymentStatus = 'PAID';
@@ -306,7 +306,7 @@ const refundOrder = async (orderId) => {
     },
   });
   if (razorpayOrder.error) {
-    throw new ApiError(httpStatus.BAD_REQUEST, `refundOrder service: ${razorpayOrder.error.description}`);
+    throw new ApiError(400, `refundOrder service: ${razorpayOrder.error.description}`);
   }
   order.paymentStatus = 'REFUNDED';
   order.status = 'CANCELLED';

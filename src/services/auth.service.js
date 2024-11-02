@@ -88,9 +88,7 @@ const getAuthByPhone = async (phone) => {
  * @param {Object} updateBody
  * @returns {Promise<Auth>}
  */
-// eslint-disable-next-line no-shadow
 const updatePassword = async (AuthData, newPassword) => {
-  // eslint-disable-next-line no-param-reassign
   AuthData.password = newPassword;
   await AuthData.save();
   return AuthData;

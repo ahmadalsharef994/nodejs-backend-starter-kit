@@ -180,7 +180,7 @@ const resendOtp = catchAsync(async (req, res) => {
   await otpServices.resendOtp(OTP, AuthData);
   res.status(httpStatus.OK).json({ message: 'OTP sent over Phone' });
 });
-const resetPassowrd = catchAsync(async (req, res) => {
+const resetPassword = catchAsync(async (req, res) => {
   let response;
   if (req.body.choice === 'phone') {
     const AuthData = await authService.getAuthByPhone(req.body.phone);
@@ -207,7 +207,7 @@ module.exports = {
   // loginWithGoogle,
   logout,
   forgotPassword,
-  resetPassowrd,
+  resetPassword,
   sendVerificationEmail,
   verifyEmail,
   changePassword,

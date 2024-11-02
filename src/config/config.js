@@ -30,10 +30,6 @@ module.exports = {
   mongoose: {
     url: envVars.MONGODB_URL,
     options: {
-      useCreateIndex: true,
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useFindAndModify: false,
     },
   },
   jwt: {

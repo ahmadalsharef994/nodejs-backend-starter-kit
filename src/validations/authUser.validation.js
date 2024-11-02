@@ -1,42 +1,41 @@
 const Joi = require('joi');
-const { password, objectId } = require('./custom.validation');
+const { objectId } = require('./custom.validation');  // Ensuring we use the custom validation for MongoDB IDs
 
 const createUser = {
   body: Joi.object().keys({
-    isdcode: Joi.number(),
-    mobile: Joi.number().required(),
+    isdcode: Joi.string().required(),
+    mobile: Joi.string().pattern(/^\d+$/).required(),
   }),
 };
 
 const resendCreateUserOtp = {
   body: Joi.object().keys({
-    mobile: Joi.number().required().min(100000000).max(9999999999),
+    mobile: Joi.string().pattern(/^\d+$/).required(),
   }),
 };
 
 const verifyCreatedUser = {
   body: Joi.object().keys({
     userId: Joi.string().custom(objectId).required(),
-    otp: Joi.number().required().min(100000).max(999999),
+    otp: Joi.number().integer().min(100000).max(999999).required(),
   }),
 };
 
 const registeruser = {
   body: Joi.object().keys({
     userId: Joi.string().custom(objectId).required(),
-    email: Joi.string().required().email(),
-    password: Joi.string().required().custom(password),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(8).max(30).required(),
     fullname: Joi.string().required(),
-    role: Joi.valid('user'),
+    role: Joi.string().valid('user').required(),
     gender: Joi.string().valid('male', 'female', 'other').required(),
     dob: Joi.date().required(),
-    pincode: Joi.number().required().min(100000).max(999999),
+    pincode: Joi.number().integer().min(100000).max(999999).required(),
   }),
 };
 
 const login = {
   body: Joi.object().keys({
-    // email: Joi.string().required(),
     username: Joi.string().required(),
     password: Joi.string().required(),
   }),
@@ -51,53 +50,28 @@ const logout = {
 const changepassword = {
   body: Joi.object().keys({
     oldPassword: Joi.string().required(),
-    newPassword: Joi.string().required(),
-    confirmNewPassword: Joi.string().required().valid(Joi.ref('newPassword')),
+    newPassword: Joi.string().min(8).max(30).required(),
+    confirmNewPassword: Joi.string().valid(Joi.ref('newPassword')).required(),
   }),
 };
 
 const forgotPassword = {
   body: Joi.object().keys({
-    choice: Joi.string().required().valid('email', 'phone'),
+    choice: Joi.string().valid('email', 'phone').required(),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(100000000).max(9999999999),
+    phone: Joi.string().pattern(/^\d+$/).when('choice', { is: 'phone', then: Joi.required() }),
   }),
 };
 
-const verifyOtp = {
-  body: Joi.object().keys({
-    choice: Joi.string().required().valid('email', 'phone'),
-    email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(100000000).max(9999999999),
-    resetcode: Joi.number().required(),
-  }),
-};
 const resetPassword = {
   body: Joi.object().keys({
-    choice: Joi.string().required().valid('email', 'phone'),
+    choice: Joi.string().valid('email', 'phone').required(),
     email: Joi.string().email().when('choice', { is: 'email', then: Joi.required() }),
-    phone: Joi.number().when('choice', { is: 'phone', then: Joi.required() }).min(100000000).max(9999999999),
-    newPassword: Joi.string().required().custom(password),
-    confirmNewPassword: Joi.string().required().custom(password),
+    phone: Joi.string().pattern(/^\d+$/).when('choice', { is: 'phone', then: Joi.required() }),
+    newPassword: Joi.string().min(8).max(30).required(),
+    confirmNewPassword: Joi.string().valid(Joi.ref('newPassword')).required(),
   }),
 };
-const verifyEmail = {
-  body: Joi.object().keys({
-    emailcode: Joi.number().required(),
-  }),
-};
-
-const verifyPhone = {
-  body: Joi.object().keys({
-    otp: Joi.number().required(),
-  }),
-};
-
-// const verifyforget = {
-//   body: Joi.object().keys({
-//     otp: Joi.number().required(),
-//   }),
-// };
 
 module.exports = {
   createUser,
@@ -108,9 +82,5 @@ module.exports = {
   logout,
   changepassword,
   forgotPassword,
-  verifyOtp,
-  verifyEmail,
-  verifyPhone,
-  // verifyforget,
   resetPassword,
 };

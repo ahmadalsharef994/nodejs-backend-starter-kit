@@ -1,32 +1,40 @@
-version: '3'
+version: '3.9'
 
 services:
-  node-app:
-    build: .
-    image: node-app
-    environment:
-      - MONGODB_URL=mongodb+srv://admin:admin@cluster0.e2yuv.mongodb.net/test
+  wellpath_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
-      - '3000:3000'
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      NODE_ENV: "development"
+      TZ: "Europe/Berlin"
+    command: npm run start
     depends_on:
       - mongodb
-    volumes:
-      - .:/usr/src/node-app
-    networks:
-      - node-network
+
+  backend_app_prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: "production"
+      TZ: "Europe/Berlin"
+    command: npm run start
+    depends_on:
+      - mongodb
 
   mongodb:
-    image: mongo:4.2.1-bionic
+    image: mongo
     ports:
-      - '27017:27017'
+      - "27017:27017"
     volumes:
-      - dbdata:/data/db
-    networks:
-      - node-network
+      - mongodb_data:/data/db
 
 volumes:
-  dbdata:
-
-networks:
-  node-network:
-    driver: bridge
+  mongodb_data:

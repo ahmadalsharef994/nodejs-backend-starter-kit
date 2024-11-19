@@ -1,0 +1,10 @@
+// module.exports.authValidation = require('./auth.validation');
+module.exports.userValidation = require('./user.validation');
+module.exports.preferenceValidation = require('./appointmentpreference.validation');
+module.exports.documentValidation = require('./document.validation');
+module.exports.appointmentValidation = require('./appointment.validation');
+module.exports.chatValidation = require('./chat.validation');
+module.exports.razorpayValidation = require('./razorpay.validation');
+module.exports.walletValidation = require('./wallet.validation'); // export wallet Validation (NEW)
+module.exports.elasticSearchValidation = require('./elasticSearch.validation'); // export elasticSearch Validation (NEW)
+module.exports.eventValidation = require('./event.validation'); // export event Validation (NEW)

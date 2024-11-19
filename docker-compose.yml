@@ -1,0 +1,40 @@
+version: '3.9'
+
+services:
+  wellpath_dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    environment:
+      NODE_ENV: "development"
+      TZ: "Europe/Berlin"
+    command: npm run start
+    depends_on:
+      - mongodb
+
+  backend_app_prod:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: "production"
+      TZ: "Europe/Berlin"
+    command: npm run start
+    depends_on:
+      - mongodb
+
+  mongodb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

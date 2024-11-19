@@ -1,0 +1,181 @@
+<html style="margin: 0; padding: 0">
+  <head>
+    <title>One | Lab Test template!</title>
+    <style>
+      body {
+        font-family: arial;
+      }
+
+      .logo {
+        position: absolute;
+        top: 1.5rem;
+        left: 4rem;
+        height: 120px;
+        width: auto;
+      }
+
+      .main {
+        box-sizing: border-box;
+        background: #e2f5ee;
+        position: relative;
+        padding: 10rem 3rem;
+        width: 100%;
+      }
+      .box {
+        text-align: left;
+        margin: auto;
+        background: #fff;
+        padding: 2rem;
+      }
+      .name {
+        font-size: 1.3rem;
+        color: #003443;
+      }
+      .text1,
+      .text2 {
+        font-weight: 400;
+        font-size: 0.7rem;
+        margin-bottom: 1.6rem;
+      }
+      .email {
+        color: #27697e;
+        font-weight: 700;
+      }
+      .text3 {
+        font-size: 0.5rem;
+        font-weight: 300;
+        color: #999;
+        padding-top: 1.5rem;
+      }
+
+      .orderDetails {
+        margin-top: 3rem;
+        margin-bottom: 2rem;
+      }
+
+      .order {
+        letter-spacing: 1px;
+        color:#00455b;
+      }
+
+      .help {
+        font-style: italic;
+        font-weight: 700;
+        color: #777;
+      }
+
+      .icons {
+        width: 100%;
+        text-align: center;
+        margin-top: 1.5rem;
+      }
+
+      .social {
+        height: 20px;
+        width: auto;
+        padding: 10px;
+      }
+
+      .footer {
+        text-align: center;
+        color: #9b9494;
+        font-size: 0.55rem;
+        margin-top: 0.6rem;
+      }
+
+      .link {
+        color: #9b9494;
+        font-size: 0.5rem;
+        text-decoration: none;
+        padding-right: 0.3rem;
+      }
+      .address {
+        margin-top: 1rem;
+        font-size: 0.45rem;
+        line-height: 12px;
+      }
+
+      @media (min-width: 599px) {
+        .box {
+          width: 600px;
+          padding: 3rem;
+        }
+
+        .logo {
+          position: absolute;
+          top: 1rem;
+          left: 20rem;
+        }
+        .name {
+          font-size: 1.4rem;
+        }
+        .text1,
+        .text2 {
+          font-size: 0.9rem;
+        }
+
+        .text3 {
+          font-size: 0.75rem;
+        }
+        .footer {
+          font-size: 0.7rem;
+        }
+
+        .link {
+          font-size: 0.65rem;
+        }
+        .address {
+          margin-top: 1.4rem;
+          font-size: 0.6rem;
+        }
+        .social {
+          height: 20px;
+          width: auto;
+          padding: 10px;
+        }
+      }
+    </style>
+  </head>
+
+  <body style="margin: 0; padding: 0">
+    <div class="main">
+      <img src="logo.png" alt="" class="logo" />
+      <div class="box">
+        <img class="icon" src="../public/send-email.svg" />
+        <h2 class="name">Hi {{name}},</h2>
+        <div class="text1">
+          You have successfully booked lab test order using your email Id:<br />
+          <span class="email"><strong>{{to}}</strong></span
+          >.
+        </div>
+        <div class="text2">Find below the details of your order.</div>
+        <div class="orderDetails">
+          <h4 class="order">{{OTP}}</h4>
+          <!-- <h4 class="order">Date: <span>{{OTP.date}}</span></h4>
+          <h4 class="order">Time: <span>{{OTP.time}}</span></h4>
+          <h4 class="order">Payment Mode: <span>{{OTP.paymentMode}}</span></h4>
+          <h4 class="order">Amount: <span>{{OTP.totalCartAmount}}</span></h4> -->
+        </div>
+        <div class="text3">
+          If you have any questions, please email us a<span class="help"> help@HEALTHCARE_APP.com</span> You can also chat with a
+          real live human during our operating hours. They can answer questions about your account.
+        </div>
+        <div class="icons">
+          <img src="../public/linkedin.svg" alt="" class="social" />
+          <img src="../public/instagram.svg" alt="" class="social" />
+          <img src="../public/facebook.svg" alt="" class="social" />
+        </div>
+        <div class="footer">
+          <a href="" class="link">HEALTHCARE_APP</a>| <a href="" class="link">How it works</a>| <a href="" class="link">FAQ</a>|
+          <a href="" class="link">T&Cs</a>
+          <div class="address">
+            You have received this email as a registered user of HEALTHCARE_APP.ro <br />
+            2145 Michigan Ave. | Santa Monica, CA 90404 | USA <br />
+            Company Number: XXXXXXXXX <br />
+            HEALTHCARE_APP, Inc.
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

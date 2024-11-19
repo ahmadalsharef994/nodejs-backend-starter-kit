@@ -1,0 +1,16 @@
+# Dependencies
+node_modules
+
+# yarn error logs
+yarn-error.log
+
+# Environment varibales
+
+# Code coverage
+coverage
+nv-wfwakey.pem.pem
+wfwakey.pem
+.vscode/settings.json
+yarn.lock
+out.jpg
+yarn.lock

@@ -43,7 +43,7 @@ const appointmentBookingMail = async (appointmentdetails) => {
   Appointment ends at:${new Date(appointmentdetails.EndTime).toLocaleTimeString()}
   
   Thank you ,
-  Team HEALTHCARE_APP.`;
+  Team NODE_BOILERPLATE.`;
 
   const msg = {
     to: appointmentdetails.patientMail,
@@ -67,7 +67,7 @@ const bookingCancellationMail = async (appointmentdetails) => {
   You will get your refund in 7 working days in wallet or given bank account.
   
   Thank you ,
-  Team HEALTHCARE_APP.
+  Team NODE_BOILERPLATE.
   `;
 
   const msg = {

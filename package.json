@@ -1,5 +1,5 @@
 {
-  "name": "healthcare_app",
+  "name": "node_boilderplate",
   "version": "1.7.0",
   "description": "Create a Node.js app for building production-ready RESTful APIs using Express, by running one command",
   "main": "src/index.js",
@@ -10,7 +10,7 @@
     "node": ">=12.0.0"
   },
   "scripts": {
-    "start": "pm2 start src/index.js --name HEALTHCARE_APP --env production --time",
+    "start": "pm2 start src/index.js --name NODE_BOILERPLATE --env production --time",
     "dev": "cross-env NODE_ENV=development TZ='Europe/Berlin' nodemon src/index.js",
     "test": "jest",
     "test:watch": "jest -i --watchAll",

@@ -4,10 +4,10 @@ FROM node:20.9.0
 RUN apt-get update -y && apt-get install -y net-tools && npm install pm2 -g
 
 # Copy the application files to the container
-COPY ./ /HEALTHCARE_APP
+COPY ./ /NODE_BOILERPLATE
 
 # Set the working directory
-WORKDIR /HEALTHCARE_APP
+WORKDIR /NODE_BOILERPLATE
 
 ENV NODE_ENV=production
 

@@ -1,44 +1,60 @@
+# Reusable Node.js Backend Boilerplate
 
-Reusable boilerplate code for backend. 
+This project is a reusable boilerplate code for backend development, built as a **Proof of Concept (POC)** for creating scalable and modular backend systems. The POC uses **Express.js** as the API framework and **MongoDB** as the database. It integrates additional features like **socket.io**, validation, sanitization, folder structure, dockerization, ESLint, Prettier, logging, authentication, authorization, JWT, device-based authentication, and more.
 
-The app is Express API with MongoDB BoilerPlate, having socket.io, validation, sanitization, folder structure, dockerization, esling, prettier, logging, authentication, authorization, jwt, LF/CLRF, deviceauth, jwt tokens
-Also upload files, Email and SMS OTPs, live chat using websocket, payment using RazorPay
-husky for ensuring linting precommit
+The boilerplate also supports **file uploads**, **Email and SMS OTPs**, **real-time chat with WebSocket**, and **payment integration using RazorPay**. It enforces **linting pre-commit checks** using Husky.
 
+This project is designed to ensure **minimal third-party library integration**, **reusability**, **modularity**, **clean code**, and **portability**.
 
+---
 
-1. install yarn
-2. yarn install
-3. yarn run dev.
-4. mongodb setup free-tier 512 mb, 10,000 -20,000 record, 10 users concurrenlty, 200-500 calls a day, 500-1000 active users, 1-2% use it at the same time in most apps
-5. create cluster, AWS GCP AZURE, region Frankfurt. Later scal Vertically with M1 Horizontally with sharding
-6. create user read and write, not Atlas Admin.
+## Table of Contents
 
+- [Features](#features)
+- [Quick Start](#quick-start)
+- [Installation](#installation)
+- [Dockerization](#dockerization)
+- [Project Highlights](#project-highlights)
+- [Additional Functionalities](#additional-functionalities)
+- [Logging](#logging)
+- [Linting](#linting)
+- [Environment Setup](#environment-setup)
+- [Contributing](#contributing)
+- [License](#license)
 
-Dockerization:
-1. Dockerfile how to build image:
-to build image from Dockerfile docker build -t backend_app .
-run the image: docker run -d -p 3000:3000 --name wellpath_container backend_app
-2. yamls how to run containers
-docker-compose app wellpath_dev backend_app_prod
+---
 
+## Features
 
+- **Core Backend Framework**: Node.js with Express.js
+- **Database**: MongoDB
+- **Authentication & Authorization**: Passport.js with JWT (including JWT strategy)
+- **Validation & Sanitization**: Data validation using Joi and sanitization for security
+- **Real-Time Communication**: WebSocket live chat using Socket.IO
+- **Notifications**: Email and SMS OTP capabilities
+- **File Uploads**: Supports file handling
+- **Payment Integration**: RazorPay for seamless payment processing
+- **Logging**: Application logging with Winston and HTTP logging with Morgan
+- **Environment Management**: `.env` for configuration
+- **Containerization**: Dockerized setup for development and production
+- **Pre-commit Checks**: Husky for linting enforcement
+- **Code Quality**: ESLint and Prettier integration
+- **Role-Based Access Control (RBAC)**: Fine-grained authorization controls
+- **Error Handling**: Centralized error handling mechanism
+- **Testing Support**: Integration with Jest for unit and integration tests
 
+---
 
+## Quick Start
 
+To run the project locally, follow these steps:
 
+```bash
+# Install Yarn (if not installed)
+npm install -g yarn
 
+# Install dependencies
+yarn install
 
-DRAFT NOTES:
-
-Logging: applogger uses winston, httplogger uses morgan
-use in-memory db for testing: mongodb-memory-server
-
-
-    2. delete package-lock.json yarn.lock
-    3. check unused packages and delete manually or yarn prune or npx depcheck
-    4. delete unused packages
-
-    .gitattributes # Convert all text file line endings to LF: on clone, checkout, commit
-    passport and jwt, passport uses jwtstrategy
-    6. yarn upgrade --latest
+# Start the development server
+yarn run dev

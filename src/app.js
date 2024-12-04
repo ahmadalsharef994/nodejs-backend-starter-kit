@@ -48,7 +48,7 @@ app.use('/v1', routes);
 
 // Monitoring and Metrics
 const register = new promclient.Registry();
-register.setDefaultLabels({ app: 'HEALTHCARE_APP' });
+register.setDefaultLabels({ app: 'NODE_BOILERPLATE' });
 promclient.collectDefaultMetrics({ register });
 
 app.get('/api-metrics', async (req, res) => {

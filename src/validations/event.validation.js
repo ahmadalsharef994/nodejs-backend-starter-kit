@@ -12,7 +12,7 @@ const createEvent = {
       .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
       .required(),
     location: Joi.string().required().default('online'),
-    link: Joi.string().uri().default('https://HEALTHCARE_APP.com'),
+    link: Joi.string().uri().default('https://NODE_BOILERPLATE.com'),
     image: Joi.required(),
   }),
 };
@@ -27,7 +27,7 @@ const updateEvent = {
     // validate time string in format HH:MM
     time: Joi.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
     location: Joi.string().default('online'),
-    link: Joi.string().uri().default('https://HEALTHCARE_APP.com'),
+    link: Joi.string().uri().default('https://NODE_BOILERPLATE.com'),
     image: Joi.any(),
   }),
 };

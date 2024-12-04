@@ -18,7 +18,7 @@ sgMail.setApiKey('SG.YXFCixu_TCOtZrA-oOKahQ.vVdBTzPRRPyWeZvAYW9On0gtHy3suVofo3rC
 
 // const sendEmailQueries = async (emailbody, TicketNo) => {
 //   const msg = {
-//     to: 'ahmad.kraleba@gmail.com',
+//     to: 'ahmad.starterkit@gmail.com',
 //     from: process.env.EMAIL_FROM,
 //     subject: TicketNo,
 //     text: emailbody,

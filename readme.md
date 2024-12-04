@@ -1,8 +1,8 @@
-# Reusable Node.js Backend Boilerplate
+# Reusable Node.js Backend StarterKit
 
-This project is a reusable boilerplate code for backend development, built as a **Proof of Concept (POC)** for creating scalable and modular backend systems. The POC uses **Express.js** as the API framework and **MongoDB** as the database. It integrates additional features like **socket.io**, validation, sanitization, folder structure, dockerization, ESLint, Prettier, logging, authentication, authorization, JWT, device-based authentication, and more.
+This project is a reusable StarterKit code for backend development, built as a **Proof of Concept (POC)** for creating scalable and modular backend systems. The POC uses **Express.js** as the API framework and **MongoDB** as the database. It integrates additional features like **socket.io**, validation, sanitization, folder structure, dockerization, ESLint, Prettier, logging, authentication, authorization, JWT, device-based authentication, and more.
 
-The boilerplate also supports **file uploads**, **Email and SMS OTPs**, **real-time chat with WebSocket**, and **payment integration using RazorPay**. It enforces **linting pre-commit checks** using Husky.
+The StarterKit also supports **file uploads**, **Email and SMS OTPs**, **real-time chat with WebSocket**, and **payment integration using RazorPay**. It enforces **linting pre-commit checks** using Husky.
 
 This project is designed to ensure **minimal third-party library integration**, **reusability**, **modularity**, **clean code**, and **portability**.
 
@@ -14,8 +14,6 @@ This project is designed to ensure **minimal third-party library integration**, 
 - [Quick Start](#quick-start)
 - [Installation](#installation)
 - [Dockerization](#dockerization)
-- [Project Highlights](#project-highlights)
-- [Additional Functionalities](#additional-functionalities)
 - [Logging](#logging)
 - [Linting](#linting)
 - [Environment Setup](#environment-setup)
@@ -39,9 +37,6 @@ This project is designed to ensure **minimal third-party library integration**, 
 - **Containerization**: Dockerized setup for development and production
 - **Pre-commit Checks**: Husky for linting enforcement
 - **Code Quality**: ESLint and Prettier integration
-- **Role-Based Access Control (RBAC)**: Fine-grained authorization controls
-- **Error Handling**: Centralized error handling mechanism
-- **Testing Support**: Integration with Jest for unit and integration tests
 
 ---
 

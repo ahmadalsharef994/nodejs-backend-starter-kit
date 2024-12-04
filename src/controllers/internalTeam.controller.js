@@ -28,7 +28,7 @@ const registeradmin = catchAsync(async (req, res) => {
   if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@kraleba.com 😒😂'
+      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@starterkit.com 😒😂'
     );
   } else {
     const AuthData = await authService.register(req.body);
@@ -45,7 +45,7 @@ const loginadmin = catchAsync(async (req, res) => {
   if (req.headers.secretadminkey !== process.env.SECRETADMINKEY || req.headers.secretadminkey === '') {
     throw new ApiError(
       httpStatus.BAD_REQUEST,
-      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@kraleba.com  😒😂'
+      'Alarm Triggered! Suspected Activity Detected 🧐reach at security@starterkit.com  😒😂'
     );
   } else {
     const { email, password } = req.body;

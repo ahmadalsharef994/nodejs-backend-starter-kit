@@ -6,6 +6,9 @@ The StarterKit also supports **file uploads**, **Email and SMS OTPs**, **real-ti
 
 This project is designed to ensure **minimal third-party library integration**, **reusability**, **modularity**, **clean code**, and **portability**.
 
+## Overview
+A reusable starter kit for Node.js backends, featuring MongoDB, Socket.IO, JWT authentication, and more.
+
 ---
 
 ## Table of Contents
@@ -53,3 +56,13 @@ yarn install
 
 # Start the development server
 yarn run dev
+```
+
+
+## Project Structure
+- `controllers/`: API logic
+- `models/`: Database schemas
+- `routes/`: API endpoints
+
+## License
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.

@@ -1,0 +1,125 @@
+# Default values for nodejs-backend-starter
+# This is a YAML-formatted file.
+
+replicaCount: 2
+
+image:
+  repository: nodejs-backend
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 3000
+
+loadBalancer:
+  enabled: true
+  type: LoadBalancer
+  port: 80
+
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+  hosts:
+    - host: api.yourapp.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Health check configuration
+healthCheck:
+  enabled: true
+  path: "/health"
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Application configuration
+config:
+  nodeEnv: "production"
+  port: 3000
+  mongodbUrl: "mongodb://mongodb-service:27017/nodejs-backend-starter"
+  jwtSecret: "ThisIsMySecretJWT"
+  jwtAccessExpirationMinutes: 3000
+  jwtRefreshExpirationDays: 30
+  jwtResetPasswordExpirationMinutes: 10
+  jwtVerifyEmailExpirationMinutes: 10
+  secretAdminKey: "ThisIsSecret"
+  emailFrom: "noreply@yourapp.com"
+  supportMail: "support@yourapp.com"
+  slotTime: 15
+
+# Secrets (base64 encoded)
+secrets:
+  smtpUsername: "eW91ci1lbWFpbEBldGhlcmVhbC5lbWFpbA=="
+  smtpPassword: "eW91ci1wYXNzd29yZA=="
+  smsApiKey: "eW91ci1zbXMtYXBpLWtleQ=="
+  smsApiSecret: "eW91ci1zbXMtYXBpLXNlY3JldA=="
+  elasticUsername: "ZWxhc3RpYw=="
+  elasticPassword: "eW91ci1lbGFzdGljLXBhc3N3b3Jk"
+  razorpayKeySecret: "eW91ci1yYXpvcnBheS1zZWNyZXQ="
+  cloudinaryApiKey: "eW91ci1hcGkta2V5"
+  cloudinaryApiSecret: "eW91ci1hcGktc2VjcmV0"
+
+# MongoDB configuration
+mongodb:
+  enabled: true
+  image:
+    repository: mongo
+    tag: "7.0"
+  persistence:
+    enabled: true
+    size: 10Gi
+    storageClass: "standard"
+  auth:
+    rootUsername: "admin"
+    rootPassword: "password"
+    database: "nodejs-backend-starter"
+
+# Network policies
+networkPolicy:
+  enabled: true
+
+# Pod disruption budget
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 1

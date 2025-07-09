@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { Notification } from '../models/notification.model.js';
+import Notification from '../models/notification.model.js';
 import ApiError from '../utils/ApiError.js';
 
 /**
@@ -99,7 +99,7 @@ const getUnreadCount = async (userId) => {
   return count;
 };
 
-export {
+export default {
   createNotification,
   queryNotifications,
   getNotificationById,

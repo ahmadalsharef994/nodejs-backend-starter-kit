@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { userService } from '../services/user.service.js';
+import userService from '../services/user.service.js';
 import { storageService } from '../services/storage.service.js';
 import catchAsync from '../utils/catchAsync.js';
 import pick from '../utils/pick.js';

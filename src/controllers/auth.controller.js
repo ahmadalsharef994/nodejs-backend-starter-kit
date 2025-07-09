@@ -1,8 +1,8 @@
 
 // auth.controller.js
 import httpStatus from 'http-status';
-import { authService } from '../services/auth.service.js';
-import { tokenService } from '../services/token.service.js';
+import authService from '../services/auth.service.js';
+import tokenService from '../services/token.service.js';
 import catchAsync from '../utils/catchAsync.js';
 
 const register = catchAsync(async (req, res) => {

@@ -176,7 +176,7 @@ const verifyPhone = async (userId) => {
   return user;
 };
 
-export default {
+export {
   createUser,
   loginUserWithEmailAndPassword,
   loginUserWithPhoneAndPassword,

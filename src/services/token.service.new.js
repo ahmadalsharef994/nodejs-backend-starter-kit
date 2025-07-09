@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import moment from 'moment';
 import httpStatus from 'http-status';
 import config from '../config/config.js';
-import authService from './auth.service.js';
+import { getUserById, getUserByEmail } from './auth.service.js';
 import { Token } from '../models/index.js';
 import ApiError from '../utils/ApiError.js';
 
@@ -143,7 +143,7 @@ const refreshAuth = async (refreshToken) => {
   }
 };
 
-export default {
+export {
   generateToken,
   saveToken,
   verifyToken,

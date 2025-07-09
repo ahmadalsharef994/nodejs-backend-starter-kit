@@ -1,4 +1,4 @@
-const { Event } = require('../models');
+import { Event } from '../models/index.js';
 
 const createEvent = async (eventData) => {
   const event = await Event.create(eventData);
@@ -27,11 +27,10 @@ const getEventById = async (id) => {
 
 const getEventsByTitle = async (title) => {
   const events = await Event.find({ title: { $regex: title, $options: 'i' } });
-
   return events;
 };
 
-module.exports = {
+export default {
   createEvent,
   getAllEvents,
   getEventById,

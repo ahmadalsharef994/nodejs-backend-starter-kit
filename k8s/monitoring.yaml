@@ -1,0 +1,72 @@
+apiVersion: v1
+kind: ServiceMonitor
+metadata:
+  name: nodejs-backend-monitor
+  namespace: default
+  labels:
+    app: nodejs-backend
+spec:
+  selector:
+    matchLabels:
+      app: nodejs-backend
+  endpoints:
+  - port: http
+    path: /api-metrics
+    interval: 30s
+    scrapeTimeout: 10s
+---
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nodejs-backend-alerts
+  namespace: default
+  labels:
+    app: nodejs-backend
+spec:
+  groups:
+  - name: nodejs-backend.rules
+    rules:
+    - alert: NodejsBackendDown
+      expr: up{job="nodejs-backend"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Node.js Backend is down"
+        description: "Node.js Backend has been down for more than 1 minute"
+    
+    - alert: NodejsBackendHighCPU
+      expr: rate(process_cpu_seconds_total{job="nodejs-backend"}[5m]) > 0.8
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU usage on Node.js Backend"
+        description: "CPU usage is above 80% for more than 5 minutes"
+    
+    - alert: NodejsBackendHighMemory
+      expr: process_resident_memory_bytes{job="nodejs-backend"} > 400000000
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High memory usage on Node.js Backend"
+        description: "Memory usage is above 400MB for more than 5 minutes"
+    
+    - alert: NodejsBackendHighErrorRate
+      expr: rate(http_requests_total{job="nodejs-backend",status=~"5.."}[5m]) > 0.1
+      for: 2m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High error rate on Node.js Backend"
+        description: "Error rate is above 10% for more than 2 minutes"
+    
+    - alert: NodejsBackendSlowResponse
+      expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="nodejs-backend"}[5m])) > 1
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Slow response time on Node.js Backend"
+        description: "95th percentile response time is above 1 second for more than 5 minutes"

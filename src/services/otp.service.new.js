@@ -1,7 +1,7 @@
 import crypto from 'crypto';
 import { OTP } from '../models/index.js';
-import emailService from './email.service.js';
-import smsService from './sms.service.js';
+import { sendOTPEmail } from './email.service.js';
+import { sendOTPSMS } from './sms.service.js';
 import ApiError from '../utils/ApiError.js';
 import httpStatus from 'http-status';
 import logger from '../config/appLogger.js';

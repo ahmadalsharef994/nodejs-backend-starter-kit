@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import catchAsync from '../utils/catchAsync.js';
-import { eventService } from '../services/event.service.js';
+import eventService from '../services/event.service.js';
 import pick from '../utils/pick.js';
 
 const createEvent = catchAsync(async (req, res) => {

@@ -441,54 +441,84 @@ CMD ["node", "src/index.js"]
 ```
 
 ### Kubernetes Configuration
+
+The project includes comprehensive Kubernetes manifests for production deployment with:
+
+- **2 Node.js API instances** (with horizontal pod autoscaling)
+- **Load balancer** for external access
+- **MongoDB** for development/testing
+- **Ingress controller** support with SSL
+- **Resource limits** and health checks
+- **Security policies** and RBAC
+
 ```yaml
-# kubernetes/deployment.yaml
+# k8s/deployment.yaml - Main application deployment
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodejs-api
+  name: nodejs-backend-deployment
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: nodejs-api
+      app: nodejs-backend
   template:
-    metadata:
-      labels:
-        app: nodejs-api
     spec:
       containers:
-      - name: nodejs-api
-        image: your-registry/nodejs-api:latest
+      - name: nodejs-backend
+        image: nodejs-backend:latest
         ports:
         - containerPort: 3000
-        env:
-        - name: NODE_ENV
-          value: "production"
-        - name: MONGODB_URL
-          valueFrom:
-            secretKeyRef:
-              name: app-secrets
-              key: mongodb-url
         resources:
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
           requests:
             memory: "256Mi"
             cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+```
+
+### Horizontal Pod Autoscaler
+```yaml
+# k8s/hpa.yaml - Auto-scaling configuration
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: nodejs-backend-hpa
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: nodejs-backend-deployment
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      target:
+        type: Utilization
+        averageUtilization: 70
 ```
 
 ### Load Balancer Service
 ```yaml
-# kubernetes/service.yaml
+# k8s/service.yaml - Load balancer configuration
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodejs-api-service
+  name: nodejs-backend-lb
 spec:
   selector:
-    app: nodejs-api
+    app: nodejs-backend
   ports:
   - port: 80
     targetPort: 3000
@@ -497,17 +527,42 @@ spec:
 
 ### Deploy to Kubernetes
 ```bash
-# Apply configurations
-kubectl apply -f kubernetes/
+# Quick deployment using script
+cd k8s
+./deploy.sh
+
+# Or manual deployment
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/rbac.yaml
+kubectl apply -f k8s/mongodb.yaml
+kubectl apply -f k8s/deployment.yaml
+kubectl apply -f k8s/service.yaml
+kubectl apply -f k8s/hpa.yaml
+kubectl apply -f k8s/ingress.yaml
 
 # Check deployment status
-kubectl get deployments
-kubectl get services
-kubectl get pods
+kubectl get deployments,pods,services,hpa -l app=nodejs-backend
 
-# Scale deployment
-kubectl scale deployment nodejs-api --replicas=3
+# View logs
+kubectl logs -l app=nodejs-backend -f
+
+# Scale manually
+kubectl scale deployment nodejs-backend-deployment --replicas=3
+
+# Clean up
+./cleanup.sh
 ```
+
+### Kubernetes Features
+
+- **Auto-scaling**: HPA scales pods based on CPU/memory usage
+- **Health checks**: Liveness and readiness probes
+- **Resource limits**: CPU and memory constraints
+- **Security**: RBAC, Network policies, Pod disruption budgets
+- **Monitoring**: Prometheus metrics support
+- **SSL termination**: Ingress with cert-manager support
+
+See the complete Kubernetes documentation in `/k8s/README.md`.
 
 ---
 

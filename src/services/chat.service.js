@@ -5,7 +5,7 @@ import httpStatus from 'http-status';
 import { v4 as uuidv4 } from 'uuid';
 import { v2 as cloudinary } from 'cloudinary';
 
-import { User } from '../models/user.model.js';
+import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 import appLogger from '../config/appLogger.js';
 

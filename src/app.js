@@ -9,8 +9,8 @@ import passport from 'passport';
 import httpStatus from 'http-status';
 import { getClientIp } from '@supercharge/request-ip';
 import config from './config/config.js';
-import httpLogger from './config/httpLogger.js';
-import { jwtStrategy } from './config/jwtStrategy.js';
+import { successHandler, errorHandler as httpErrorHandler } from './config/httpLogger.js';
+import jwtStrategy from './config/jwtStrategy.js';
 import routes from './routes/v1/index.js';
 import { errorConverter, errorHandler } from './middlewares/error.js';
 import ApiError from './utils/ApiError.js';
@@ -19,8 +19,8 @@ const app = express();
 
 // Logging middleware
 if (config.env !== 'test') {
-  app.use(httpLogger.successHandler);
-  app.use(httpLogger.errorHandler);
+  app.use(successHandler);
+  app.use(httpErrorHandler);
 }
 
 // Security middleware

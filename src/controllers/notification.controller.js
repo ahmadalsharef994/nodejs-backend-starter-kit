@@ -1,6 +1,6 @@
 import httpStatus from 'http-status';
 import catchAsync from '../utils/catchAsync.js';
-import { notificationService } from '../services/notification.service.js';
+import notificationService from '../services/notification.service.js';
 import pick from '../utils/pick.js';
 import ApiError from '../utils/ApiError.js';
 

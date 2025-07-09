@@ -1,5 +1,5 @@
 import httpStatus from 'http-status';
-import { User } from '../models/user.model.js';
+import User from '../models/user.model.js';
 import ApiError from '../utils/ApiError.js';
 
 /**
@@ -79,7 +79,7 @@ const deleteUserById = async (userId) => {
   return user;
 };
 
-export {
+export default {
   createUser,
   queryUsers,
   getUserById,

@@ -1,11 +1,11 @@
 /* eslint-disable no-undef */
-const mongoose = require('mongoose');
-const { Server } = require('socket.io');
-const uuid = require('uuid');
-const app = require('./app');
-const config = require('./config/config');
-const appLogger = require('./config/appLogger');
-const { chatService } = require('./services');
+import mongoose from 'mongoose';
+import { Server } from 'socket.io';
+import { v4 as uuidv4 } from 'uuid';
+import app from './app.js';
+import config from './config/config.js';
+import appLogger from './config/appLogger.js';
+import { chatService } from './services/index.js';
 
 // Database Connection
 mongoose.connect(config.mongoose.url, config.mongoose.options).then(() => {

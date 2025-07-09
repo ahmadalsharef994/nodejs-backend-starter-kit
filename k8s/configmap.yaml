@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nodejs-backend-config
+  namespace: default
+data:
+  NODE_ENV: "production"
+  PORT: "3000"
+  MONGODB_URL: "mongodb://mongodb-service:27017/nodejs-backend-starter"
+  JWT_SECRET: "ThisIsMySecretJWT"
+  JWT_ACCESS_EXPIRATION_MINUTES: "3000"
+  JWT_REFRESH_EXPIRATION_DAYS: "30"
+  JWT_RESET_PASSWORD_EXPIRATION_MINUTES: "10"
+  JWT_VERIFY_EMAIL_EXPIRATION_MINUTES: "10"
+  SECRETADMINKEY: "ThisIsSecret"
+  EMAIL_FROM: "noreply@yourapp.com"
+  SUPPORT_MAIL: "support@yourapp.com"
+  SLOT_TIME: "15"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nodejs-backend-secrets
+  namespace: default
+type: Opaque
+data:
+  # Base64 encoded values - replace with your actual credentials
+  SMTP_USERNAME: eW91ci1lbWFpbEBldGhlcmVhbC5lbWFpbA== # your-email@ethereal.email
+  SMTP_PASSWORD: eW91ci1wYXNzd29yZA== # your-password
+  SMS_API_KEY: eW91ci1zbXMtYXBpLWtleQ== # your-sms-api-key
+  SMS_API_SECRET: eW91ci1zbXMtYXBpLXNlY3JldA== # your-sms-api-secret
+  ELASTIC_USERNAME: ZWxhc3RpYw== # elastic
+  ELASTIC_PASSWORD: eW91ci1lbGFzdGljLXBhc3N3b3Jk # your-elastic-password
+  RAZORPAY_KEY_SECRET: eW91ci1yYXpvcnBheS1zZWNyZXQ= # your-razorpay-secret
+  CLOUDINARY_API_KEY: eW91ci1hcGkta2V5 # your-api-key
+  CLOUDINARY_API_SECRET: eW91ci1hcGktc2VjcmV0 # your-api-secret

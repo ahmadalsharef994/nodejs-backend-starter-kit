@@ -1,0 +1,155 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-backend-deployment
+  namespace: default
+  labels:
+    app: nodejs-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: nodejs-backend
+  template:
+    metadata:
+      labels:
+        app: nodejs-backend
+    spec:
+      serviceAccountName: nodejs-backend-sa
+      containers:
+      - name: nodejs-backend
+        image: nodejs-backend:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        env:
+        - name: NODE_ENV
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: NODE_ENV
+        - name: PORT
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: PORT
+        - name: MONGODB_URL
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: MONGODB_URL
+        - name: JWT_SECRET
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: JWT_SECRET
+        - name: JWT_ACCESS_EXPIRATION_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: JWT_ACCESS_EXPIRATION_MINUTES
+        - name: JWT_REFRESH_EXPIRATION_DAYS
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: JWT_REFRESH_EXPIRATION_DAYS
+        - name: JWT_RESET_PASSWORD_EXPIRATION_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: JWT_RESET_PASSWORD_EXPIRATION_MINUTES
+        - name: JWT_VERIFY_EMAIL_EXPIRATION_MINUTES
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: JWT_VERIFY_EMAIL_EXPIRATION_MINUTES
+        - name: SECRETADMINKEY
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: SECRETADMINKEY
+        - name: EMAIL_FROM
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: EMAIL_FROM
+        - name: SUPPORT_MAIL
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: SUPPORT_MAIL
+        - name: SLOT_TIME
+          valueFrom:
+            configMapKeyRef:
+              name: nodejs-backend-config
+              key: SLOT_TIME
+        - name: SMTP_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: SMTP_USERNAME
+        - name: SMTP_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: SMTP_PASSWORD
+        - name: SMS_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: SMS_API_KEY
+        - name: SMS_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: SMS_API_SECRET
+        - name: ELASTIC_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: ELASTIC_USERNAME
+        - name: ELASTIC_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: ELASTIC_PASSWORD
+        - name: RAZORPAY_KEY_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: RAZORPAY_KEY_SECRET
+        - name: CLOUDINARY_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: CLOUDINARY_API_KEY
+        - name: CLOUDINARY_API_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: nodejs-backend-secrets
+              key: CLOUDINARY_API_SECRET
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      restartPolicy: Always

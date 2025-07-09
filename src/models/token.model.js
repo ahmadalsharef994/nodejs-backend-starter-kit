@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const { toJSON } = require('./plugins');
+import mongoose from 'mongoose';
+import { toJSON } from './plugins/index.js';
 
 const tokenSchema = mongoose.Schema(
   {
@@ -7,6 +7,24 @@ const tokenSchema = mongoose.Schema(
       type: String,
       required: true,
       index: true,
+    },
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ['refresh', 'resetPassword', 'verifyEmail', 'verifyPhone'],
+      required: true,
+    },
+    expires: {
+      type: Date,
+      required: true,
+    },
+    blacklisted: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -22,4 +40,4 @@ tokenSchema.plugin(toJSON);
  */
 const Token = mongoose.model('Token', tokenSchema);
 
-module.exports = Token;
+export default Token;

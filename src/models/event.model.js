@@ -1,55 +1,70 @@
-const mongoose = require('mongoose');
-const { toJSON, paginate } = require('./plugins');
-const Auth = require('./auth.model');
+import mongoose from 'mongoose';
+import { toJSON, paginate } from './plugins/index.js';
 
-const eventSchema = mongoose.Schema({
-  title: {
-    type: String,
-    required: true,
+const eventSchema = mongoose.Schema(
+  {
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: true,
+    },
+    date: {
+      type: Date,
+      required: true,
+    },
+    time: {
+      type: String,
+      required: true,
+    },
+    location: {
+      type: String,
+      default: 'Online',
+    },
+    link: {
+      type: String,
+      default: null,
+    },
+    image: {
+      type: String,
+      default: null,
+    },
+    createdBy: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    maxParticipants: {
+      type: Number,
+      default: null,
+    },
+    participants: [{
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+    }],
+    category: {
+      type: String,
+      enum: ['webinar', 'workshop', 'meeting', 'conference', 'other'],
+      default: 'other',
+    },
   },
-  description: {
-    type: String,
-    required: true,
-  },
-  date: {
-    type: Date,
-    required: true,
-  },
-  time: {
-    type: String,
-    required: true,
-  },
-  location: {
-    type: String,
-  },
-  link: {
-    type: String,
-  },
-  image: {
-    type: String,
-  },
-  createdBy: {
-    type: String,
-    required: true,
-    default: 'admin',
-    ref: Auth,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-  updatedAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  {
+    timestamps: true,
+  }
+);
 
 eventSchema.plugin(toJSON);
 eventSchema.plugin(paginate);
 
 /**
- * @typedef Appointment
+ * @typedef Event
  */
 const Event = mongoose.model('Event', eventSchema);
 
-module.exports = Event;
+export default Event;

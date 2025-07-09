@@ -1,5 +1,5 @@
-const Joi = require('joi');
-Joi.objectId = require('joi-objectid')(Joi);
+import Joi from 'joi';
+import { objectId } from './custom.validation.js';
 
 const createEvent = {
   body: Joi.object().keys({
@@ -18,31 +18,40 @@ const createEvent = {
 };
 
 const updateEvent = {
-  body: Joi.object().keys({
-    id: Joi.objectId().required(),
-    title: Joi.string(),
-    description: Joi.string(),
-    // validate date is greater than current date
-    date: Joi.date().greater(new Date()),
-    // validate time string in format HH:MM
-    time: Joi.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
-    location: Joi.string().default('online'),
-    link: Joi.string().uri().default('https://NODE_BOILERPLATE.com'),
-    image: Joi.any(),
+  params: Joi.object().keys({
+    eventId: Joi.required().custom(objectId),
   }),
+  body: Joi.object()
+    .keys({
+      title: Joi.string(),
+      description: Joi.string(),
+      date: Joi.date().greater(new Date()),
+      time: Joi.string()
+        .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/),
+      location: Joi.string(),
+      link: Joi.string().uri(),
+      image: Joi.any(),
+    })
+    .min(1),
 };
 
 const deleteEvent = {
   params: Joi.object().keys({
-    id: Joi.string(),
+    eventId: Joi.string().custom(objectId),
   }),
 };
 
-const getAllEvents = {};
+const getAllEvents = {
+  query: Joi.object().keys({
+    sortBy: Joi.string(),
+    limit: Joi.number().integer(),
+    page: Joi.number().integer(),
+  }),
+};
 
 const getEventById = {
   params: Joi.object().keys({
-    id: Joi.objectId().required(),
+    eventId: Joi.string().custom(objectId),
   }),
 };
 
@@ -53,7 +62,7 @@ const getEventsByTitle = {
 };
 
 // export all
-module.exports = {
+export {
   createEvent,
   updateEvent,
   getEventById,

@@ -1,12 +1,9 @@
 const allRoles = {
-  user: [],
-  doctor: [],
-  admin: [],
+  user: ['getProfile', 'updateProfile', 'bookEvent', 'sendMessage', 'makePayment'],
+  admin: ['getProfile', 'updateProfile', 'manageUsers', 'manageEvents', 'manageSystem', 'accessAnalytics'],
 };
 
 const roles = Object.keys(allRoles);
-const roleRights = new Map(); // No explicit rights needed since middleware handles permissions
+const roleRights = new Map(Object.entries(allRoles));
 
-module.exports = {
-  roles,
-};
+export { roles, roleRights };

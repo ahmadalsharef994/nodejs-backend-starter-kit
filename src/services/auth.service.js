@@ -1,232 +1,191 @@
-const httpStatus = require('http-status');
-const { Auth } = require('../models');
-const ApiError = require('../utils/ApiError');
-const tokenService = require('./token.service');
-const otpServices = require('./otp.service');
+import httpStatus from 'http-status';
+import { User } from '../models/index.js';
+import ApiError from '../utils/ApiError.js';
 
 /**
- * Create a AuthData
- * @param {Object} AuthBody
- * @returns {Promise<Auth>}
+ * Create a user
+ * @param {Object} userBody
+ * @returns {Promise<User>}
  */
-// create user auth data
-const register = async (AuthData) => {
-  if (await Auth.isEmailTaken(AuthData.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
-  }
-  if (await Auth.isPhoneTaken(AuthData.mobile)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone Number Already Taken');
-  }
-  const auth = await Auth.create(AuthData);
-  return auth;
-};
-
-// const createGoogleAuthData = async (profileBody) => {
-//   try {
-//     const user = await Auth.findOne({ googleId: profileBody.id });
-//     if (user) {
-//       throw new ApiError(httpStatus.BAD_REQUEST, 'Email Already Taken');
-//     } else {
-//       // if user is not preset in our database save user data to database.
-//       const auth = await Auth.create(profileBody);
-//       return auth;
-//     }
-//   } catch (err) {
-//     throw new ApiError(httpStatus.BAD_REQUEST, 'Google AUth Data Error');
-//   }
-// };
-
-/**
- * Query for authusers
- * @param {Object} filter - Mongo filter
- * @param {Object} options - Query options
- * @param {string} [options.sortBy] - Sort option in the format: sortField:(desc|asc)
- * @param {number} [options.limit] - Maximum number of results per page (default = 10)
- * @param {number} [options.page] - Current page (default = 1)
- * @returns {Promise<QueryResult>}
- */
-const queryAuthData = async (filter, options) => {
-  const authdata = await Auth.paginate(filter, options);
-  return authdata;
-};
-
-/**
- * Get Auth by id
- * @param {ObjectId} id
- * @returns {Promise<Auth>}
- */
-const getAuthById = async (id) => {
-  const userAuth = await Auth.findOne({ _id: id });
-  if (!userAuth) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
-  }
-  return userAuth;
-};
-
-/**
- * Get Auth by email
- * @param {string} email
- * @returns {Promise<Auth>}
- */
-// to find if email already exists
-const getAuthByEmail = async (email) => {
-  return Auth.findOne({ email });
-};
-
-/**
- * Get Auth by Phone
- * @param {string} phone
- * @returns {Promise<Auth>}
- */
-// to find if phone number already exists
-const getAuthByPhone = async (phone) => {
-  return Auth.findOne({ mobile: phone });
-};
-/**
- * Update Auth by id
- * @param {Model} Auth
- * @param {Object} updateBody
- * @returns {Promise<Auth>}
- */
-const updatePassword = async (AuthData, newPassword) => {
-  AuthData.password = newPassword;
-  await AuthData.save();
-  return AuthData;
-};
-/**
- * Update Auth by id
- * @param {ObjectId} AuthId
- * @param {Object} updateBody
- * @returns {Promise<Auth>}
- */
-const updateAuthById = async (authId, updateBody) => {
-  const auth = await getAuthById(authId);
-  if (!auth) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Auth not found');
-  }
-  if (updateBody.email && (await Auth.isEmailTaken(updateBody.email, authId))) {
+const createUser = async (userBody) => {
+  if (await User.isEmailTaken(userBody.email)) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
   }
-  Object.assign(auth, updateBody);
-  await auth.save();
-  return auth;
-};
-/**
- * Delete Auth by id
- * @param {ObjectId} AuthId
- * @returns {Promise<Auth>}
- */
-const deleteAuthById = async (authId) => {
-  const auth = await getAuthById(authId);
-  if (!auth) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Auth not found');
+  if (await User.isPhoneTaken(userBody.phone)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone already taken');
   }
-  await auth.remove();
-  return auth;
+  return User.create(userBody);
 };
 
 /**
  * Login with email and password
- * @param {string} username
+ * @param {string} email
  * @param {string} password
- * @returns {Promise<Auth>}
+ * @returns {Promise<User>}
  */
-// login for doctor
-const loginWithEmailAndPassword = async (email, password) => {
-  const auth = await getAuthByEmail(email);
-
-  if (!auth) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'not found');
-  }
-  // if (doctor) {
-  //   if (`${doctor.role[0]}` !== 'doctor') {
-  //     throw new ApiError(httpStatus.UNAUTHORIZED, 'Doctor not found');
-  //   }
-  // }
-  if (!auth || !(await auth.isPasswordMatch(password))) {
+const loginUserWithEmailAndPassword = async (email, password) => {
+  const user = await getUserByEmail(email);
+  if (!user || !(await user.isPasswordMatch(password))) {
     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
   }
-  return auth;
-};
-// login admin
-// const loginWithEmailAndPassword = async (username, password) => {
-//   const user = await getAuthByEmail(username);
-//   if (!user || `${user.role[0]}` !== 'admin') {
-//     throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
-//   }
-//   if (!user || !(await user.isPasswordMatch(password))) {
-//     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-//   }
-//   return user;
-// };
-// // login for user
-// const loginWithEmailAndPassword = async (username, password) => {
-//   let user = await getAuthByEmail(username);
-//   if (!user) {
-//     user = await getAuthByPhone(username);
-//     if (!user || `${user.role[0]}` !== 'user') {
-//       throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
-//     }
-//   }
-//   if (user) {
-//     if (`${user.role[0]}` !== 'user') {
-//       throw new ApiError(httpStatus.UNAUTHORIZED, 'User not found');
-//     }
-//   }
-//   if (!user || !(await user.isPasswordMatch(password))) {
-//     throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
-//   }
-//   return user;
-// };
-// change password
-const changeAuthPassword = async (oldPassword, newPassword, token, SubjectId) => {
-  const userdocs = await getAuthById(SubjectId);
-  if (!userdocs || !(await userdocs.isPasswordMatch(oldPassword))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Password InCorrect');
+  if (!user.isActive) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Account is deactivated');
   }
-  await updatePassword(userdocs, newPassword);
-  await tokenService.logoutdevice(token);
-  return userdocs;
+  
+  // Update last login
+  user.lastLogin = new Date();
+  await user.save();
+  
+  return user;
 };
 
 /**
- * Reset password
- * @param {string} email
- * @param {string} resetcode
- * @param {string} newPassword
- * @returns {Promise}
+ * Login with phone and password
+ * @param {string} phone
+ * @param {string} password
+ * @returns {Promise<User>}
  */
-const verifyOtp = async (email, resetcode) => {
-  const AuthData = await getAuthByEmail(email);
-  const verification = await otpServices.verifyForgetPasswordOtp(resetcode, AuthData);
-  // if (verification) {
-  //   await updateAuthById(AuthData._id, { password: newPassword });
-  // }
-  return verification;
-};
-const resetPassword = async (AuthData, newPassword, confirmPassword) => {
-  let response;
-  if (newPassword === confirmPassword) {
-    response = await updateAuthById(AuthData._id, { password: newPassword });
-  } else {
-    throw new ApiError(httpStatus.BAD_REQUEST, "passwords doesn't match");
+const loginUserWithPhoneAndPassword = async (phone, password) => {
+  const user = await getUserByPhone(phone);
+  if (!user || !(await user.isPasswordMatch(password))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect phone or password');
   }
-  return response;
+  if (!user.isActive) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Account is deactivated');
+  }
+  
+  // Update last login
+  user.lastLogin = new Date();
+  await user.save();
+  
+  return user;
 };
-module.exports = {
-  register,
-  queryAuthData,
-  // createGoogleAuthData,
-  getAuthById,
-  getAuthByEmail,
-  getAuthByPhone,
-  updateAuthById,
-  deleteAuthById,
-  updatePassword,
-  loginWithEmailAndPassword,
-  // loginWithEmailAndPassword,
-  // loginWithEmailAndPassword,
+
+/**
+ * Get user by email
+ * @param {string} email
+ * @returns {Promise<User>}
+ */
+const getUserByEmail = async (email) => {
+  return User.findOne({ email });
+};
+
+/**
+ * Get user by phone
+ * @param {string} phone
+ * @returns {Promise<User>}
+ */
+const getUserByPhone = async (phone) => {
+  return User.findOne({ phone });
+};
+
+/**
+ * Get user by id
+ * @param {ObjectId} id
+ * @returns {Promise<User>}
+ */
+const getUserById = async (id) => {
+  return User.findById(id);
+};
+
+/**
+ * Update user by id
+ * @param {ObjectId} userId
+ * @param {Object} updateBody
+ * @returns {Promise<User>}
+ */
+const updateUserById = async (userId, updateBody) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+  }
+  if (updateBody.phone && (await User.isPhoneTaken(updateBody.phone, userId))) {
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone already taken');
+  }
+  Object.assign(user, updateBody);
+  await user.save();
+  return user;
+};
+
+/**
+ * Change user password
+ * @param {ObjectId} userId
+ * @param {string} oldPassword
+ * @param {string} newPassword
+ * @returns {Promise<User>}
+ */
+const changePassword = async (userId, oldPassword, newPassword) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  if (!(await user.isPasswordMatch(oldPassword))) {
+    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect old password');
+  }
+  user.password = newPassword;
+  await user.save();
+  return user;
+};
+
+/**
+ * Reset user password
+ * @param {ObjectId} userId
+ * @param {string} newPassword
+ * @returns {Promise<User>}
+ */
+const resetPassword = async (userId, newPassword) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  user.password = newPassword;
+  await user.save();
+  return user;
+};
+
+/**
+ * Verify user email
+ * @param {ObjectId} userId
+ * @returns {Promise<User>}
+ */
+const verifyEmail = async (userId) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  user.isEmailVerified = true;
+  await user.save();
+  return user;
+};
+
+/**
+ * Verify user phone
+ * @param {ObjectId} userId
+ * @returns {Promise<User>}
+ */
+const verifyPhone = async (userId) => {
+  const user = await getUserById(userId);
+  if (!user) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+  }
+  user.isPhoneVerified = true;
+  await user.save();
+  return user;
+};
+
+export {
+  createUser,
+  loginUserWithEmailAndPassword,
+  loginUserWithPhoneAndPassword,
+  getUserByEmail,
+  getUserByPhone,
+  getUserById,
+  updateUserById,
+  changePassword,
   resetPassword,
-  verifyOtp,
-  changeAuthPassword,
+  verifyEmail,
+  verifyPhone,
 };

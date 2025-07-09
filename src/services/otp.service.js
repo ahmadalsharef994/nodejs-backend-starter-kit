@@ -1,165 +1,121 @@
-const httpStatus = require('http-status');
-const { Otp, Auth } = require('../models');
-const ApiError = require('../utils/ApiError');
-const { smsService } = require('../Microservices');
+import crypto from 'crypto';
+import { OTP } from '../models/index.js';
+import { sendOTPEmail } from './email.service.js';
+import { sendOTPSMS } from './sms.service.js';
+import ApiError from '../utils/ApiError.js';
+import httpStatus from 'http-status';
+import logger from '../config/appLogger.js';
 
-const initiateOTPData = async (user) => {
-  const authDataExist = await Otp.findOne({ auth: user });
-  if (!authDataExist) {
-    const OtpDoc = await Otp.create({ auth: user });
-    return OtpDoc;
+/**
+ * Generate a random OTP
+ * @param {number} length
+ * @returns {string}
+ */
+const generateOTP = (length = 6) => {
+  const digits = '0123456789';
+  let otp = '';
+  for (let i = 0; i < length; i++) {
+    otp += digits[Math.floor(Math.random() * digits.length)];
   }
-  throw new ApiError(400, 'Something went Wrong!');
+  return otp;
 };
 
-const sendResetPassOtp = async (OTP, user) => {
-  const authDataExist = await Otp.findOne({ auth: user });
-  if (authDataExist) {
-    const OtpDoc = await Otp.updateOne(
-      { _id: authDataExist._id },
-      { $set: { resetPasswordOtp: OTP, resetPasswordOtpTimestamp: new Date() } }
-    );
-    return OtpDoc;
-  }
-  const OtpDoc = await Otp.create({ resetPasswordOtp: OTP, auth: user, resetPasswordOtpTimestamp: new Date() });
-  return OtpDoc;
-};
+/**
+ * Create and send OTP
+ * @param {ObjectId} userId
+ * @param {string} type - 'email', 'phone', 'resetPassword'
+ * @param {string} recipient - email or phone number
+ * @returns {Promise<Object>}
+ */
+const createAndSendOTP = async (userId, type, recipient) => {
+  try {
+    // Delete any existing OTP for this user and type
+    await OTP.deleteMany({ user: userId, type, isUsed: false });
 
-const sendEmailVerifyOtp = async (OTP, user) => {
-  const authDataExist = await Otp.findOne({ auth: user });
-  if (authDataExist) {
-    const OtpDoc = await Otp.updateOne(
-      { _id: authDataExist._id },
-      { $set: { emailOtp: OTP, emailOtpTimestamp: new Date() } }
-    );
-    return OtpDoc;
-  }
-  const OtpDoc = await Otp.create({ emailOtp: OTP, auth: user, emailOtpTimestamp: new Date() });
-  return OtpDoc;
-};
+    // Generate new OTP
+    const otp = generateOTP();
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-const sendPhoneVerifyOtp = async (OTP, user) => {
-  const response2F = await smsService.sendPhoneOtp2F(user.mobile, OTP);
-  if (response2F.data.Status !== 'Success') {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Request Phone OTP Failed');
-  }
-  const authDataExist = await Otp.findOne({ auth: user });
-  if (authDataExist) {
-    const OtpDoc = await Otp.updateOne(
-      { _id: authDataExist._id },
-      { $set: { phoneOtp: OTP, phoneOtpTimestamp: new Date() } }
-    );
-    return OtpDoc;
-  }
-  const OtpDoc = await Otp.create({ phoneOtp: OTP, auth: user, phoneOtpTimestamp: new Date() });
-  return OtpDoc;
-};
+    // Save OTP to database
+    const otpDoc = await OTP.create({
+      user: userId,
+      otp,
+      type,
+      expiresAt,
+    });
 
-const verifyEmailOtp = async (emailcode, authId) => {
-  const OtpDoc = await Otp.findOne({ auth: authId });
-  if (!OtpDoc) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
-  }
-  const time = new Date().getTime() - OtpDoc.emailOtpTimestamp.getTime();
-
-  if (time > 180000) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
-  }
-
-  if (emailcode === OtpDoc.emailOtp) {
-    await Auth.updateOne({ _id: OtpDoc.auth }, { $set: { isEmailVerified: true } });
-    return OtpDoc;
-  }
-
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
-};
-
-const verifyForgetPasswordOtp = async (resetcode, AuthData) => {
-  const OtpDoc = await Otp.findOne({ auth: AuthData });
-  if (!OtpDoc) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
-  }
-  const time = new Date().getTime() - OtpDoc.resetPasswordOtpTimestamp.getTime();
-
-  if (time > 180000) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
-  }
-
-  if (resetcode === OtpDoc.resetPasswordOtp) {
-    return OtpDoc;
-  }
-
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
-};
-
-const verifyPhoneOtp = async (otp, AuthData) => {
-  const OtpDoc = await Otp.findOne({ auth: AuthData });
-  if (!OtpDoc) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Request OTP Before Verifying It');
-  }
-  const time = new Date().getTime() - OtpDoc.phoneOtpTimestamp.getTime();
-
-  if (time > 120000) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP Expired!');
-  }
-
-  if (otp === OtpDoc.phoneOtp) {
-    await Auth.updateOne({ _id: AuthData._id }, { $set: { isMobileVerified: true } });
-    return OtpDoc;
-  }
-
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Incorrect OTP');
-};
-
-const resendOtp = async (OTP, user) => {
-  const response2F = await smsService.sendPhoneOtp2F(user.mobile, 40, OTP);
-  if (response2F.data.Status !== 'Success') {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Request Phone OTP Failed');
-  }
-  const authData = await Otp.findOne({ auth: user });
-  if (authData) {
-    const OtpDoc = await Otp.updateOne({ _id: authData._id }, { $set: { phoneOtp: OTP, phoneOtpTimestamp: new Date() } });
-    return OtpDoc;
-  }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'You are being Monitored');
-};
-
-const changeEmail = async (email, user) => {
-  const authDataExist = await Auth.findOne({ email });
-  if (!authDataExist) {
-    const checkEmailVerified = await Auth.findOne({ _id: user._id, isEmailVerified: true });
-    if (checkEmailVerified === null) {
-      await Auth.updateOne({ _id: user._id }, { $set: { email } });
-      return 'Sucessfully Updated';
+    // Send OTP based on type
+    if (type === 'email' || type === 'resetPassword') {
+      await sendOTPEmail(recipient, otp);
+    } else if (type === 'phone') {
+      await sendOTPSMS(recipient, otp);
     }
-    return false;
+
+    logger.info(`OTP sent successfully to ${recipient} for user ${userId}`);
+    
+    return {
+      success: true,
+      message: 'OTP sent successfully',
+      expiresAt,
+    };
+  } catch (error) {
+    logger.error(`Failed to send OTP to ${recipient}: ${error.message}`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send OTP');
   }
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Email is already taken');
 };
 
-const changePhone = async (mobile, user) => {
-  const authDataExist = await Auth.findOne({ mobile });
-  if (!authDataExist) {
-    const checkemailverified = await Auth.findOne({ _id: user._id, isMobileVerified: true });
-    if (checkemailverified === null) {
-      await Auth.updateOne({ _id: user._id }, { $set: { mobile } });
-      return 'Sucessfully Updated';
+/**
+ * Verify OTP
+ * @param {ObjectId} userId
+ * @param {string} otp
+ * @param {string} type
+ * @returns {Promise<boolean>}
+ */
+const verifyOTP = async (userId, otp, type) => {
+  try {
+    const otpDoc = await OTP.findOne({
+      user: userId,
+      type,
+      isUsed: false,
+    }).sort({ createdAt: -1 });
+
+    if (!otpDoc) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'OTP not found or already used');
     }
-    return false;
-  }
 
-  throw new ApiError(httpStatus.BAD_REQUEST, 'Phone number is already taken');
+    if (otpDoc.expiresAt < new Date()) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'OTP has expired');
+    }
+
+    if (otpDoc.attempts >= otpDoc.maxAttempts) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Maximum OTP attempts exceeded');
+    }
+
+    // Increment attempts
+    otpDoc.attempts += 1;
+    await otpDoc.save();
+
+    if (otpDoc.otp !== otp) {
+      throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid OTP');
+    }
+
+    // Mark OTP as used
+    otpDoc.isUsed = true;
+    await otpDoc.save();
+
+    logger.info(`OTP verified successfully for user ${userId}`);
+    return true;
+  } catch (error) {
+    if (error instanceof ApiError) {
+      throw error;
+    }
+    logger.error(`Failed to verify OTP for user ${userId}: ${error.message}`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to verify OTP');
+  }
 };
 
-module.exports = {
-  initiateOTPData,
-  sendPhoneVerifyOtp,
-  sendEmailVerifyOtp,
-  sendResetPassOtp,
-  verifyEmailOtp,
-  verifyForgetPasswordOtp,
-  verifyPhoneOtp,
-  resendOtp,
-  changeEmail,
-  changePhone,
+export {
+  generateOTP,
+  createAndSendOTP,
+  verifyOTP,
 };

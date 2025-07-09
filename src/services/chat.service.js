@@ -1,12 +1,13 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable no-restricted-syntax */
-const dotenv = require('dotenv');
-const httpStatus = require('http-status');
-const uuid = require('uuid');
-const cloudinary = require('cloudinary').v2;
+import dotenv from 'dotenv';
+import httpStatus from 'http-status';
+import { v4 as uuidv4 } from 'uuid';
+import { v2 as cloudinary } from 'cloudinary';
 
-const { Appointment, DoctorBasic, UserBasic } = require('../models');
-const ApiError = require('../utils/ApiError');
+import { User } from '../models/user.model.js';
+import ApiError from '../utils/ApiError.js';
+import appLogger from '../config/appLogger.js';
 
 dotenv.config();
 
@@ -16,55 +17,80 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const getMessages = async (appointmentId, authId) => {
-  const appointment = await Appointment.findOne({ _id: appointmentId });
-  if (!appointment) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Appointment ID does not give you access');
+/**
+ * Handle user joining a chat room
+ * @param {string} userId
+ * @param {string} roomId
+ * @returns {Promise<void>}
+ */
+const joinRoom = async (userId, roomId) => {
+  try {
+    // Add user to room logic here
+    appLogger.info(`User ${userId} joined room ${roomId}`);
+  } catch (error) {
+    appLogger.error(`Error joining room: ${error.message}`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to join room');
   }
-  if (appointment.doctorAuthId.equals(authId) || appointment.userAuthId.equals(authId)) {
-    const result = appointment.chatHistory;
-    return result;
-  }
-  throw new ApiError(httpStatus.BAD_REQUEST, "You don't have access to this Appointment Data");
 };
 
-const saveMessage = async (data) => {
-  const appointmentId = data.appointmentId;
-  const appointment = await Appointment.findOne({ _id: appointmentId });
-
-  if (!appointment.chatHistory) {
-    appointment.chatHistory = {};
-    appointment.chatHistory.messages = [];
-    appointment.chatHistory.appointmentId = appointmentId;
-    const doctorBasic = await DoctorBasic.findOne({ doctorAuthId: appointment.doctorAuthId });
-    const doctorProfilePic = doctorBasic.avatar;
-    const userBasic = await UserBasic.findOne({ doctorAuthId: appointment.userAuthId });
-    const userProfilePic = userBasic.avatar;
-    appointment.chatHistory.particpants = [
-      { name: appointment.doctorName, profilePic: doctorProfilePic },
-      { name: appointment.patientName, profilePic: userProfilePic },
-    ];
+/**
+ * Handle user leaving a chat room
+ * @param {string} userId
+ * @param {string} roomId
+ * @returns {Promise<void>}
+ */
+const leaveRoom = async (userId, roomId) => {
+  try {
+    // Remove user from room logic here
+    appLogger.info(`User ${userId} left room ${roomId}`);
+  } catch (error) {
+    appLogger.error(`Error leaving room: ${error.message}`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to leave room');
   }
-
-  appointment.chatHistory.messages.push({
-    messageId: uuid(),
-    body: data.body,
-    contentType: 'text',
-    attachments: data.attachments,
-    createdAt: Date.now(),
-    senderId: data.senderId,
-  });
-  await Appointment.findByIdAndUpdate(appointmentId, appointment);
 };
 
-const uploadAttachment = async (attachments) => {
+/**
+ * Handle sending a message
+ * @param {string} userId
+ * @param {string} roomId
+ * @param {string} message
+ * @returns {Promise<Object>}
+ */
+const sendMessage = async (userId, roomId, message) => {
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    }
+
+    const messageData = {
+      id: uuidv4(),
+      userId,
+      username: user.name,
+      message,
+      timestamp: new Date(),
+      roomId,
+    };
+
+    appLogger.info(`Message sent by ${userId} in room ${roomId}: ${message}`);
+    return messageData;
+  } catch (error) {
+    appLogger.error(`Error sending message: ${error.message}`);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send message');
+  }
+};
+
+/**
+ * Upload chat attachments
+ * @param {Array} files
+ * @returns {Promise<Array>}
+ */
+const uploadAttachment = async (files) => {
   const urls = [];
-
-  for (const attachment of attachments) {
-    const uploadResponse = await cloudinary.uploader.upload(attachment, {
-      folder: 'attachments',
-      use_filename: true,
-      unique_filename: false,
+  
+  for (const file of files) {
+    const uploadResponse = await cloudinary.uploader.upload(file, {
+      folder: 'chat-attachments',
       resource_type: 'auto',
       overwrite: false,
     });
@@ -74,8 +100,9 @@ const uploadAttachment = async (attachments) => {
   return urls;
 };
 
-module.exports = {
-  getMessages,
-  saveMessage,
+export {
+  joinRoom,
+  leaveRoom,
+  sendMessage,
   uploadAttachment,
 };

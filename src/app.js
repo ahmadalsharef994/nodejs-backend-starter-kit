@@ -1,19 +1,19 @@
-const express = require('express');
-const helmet = require('helmet');
-const xss = require('xss-clean');
-const promclient = require('prom-client');
-const mongoSanitize = require('express-mongo-sanitize');
-const compression = require('compression');
-const cors = require('cors');
-const passport = require('passport');
-const httpStatus = require('http-status');
-const { getClientIp } = require('@supercharge/request-ip');
-const config = require('./config/config');
-const httpLogger = require('./config/httpLogger');
-const { jwtStrategy } = require('./config/jwtStrategy');
-const routes = require('./routes/v1');
-const { errorConverter, errorHandler } = require('./middlewares/error');
-const ApiError = require('./utils/ApiError');
+import express from 'express';
+import helmet from 'helmet';
+import xss from 'xss-clean';
+import promclient from 'prom-client';
+import mongoSanitize from 'express-mongo-sanitize';
+import compression from 'compression';
+import cors from 'cors';
+import passport from 'passport';
+import httpStatus from 'http-status';
+import { getClientIp } from '@supercharge/request-ip';
+import config from './config/config.js';
+import httpLogger from './config/httpLogger.js';
+import { jwtStrategy } from './config/jwtStrategy.js';
+import routes from './routes/v1/index.js';
+import { errorConverter, errorHandler } from './middlewares/error.js';
+import ApiError from './utils/ApiError.js';
 
 const app = express();
 
@@ -43,6 +43,17 @@ app.use((req, res, next) => {
 app.use(passport.initialize());
 passport.use('jwt', jwtStrategy);
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: config.env,
+    version: '1.0.0'
+  });
+});
+
 // API routes
 app.use('/v1', routes);
 
@@ -63,4 +74,4 @@ app.use((req, res, next) => {
 app.use(errorConverter);
 app.use(errorHandler);
 
-module.exports = app;
+export default app;

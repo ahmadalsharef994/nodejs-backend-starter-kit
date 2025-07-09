@@ -1,9 +1,9 @@
 
 // auth.controller.js
-const httpStatus = require('http-status');
-const authService = require('../services/auth.service');
-const tokenService = require('../services/token.service');
-const catchAsync = require('../utils/catchAsync');
+import httpStatus from 'http-status';
+import { authService } from '../services/auth.service.js';
+import { tokenService } from '../services/token.service.js';
+import catchAsync from '../utils/catchAsync.js';
 
 const register = catchAsync(async (req, res) => {
   const user = await authService.register(req.body);
@@ -43,7 +43,7 @@ const logout = catchAsync(async (req, res) => {
   res.status(httpStatus.OK).send({ message: 'Logged out successfully' });
 });
 
-module.exports = {
+export {
   register,
   login,
   getProfile,

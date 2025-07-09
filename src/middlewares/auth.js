@@ -1,8 +1,8 @@
-const passport = require('passport');
-const httpStatus = require('http-status');
-const jwt = require('jsonwebtoken');
-const ApiError = require('../utils/ApiError');
-const config = require('../config/config');
+import passport from 'passport';
+import httpStatus from 'http-status';
+import jwt from 'jsonwebtoken';
+import ApiError from '../utils/ApiError.js';
+import config from '../config/config.js';
 
 const verifyCallback = (req, resolve, reject) => async (err, user, info) => {
   if (err || info || !user) {
@@ -41,4 +41,4 @@ const authUser = () => async (req, res, next) => {
   }
 };
 
-module.exports = { auth, authUser };
+export { auth, authUser };

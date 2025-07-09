@@ -1,36 +1,37 @@
-const mongoose = require('../../node_modules/mongoose');
-const { toJSON } = require('./plugins');
-const Auth = require('./auth.model');
+import mongoose from 'mongoose';
+import { toJSON } from './plugins/index.js';
 
 const otpSchema = mongoose.Schema(
   {
-    phoneOtp: {
-      type: Number,
-      default: null,
+    user: {
+      type: mongoose.SchemaTypes.ObjectId,
+      ref: 'User',
+      required: true,
     },
-    phoneOtpTimestamp: {
+    otp: {
+      type: String,
+      required: true,
+    },
+    type: {
+      type: String,
+      enum: ['email', 'phone', 'resetPassword'],
+      required: true,
+    },
+    expiresAt: {
       type: Date,
-      default: null,
+      required: true,
     },
-    emailOtp: {
+    isUsed: {
+      type: Boolean,
+      default: false,
+    },
+    attempts: {
       type: Number,
-      default: null,
+      default: 0,
     },
-    emailOtpTimestamp: {
-      type: Date,
-      default: null,
-    },
-    resetPasswordOtp: {
+    maxAttempts: {
       type: Number,
-      default: null,
-    },
-    resetPasswordOtpTimestamp: {
-      type: Date,
-      default: null,
-    },
-    auth: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: Auth,
+      default: 5,
     },
   },
   {
@@ -41,9 +42,12 @@ const otpSchema = mongoose.Schema(
 // add plugin that converts mongoose to json
 otpSchema.plugin(toJSON);
 
-/**
- * @typedef otp
- */
-const Otp = mongoose.model('Otp', otpSchema);
+// Index for automatic cleanup
+otpSchema.index({ expiresAt: 1 }, { expireAfterSeconds: 0 });
 
-module.exports = Otp;
+/**
+ * @typedef OTP
+ */
+const OTP = mongoose.model('OTP', otpSchema);
+
+export default OTP;

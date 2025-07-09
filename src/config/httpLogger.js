@@ -1,6 +1,6 @@
-const morgan = require('morgan');
-const config = require('./config');
-const appLogger = require('./appLogger');
+import morgan from 'morgan';
+import config from './config.js';
+import logger from './appLogger.js';
 
 morgan.token('message', (req, res) => res.locals.errorMessage || '');
 
@@ -10,15 +10,12 @@ const errorResponseFormat = `${getIpFormat()}:method :url :status - :response-ti
 
 const successHandler = morgan(successResponseFormat, {
   skip: (req, res) => res.statusCode >= 400,
-  stream: { write: (message) => appLogger.info(message.trim()) },
+  stream: { write: (message) => logger.info(message.trim()) },
 });
 
 const errorHandler = morgan(errorResponseFormat, {
   skip: (req, res) => res.statusCode < 400,
-  stream: { write: (message) => appLogger.error(message.trim()) },
+  stream: { write: (message) => logger.error(message.trim()) },
 });
 
-module.exports = {
-  successHandler,
-  errorHandler,
-};
+export { successHandler, errorHandler };

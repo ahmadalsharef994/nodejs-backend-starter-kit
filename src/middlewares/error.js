@@ -1,8 +1,8 @@
-const mongoose = require('mongoose');
-const httpStatus = require('http-status');
-const config = require('../config/config');
-const appLogger = require('../config/appLogger');
-const ApiError = require('../utils/ApiError');
+import mongoose from 'mongoose';
+import httpStatus from 'http-status';
+import config from '../config/config.js';
+import appLogger from '../config/appLogger.js';
+import ApiError from '../utils/ApiError.js';
 
 const errorConverter = (err, req, res, next) => {
   let error = err;
@@ -37,7 +37,7 @@ const errorHandler = (err, req, res, next) => {
   res.status(statusCode).json(response);
 };
 
-module.exports = {
+export {
   errorConverter,
   errorHandler,
 };

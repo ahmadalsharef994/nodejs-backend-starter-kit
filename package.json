@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "type": "module",
   "repository": "https://github.com/ahmadalsharef994/nodejs-backend-starter-kit.git",
-  "author": "Ahmad Alsharef <ahmadalsharef@gmail.com>",
+  "author": "Ahmad Alsharef <ahmadalsharef994@gmail.com>",
   "license": "MIT",
   "engines": {
     "node": ">=20.0.0"

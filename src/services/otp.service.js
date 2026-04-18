@@ -1,10 +1,10 @@
-import crypto from 'crypto';
-import { OTP } from '../models/index.js';
-import emailService from './email.service.js';
-import smsService from './sms.service.js';
-import ApiError from '../utils/ApiError.js';
-import httpStatus from 'http-status';
-import logger from '../config/appLogger.js';
+import crypto from "crypto";
+import { OTP } from "../models/index.js";
+import emailService from "./email.service.js";
+import smsService from "./sms.service.js";
+import ApiError from "../utils/ApiError.js";
+import httpStatus from "http-status";
+import logger from "../config/appLogger.js";
 
 /**
  * Generate a random OTP
@@ -12,10 +12,9 @@ import logger from '../config/appLogger.js';
  * @returns {string}
  */
 const generateOTP = (length = 6) => {
-  const digits = '0123456789';
-  let otp = '';
+  let otp = "";
   for (let i = 0; i < length; i++) {
-    otp += digits[Math.floor(Math.random() * digits.length)];
+    otp += crypto.randomInt(0, 10).toString();
   }
   return otp;
 };
@@ -37,7 +36,7 @@ const createAndSendOTP = async (userId, type, recipient) => {
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     // Save OTP to database
-    const otpDoc = await OTP.create({
+    await OTP.create({
       user: userId,
       otp,
       type,
@@ -45,22 +44,22 @@ const createAndSendOTP = async (userId, type, recipient) => {
     });
 
     // Send OTP based on type
-    if (type === 'email' || type === 'resetPassword') {
-      await sendOTPEmail(recipient, otp);
-    } else if (type === 'phone') {
-      await sendOTPSMS(recipient, otp);
+    if (type === "email" || type === "resetPassword") {
+      await emailService.sendOtpEmail(recipient, otp);
+    } else if (type === "phone") {
+      await smsService.sendOtpSms(recipient, otp);
     }
 
     logger.info(`OTP sent successfully to ${recipient} for user ${userId}`);
-    
+
     return {
       success: true,
-      message: 'OTP sent successfully',
+      message: "OTP sent successfully",
       expiresAt,
     };
   } catch (error) {
     logger.error(`Failed to send OTP to ${recipient}: ${error.message}`);
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to send OTP');
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "Failed to send OTP");
   }
 };
 
@@ -80,15 +79,21 @@ const verifyOTP = async (userId, otp, type) => {
     }).sort({ createdAt: -1 });
 
     if (!otpDoc) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'OTP not found or already used');
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "OTP not found or already used",
+      );
     }
 
     if (otpDoc.expiresAt < new Date()) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'OTP has expired');
+      throw new ApiError(httpStatus.BAD_REQUEST, "OTP has expired");
     }
 
     if (otpDoc.attempts >= otpDoc.maxAttempts) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Maximum OTP attempts exceeded');
+      throw new ApiError(
+        httpStatus.BAD_REQUEST,
+        "Maximum OTP attempts exceeded",
+      );
     }
 
     // Increment attempts
@@ -96,7 +101,7 @@ const verifyOTP = async (userId, otp, type) => {
     await otpDoc.save();
 
     if (otpDoc.otp !== otp) {
-      throw new ApiError(httpStatus.BAD_REQUEST, 'Invalid OTP');
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid OTP");
     }
 
     // Mark OTP as used
@@ -110,11 +115,16 @@ const verifyOTP = async (userId, otp, type) => {
       throw error;
     }
     logger.error(`Failed to verify OTP for user ${userId}: ${error.message}`);
-    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to verify OTP');
+    throw new ApiError(
+      httpStatus.INTERNAL_SERVER_ERROR,
+      "Failed to verify OTP",
+    );
   }
 };
 
-export {
+export { generateOTP, createAndSendOTP, verifyOTP };
+
+export default {
   generateOTP,
   createAndSendOTP,
   verifyOTP,

@@ -1,27 +1,24 @@
-const rateLimit = require('express-rate-limit');
-const config = require('../config/config');
+import rateLimit from "express-rate-limit";
+import config from "../config/config.js";
 
 let maxAuthLimiter = 10;
 let maxOTPLimiter = 3;
 
-if (config.env === 'development') {
+if (config.env === "development") {
   maxAuthLimiter = 50;
   maxOTPLimiter = 10;
 }
 
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: maxAuthLimiter,
+  limit: maxAuthLimiter,
   skipSuccessfulRequests: true,
 });
 
 const otpLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: maxOTPLimiter,
+  limit: maxOTPLimiter,
   skipSuccessfulRequests: false,
 });
 
-module.exports = {
-  authLimiter,
-  otpLimiter,
-};
+export { authLimiter, otpLimiter };

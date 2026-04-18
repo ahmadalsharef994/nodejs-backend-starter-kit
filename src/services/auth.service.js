@@ -1,6 +1,6 @@
-import httpStatus from 'http-status';
-import { User } from '../models/index.js';
-import ApiError from '../utils/ApiError.js';
+import httpStatus from "http-status";
+import { User } from "../models/index.js";
+import ApiError from "../utils/ApiError.js";
 
 /**
  * Create a user
@@ -9,10 +9,10 @@ import ApiError from '../utils/ApiError.js';
  */
 const createUser = async (userBody) => {
   if (await User.isEmailTaken(userBody.email)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
   if (await User.isPhoneTaken(userBody.phone)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, "Phone already taken");
   }
   return User.create(userBody);
 };
@@ -26,16 +26,16 @@ const createUser = async (userBody) => {
 const loginUserWithEmailAndPassword = async (email, password) => {
   const user = await getUserByEmail(email);
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect email or password');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect email or password");
   }
   if (!user.isActive) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Account is deactivated');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Account is deactivated");
   }
-  
+
   // Update last login
   user.lastLogin = new Date();
   await user.save();
-  
+
   return user;
 };
 
@@ -48,16 +48,16 @@ const loginUserWithEmailAndPassword = async (email, password) => {
 const loginUserWithPhoneAndPassword = async (phone, password) => {
   const user = await getUserByPhone(phone);
   if (!user || !(await user.isPasswordMatch(password))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect phone or password');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect phone or password");
   }
   if (!user.isActive) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Account is deactivated');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Account is deactivated");
   }
-  
+
   // Update last login
   user.lastLogin = new Date();
   await user.save();
-  
+
   return user;
 };
 
@@ -97,13 +97,13 @@ const getUserById = async (id) => {
 const updateUserById = async (userId, updateBody) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   if (updateBody.email && (await User.isEmailTaken(updateBody.email, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Email already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, "Email already taken");
   }
   if (updateBody.phone && (await User.isPhoneTaken(updateBody.phone, userId))) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'Phone already taken');
+    throw new ApiError(httpStatus.BAD_REQUEST, "Phone already taken");
   }
   Object.assign(user, updateBody);
   await user.save();
@@ -120,10 +120,10 @@ const updateUserById = async (userId, updateBody) => {
 const changePassword = async (userId, oldPassword, newPassword) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   if (!(await user.isPasswordMatch(oldPassword))) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Incorrect old password');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Incorrect old password");
   }
   user.password = newPassword;
   await user.save();
@@ -139,7 +139,7 @@ const changePassword = async (userId, oldPassword, newPassword) => {
 const resetPassword = async (userId, newPassword) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   user.password = newPassword;
   await user.save();
@@ -154,7 +154,7 @@ const resetPassword = async (userId, newPassword) => {
 const verifyEmail = async (userId) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   user.isEmailVerified = true;
   await user.save();
@@ -169,12 +169,14 @@ const verifyEmail = async (userId) => {
 const verifyPhone = async (userId) => {
   const user = await getUserById(userId);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'User not found');
+    throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
   user.isPhoneVerified = true;
   await user.save();
   return user;
 };
+
+export { getUserById, getUserByEmail };
 
 export default {
   createUser,

@@ -57,6 +57,9 @@ const envVarsSchema = Joi.object()
     CLOUDINARY_CLOUD_NAME: Joi.string().description("Cloudinary cloud name"),
     CLOUDINARY_API_KEY: Joi.string().description("Cloudinary API key"),
     CLOUDINARY_API_SECRET: Joi.string().description("Cloudinary API secret"),
+    METRICS_SECRET: Joi.string().description(
+      "Secret for /api-metrics endpoint",
+    ),
   })
   .unknown();
 
@@ -73,6 +76,7 @@ const config = {
   port: envVars.PORT,
   clientUrl: envVars.CLIENTURL,
   secretAdminKey: envVars.SECRETADMINKEY,
+  metricsSecret: envVars.METRICS_SECRET,
   supportMail: envVars.SUPPORT_MAIL,
   slotTime: envVars.SLOT_TIME,
   baseUrl: `http://localhost:${envVars.PORT}`,

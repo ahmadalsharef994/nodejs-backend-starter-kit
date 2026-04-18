@@ -1,10 +1,9 @@
-import jwt from 'jsonwebtoken';
-import moment from 'moment';
-import httpStatus from 'http-status';
-import config from '../config/config.js';
-import authService from './auth.service.js';
-import { Token } from '../models/index.js';
-import ApiError from '../utils/ApiError.js';
+import jwt from "jsonwebtoken";
+import httpStatus from "http-status";
+import config from "../config/config.js";
+import { getUserById, getUserByEmail } from "./auth.service.js";
+import { Token } from "../models/index.js";
+import ApiError from "../utils/ApiError.js";
 
 /**
  * Generate token
@@ -17,8 +16,8 @@ import ApiError from '../utils/ApiError.js';
 const generateToken = (userId, expires, type, secret = config.jwt.secret) => {
   const payload = {
     sub: userId,
-    iat: moment().unix(),
-    exp: expires.unix(),
+    iat: Math.floor(Date.now() / 1000),
+    exp: Math.floor(expires.getTime() / 1000),
     type,
   };
   return jwt.sign(payload, secret);
@@ -37,7 +36,7 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
   const tokenDoc = await Token.create({
     token,
     user: userId,
-    expires: expires.toDate(),
+    expires: expires,
     type,
     blacklisted,
   });
@@ -51,10 +50,20 @@ const saveToken = async (token, userId, expires, type, blacklisted = false) => {
  * @returns {Promise<Token>}
  */
 const verifyToken = async (token, type) => {
-  const payload = jwt.verify(token, config.jwt.secret);
-  const tokenDoc = await Token.findOne({ token, type, user: payload.sub, blacklisted: false });
+  let payload;
+  try {
+    payload = jwt.verify(token, config.jwt.secret);
+  } catch {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Invalid or expired token");
+  }
+  const tokenDoc = await Token.findOne({
+    token,
+    type,
+    user: payload.sub,
+    blacklisted: false,
+  });
   if (!tokenDoc) {
-    throw new Error('Token not found');
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Token not found");
   }
   return tokenDoc;
 };
@@ -65,21 +74,26 @@ const verifyToken = async (token, type) => {
  * @returns {Promise<Object>}
  */
 const generateAuthTokens = async (user) => {
-  const accessTokenExpires = moment().add(config.jwt.accessExpirationMinutes, 'minutes');
-  const accessToken = generateToken(user.id, accessTokenExpires, 'access');
+  const now = Date.now();
+  const accessTokenExpires = new Date(
+    now + config.jwt.accessExpirationMinutes * 60 * 1000,
+  );
+  const accessToken = generateToken(user.id, accessTokenExpires, "access");
 
-  const refreshTokenExpires = moment().add(config.jwt.refreshExpirationDays, 'days');
-  const refreshToken = generateToken(user.id, refreshTokenExpires, 'refresh');
-  await saveToken(refreshToken, user.id, refreshTokenExpires, 'refresh');
+  const refreshTokenExpires = new Date(
+    now + config.jwt.refreshExpirationDays * 24 * 60 * 60 * 1000,
+  );
+  const refreshToken = generateToken(user.id, refreshTokenExpires, "refresh");
+  await saveToken(refreshToken, user.id, refreshTokenExpires, "refresh");
 
   return {
     access: {
       token: accessToken,
-      expires: accessTokenExpires.toDate(),
+      expires: accessTokenExpires,
     },
     refresh: {
       token: refreshToken,
-      expires: refreshTokenExpires.toDate(),
+      expires: refreshTokenExpires,
     },
   };
 };
@@ -92,11 +106,13 @@ const generateAuthTokens = async (user) => {
 const generateResetPasswordToken = async (email) => {
   const user = await getUserByEmail(email);
   if (!user) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'No users found with this email');
+    throw new ApiError(httpStatus.NOT_FOUND, "No users found with this email");
   }
-  const expires = moment().add(config.jwt.resetPasswordExpirationMinutes, 'minutes');
-  const resetPasswordToken = generateToken(user.id, expires, 'resetPassword');
-  await saveToken(resetPasswordToken, user.id, expires, 'resetPassword');
+  const expires = new Date(
+    Date.now() + config.jwt.resetPasswordExpirationMinutes * 60 * 1000,
+  );
+  const resetPasswordToken = generateToken(user.id, expires, "resetPassword");
+  await saveToken(resetPasswordToken, user.id, expires, "resetPassword");
   return resetPasswordToken;
 };
 
@@ -106,9 +122,11 @@ const generateResetPasswordToken = async (email) => {
  * @returns {Promise<string>}
  */
 const generateVerifyEmailToken = async (user) => {
-  const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-  const verifyEmailToken = generateToken(user.id, expires, 'verifyEmail');
-  await saveToken(verifyEmailToken, user.id, expires, 'verifyEmail');
+  const expires = new Date(
+    Date.now() + config.jwt.verifyEmailExpirationMinutes * 60 * 1000,
+  );
+  const verifyEmailToken = generateToken(user.id, expires, "verifyEmail");
+  await saveToken(verifyEmailToken, user.id, expires, "verifyEmail");
   return verifyEmailToken;
 };
 
@@ -118,9 +136,11 @@ const generateVerifyEmailToken = async (user) => {
  * @returns {Promise<string>}
  */
 const generateVerifyPhoneToken = async (user) => {
-  const expires = moment().add(config.jwt.verifyEmailExpirationMinutes, 'minutes');
-  const verifyPhoneToken = generateToken(user.id, expires, 'verifyPhone');
-  await saveToken(verifyPhoneToken, user.id, expires, 'verifyPhone');
+  const expires = new Date(
+    Date.now() + config.jwt.verifyEmailExpirationMinutes * 60 * 1000,
+  );
+  const verifyPhoneToken = generateToken(user.id, expires, "verifyPhone");
+  await saveToken(verifyPhoneToken, user.id, expires, "verifyPhone");
   return verifyPhoneToken;
 };
 
@@ -131,16 +151,33 @@ const generateVerifyPhoneToken = async (user) => {
  */
 const refreshAuth = async (refreshToken) => {
   try {
-    const refreshTokenDoc = await verifyToken(refreshToken, 'refresh');
+    const refreshTokenDoc = await verifyToken(refreshToken, "refresh");
     const user = await getUserById(refreshTokenDoc.user);
     if (!user) {
       throw new Error();
     }
-    await refreshTokenDoc.remove();
+    await refreshTokenDoc.deleteOne();
     return generateAuthTokens(user);
-  } catch (error) {
-    throw new ApiError(httpStatus.UNAUTHORIZED, 'Please authenticate');
+  } catch {
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Please authenticate");
   }
+};
+
+/**
+ * Logout by deleting the refresh token
+ * @param {string} refreshToken
+ * @returns {Promise<void>}
+ */
+const logout = async (refreshToken) => {
+  const tokenDoc = await Token.findOne({
+    token: refreshToken,
+    type: "refresh",
+    blacklisted: false,
+  });
+  if (!tokenDoc) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Token not found");
+  }
+  await tokenDoc.deleteOne();
 };
 
 export default {
@@ -152,4 +189,5 @@ export default {
   generateVerifyEmailToken,
   generateVerifyPhoneToken,
   refreshAuth,
+  logout,
 };

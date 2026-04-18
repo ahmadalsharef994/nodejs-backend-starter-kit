@@ -1,7 +1,7 @@
-FROM node:20.9.0
+FROM node:24-alpine
 
 # Update system, install PM2 globally, and other required tools
-RUN apt-get update -y && apt-get install -y net-tools && npm install pm2 -g
+RUN apk add --no-cache net-tools && npm install pm2 -g
 
 # Copy the application files to the container
 COPY ./ /NODE_BOILERPLATE
